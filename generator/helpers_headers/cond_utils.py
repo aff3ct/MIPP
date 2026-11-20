@@ -6,6 +6,8 @@ and functions for condition parsing, negation, and simplification.
 import re
 from functools import lru_cache
 
+_COMPARISON_RE = re.compile(r"(>=|<=|==|!=|>|<)")
+
 class Expr:
     pass
 
@@ -27,7 +29,9 @@ class Not(Expr):
     def __repr__(self):
         return f"Not({self.child!r})"
     def to_str(self):
-        if isinstance(self.child, Term):
+        # A comparison term ("__riscv_v_fixed_vlen >= 64") needs parentheses:
+        # '!' binds tighter than '>=', so "!x >= 64" would always be false.
+        if isinstance(self.child, Term) and not _COMPARISON_RE.search(self.child.value):
             return f"!{self.child.to_str()}"
         return f"!( {self.child.to_str()} )"
     def __eq__(self, other):

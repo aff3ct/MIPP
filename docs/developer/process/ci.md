@@ -22,9 +22,25 @@ Every push runs the whole pipeline.
 | | `test-examples` | Runs the examples and the code examples of the documentation (`--run-only`) on each target. |
 | `deploy` | `deploy-docs-html` | `mkdocs build` (without `--strict`); the site is kept as an artifact. |
 
-**Matrix.** The `build` and `test` jobs run for two compilers (`gcc-14`, `clang-20`) and 14 targets (`sse2` to `avx512dq`, `armv8-neon`, `riscv64-rvv1.0`, `x86-scalar`). Each job runs in the image `registry.gitlab.com/aff3ct/aff3ct/mipp_linux:<compiler>_<target>`, on a runner tagged with the target name. The compiler flags of each target are set in `.build-common` and listed in [CI Targets and Flags](../setup.md#51-ci-targets-and-flags). The ARMv7 and SVE targets are declared but commented out of the matrix.
+**Matrix.** The `build` and `test` jobs run for two compilers (`gcc-14`, `clang-20`) and the 16 targets of [§1.1](#11-targets-and-flags). Each job runs in the image `registry.gitlab.com/aff3ct/aff3ct/mipp_linux:<compiler>_<target>`, on a runner tagged with the target name. The ARMv7 targets (`armv7-neon`, `armv7-neon-fma`) have flags in `.build-common` but are not in the matrix.
 
-**RVV.** The C examples (and the C code examples of the documentation) are skipped on `riscv64-rvv1.0`, and the unit tests are built without unity build and precompiled headers.
+### 1.1. Targets and Flags
+
+The matrix is the `ARCH` list of `.matrix-linux-common`; the flags of each target are set in `.build-common` (`SIMD_EXT`) and passed in `CMAKE_CXX_FLAGS` and to the examples:
+
+| Target | Flags |
+| :--- | :--- |
+| `sse2`, `sse3`, `ssse3`, `sse4.1`, `sse4.2` | `-msse2`, `-msse3`, `-mssse3`, `-msse4.1`, `-msse4.2` |
+| `avx`, `avx2`, `avx2-fma` | `-mavx`, `-mavx2`, `-mavx2 -mfma` |
+| `avx512f`, `avx512bw`, `avx512dq` | `-mavx512f`, then `-mavx512bw`, then `-mavx512dq`, cumulatively |
+| `armv8-neon` | `-march=armv8.1-a+simd` |
+| `armv9-sve`, `armv9-sve2` | `-march=armv9-a+sve -msve-vector-bits=128`, `-march=armv9-a+sve2 -msve-vector-bits=128` |
+| `riscv64-rvv1.0` | `-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl` |
+| `x86-scalar` | `-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024` |
+
+**RVV.** The C examples (and the C code examples of the documentation) are skipped on `riscv64-rvv1.0`, and the unit tests are built without unity build and precompiled headers (`-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF`).
+
+**SVE.** On `armv9-sve` and `armv9-sve2`, the unit tests are also built without unity build and precompiled headers. GCC 14 stops with an internal compiler error on the SVE code, so the `gcc-14` jobs of these two targets install GCC 15 from the Ubuntu toolchain PPA and build with it (the job names keep `gcc-14`; the Docker image is unchanged). The examples are then linked with `-static-libstdc++ -static-libgcc`, because they run in another job, with the older `libstdc++` of the image.
 
 ---
 
@@ -34,7 +50,7 @@ The workflow runs on pushes and pull requests to `develop`, on `v*` tags, and ma
 
 | Job | When | What it does |
 | :--- | :--- | :--- |
-| `generation` | always | Same generation as GitLab, without SVE: headers (`--simd-ext sse avx avx512 rvv neon scalar --granularity fine`), C++ Object tests and documentation pages, with Python 3.14. The outputs are uploaded as artifacts (`mipp-headers`, `mipp-tests`, `mipp-docs`), kept 7 days. |
+| `generation` | always | Same generation as GitLab: headers (`--simd-ext sse avx avx512 rvv neon scalar sve --granularity fine`), C++ Object tests and documentation pages, with Python 3.14. The outputs are uploaded as artifacts (`mipp-headers`, `mipp-tests`, `mipp-docs`), kept 7 days. |
 | `deploy-docs` | `v*` tags | Downloads `mipp-docs`, runs `mkdocs build --clean --strict` and deploys the site to GitHub Pages. |
 | `release` | `v*` tags | Downloads `mipp-headers`, packs `include/` into `mipp-<tag>-headers.zip` and `.tar.gz`, and creates the GitHub release ([Release](release.md)). |
 
@@ -46,9 +62,8 @@ GitHub Actions does not compile anything: a change is only built and tested by t
 
 | | GitLab CI | GitHub Actions |
 | :--- | :--- | :--- |
-| SVE in the headers | yes | no (not in the released archives) |
 | Static analysis | cppcheck | none |
-| Builds and tests | 2 compilers × 14 targets | none |
+| Builds and tests | 2 compilers × 16 targets | none |
 | Site build | `mkdocs build` | `mkdocs build --strict`, tags only |
 | Publication | none | GitHub Pages and release, tags only |
 

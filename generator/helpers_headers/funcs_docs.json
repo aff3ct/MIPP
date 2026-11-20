@@ -87,6 +87,14 @@
     "description": "Compares two vector registers element-wise for inequality (a != b).",
     "latex": "m_i = (r0_i \\neq r1_i)"
   },
+  "combine": {
+    "description": "Joins two vector registers into a register of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
+    "latex": "\\text{res}_i = \\begin{cases} r0_i & \\text{if } i < N \\\\ r1_{i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
+  },
+  "combine_k": {
+    "description": "Joins two mask registers into a mask of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
+    "latex": "m_{\\text{res}, i} = \\begin{cases} m_{0, i} & \\text{if } i < N \\\\ m_{1, i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
+  },
   "cos": {
     "description": "Computes the trigonometric cosine of each floating-point element in radians.",
     "latex": "\\text{res}_i = \\cos(r0_i)"
@@ -155,6 +163,14 @@
     "description": "Computes the horizontal addition with saturation of all elements in a vector register.",
     "latex": "\\text{res} = \\operatorname{saturate}\\left(\\sum_{i=0}^{N-1} r0_i\\right)"
   },
+  "high": {
+    "description": "Returns the upper half of a vector register as a register of the LMUL below (m2 to m1, m1 to d2, ...).",
+    "latex": "\\text{res}_i = r0_{i + N/2}, \\quad 0 \\le i < N / 2"
+  },
+  "high_k": {
+    "description": "Returns the upper half of a mask register as a mask of the LMUL below (m2 to m1, m1 to d2, ...).",
+    "latex": "m_{\\text{res}, i} = m_{0, i + N/2}, \\quad 0 \\le i < N / 2"
+  },
   "hmax": {
     "description": "Computes the horizontal maximum (reduction maximum) of all elements in a vector register.",
     "latex": "\\text{res} = \\max_{i=0}^{N-1} r0_i"
@@ -178,6 +194,14 @@
   "log": {
     "description": "Computes the natural (base-e) logarithm of each floating-point element.",
     "latex": "\\text{res}_i = \\ln(r0_i)"
+  },
+  "low": {
+    "description": "Returns the lower half of a vector register as a register of the LMUL below (m2 to m1, m1 to d2, ...).",
+    "latex": "\\text{res}_i = r0_i, \\quad 0 \\le i < N / 2"
+  },
+  "low_k": {
+    "description": "Returns the lower half of a mask register as a mask of the LMUL below (m2 to m1, m1 to d2, ...).",
+    "latex": "m_{\\text{res}, i} = m_{0, i}, \\quad 0 \\le i < N / 2"
   },
   "lshift": {
     "description": "Shifts each vector element left by a given number of bits.",

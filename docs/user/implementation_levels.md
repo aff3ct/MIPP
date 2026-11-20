@@ -1,6 +1,6 @@
 # Implementation Levels & Fallback Solver
 
-MIPP guarantees 100% API completeness across all supported architectures through a **4-level fallback solver**. If an architecture lacks a native hardware instruction for a given datatype or operation, MIPP automatically resolves to the most optimal emulation strategy available.
+Every MIPP function exists for all its datatypes on every supported target, through a **4-level fallback solver**: if an architecture lacks a native hardware instruction for a given datatype or operation, MIPP resolves to the best emulation available, down to a scalar loop. The few configurations where a function compiles but is not implemented are listed in [Known Limitations](#known-limitations).
 
 ---
 
@@ -23,7 +23,7 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 - **Performance**: High vector efficiency using handcrafted target assembly and intrinsic sequences.
 - **Examples**:
     - Horizontal reduction on AVX (`hadd_float32`), using `_mm256_permute2f128_ps`, `_mm256_shuffle_ps`, and `_mm256_add_ps` to perform in-register tree reduction across 256-bit lanes.
-    - Vectorized `exp` / `log` on AVX (`exp_float32`, `log_float32`), written once with AVX intrinsics (range reduction and polynomial evaluation on `__m256`) because the ISA has no instruction for them.
+    - Vectorized `exp` / `log` on AVX2 (`exp_float32`, `log_float32`), written once with AVX intrinsics (range reduction and polynomial evaluation on `__m256`) because the ISA has no instruction for them.
 
 ### <span class="mipp-isa-badge lvl-2">L2</span> Level 2: Generic Emulation
 - **Definition**: Vectorized algorithms implemented on top of standard MIPP primitives.
@@ -46,28 +46,32 @@ Because all MIPP functions are declared `static inline`, the compiler inlines th
 Users can inspect the implementation level of any function through two mechanisms:
 
 ### 2.1. Header Comments
-Every generated function definition in `include/mipp/internal/simd_ext/<isa>/c/functions/<category>/...` contains an explicit comment declaring its level:
+Every generated implementation in `include/mipp/internal/simd_ext/<isa>/c/functions/<category>/...` contains an explicit comment declaring its level (the short names without the `_m1` suffix are aliases of these functions):
 
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_m1_t mipp_avx_add_float32_m1(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
     // Level 0 (Native Hardware)
-    rvd_avx_float32_t res;
+    rvd_avx_float32_m1_t res;
     res.r = _mm256_add_ps(r0.r, r1.r);
     return res;
 }
 ```
 
+NEON has no 64-bit integer multiplication, so `mul` on `int64` falls back to the scalar reference:
+
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-static inline rvd_rvv_int64_m2_t mipp_rvv_wcvt_int32_int64_m1(const rvd_rvv_int32_m1_t r0) {
+static inline rvd_neon_int64_m1_t mipp_neon_mul_int64_m1(const rvd_neon_int64_m1_t r0, const rvd_neon_int64_m1_t r1) {
     // Level 3 (Scalar Fallback)
-    rvd_scalar_int32_m1_t s_r0 = {0};
+    rvd_scalar_int64_m1_t s_r0 = {0};
     memcpy(&s_r0, &r0, sizeof(r0));
-    rvd_scalar_int64_m2_t sres = mipp_scalar_wcvt_int32_int64_m1(s_r0);
-    rvd_rvv_int64_m2_t res;
+    rvd_scalar_int64_m1_t s_r1 = {0};
+    memcpy(&s_r1, &r1, sizeof(r1));
+    rvd_scalar_int64_m1_t sres = mipp_scalar_mul_int64_m1(s_r0, s_r1);
+    rvd_neon_int64_m1_t res;
     memcpy(&res, &sres, sizeof(res));
     return res;
 }
@@ -77,7 +81,7 @@ static inline rvd_rvv_int64_m2_t mipp_rvv_wcvt_int32_int64_m1(const rvd_rvv_int3
 The online documentation provides complete capability breakdowns:
 
 - **[Hardware Support Dashboard](../isas_support/index.md)**: Displays implementation level breakdowns and coverage statistics across all target architectures.
-- **[Universal Intersection Matrix](../isas_support/intersection.md)**: Lists operations guaranteed to execute natively (Level 0) or via dedicated vector sequences across all platforms.
+- **[Universal Intersection Matrix](../isas_support/intersection.md)**: Gives, for each function and datatype, the lowest level reached on every target (the worst level among the ISAs, Level 3 included).
 - **[API Reference](../funcs_support/index.md)**: Each function reference page includes an interactive implementation matrix across all ISAs and masking modes.
 
 ## 3. Transitive Dependency Propagation & Hybrid Execution
@@ -102,7 +106,7 @@ $$\text{EffectiveLevel}(F) = \max \Big( \text{BaseLevel}(F), \; \max_{D \in \tex
   It is classified and documented as **Level 3 (Scalar Fallback)**.
 
 !!! note
-    **Concrete Example**: On baseline x86 SSE, native variable vector blending (`_mm_blendv_*`) is unavailable prior to SSE4.1, so floating-point `select` resolves to Level 3. Consequently, integer `select` (which casts to float and invokes `select`) and masked operations like `add_mask` (which compute `add` followed by `select`) still emit vectorized arithmetic, but their official level is classified as **Level 3** because of the scalar bottleneck.
+    **Concrete Example**: On AVX, `min` on `int64` is the generic composition `select(cmplt(a, b), a, b)` (Level 2). `select` is native (`_mm256_blendv_*`), but `cmplt` on `int64` is a scalar fallback, so `min_int64` is reported as **Level 3** even though the `select` stays vectorized.
 
 ---
 
@@ -114,7 +118,7 @@ Understanding implementation levels helps users interpret profiling data and com
     - **Level 0, Level 1, and Level 2 are all fully vectorized and highly performant**.
     - A function marked as **Level 1 (Dedicated Emulation)** or **Level 2 (Generic Emulation)**, such as composite arithmetic (`fmadd` without FMA hardware), horizontal reductions (`hadd`, `hmax`, `hmin`), or elementary math functions (`exp`, `log`, `sin`, `cos`), simply indicates that the target ISA lacks a dedicated, single hardware instruction for that operation. MIPP executes these via fully vectorized SIMD instruction sequences with no scalar serialization.
 - **Level 3 (Scalar Fallback)**:
-    - Level 3 is the only level where the generated source code is sequential element-by-element rather than explicit SIMD instructions. In some cases, this code can be auto-vectorized by the compiler.
+    - Level 3 is the only level where the generated source code can be sequential element-by-element rather than explicit SIMD instructions (a Level 3 reached by propagation, [§3.2](#32-transitive-bottleneck-propagation-honest-classification), keeps its vector parts). In some cases, this code can be auto-vectorized by the compiler.
     - While Level 3 guarantees complete API coverage and functional correctness, performance-critical inner loops should avoid relying on Level 3 fallbacks. If a hotspot hits a Level 3 implementation, consider:
         - Checking if an alternative datatype has native hardware support on that architecture (e.g., using `float32` on architectures lacking 64-bit hardware floating-point units).
         - Contributing a Level 1 (Dedicated Emulation) or Level 2 (Generic Emulation) implementation to the MIPP codebase.
@@ -124,9 +128,15 @@ Understanding implementation levels helps users interpret profiling data and com
 <a id="known-limitations"></a>
 ## 5. Known Limitations
 
-The fallback hierarchy covers the overwhelming majority of `(function, datatype, LMUL, mask variant, ISA)` combinations. The current exception is a subset of **[half-vector](vector_types_and_lmul.md#half-vectors) (`d2`) operations on RISC-V Vector**, mostly on 64-bit element types: these functions compile, but are not implemented yet. When called, they report the following message, then terminate the program in C (`exit(-1)`) or throw `mipp::stub_exception` in C++:
+The fallback hierarchy covers every `(function, datatype, LMUL, mask variant, ISA)` combination on the main configurations of each target. In two configurations, a few functions compile but are not implemented yet:
+
+| Configuration | Affected functions |
+| :--- | :--- |
+| **NEON on ARMv7** (32-bit Arm, no `__aarch64__`) | `float64` [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`): loads, stores, gathers, scatters, reductions, `set`, `set_k`, `testz`, `none`, `combine`; and the functions that turn an `m1` register into a `d2` one or back for `float64` (`low` and `high`, also on masks, `ncvt` to `float32`, `wcvt` from `float32`). |
+| **RVV without 64-bit elements or with VLEN < 128** (`__riscv_v_elen < 64`, `__riscv_v_elen_fp < 64` for `float64`, or `__riscv_v_fixed_vlen < 128`, as with the `Zve32*` and `Zve64*` embedded profiles) | Most 64-bit half-vector (`d2`) operations, and `low`, `high`, `combine`, `wcvt` and `ncvt` on 64-bit elements at every LMUL. |
+
+With the standard RVV `V` extension (VLEN $\ge$ 128, 64-bit elements) and on AArch64, every function is implemented. When one of the functions above is called, it reports the following message, then terminates the program in C (`exit(-1)`) or throws `mipp::stub_exception` in C++:
 
 ```text
-MIPP panic: 'mipp_rvv_<function>_<datatype>_d2' is unimplemented.
+MIPP panic: 'mipp_<isa>_<function>_<datatype>[_<variant>]_<lmul>' is unimplemented.
 ```
-

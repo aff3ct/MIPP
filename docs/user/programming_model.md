@@ -42,6 +42,7 @@ When operating at standard vector length ($\text{LMUL}=1$), the `_m1` suffix is 
 - **Zero-Masked**: `mipp_add_float32_maskz(m0, r0, r1)` or `mipp_add_float32_maskz_m1(m0, r0, r1)`
 - **Source-Masked**: `mipp_add_float32_masks(m0, rsrc, r0, r1)` or `mipp_add_float32_masks_m1(m0, rsrc, r0, r1)`
 - **Merge-Masked + Multi-Register**: `mipp_add_float32_mask_m2(m0, r0, r1)`
+- **[Half-Vector](vector_types_and_lmul.md#half-vectors)**: `mipp_add_float32_d2(r0, r1)`, `mipp_add_float32_mask_d2(m0, r0, r1)`
 
 ### 2.2. Vector & Mask Datatypes (`rvd` and `rvm`)
 MIPP defines distinct data register (`rvd`) and mask register (`rvm`) types for each of the 10 supported data types across all LMUL configurations:
@@ -52,6 +53,7 @@ MIPP defines distinct data register (`rvd`) and mask register (`rvm`) types for 
 | **Multi-Register Data** | `rvd_[type]_m[2|4|8]_t` | `rvd_float32_m2_t`, `rvd_float32_m4_t` | Group of $2\times, 4\times, 8\times$ vector registers. |
 | **Standard Mask Vector** | `rvm_[type]_t` / `rvm_[type]_m1_t` | `rvm_float32_t`, `rvm_int32_m1_t` | Single mask/predicate register ($\text{LMUL}=1$). |
 | **Multi-Register Mask** | `rvm_[type]_m[2|4|8]_t` | `rvm_float32_m2_t`, `rvm_float32_m4_t` | Group of $2\times, 4\times, 8\times$ mask registers. |
+| **Half-Vector Data / Mask** | `rvd_[type]_d2_t` / `rvm_[type]_d2_t` | `rvd_float32_d2_t`, `rvm_float32_d2_t` | Half of a register ([half-vectors](vector_types_and_lmul.md#half-vectors)). |
 
 Multi-register types (`m2`, `m4`, `m8`) map directly to native vector register groups on RVV 1.0, or to hierarchical zero-overhead structures on fixed-width ISAs. See [Vector Types & LMUL](vector_types_and_lmul.md) for full structural details and memory layouts.
 
@@ -60,6 +62,7 @@ Predefined compile-time constants provide the number of elements per vector type
 
 - `MIPP_N_FLOAT32` or `MIPP_N_FLOAT32_M1`: Number of `float` elements in an $\text{LMUL}=1$ vector.
 - `MIPP_N_FLOAT32_M2`, `MIPP_N_FLOAT32_M4`, `MIPP_N_FLOAT32_M8`: Multiplied element capacities.
+- `MIPP_N_FLOAT32_D2`: Capacity of a half-vector (half of `MIPP_N_FLOAT32`).
 - Equivalent macros exist for all 10 types (`MIPP_N_INT32`, `MIPP_N_FLOAT64`, `MIPP_N_UINT8`, etc.).
 
 ### 2.4. Explicit Architecture Selection
@@ -84,7 +87,7 @@ The C++ Functional API parameterizes operations over the element type `T`, an op
 | Parameter | Domain / Supported Values | Description & Constraints |
 | :--- | :--- | :--- |
 | `typename T` | `float`, `double`, `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t` | 10 standard numeric datatypes supported across all operations. |
-| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and `-2` for [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`: AVX, AVX-512, RVV and scalar only) | Vector length multiplier (register grouping, or half-vector). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
+| `int LMUL` | `1, 2, 4, 8` (integer multipliers) and `-2` for [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`, provided by every target today, see [§3.4](vector_types_and_lmul.md#34-representation-per-target)) | Vector length multiplier (register grouping, or half-vector). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
 | `mipp::ISA ISA_TYPE` | `mipp::ISA::SCALAR`, `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::AVX512`, `mipp::ISA::NEON`, `mipp::ISA::SVE`, `mipp::ISA::RVV` | Target instruction set architecture. Defaults to `mipp::DEFAULT_ISA`. |
 
 ### 3.2. Types & Function Signatures
@@ -157,6 +160,8 @@ Unlike the C++ Functional API, these classes have no `ISA_TYPE` parameter: they 
 ```cpp
 template <typename T, int LMUL = 1>
 struct Rvd {
+    using value_type = T;
+    static constexpr int lmul = LMUL;
     rvd<T, LMUL> r; // Underlying low-level SIMD register
 
     static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
@@ -174,10 +179,17 @@ struct Rvd {
     Rvd& operator=(const T val); // Broadcast
 
     T operator[](const size_t index) const; // Reads one element (mipp::get)
+
+    // Change of LMUL (see Vector Types & LMUL, section 5.5)
+    Rvd<T, /* LMUL below */> low() const;                  // Lower half (mipp::low)
+    Rvd<T, /* LMUL below */> high() const;                 // Upper half (mipp::high)
+    Rvd<T, /* LMUL above */> combine(const Rvd& hi) const; // *this as lower half, hi as upper half (mipp::combine)
 };
 
 template <typename T, int LMUL = 1>
 struct Rvm {
+    using value_type = T;
+    static constexpr int lmul = LMUL;
     rvm<T, LMUL> m; // Underlying low-level mask register
 
     static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
@@ -195,6 +207,11 @@ struct Rvm {
     Rvm& operator=(const bool val); // Broadcast
 
     bool operator[](const size_t index) const; // Reads one lane: true if active
+
+    // Change of LMUL, as for Rvd (mipp::low, mipp::high, mipp::combine on masks)
+    Rvm<T, /* LMUL below */> low() const;
+    Rvm<T, /* LMUL below */> high() const;
+    Rvm<T, /* LMUL above */> combine(const Rvm& hi) const;
 };
 ```
 
@@ -248,7 +265,7 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
 
 1. **Prefer Operator Overloads**: When an operator exists (`a + b`, `a * b`, `a == b`, `m1 & m2`), use it over named function calls for maximum readability.
 2. **Use Free Functions**: For non-operator routines (e.g. `mipp::fmadd`, `mipp::sqrt`, `mipp::min`, `mipp::store`), use free functions under `namespace mipp::`.
-3. **No Member Syntax**: Operations are not exposed as member functions (there is no `a.add(b)`); use operators and free functions.
+3. **Few Member Functions**: Apart from `N()`, `operator[]` and the LMUL changes `low()`, `high()` and `combine()`, operations are not exposed as member functions (there is no `a.add(b)`); use operators and free functions.
 
 ---
 
@@ -281,4 +298,4 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
     ```
 
 !!! note "Performance"
-    The masked `loadu` / `storeu` of this example map to native instructions on RVV (masked `vle` / `vse`, every type) and on AVX-512 for floating-point and signed integer types (8-bit and 16-bit types require AVX-512BW). Everywhere else (SSE, AVX, NEON, SVE) they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).
+    The masked `loadu` / `storeu` of this example map to native instructions on RVV (masked `vle` / `vse`, every type) and on AVX-512 for the 10 datatypes (8-bit and 16-bit types require AVX-512BW). Everywhere else (SSE, AVX, NEON, SVE) they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).

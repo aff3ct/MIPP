@@ -55,10 +55,10 @@ hide:
   <div class="mipp-home-card">
     <div class="mipp-home-card-header">
       <div class="mipp-home-card-icon">🛡️</div>
-      <h3 class="mipp-home-card-title">100% Fallback Guarantee</h3>
+      <h3 class="mipp-home-card-title">Fallback Guarantee</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Guaranteed completeness across all <b>10 datatypes</b> through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Hardware) &rarr; <b>L1</b> (Dedicated Emulation) &rarr; <b>L2</b> (Generic Emulation) &rarr; <b>L3</b> (Scalar Fallback). <b>No missing-instruction compilation errors</b>.
+      Every function compiles on every target for all <b>10 datatypes</b>, through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Hardware) &rarr; <b>L1</b> (Dedicated Emulation) &rarr; <b>L2</b> (Generic Emulation) &rarr; <b>L3</b> (Scalar Fallback). <b>No missing-instruction compilation errors</b> (see the <a href="user/implementation_levels/#known-limitations">known limitations</a>).
     </p>
   </div>
   <div class="mipp-home-card">
@@ -107,11 +107,11 @@ MIPP supports 10 fundamental numeric data types across all vector abstractions:
 - **[Why MIPPv2](why_mippv2.md)**: Architectural evolution, technical relevance, and comparison with other SIMD wrappers (Highway, xsimd, Eve).
 - **[Getting Started](user/getting_started.md)**: Header integration, compiler flags, and a **5-minute tutorial across the C, C++ Functional, and C++ Object APIs**.
 - **[Programming Model](user/programming_model.md)**: In-depth exploration of the C, C++ Functional, and C++ Object APIs.
-- **[Vector Types & LMUL](user/vector_types_and_lmul.md)**: Vector representations, element counts (`mipp::N<T, LMUL>()`), and software/hardware register multiplier scaling.
-- **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
-- **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
+- **[Vector Types & LMUL](user/vector_types_and_lmul.md)**: Vector representations, element counts (`mipp::N<T, LMUL>()`), register multipliers, half-vectors and type conversions.
 - **[Memory & Alignment](user/memory_and_alignment.md)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
+- **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Headers & Compile Time](user/headers_and_compile_time.md)**: Header tree, monolithic / per-function / fine-grained inclusion, and measured compile times.
+- **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
 - **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and switching between the three APIs.
 - **[Specifications](funcs_support/index.md)**: Complete function prototypes, mathematical descriptions, and target ISA capability matrices.
 - **[Developer Guide](developer/index.md)**: Generation pipeline, setup, and tutorials to add a function, an implementation or an ISA.

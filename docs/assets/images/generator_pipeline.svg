@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 452" width="680" height="452" role="img" aria-labelledby="gp-title gp-desc">
   <title id="gp-title">MIPPv2 generator pipeline</title>
-  <desc id="gp-desc">Three groups of declarative JSON files are the input: the core registries in generator/helpers_headers (functions, prototypes, categories, scalar reference, generic emulations, docs), the ISA backends in generator/simd_ext/isa (descriptor, native implementations, dedicated emulations) and the test specifications in generator/helpers_tests. All of them are checked by blocking validation and by warning-only audits. The candidate resolution in codegen picks, for every function, datatype, mask variant, LMUL and ISA, the first available level among L0 native, L1 dedicated, L2 generic and L3 scalar. gen_mipp_headers.py writes the C, C++ Functional and C++ Object headers in include/, gen_mipp_docs.py writes the Function Support and Hardware Support pages and the API Explorer data in docs/. gen_mipp_tests.py does not use the resolution: it writes the Catch2 sources in tests/src, which compare every API against the L3 scalar reference.</desc>
+  <desc id="gp-desc">Three groups of declarative JSON files are the input: the core registries in generator/helpers_headers (functions, prototypes, categories, scalar reference, generic emulations and half-vector templates, docs), the ISA backends in generator/simd_ext/isa (descriptor, native implementations, dedicated emulations, half-vector templates) and the test specifications in generator/helpers_tests. All of them are checked by blocking validation and by warning-only audits. The candidate resolution in codegen picks, for every function, datatype, mask variant, LMUL and ISA, the first available level among L0 native, L1 dedicated, L2 generic and L3 scalar. gen_mipp_headers.py writes the C, C++ Functional and C++ Object headers in include/, gen_mipp_docs.py writes the Function Support and Hardware Support pages and the API Explorer data in docs/. gen_mipp_tests.py does not use the resolution: it writes the Catch2 sources in tests/src, which compare every API against the L3 scalar reference.</desc>
   <defs>
     <style>
       .head { font: 600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill: #64748b; letter-spacing: .06em; }
@@ -33,7 +33,7 @@
   <text class="ttl" x="20" y="42">Core registries</text>
   <text class="dir" x="20" y="60">helpers_headers/</text>
   <text class="file" x="20" y="80">registry_*.json</text>
-  <text class="file" x="20" y="96">generic_emu_*.json  (L2)</text>
+  <text class="file" x="20" y="96">generic_*.json  (L2)</text>
   <text class="file" x="20" y="112">funcs_docs.json</text>
   <text class="sub" x="20" y="127">functions, scalar reference (L3)</text>
 
@@ -43,7 +43,7 @@
   <text class="file" x="248" y="80">&lt;isa&gt;_isa.json</text>
   <text class="file" x="248" y="96">&lt;isa&gt;_native_*.json  (L0)</text>
   <text class="file" x="248" y="112">&lt;isa&gt;_emu_*.json  (L1)</text>
-  <text class="sub" x="248" y="127">one directory per target</text>
+  <text class="file" x="248" y="127">&lt;isa&gt;_ldiv_mask.json  (d2)</text>
 
   <rect class="in" x="464" y="22" width="208" height="112" rx="10"/>
   <text class="ttl" x="476" y="42">Test specifications</text>

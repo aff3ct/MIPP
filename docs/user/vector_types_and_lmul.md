@@ -23,6 +23,8 @@ The total number of elements contained in a vector is retrieved via `mipp::N<T, 
 
 $$N(T, \text{LMUL}) = \left( \frac{\text{VectorBitWidth}}{\text{sizeof}(T) \times 8} \right) \times \text{LMUL}$$
 
+For the [half-vectors](#half-vectors) (`d2`), the capacity is half the one of `LMUL = 1` (`MIPP_N_FLOAT32_D2`, `mipp::N<float, -2>()`).
+
 === "C API"
 
     ```c
@@ -45,7 +47,7 @@ $$N(T, \text{LMUL}) = \left( \frac{\text{VectorBitWidth}}{\text{sizeof}(T) \time
 
 ## 3. Generalized LMUL (Length Multiplier) Semantics
 
-The Length Multiplier ($\text{LMUL} \in \{1, 2, 4, 8\}$) originates from **RISC-V Vector 1.0 (RVV)**, where hardware registers are grouped to scale vector capacity. To support RVV natively while maintaining an identical API across all backends, MIPP generalizes the LMUL concept across all supported ISAs.
+The Length Multiplier ($\text{LMUL} \in \{1, 2, 4, 8\}$, plus the half-vectors of [section 4](#half-vectors)) originates from **RISC-V Vector 1.0 (RVV)**, where hardware registers are grouped to scale vector capacity. To support RVV natively while maintaining an identical API across all backends, MIPP generalizes the LMUL concept across all supported ISAs.
 
 On architectures without hardware register grouping (x86, ARM), software LMUL functions as a **structured multi-register unrolling mechanism**: operations on $\text{LMUL}=2$ or $\text{LMUL}=4$ expand into discrete SIMD instructions across separate registers, increasing instruction-level parallelism (ILP) without manual loop unrolling, while developer discretion is required to manage register pressure at high LMUL values.
 
@@ -145,7 +147,8 @@ In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **hal
 | C API types and functions | `d2` suffix: `rvd_float32_d2_t`, `mipp_add_float32_d2` |
 | C++ Functional and Object APIs | `LMUL` template argument `-2`: `mipp::rvd<float, -2>`, `mipp::Rvd<float, -2>` |
 | Availability macro | `MIPP_LDIV_2` |
-| Generator (`sw_lmul`, `hw_lmul`, `--ldiv`) | factor `-2`, or `--ldiv 2` |
+| ISA descriptors of the generator (`sw_lmul`, `hw_lmul`) | factor `-2` |
+| Test generator (`gen_mipp_tests.py --ldiv`) | `--ldiv 2` |
 
 The same loop in the three APIs (the `MIPP_LDIV_2` guard keeps the code portable, see [§4.1](#41-availability)):
 
@@ -192,11 +195,11 @@ Today, **every SIMD extension supported by MIPP provides half-vectors** ($\text{
 The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-per-target) give the targets that provide half-vectors, and their representation:
 
 - **AVX / AVX2, AVX-512**: a native register of the narrower ISA: 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`) on AVX, 256-bit AVX registers on AVX-512.
-- **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array. Some of these 64-bit operations are not implemented yet (see [Implementation Levels](implementation_levels.md#known-limitations)).
-- **SSE / NEON / ARM SVE**: there is no narrower register, so a `d2` value is stored in a full LMUL = 1 register (same member as the `m1` type, but a distinct type). Only the lower $N/2$ lanes are meaningful; the upper lanes are unspecified and ignored (they may hold garbage). Consequences:
-    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions and `testz` ignore the upper lanes;
+- **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array, and most operations on it use the scalar fallback. They are implemented with the standard `V` extension; on cores without 64-bit elements or with VLEN < 128, some of them are not (see [Implementation Levels](implementation_levels.md#known-limitations)).
+- **SSE / NEON / ARM SVE**: there is no narrower register (on ARMv7, part of the `float64` half-vector operations are not implemented, see [Implementation Levels](implementation_levels.md#known-limitations)), so a `d2` value is stored in a full LMUL = 1 register (same member as the `m1` type, but a distinct type). Only the lower $N/2$ lanes are meaningful; the upper lanes are unspecified and ignored (they may hold garbage). Consequences:
+    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions, `testz` and `none` ignore the upper lanes;
     - `get(r, lane)` with `lane` outside $[0, N/2)$ is undefined behavior;
-    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, masked loads/stores/gathers/scatters, masked reductions).
+    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, `none`, masked loads/stores/gathers/scatters, masked reductions, `combine` on masks).
 - **Scalar**: plain array of half the elements.
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
@@ -274,7 +277,7 @@ MIPP provides four conversions between data vectors. They differ in what they pr
 | **`high`** | The upper half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
 | **`combine`** | Joins two registers: the first one gives the lower half, the second one the upper half. | `d2` $\to$ `m1` $\to$ `m2` $\to$ `m4` $\to$ `m8` |
 
-`low`, `high` and `combine` also exist on masks (`low_k`, `high_k`, `combine_k`), and `combine(low(v), high(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `low` from `d2`, no `combine` or `wcvt` from `m8`).
+`low`, `high` and `combine` also exist on masks: `low_k`, `high_k` and `combine_k` in the C API, overloads of `low`, `high` and `combine` taking `rvm` / `Rvm` arguments in the C++ APIs. `combine(low(v), high(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `low` from `d2`, no `combine` or `wcvt` from `m8`).
 
 The C name carries the **`LMUL` of the arguments**, the one of the result being given by the type (`mipp_low_float32_m2` takes an `m2` register and returns an `m1` one). As for the other functions, no suffix means `m1`. The C++ Functional and Object APIs deduce the `LMUL` from the type of the argument.
 

@@ -20,11 +20,13 @@ For example:
 %r<tp>% res = %add<tp>%(r0, r1);
 ```
 
-When evaluated for `float32` on AVX, this becomes:
+When evaluated for `float32` on AVX, for the base registers, this becomes:
 
 ```c
-rvd_avx_float32_t res = mipp_avx_add_float32(r0, r1);
+rvd_avx_float32_m1_t res = mipp_avx_add_float32_m1(r0, r1);
 ```
+
+Inside an ISA, the base registers and the functions on them are named with the `_m1` suffix ([Code Generation](../internals/code_generation.md#2-one-isa-layer)); the examples of this page use these names.
 
 ---
 
@@ -34,11 +36,11 @@ The prefix before the opening angle bracket `<` indicates what entity is being g
 
 | Token Prefix | Entity Generated | Example Expression | Generated C Code (AVX, `float32`) |
 | :--- | :--- | :--- | :--- |
-| **`r`** | Vector Data Register (`rvd`) | `%r<tp>%` | `rvd_avx_float32_t` |
-| **`m`** | Vector Mask Register (`rvm`) | `%m<tp>%` | `rvm_avx_float32_t` |
+| **`r`** | Vector Data Register (`rvd`) | `%r<tp>%` | `rvd_avx_float32_m1_t` |
+| **`m`** | Vector Mask Register (`rvm`) | `%m<tp>%` | `rvm_avx_float32_m1_t` |
 | **`s`** | Scalar Value Type | `%s<tp>%` | `float32_t` |
 | **`N`** | Number of Elements Constant | `%N<tp>%` | `MIPP_AVX_N_FLOAT32` |
-| **`<function>`** | Call to another MIPP function | `%select<tp>%(...)` | `mipp_avx_select_float32(...)` |
+| **`<function>`** | Call to another MIPP function | `%select<tp>%(...)` | `mipp_avx_select_float32_m1(...)` |
 
 ### 2.1. Naming Convention of Function Arguments
 
@@ -53,7 +55,7 @@ Inside a template body, the parameters of the function being generated are not n
 
 For example, in `%r<tp>% res = %add<tp>%(r0, r1);`, `r0` and `r1` are the first and second register arguments. A function taking a mask, a register and a scalar (e.g. a masked shift) names them `m0`, `r0` and `s0`.
 
-A few arguments have a fixed, special name instead: `rsrc` (the source register of the merge-masking `masks` variants, e.g. `%sub<tp|v:S>%(m0, rsrc, r0, r1)`), `vals` (the values of `set`) and `vi` (the index vector of `gather`/`scatter`).
+A few arguments have a fixed, special name instead: `rsrc` (the source register of the Source-Masked `masks` variants, e.g. `%sub<tp|v:S>%(m0, rsrc, r0, r1)`), `vals` (the values of `set`) and `vi` (the index vector of `gather`/`scatter`).
 
 ---
 
@@ -92,9 +94,9 @@ A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`,
 #### Examples
 
 ```mipp-dsl
-%r<c:int|b:32>%   // 32-bit signed integer register (rvd_avx_int32_t)
-%r<c:uint|b:tp>%  // Unsigned integer with the same bitwidth as tp (rvd_avx_uint32_t if tp is float32)
-%r<c:float|b:64>% // 64-bit floating-point register (rvd_avx_float64_t)
+%r<c:int|b:32>%   // 32-bit signed integer register (rvd_avx_int32_m1_t)
+%r<c:uint|b:tp>%  // Unsigned integer with the same bitwidth as tp (rvd_avx_uint32_m1_t if tp is float32)
+%r<c:float|b:64>% // 64-bit floating-point register (rvd_avx_float64_m1_t)
 %m<c:uint|b:tp>%  // Mask register matching tp's bitwidth
 ```
 
@@ -106,7 +108,7 @@ A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`,
 Functions with a datatype pair (conversions, `cast`) take two type expressions separated by a comma, source first:
 
 ```mipp-dsl
-%cast<tp, c:int|b:tp>%(r0) // mipp_avx_cast_uint32_int32(r0) if tp is uint32
+%cast<tp, c:int|b:tp>%(r0) // mipp_avx_cast_uint32_int32_m1(r0) if tp is uint32
 ```
 
 ---
@@ -117,8 +119,8 @@ Functions with a datatype pair (conversions, `cast`) take two type expressions s
 
 You can adjust the register multiplier of a type or of a function call:
 
-- Fixed LMUL: `m:1`, `m:2`, `m:4`, `m:8`.
-- Relative to the current LMUL: `m:tp*2`, `m:tp/2`.
+- Fixed LMUL: `m:1`, `m:2`, `m:4`, `m:8`, and `m:-2` for the half-vectors (`d2`).
+- Relative to the current LMUL: `m:tp*2`, `m:tp/2` (and `tr` instead of `tp`). From a half-vector, `m:tp*2` is the full register (`d2` to `m1`).
 
 ```mipp-dsl
 %r<tp|m:tp/2>%          // Register with half the current LMUL
@@ -126,7 +128,7 @@ You can adjust the register multiplier of a type or of a function call:
 ```
 
 !!! warning "Only in templates rendered for an LMUL"
-    `m:` has an effect only when the template is rendered for a specific LMUL, as the horizontal templates of `generic_emu_templates_lmulh.json` are (`mode: horiz_lmul`). The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32`.
+    `m:` has an effect only when the template is rendered for a specific LMUL: the horizontal templates of `generic_emu_templates_lmulh.json` (`mode: horiz_lmul`), and the half-vector templates of `generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`, rendered for `d2` (or `m1` for `low` and `high`), where `%N<tp|m:tp*2>%` is the number of elements of the full register. The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32_m1`.
 
 ### 4.2. Variant Modifiers (`v:`)
 
@@ -142,8 +144,8 @@ When calling another MIPP function, `v:` selects its masking variant, with the l
 Only these four letters are accepted; any other value stops the generation with a "Panic" message.
 
 ```mipp-dsl
-%r<tp>% a = %sub<tp|v:Z>%(m0, r0, r1);       // mipp_avx_sub_float32_maskz(m0, r0, r1)
-%r<tp>% b = %sub<tp|v:S>%(m0, rsrc, r0, r1); // mipp_avx_sub_float32_masks(m0, rsrc, r0, r1)
+%r<tp>% a = %sub<tp|v:Z>%(m0, r0, r1);       // mipp_avx_sub_float32_maskz_m1(m0, r0, r1)
+%r<tp>% b = %sub<tp|v:S>%(m0, rsrc, r0, r1); // mipp_avx_sub_float32_masks_m1(m0, rsrc, r0, r1)
 ```
 
 `v:` combines with the other modifiers. The horizontal LMUL templates reduce the two halves of a register group with the Zero-Masked variant at half the LMUL:
@@ -186,13 +188,13 @@ When specializing this template for `func_name = "add"` on AVX with `tp = float3
     return res;
     ```
 
-2. The DSL parser produces the body of `mipp_avx_add_float32_mask`:
+2. The DSL parser produces the body of `mipp_avx_add_float32_mask_m1`:
 
     ```c
-    static inline rvd_avx_float32_t mipp_avx_add_float32_mask(const rvm_avx_float32_t m0, const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+    static inline rvd_avx_float32_m1_t mipp_avx_add_float32_mask_m1(const rvm_avx_float32_m1_t m0, const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
     	// Level 2 (Generic Emulation)
-    	rvd_avx_float32_t op = mipp_avx_add_float32(r0, r1);
-    	rvd_avx_float32_t res = mipp_avx_select_float32(m0, op, r0);
+    	rvd_avx_float32_m1_t op = mipp_avx_add_float32_m1(r0, r1);
+    	rvd_avx_float32_m1_t res = mipp_avx_select_float32_m1(m0, op, r0);
     	return res;
     }
     ```
@@ -212,8 +214,8 @@ return %cast<c:int|b:tp, tp>%(res_s);
 For `uint32`, this generates:
 
 ```c
-rvd_avx_int32_t r0_s = mipp_avx_cast_uint32_int32(r0);
-rvd_avx_int32_t r1_s = mipp_avx_cast_uint32_int32(r1);
-rvd_avx_int32_t res_s = mipp_avx_add_int32(r0_s, r1_s);
-return mipp_avx_cast_int32_uint32(res_s);
+rvd_avx_int32_m1_t r0_s = mipp_avx_cast_uint32_int32_m1(r0);
+rvd_avx_int32_m1_t r1_s = mipp_avx_cast_uint32_int32_m1(r1);
+rvd_avx_int32_m1_t res_s = mipp_avx_add_int32_m1(r0_s, r1_s);
+return mipp_avx_cast_int32_uint32_m1(res_s);
 ```

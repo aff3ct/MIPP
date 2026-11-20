@@ -44,7 +44,7 @@ The names of the generated functions are derived from this entry: `mipp_absdiff_
 
 ### Choosing a Prototype
 
-`registry_protos.json` holds 30 prototypes. Each one describes the return value and the arguments:
+`registry_protos.json` holds 36 prototypes. Each one describes the return value and the arguments:
 
 ```json
 "ret_reg_2args_reg": {
@@ -59,8 +59,11 @@ The names of the generated functions are derived from this entry: `mipp_absdiff_
 | Field | Values |
 | :--- | :--- |
 | `type` | `reg` (data register), `msk` (mask register), `val` (scalar), `ptr` (pointer), `Nele` (array of one scalar per lane), or `false` for a `void` return. |
-| `fixeddatatype` | `false` when the parameter follows the datatype of the function, or a fixed type: `int32` (a shift count), `uint` (the unsigned type of the same width, used for gather and scatter indices). |
+| `fixeddatatype` | `false` when the parameter follows the datatype of the function, or a fixed type: a datatype (`int32` for a shift count, `uint32`, ...) or `uint` (the unsigned type of the same width, used for gather and scatter indices). |
 | `charac` | `RO` (read) or `WO` (written). |
+| `lmul` | Return value only, optional. LMUL of the returned register relative to the one of the arguments: `same` (default), `down` (one step below, `m1` → `d2`), `up` (one step above, `d2` → `m1`) or a fixed LMUL (`d2`, `m1`, ... `m8`). Used by `low` and `high` (`down`), `combine` (`up`), `wcvt` (`up`) and `ncvt` (`down`). The function is only generated for the LMULs where the returned LMUL exists. |
+| `changes_type` | Return value only, optional. `true` when the datatype of the result differs from the one of the argument (`wcvt`, `ncvt`): the LMUL change then keeps the number of lanes with wider or narrower elements. Without it, `down` and `up` split or join the registers. |
+| `offset_lmul` | Pointers only, optional. `false` passes the same pointer to the two halves of an LMUL > 1 function (gather and scatter). |
 
 Add a prototype only if none fits. The names follow the pattern `ret_<return>_<n>args_<arguments>`.
 
@@ -145,13 +148,15 @@ From `generator/` (see [Setup](../setup.md)):
 The generator writes, among others:
 
 - the public headers `<mipp/c/fun/absdiff.h>`, `<mipp/cpp/fun/absdiff.hpp>` and `<mipp/obj/fun/absdiff.hpp>`;
-- one implementation header per ISA, for instance `mipp/internal/simd_ext/neon/c/functions/arithmetic/absdiff.h`, where every function carries a comment with its level:
+- implementation headers per ISA, mask variant and LMUL, for instance `mipp/internal/simd_ext/neon/c/functions/arithmetic/u/m1/absdiff.h` in fine granularity ([Header Layout](../internals/header_layout.md)), where every resolved function carries a comment with its level:
 
 ```c
-static inline rvd_neon_float32_t mipp_neon_absdiff_float32(const rvd_neon_float32_t r0, const rvd_neon_float32_t r1) {
+static inline rvd_neon_float32_m1_t mipp_neon_absdiff_float32_m1(const rvd_neon_float32_m1_t r0, const rvd_neon_float32_m1_t r1) {
 	// Level 3 (Scalar Fallback)
 	...
 ```
+
+Inside an ISA, the LMUL 1 functions are named with `_m1`; `mipp_neon_absdiff_float32` is an alias that calls `mipp_neon_absdiff_float32_m1` ([Code Generation](../internals/code_generation.md#2-one-isa-layer)).
 
 Then build the tests and run those of `absdiff` (see [Build and Run the Unit Tests](../setup.md#4-build-and-run-the-unit-tests), and [Faster Iterations](../setup.md#41-faster-iterations) to build fewer tests):
 

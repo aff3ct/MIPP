@@ -104,11 +104,19 @@ static inline ... mipp_neon_<function>_float64(...) { /* Level 3 */ }
 Example of an emitted <span class="mipp-isa-badge lvl-0">L0</span> function (`avx/c/functions/arithmetic/u/m1/add.h`, fine granularity):
 
 ```c
-static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_m1_t mipp_avx_add_float32_m1(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
 	// Level 0 (Native Hardware)
-	rvd_avx_float32_t res;
+	rvd_avx_float32_m1_t res;
 	res.r = _mm256_add_ps(r0.r, r1.r);
 	return res;
+}
+```
+
+and, in the `LMUL = 1 Aliases` section of the same header, its alias without suffix (step 5 of [§2](#2-one-isa-layer)), which has no `// Level` comment:
+
+```c
+static inline rvd_avx_float32_m1_t mipp_avx_add_float32(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
+	return mipp_avx_add_float32_m1(r0, r1);
 }
 ```
 
@@ -119,7 +127,7 @@ static inline rvd_avx_float32_t mipp_avx_add_float32(const rvd_avx_float32_t r0,
 At the end of a run, `print_summary_table()` reads the generated `simd_ext/<isa>/c/functions/` headers and counts, per ISA and per level, the functions that carry a `// Level N` comment. The functions are split into three columns: `Std` (unmasked, LMUL 1), `Msk` (mask variants) and `LM/D` (LMUL > 1 and half-vectors). The `Stubs` column counts the `MIPP panic` lines.
 
 !!! warning "The `LM/D` column is incomplete"
-    The software LMUL wrappers ([§2](#2-one-isa-layer), step 3) and the `sub_isa` half-vectors (step 4) have no `// Level` comment, so they are not counted. The horizontal LMUL wrappers always carry `// Level 2`. On ISAs without hardware LMUL, the `LM/D` column therefore only counts the horizontal wrappers, and has the same value for every ISA.
+    The software LMUL wrappers ([§2](#2-one-isa-layer), step 6), the `sub_isa` half-vectors (step 3) and the LMUL 1 aliases (step 5) have no `// Level` comment, so they are not counted. The `LM/D` column counts the hardware LMUL functions (RVV), the half-vectors by mask (step 4, which carry the level of the LMUL 1 function or of their template) and the horizontal LMUL wrappers (`// Level 2`). Its value therefore depends on the `sw_ldiv_type` of the ISA: AVX and AVX-512 (`sub_isa`) count fewer functions than SSE, NEON and SVE (`mask`).
 
 ---
 
@@ -135,6 +143,7 @@ At the end of a run, `print_summary_table()` reads the generated `simd_ext/<isa>
 | `c_generator.py` | One ISA layer: common header, candidate registration, LMUL loops ([§2](#2-one-isa-layer)). |
 | `codegen/candidate_resolver.py` | Candidate resolution, effective levels, emission, scalar fallback and stubs ([§4](#4-resolution), [§5](#5-emission)). |
 | `codegen/lmul_orchestrator.py` | Software LMUL and `sub_isa` half-vector wrappers, horizontal LMUL wrappers. |
+| `codegen/ldiv_mask.py` | Half-vectors by mask (`"sw_ldiv_type": "mask"`), and the functions that change the LMUL between `m1` and `d2` (`low`, `high`, `combine`, `wcvt`, `ncvt`): templates of `generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`, level detection ([§2](#2-one-isa-layer), step 4). |
 | `codegen/emit_helpers.py` | Function bodies, `// Level` comments, panic stubs, half-vector structures. |
 | `codegen/implem_tracker.py` | Implementation status per function, datatype and mask variant (read by the dependency and include resolution). |
 | `include_gen.py` | `IncludeManager`: files, includes and umbrella headers ([Header Layout](header_layout.md)). |

@@ -21,14 +21,17 @@ Three complementary interfaces mapping to the same inlined instructions:
 - **C++ Object API (`<mipp_obj.hpp>`, C++11)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
 ### 1.2. Deterministic 4-Level Fallback Hierarchy
-Every function is implemented on every target, for all 10 data types, at the best available level: **Level 0 (Native Hardware)**, **Level 1 (Dedicated Emulation)**, **Level 2 (Generic Emulation)** or **Level 3 (Scalar Fallback)**. See [Implementation Levels](user/implementation_levels.md), including its [known limitations](user/implementation_levels.md#known-limitations).
+Every function compiles on every target, for all its data types, and uses the best available level: **Level 0 (Native Hardware)**, **Level 1 (Dedicated Emulation)**, **Level 2 (Generic Emulation)** or **Level 3 (Scalar Fallback)**. A few functions are not implemented yet in two configurations (ARMv7 NEON, RVV without 64-bit elements): they compile but stop at run time. See [Implementation Levels](user/implementation_levels.md) and its [known limitations](user/implementation_levels.md#known-limitations).
 
 ### 1.3. Generalized Length Multiplier (LMUL)
 
-Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$):
+Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$), plus half-vectors (`d2`, $\text{LMUL} = 1/2$):
 
-- **Hardware (RVV 1.0)**: Native vector register grouping (`vfloat32m2_t`, `vfloat32m4_t`).
-- **Software (x86, ARM, Scalar)**: Binary register pairs unrolled cleanly at compile time.
+- **Hardware (RVV 1.0)**: Native vector register grouping (`vfloat32m2_t`, `vfloat32m4_t`) and fractional registers (`vfloat32mf2_t`).
+- **Software (x86, ARM)**: Binary register pairs unrolled at compile time.
+- **Scalar target**: Flat arrays of $N \times \text{LMUL}$ elements.
+
+See [Vector Types & LMUL](user/vector_types_and_lmul.md).
 
 ### 1.4. Explicit 4-Variant Masking Model
 
@@ -54,10 +57,10 @@ Choosing the right SIMD library depends on language requirements, compilation co
 | **Latest Release** | **v2.2.0** (2026-10-18) | No tag (`master`, 2026-04-15) | 1.4.0 (2026-04-23) | 14.3.0 (2026-07-15) | v2023.02.15 (2023-02-15) | v3.0.1 (2021-10-19) | 1.4.5 (2024-06-06, maintenance mode) | v2.02.03 (2026-04-14) | C++26 (P1928R15, 2024) | N/A | N/A |
 | **C API** | ✅ **Yes (`<mipp.h>`)** | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ✅ Yes (`nsimd.h`) | ❌ No (C++ only) | ❌ No (C++ only) | ❌ No (C++ only) | ⚠️ Vendor specific | N/A |
 | **C++ Operator Overloading** | ✅ **Yes (`Rvd`)** | ✅ Yes (`Reg`) | ⚠️ Partial (not on SVE / RVV) | ✅ Yes (`batch`) | ✅ Yes (`wide`) | ✅ Yes (`pack`) | ✅ Yes (`Vector`) | ✅ Yes (`Vec...`) | ✅ Yes (`simd`) | ❌ No | N/A |
-| **100% Fallback Guarantee** | ✅ **Levels 0 to 3** | ❌ Incomplete (Ad-hoc) | ✅ Yes (`EMU128` / `SCALAR` targets) | ⚠️ Opt-in (`emulated` arch) | ✅ Yes (`emulated_` ABI) | ✅ Yes (CPU emulation) | ✅ Yes (Scalar implementation) | ⚠️ x86 only (down to SSE2) | ✅ Guaranteed (ISO spec) | ❌ Compile error | ❌ Silent failure |
+| **100% Fallback Guarantee** | ✅ **Levels 0 to 3** ([few exceptions](user/implementation_levels.md#known-limitations)) | ❌ Incomplete (Ad-hoc) | ✅ Yes (`EMU128` / `SCALAR` targets) | ⚠️ Opt-in (`emulated` arch) | ✅ Yes (`emulated_` ABI) | ✅ Yes (CPU emulation) | ✅ Yes (Scalar implementation) | ⚠️ x86 only (down to SSE2) | ✅ Guaranteed (ISO spec) | ❌ Compile error | ❌ Silent failure |
 | **RISC-V Vector 1.0 (RVV)** | ⚠️ **Fixed-width only** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width only | ⚠️ Fixed-width only (unreleased, `main`) | ❌ No | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ Built-ins (VLA/Fixed) | ⚠️ Unpredictable |
 | **ARM SVE Support** | ⚠️ **Fixed-width only** | ❌ No | ✅ Scalable & Fixed | ⚠️ Fixed-width only | ⚠️ Fixed-width only | ✅ Scalable & Fixed | ❌ No | ❌ No (x86 only) | ⚠️ Fixed-width only (WIP) | ⚠️ ACLE (VLA/Fixed) | ⚠️ Unpredictable |
-| **Generalized LMUL ($1,2,4,8$)** | ✅ **Yes** | ❌ No | ⚠️ RVV only (`ScalableTag<T, kPow2>`) | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No (RVV only) | ❌ No |
+| **Generalized LMUL ($1,2,4,8$)** | ✅ **Yes** (and half-vectors) | ❌ No | ⚠️ RVV only (`ScalableTag<T, kPow2>`) | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No | ❌ No (RVV only) | ❌ No |
 | **Dispatch** | **Static** | **Static** | **Static & Dynamic** | **Static & Dynamic** | **Static** | **Static & Dynamic** | **Static** | **Static** *(Manual dynamic)* | **Static** | **Static** *(Manual dynamic)* | **Static** *(Dynamic with `target_clones`)* |
 | **C++ Standard Required** | **C99 / C++11** | C++11 | C++17 | C++17 | C++20 | C89 / C++98 | C++11 | C++17 | C++26 | C99 / C++11 | C99 / C++11 |
 | **Compilation Overhead** | **Fast** (Simple inlines) | Medium (Deep templates) | Heavy templates | Medium | Very heavy | Heavy (Macro bloat) | Medium / Heavy | Fast (Inline headers) | Heavy templates | Very fast | Zero lib overhead |
@@ -73,7 +76,7 @@ Choosing the right SIMD library depends on language requirements, compilation co
 
 1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C99 inline functions (C API) alongside the C++ Functional and C++ Object APIs.
 2. **Expressive Syntax without Portability Sacrifices**: While Google Highway restricts operator overloading to fixed-width targets to accommodate sizeless SVE / RVV vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
-3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, covering virtually the entire function / datatype matrix across all 10 datatypes.
+3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, covering the function / datatype matrix across all 10 datatypes (except the few [known limitations](user/implementation_levels.md#known-limitations)).
 4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.
 5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.
 6. **Automated Offline Code Generation**: Shifting metaprogramming offline into a Python engine (`generator/`) yields three major engineering benefits:

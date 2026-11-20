@@ -82,16 +82,18 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 
 ### Complete Working Example (SAXPY with Tail Loop)
 
+The three programs are also in the repository (`examples/doc/getting_started/c.c`, `fun.cpp` and `obj.cpp`), where they are compiled and run by the documentation checks.
+
 === "C API"
 
     ```c
     --8<-- "examples/doc/getting_started/c.c"
     ```
 
-    Compile and run:
+    Compile and run (with the code saved as `saxpy.c`):
     ```bash
-    gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy_c.c -o saxpy_c
-    ./saxpy_c
+    gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.c -o saxpy
+    ./saxpy
     ```
 
 === "C++ Functional API"
@@ -100,8 +102,8 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
     --8<-- "examples/doc/getting_started/fun.cpp"
     ```
 
-    Compile and run:
-    ```
+    Compile and run (with the code saved as `saxpy.cpp`):
+    ```bash
     g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
     ./saxpy
     ```
@@ -112,8 +114,8 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
     --8<-- "examples/doc/getting_started/obj.cpp"
     ```
 
-    Compile and run:
-    ```
+    Compile and run (with the code saved as `saxpy.cpp`):
+    ```bash
     g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
     ./saxpy
     ```

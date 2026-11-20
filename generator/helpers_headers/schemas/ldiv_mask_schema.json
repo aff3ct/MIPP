@@ -1,21 +1,51 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "d2 by mask special implementations (generic_ldiv_mask.json, <isa>_ldiv_mask.json)",
+    "title": "Half-Vector Templates",
+    "description": "Templates of the half-vectors by mask (`\"sw_ldiv_type\": \"mask\"` in the [ISA Descriptor](isa.md)) and of the functions that change the LMUL between `m1` and `d2` (`low`, `high`, `combine`, `wcvt`, `ncvt`, and the `_k` mask versions). `helpers_headers/generic_ldiv_mask.json` gives the generic version, used by every ISA; `simd_ext/<isa>/<isa>_ldiv_mask.json` overrides it for one ISA, and is also where the ISAs with `sub_isa` half-vectors (AVX, AVX-512) and with hardware LMUL groups (RVV) write these functions. A function without an entry is written as a lane-wise wrapper of its LMUL 1 version on the same register. The code is Jinja2 and [templating DSL](../templating_dsl.md), rendered for the LMUL of the arguments (`d2`, or `m1` for `low` and `high`). Each key is a function name, or several names separated by `|` that share the entries. See [Code Generation](../../internals/code_generation.md#2-one-isa-layer) and [Add an ISA](../../tutorials/add_isa.md#half-vectors-and-functions-that-change-the-lmul).",
+    "examples": [
+        {
+            "combine": [
+                {
+                    "variants": [
+                        "u"
+                    ],
+                    "code": [
+                        "%r<tr>% res;",
+                        "{% if isa_dt.reg == '__m128' %}res.r = _mm_movelh_ps(r0.r, r1.r);",
+                        "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_unpacklo_pd(r0.r, r1.r);",
+                        "{% else %}res.r = _mm_unpacklo_epi64(r0.r, r1.r);{% endif %}",
+                        "return res;"
+                    ],
+                    "datatypes": [
+                        "float32"
+                    ]
+                }
+            ]
+        }
+    ],
     "type": "object",
     "propertyNames": {
-        "pattern": "^[a-z0-9_]+(\\|[a-z0-9_]+)*$"
+        "pattern": "^[a-z0-9_]+(\\|[a-z0-9_]+)*$",
+        "title": "function"
     },
     "additionalProperties": {
         "type": "array",
         "minItems": 1,
         "items": {
             "type": "object",
-            "required": ["code"],
+            "required": [
+                "code"
+            ],
             "additionalProperties": false,
             "properties": {
                 "level": {
-                    "description": "Implementation level shown in the generated code and in the level summary. Default: 1 in <isa>_ldiv_mask.json, 2 in generic_ldiv_mask.json.",
-                    "enum": [0, 1, 2, 3]
+                    "description": "Implementation level shown in the generated `// Level` comment, in the summary table and in the documentation. Optional. Without it, the level of an entry of `<isa>_ldiv_mask.json` is detected from its code with the rules of the level audit (0: a single intrinsic, or no instruction at all such as an identity; 1: several intrinsics, or intrinsics and MIPP functions; 2: only MIPP functions), and an entry of `generic_ldiv_mask.json` is level 2. Sequential code (level 3) must be declared with this key.",
+                    "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ]
                 },
                 "if": {
                     "description": "C preprocessor condition (e.g. `defined(__SSE4_1__)`) under which this entry is used. Otherwise the next matching entry is used (the entries of `<isa>_ldiv_mask.json` come first, then those of `generic_ldiv_mask.json`), down to an entry without `if`, or the lane-wise wrapper of the LMUL 1 function. `low` / `high` / `combine` need a fallback entry without `if` (given by `generic_ldiv_mask.json`).",
@@ -26,25 +56,43 @@
                     "type": "array",
                     "minItems": 1,
                     "uniqueItems": true,
-                    "items": { "enum": ["u", "m", "z", "s"] }
+                    "items": {
+                        "enum": [
+                            "u",
+                            "m",
+                            "z",
+                            "s"
+                        ]
+                    },
+                    "description": "Mask variants the entry applies to (`u`, `m`, `z`, `s`). Omitted: all the variants of the function."
                 },
                 "datatypes": {
                     "oneOf": [
-                        { "const": "all_datatypes" },
+                        {
+                            "const": "all_datatypes"
+                        },
                         {
                             "type": "array",
                             "minItems": 1,
                             "uniqueItems": true,
-                            "items": { "type": "string" }
+                            "items": {
+                                "type": "string"
+                            }
                         }
-                    ]
+                    ],
+                    "description": "Datatypes (or `dt_par,dt_ret` pairs for the conversions) the entry applies to, or `all_datatypes` (the default)."
                 },
                 "code": {
                     "type": "array",
                     "minItems": 1,
-                    "items": { "type": "string" }
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Body of the function, one line per item: Jinja2 (variables `isa`, `isa_dt` for the datatype entry of the ISA descriptor, `ctx`, `mask_kind`, ...) and templating DSL (`%r<tp>%`, `%N<tp|m:tp*2>%`, `%r<tr>%` for the result)."
                 }
-            }
-        }
+            },
+            "description": "One candidate implementation."
+        },
+        "description": "Candidate entries of the function, tried in order (the entries of `<isa>_ldiv_mask.json` first, then those of `generic_ldiv_mask.json`)."
     }
 }

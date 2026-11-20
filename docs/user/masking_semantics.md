@@ -73,20 +73,23 @@ An unmasked operation is a call without a mask. In C++, the masked signatures al
 
 ## 3. Architectural Hardware Mappings
 
-Different CPU architectures implement masking using fundamentally distinct mechanisms. MIPP classifies mask execution into native hardware predication and two distinct forms of emulation:
+The mask type follows the hardware of each target. How a masked operation is executed depends on the target and on the function: either a native predicated instruction (<span class="mipp-isa-badge lvl-0">L0</span>), or the unmasked operation followed by a `select` (<span class="mipp-isa-badge lvl-2">L2</span>), or the scalar fallback (<span class="mipp-isa-badge lvl-3">L3</span>):
 
-| Architecture | Mask Representation in MIPP | Execution Mechanism | Support Classification |
-| :--- | :--- | :--- | :--- |
-| **RISC-V Vector 1.0** | **Boolean Vectors (`vbool*`)**: Dedicated hardware mask vector registers. | Native instruction-level predication (`vadd.vv ..., v0.t`) with undisturbed inactive elements. | **Native (Hardware predication)** |
-| **x86 AVX-512** | **Full-Vector Masks** *(Future: `__mmask*` opmasks)* | Currently evaluates unmasked op and blends result via software fallback. | **Emulated (MIPP implementation limitation)** |
-| **ARM SVE** | **Full-Vector Masks** *(Future: `svbool_t` predicates)* | Currently evaluates unmasked op and blends result via software fallback. | **Emulated (MIPP implementation limitation)** |
-| **x86 SSE / AVX / AVX2** | **Full-Vector Masks**: SIMD registers with all-1s (`0xFF...`) or all-0s per element. | Evaluates unmasked op followed by vector blend instructions (`_mm_blendv_ps`, `_mm256_blendv_ps`) or bitwise multiplexing. | **Emulated (Hardware limitation)** |
-| **ARM NEON** | **Full-Vector Masks**: Vector registers with bitmasks per element (`uint32x4_t`, etc.). | Evaluates unmasked op followed by bitwise selection (`vbslq_f32`) or logical masking. | **Emulated (Hardware limitation)** |
-| **Scalar Target** | **Unsigned Integer Arrays**: Sized to match datatype bitwidth (`uint64_t m[N]`, `uint32_t m[N]`, etc.). | Sequential ternary evaluation: `res[i] = m[i] ? (a[i] + b[i]) : src[i]`. | **Sequential Fallback** |
+| Architecture | Mask Representation in MIPP | Execution of Masked Operations |
+| :--- | :--- | :--- |
+| **RISC-V Vector 1.0** | Boolean mask registers (`vbool*_t`). | Native predicated instructions (`vadd.vv ..., v0.t`) for a large part of the functions. |
+| **x86 AVX-512** | Opmask registers (`__mmask8` ... `__mmask64`). | Native masked intrinsics for part of the functions (e.g. `_mm512_mask_add_ps`, masked `load` / `store` for the 10 datatypes); the others run the unmasked operation, then `_mm512_mask_blend_*`. |
+| **ARM SVE** | Predicate registers (`svbool_t`). | Unmasked operation, then `svsel`. The predicated instruction forms (`svadd_f32_m`) are not used yet. |
+| **x86 AVX / AVX2** | Full-vector masks: all bits of a lane set (active) or cleared (inactive). | Unmasked operation, then `_mm256_blendv_*`. |
+| **ARM NEON** | Full-vector masks (`uint32x4_t`, ...). | Unmasked operation, then `vbslq_*`. |
+| **x86 SSE** | Full-vector masks (`__m128`, `__m128d`, `__m128i`). | Scalar fallback: SSE has no `select` implementation yet. |
+| **Scalar target** | Arrays of unsigned integers of the element width (`uint32_t m[N]`, ...). | Loop: `res[i] = m[i] ? f(a[i], b[i]) : a[i]`. |
 
-!!! note "Distinction Between Emulation Modes"
-    - **Hardware Limitation (SSE, AVX, NEON)**: These instruction sets lack native instruction-level predication for general arithmetic. Emulating masked execution via vector blending (`blendv`, `vbslq`) is the only viable mechanism on these ISAs.
-    - **MIPP Implementation Limitation (AVX-512, SVE)**: While AVX-512 and SVE feature dedicated hardware opmask/predicate registers, MIPPv2 currently routes them through full-vector mask emulation. Native `k`-register and `svbool_t` bindings will be added in upcoming generator revisions.
+The level of each masked function on each target is listed in the masked [Hardware Support](../isas_support/index.md) pages (e.g. [AVX-512 masked](../isas_support/avx512_masked.md)).
+
+!!! note "Hardware and MIPP limitations"
+    - SSE, AVX and NEON have no predicated arithmetic: a blend (`blendv`, `vbsl`) after the unmasked operation is the expected implementation. SSE still lacks it in MIPP (scalar fallback).
+    - AVX-512 and SVE have predicated instructions, and MIPP already uses their native mask types. The remaining blend-based (AVX-512) and `svsel`-based (SVE) masked operations are a MIPP limitation, to be replaced by native predicated forms.
 
 ---
 
@@ -268,7 +271,7 @@ MIPP provides functions to construct and initialize mask registers from scalar v
             ```
 
 2. **C Truthiness Evaluation**:
-    - `set_k` evaluates the *truthiness* of each integer element rather than copying raw bit patterns. Any non-zero integer (`vals[i] != 0`) sets the corresponding mask element to **active** (a boolean mask lane on RVV, an all-ones `~0` element on full-vector mask backends). A zero integer (`vals[i] == 0`) sets the element to **inactive** (`0`).
+    - `set_k` evaluates the *truthiness* of each integer element rather than copying raw bit patterns. Any non-zero integer (`vals[i] != 0`) sets the corresponding mask element to **active** (one mask bit or predicate lane on RVV, AVX-512 and SVE, an all-ones `~0` element on the full-vector mask targets). A zero integer (`vals[i] == 0`) sets the element to **inactive** (`0`).
 3. **The `_k` Suffix**:
     - The `_k` naming convention reflects AVX-512 opmask / predicate register naming (`k1..k7`), distinguishing mask factory functions (`set_k`, `set1_k`, `set0_k`) from numeric vector factories (`set`, `set1`, `set0`).
 
@@ -276,7 +279,7 @@ MIPP provides functions to construct and initialize mask registers from scalar v
 
 ## 8. Masking & Multi-Register LMUL Interoperability
 
-Masking and the Length Multiplier ($\text{LMUL}$) are orthogonal and fully composable across all MIPP interfaces. Predicated operations execute on multi-register vectors ($\text{LMUL} \in \{2, 4, 8\}$) and, on targets that provide them (AVX, AVX-512, RVV, scalar), on half-vectors (`d2` suffix in C, $\text{LMUL} = -2$ in C++).
+Masking and the Length Multiplier ($\text{LMUL}$) are orthogonal and fully composable across all MIPP interfaces. Predicated operations execute on multi-register vectors ($\text{LMUL} \in \{2, 4, 8\}$) and on half-vectors (`d2` suffix in C, $\text{LMUL} = -2$ in C++), which every target provides (see [Vector Types & LMUL](vector_types_and_lmul.md#34-representation-per-target)).
 
 ### 8.1. Type Matching & Capacity
 A comparison evaluated on an $\text{LMUL}=k$ data vector produces an $\text{LMUL}=k$ mask containing the exact matching element capacity:
@@ -307,3 +310,16 @@ In C, $\text{LMUL}$ is part of the type and function names. In the C++ Functiona
 
 - **RISC-V Vector (RVV)**: Operates directly on hardware grouped registers (`vfloat32m2_t`) governed by the corresponding fractional boolean mask register (`vbool16_t` / `vbool8_t`).
 - **Fixed-Width Architectures (x86, ARM)**: Multi-register masks (`rvm_*_m2_t`) and data vectors (`rvd_*_m2_t`) use recursive binary struct composition (`{ m1, m2 }` and `{ r1, r2 }`). The masked operation is applied independently to each register of the group (using the emulation strategy described in [Section 3](#3-architectural-hardware-mappings)), with no abstraction overhead once inlined.
+
+---
+
+## 9. Mask Tests (`testz`, `none`)
+
+Two functions reduce masks to a scalar `int32_t` (`1` for true, `0` for false), typically to leave a loop early or to skip a branch when no lane is concerned:
+
+| Function | C API Function | C++ Functional API | C++ Object API | Semantics |
+| :--- | :--- | :--- | :--- | :--- |
+| **None active** | `mipp_none_[type]_[lmul](m)` | `mipp::none(m)` | `mipp::none(m)` | $1$ if no lane of `m` is active, $0$ otherwise. |
+| **Disjoint** | `mipp_testz_[type]_[lmul](m0, m1)` | `mipp::testz(m0, m1)` | `mipp::testz(m0, m1)` | $1$ if `m0 & m1` has no active lane, $0$ otherwise. |
+
+`none(m)` is `testz(m, m)`. On half-vectors (`d2`), both functions ignore the unused upper lanes (see [Vector Types & LMUL §4.1](vector_types_and_lmul.md#41-availability)). `none` was named `testz_2` before MIPP v2.2.0.

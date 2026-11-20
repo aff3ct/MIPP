@@ -794,7 +794,7 @@ def generate_mipp_api_data(project_root=None):
     scalar_gen_path = os.path.join(base_generator_dir, "simd_ext", "scalar", "scalar_gen.py")
     scalar_macros = extract_scalar_macros(scalar_gen_path)
 
-    # 4. Process each of the 85 functions
+    # 4. Process each function of the registry
     api_entries = []
 
     for func, func_def in interfaces.items():

@@ -35,6 +35,8 @@ PAGES = [
      ["simd_ext/<isa>/<isa>_native_templates.json", "simd_ext/<isa>/<isa>_emu_templates.json",
       "helpers_headers/generic_emu_templates.json", "helpers_headers/generic_emu_templates_mask.json",
       "helpers_headers/generic_emu_templates_lmulh.json"], "mipp-json"),
+    ("ldiv_mask", "helpers_headers/schemas/ldiv_mask_schema.json",
+     ["simd_ext/<isa>/<isa>_ldiv_mask.json", "helpers_headers/generic_ldiv_mask.json"], "mipp-json"),
     ("explorer_isa", "helpers_headers/schemas/explorer_isa_schema.json",
      ["simd_ext/<isa>/<isa>_explorer.json"], "json"),
     ("tests_specs", "helpers_tests/schemas/specs_schema.json",

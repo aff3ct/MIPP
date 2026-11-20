@@ -56,9 +56,9 @@ After `./gen_mipp_headers.py`, the NEON header contains:
 
 ```c
 #if defined(__aarch64__)
-static inline rvd_neon_float64_t mipp_neon_absdiff_float64(const rvd_neon_float64_t r0, const rvd_neon_float64_t r1) {
+static inline rvd_neon_float64_m1_t mipp_neon_absdiff_float64_m1(const rvd_neon_float64_m1_t r0, const rvd_neon_float64_m1_t r1) {
 	// Level 0 (Native Hardware)
-	rvd_neon_float64_t res;
+	rvd_neon_float64_m1_t res;
 	res.r = vabdq_f64(r0.r, r1.r);
 	return res;
 }
@@ -84,7 +84,7 @@ The code is rendered by Jinja2 with these variables:
 | `func_name` | The MIPP function name (`absdiff`), useful in templates shared by several functions. |
 | `lmul`, `mask_kind` | The LMUL and the mask variant being generated. |
 
-The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `r0.r` is the native register wrapped by the MIPP type `rvd_neon_float32_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(r0, r1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
+The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `r0.r` is the native register wrapped by the MIPP type `rvd_neon_float32_m1_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(r0, r1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
 
 An entry can also hold its template inline (`"template": { "format": ..., "code": ... }`) instead of a name.
 
@@ -119,11 +119,11 @@ and the entry in `helpers_headers/generic_emu_implems.json`:
 `%r<tp>%` is the register type and `%max<tp>%` the `max` function of the ISA being generated, for the current datatype and LMUL. On AVX the template becomes:
 
 ```c
-static inline rvd_avx_float32_t mipp_avx_absdiff_float32(const rvd_avx_float32_t r0, const rvd_avx_float32_t r1) {
+static inline rvd_avx_float32_m1_t mipp_avx_absdiff_float32_m1(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
 	// Level 2 (Generic Emulation)
-	rvd_avx_float32_t hi = mipp_avx_max_float32(r0, r1);
-	rvd_avx_float32_t lo = mipp_avx_min_float32(r0, r1);
-	return mipp_avx_sub_float32(hi, lo);
+	rvd_avx_float32_m1_t hi = mipp_avx_max_float32_m1(r0, r1);
+	rvd_avx_float32_m1_t lo = mipp_avx_min_float32_m1(r0, r1);
+	return mipp_avx_sub_float32_m1(hi, lo);
 }
 ```
 
@@ -146,7 +146,7 @@ The `lmulh` files combine the registers of an LMUL > 1 group for horizontal func
 
 ## Step 3: Masked Variants <span class="mipp-isa-badge lvl-2">L2</span> { #step-3-masked-variants-l2 }
 
-At this point `mipp_neon_absdiff_float32_maskz` is still <span class="mipp-isa-badge lvl-3">L3</span>. The masked variants have their own candidates, selected with the `variant` field (`m`, `z`, `s`). `generic_emu_templates_mask.json` provides templates for any function with two register arguments, which compute the unmasked function then apply the mask:
+At this point `mipp_neon_absdiff_float32_maskz_m1` is still <span class="mipp-isa-badge lvl-3">L3</span>. The masked variants have their own candidates, selected with the `variant` field (`m`, `z`, `s`). `generic_emu_templates_mask.json` provides templates for any function with two register arguments, which compute the unmasked function then apply the mask:
 
 ```mipp-json
 "binary_maskz_all_datatypes": {
@@ -185,7 +185,7 @@ Reuse them in `helpers_headers/generic_emu_implems_mask.json`, as `add`, `max` o
 ]
 ```
 
-The masked variants then follow the level of the unmasked one. An ISA with native masked instructions (AVX-512, SVE, RVV) adds entries with a `variant` field in its own `*_native_implems.json` instead.
+The masked variants then follow the level of the unmasked one. An ISA with native masked instructions adds entries with a `variant` field in its own `*_native_implems.json` instead, as AVX-512 and RVV do. SVE has predicated instructions, but no such entry yet: its masked variants use the generic templates.
 
 ---
 
@@ -193,7 +193,7 @@ The masked variants then follow the level of the unmasked one. An ISA with nativ
 
 After `./gen_mipp_headers.py`:
 
-- every generated function starts with a `// Level N` comment, in `include/mipp/internal/simd_ext/<isa>/c/functions/<category>/`;
+- every resolved function starts with a `// Level N` comment, in `include/mipp/internal/simd_ext/<isa>/c/functions/<category>/`; the LMUL 1 aliases without suffix and the software LMUL wrappers (`_m2`, `_m4`, `_m8`, which call the function of half the LMUL) have none ([Summary Table](../internals/code_generation.md#6-summary-table));
 - the summary table printed at the end of `gen_mipp_headers.py` gives the distribution of the levels per ISA;
 - after `./gen_mipp_docs.py`, the Function Support page of `absdiff` and the [API Explorer](../../explorer/index.md) show the level of each datatype, variant and ISA.
 

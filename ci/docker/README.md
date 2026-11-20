@@ -1,5 +1,7 @@
 # Docker Images Generation
 
+The images contain GCC 14 and Clang 20. GCC 14 stops with an internal compiler error on the SVE code: the `gcc-14` jobs of the `armv9-sve` and `armv9-sve2` targets install GCC 15 from the Ubuntu toolchain PPA at run time (`.build-common` in `.gitlab-ci.yml`), the arm64 image itself is unchanged. Adding GCC 15 to `linux/arm64/gcc-14_clang-20/Dockerfile` would remove this step from the jobs.
+
 Build images:
 ```bash
 cd linux/x86_64/gcc-14_clang-20

@@ -38,6 +38,18 @@ The [API Explorer](../../explorer/index.md) is a client-side application: `docs/
 | `datatypes`, `datatype_groups`, `mask_modes`, `levels`, `categories` | Values of the filters. |
 | `primitives` | One entry per function. |
 
+The main fields of a `primitives` entry:
+
+| Field | Content |
+| :--- | :--- |
+| `name`, `category`, `description`, `latex`, `datatypes`, `variants` | From the registries and `funcs_docs.json`. |
+| `traits` | Properties derived from the prototype and the interface, never from the category name: `memory` (an argument is a pointer), `returns_mask`, `reduction` (`horizontal`), `changes_datatype` (a datatype pair with two different types, outside memory accesses) and `needs_math` (the scalar reference calls `<math.h>`). The Explorer uses them to build the code samples and the Compiler Explorer programs, so that a new function or category needs no change in the JavaScript. |
+| `isa_support` | Level and intrinsics per ISA, datatype, mask variant and LMUL. |
+| `prototypes` | The C, C++ Functional and C++ Object prototypes, per LMUL and mask variant (`c99_samples`, `cpp_samples`, `obj_samples`). `defined_lmuls` lists the LMULs where the function exists: the functions that change the LMUL are not generated for every LMUL (no `low` from `d2`, no `combine` or `wcvt` from `m8`), and for the other LMULs the Explorer shows a notice instead of the prototype. |
+| `reference_algos`, `scalar_macros`, `test_specs`, `snippets`, `doc_url` | Scalar reference, test properties, code samples and link to the Function Support page. |
+
+The levels of the functions that change the LMUL between `m1` and `d2` (`low`, `high`, `combine`, `wcvt`, `ncvt`) do not come from the candidate resolution: they are given by the half-vector templates. For the ISAs with half-vectors by mask, the script gets them from `compute_changing_levels()` (`codegen/ldiv_mask.py`), which runs the half-vector generation without writing anything.
+
 To make `mkdocs serve` pick up a new data file without a restart, the script also copies it to `site/` and to the temporary directories of a running `mkdocs serve`.
 
 ---

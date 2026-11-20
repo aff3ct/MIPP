@@ -7,7 +7,7 @@ This tutorial creates a new target, `myisa`, a fictional 128-bit instruction set
 | [1. Create the directory](#step-1-create-the-directory) | | Yes |
 | [2. Describe the ISA](#step-2-describe-the-isa) | `myisa_isa.json` | Yes |
 | [3. Generate](#step-3-generate) | none | Yes |
-| [4. Implement the functions](#step-4-implement-the-functions) | `myisa_native_*.json`, `myisa_emu_*.json` | Yes / No |
+| [4. Implement the functions](#step-4-implement-the-functions) | `myisa_native_*.json`, `myisa_emu_*.json`, `myisa_ldiv_mask.json` | Yes / No |
 | [5. Describe the ISA for the API Explorer](#step-5-describe-the-isa-for-the-api-explorer) | `myisa_explorer.json` | No |
 | [6. Test and add to the CI](#step-6-test-and-add-to-the-ci) | `.gitlab-ci.yml`, `.github/workflows/ci.yml` | Yes |
 
@@ -23,11 +23,12 @@ Create `simd_ext/myisa/`. The directory name is the ISA name. It holds:
 | `myisa_native_templates.json` | Yes | <span class="mipp-isa-badge lvl-0">L0</span> templates (may be `{}` at first). |
 | `myisa_native_implems.json` | Yes | <span class="mipp-isa-badge lvl-0">L0</span> entries (may be `{}` at first). |
 | `myisa_emu_templates.json`, `myisa_emu_implems.json` | No | <span class="mipp-isa-badge lvl-1">L1</span> templates and entries. |
+| `myisa_ldiv_mask.json` | No | Half-vector (`d2`) specializations and the functions that change the LMUL ([step 4](#half-vectors-and-functions-that-change-the-lmul)). |
 | `myisa_explorer.json` | No | Metadata for the API Explorer ([step 5](#step-5-describe-the-isa-for-the-api-explorer)). |
 
 Without one of the three mandatory files, the generator stops with `FileNotFoundError: Missing mandatory configuration files`.
 
-The fastest start is to copy the directory of the closest ISA, rename the files and change the `name`, `define` and `info_names` fields of the descriptor. A copy of `sse/` renamed this way generates a working `myisa` target, identical to SSE.
+The fastest start is to copy the directory of the closest ISA, rename the files and change the `name`, `define`, `info_names` and `header_template` (include guard) fields of the descriptor, and the `name` of `myisa_explorer.json`. A copy of `sse/` renamed this way generates a working `myisa` target, identical to SSE.
 
 ---
 
@@ -45,7 +46,8 @@ The fastest start is to copy the directory of the closest ISA, rename the files 
             "reg": "__m128",
             "msk": "__m128",
             "to_ptr": "float32_t"
-        }
+        },
+        ...
     },
     "define": "defined(__MY_ISA__)",
     "header_template": [
@@ -64,21 +66,25 @@ The fastest start is to copy the directory of the closest ISA, rename the files 
     "name": "myisa",
     "prefix": "_mm_myisa",
     "size": 128,
-    "sw_lmul": [1, 2, 4, 8]
+    "sw_ldiv_type": "mask",
+    "sw_lmul": [1, 2, 4, 8, -2]
 }
 ```
+
+The `...` stands for the nine other datatypes: the descriptor must have an entry for each of the 10 datatypes (`float64`, `float32`, `int64`, `int32`, `int16`, `int8`, `uint64`, `uint32`, `uint16`, `uint8`), otherwise the generator stops with a `KeyError` when it renders the templates. See `sse/sse_isa.json` for a complete descriptor.
 
 | Field | Use |
 | :--- | :--- |
 | `name` | ISA name, equal to the directory name. |
 | `define` | Compiler condition that selects the ISA, written in `include/mipp/internal/interfaces/c/common.h`. |
-| `datatypes` | One entry per datatype the ISA supports natively: register type `reg`, mask type `msk`, intrinsic suffixes `data_ext*`, pointer type `to_ptr`. The other datatypes are still generated, at <span class="mipp-isa-badge lvl-2">L2</span> or <span class="mipp-isa-badge lvl-3">L3</span>. The templates read these fields as `isa_dt_par.*`. |
+| `datatypes` | One entry per datatype, for all 10 datatypes: register type `reg`, mask type `msk`, intrinsic suffixes `data_ext*`, pointer type `to_ptr`. A datatype without native instructions still needs an entry (its register type); its functions are then generated at <span class="mipp-isa-badge lvl-2">L2</span> or <span class="mipp-isa-badge lvl-3">L3</span>. The templates read these fields as `isa_dt_par.*`. |
 | `prefix` | Intrinsic prefix, read by the templates as `isa.prefix`. |
 | `size` | Register width in bits. |
-| `sw_lmul`, `hw_lmul` | LMUL values emulated in software (several registers) or supported by the hardware. `-2` enables half-vectors (`d2`). |
+| `sw_lmul`, `hw_lmul` | LMUL values emulated in software (several registers) or supported by the hardware. `-2` enables half-vectors (`d2`); all the current targets have them. |
 | `header_template` | First lines of the generated ISA header: include guard and intrinsics header. |
 | `mipp_definitions` | Macros defined for the users when the ISA is selected (`MIPP_64BIT`, `MIPP_BW`, ...). |
 | `info_names` | Optional. Name printed by `mipp_info()`: the first entry whose `if` condition holds; the entry without `if` is the default and must be last. Without this field, the upper-case `name` is printed. |
+| `sw_ldiv_type` | How the half-vectors of `sw_lmul` are built: `"mask"` (the LMUL = 1 register, upper lanes ignored: SSE, NEON, SVE) or `"sub_isa"` (a register of the parent ISA: AVX, AVX-512). |
 | `sub_isa` | Optional. Parent ISA: the derived ISA is tested before its parent, and `--simd-ext` pulls in the parent. With `"sw_ldiv_type": "sub_isa"`, the half-vectors use the parent's registers (AVX `d2` uses SSE registers). With `"sw_ldiv_type": "mask"` and `-2` in `sw_lmul`, no parent is needed: the half-vectors reuse the LMUL = 1 register and ignore the upper lanes (optional per-ISA optimizations in `<isa>_ldiv_mask.json`). |
 
 The other fields (hardware masks, scalable layouts, ...) are described in [ISA Descriptor](../reference/registries/isa.md). The descriptor is validated against `helpers_headers/schemas/isa_schema.json`; the cross-field rules (existing `sub_isa`, `-2` and `sw_ldiv_type`, default `info_names` entry) stop the generator on the first violation.
@@ -105,7 +111,7 @@ The other fields (hardware masks, scalable layouts, ...) are described in [ISA D
 
 The `mipp::ISA` enum lists every directory of `simd_ext/`, whatever the `--simd-ext` value.
 
-With empty implementation files, every function already exists on `myisa` and the generated headers compile: about three quarters of the functions are at <span class="mipp-isa-badge lvl-3">L3</span>, the others at <span class="mipp-isa-badge lvl-2">L2</span>. The summary table printed at the end shows the distribution of the levels for the new ISA.
+With empty implementation files, every function already exists on `myisa` and the generated headers compile: about three quarters of the functions are at <span class="mipp-isa-badge lvl-3">L3</span>, most of the others at <span class="mipp-isa-badge lvl-2">L2</span>. The summary table printed at the end shows the distribution of the levels for the new ISA.
 
 ---
 
@@ -117,7 +123,7 @@ Watch the audits at each generation: they report entries placed at the wrong lev
 
 ### Half-vectors and functions that change the LMUL
 
-`low`, `high`, `combine`, `wcvt` and `ncvt` return a register of another LMUL than their arguments (`ret.lmul` in `registry_protos.json`). What an ISA must provide depends on its descriptor:
+`low`, `high`, `combine`, `wcvt` and `ncvt` return a register of another LMUL than their arguments (`ret.lmul` in `registry_protos.json`). Their templates, and the half-vector specializations, go to `<isa>_ldiv_mask.json` ([Half-Vector Templates](../reference/registries/ldiv_mask.md)). What an ISA must provide depends on its descriptor:
 
 - **LMUL ≥ 2** (`sw_lmul` without a hardware group): nothing to write. `low` and `high` return one half of the register group, `combine` joins two registers, and `wcvt` / `ncvt` apply the conversion to each half.
 - **Between `m1` and `d2`** with `"sw_ldiv_type": "mask"`: add `low` and `high` (`m1` to `d2`) and `combine` (`d2` to `m1`) to `<isa>_ldiv_mask.json`, with the intrinsics of the ISA and, if needed, an `if` condition (`defined(__SSE4_1__)`). Without an entry, or when the condition does not hold, the generic version of `generic_ldiv_mask.json` is used (level L3, through a buffer). `wcvt` (`d2` to `m1`) and `ncvt` (`m1` to `d2`) are templates of the generic file that an ISA can override the same way.
@@ -167,4 +173,4 @@ Then add the target to the CI:
     - the build jobs run in the image `registry.gitlab.com/aff3ct/aff3ct/mipp_linux:<compiler>_<arch>` on a runner tagged with the architecture name: both must exist;
 - `.github/workflows/ci.yml`: add `myisa` to the `--simd-ext` list of the generation step, so that the released headers include the new target.
 
-The existing targets and their flags are listed in [CI Targets and Flags](../setup.md#51-ci-targets-and-flags); the jobs are described in [Continuous Integration](../process/ci.md).
+The existing targets and their flags are listed in [Targets and Flags](../process/ci.md#11-targets-and-flags); the jobs are described in [Continuous Integration](../process/ci.md).

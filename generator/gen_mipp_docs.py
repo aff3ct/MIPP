@@ -1004,13 +1004,14 @@ Explore hardware acceleration matrices by instruction set architecture:
 
 def write_funcs_support_index(base_dir, categories):
     file_path = os.path.join(base_dir, "index.md")
+    n_funcs = sum(len(funcs) for funcs in categories.values())
     with open(file_path, "w", encoding="utf-8") as f:
-        print("""# Function Reference & Implementation Directory
+        print(f"""# Function Reference & Implementation Directory
 
 This section contains complete API reference documentation, mathematical semantics, test specifications, and architecture acceleration matrices for all MIPP functions.
 
 !!! tip "MIPP API Explorer"
-    Search across all 85 primitives, perform reverse lookup on vendor hardware intrinsics (AVX, NEON, RVV, SVE), filter by guaranteed acceleration levels, and switch between the C, C++ Functional and C++ Object APIs in the [**MIPP API Explorer**](../explorer/index.md).
+    Search across all {n_funcs} primitives, perform reverse lookup on vendor hardware intrinsics (AVX, NEON, RVV, SVE), filter by guaranteed acceleration levels, and switch between the C, C++ Functional and C++ Object APIs in the [**MIPP API Explorer**](../explorer/index.md).
 
 <a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend

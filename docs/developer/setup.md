@@ -10,7 +10,7 @@ This page sets up a development environment: generate the headers, build and run
 | :--- | :--- | :--- |
 | Python | 3 (the CI uses 3.12 on GitLab and 3.14 on GitHub) | the generators |
 | Jinja2, jsonschema, colorama | see `generator/requirements.txt` | the generators |
-| A C++20 compiler | GCC 14 and Clang 20 in the CI | the unit tests (the headers themselves only need C99 or C++11) |
+| A C++20 compiler | GCC 14 (GCC 15 for SVE) and Clang 20 in the CI | the unit tests (the headers themselves only need C99 or C++11) |
 | CMake | 3.5 or later (3.16 or later for precompiled headers) | the unit tests |
 | Catch2 | v3 | the unit tests |
 
@@ -90,7 +90,7 @@ cmake --build build -j4
 ./build/bin/run-tests
 ```
 
-- **Target ISA.** As for any MIPP program, the ISA is selected by the compiler flags in `CMAKE_CXX_FLAGS` (`-march=native` tests the ISA of your machine). The CI flags of each target are listed in [Testing Other Targets](#5-testing-other-targets).
+- **Target ISA.** As for any MIPP program, the ISA is selected by the compiler flags in `CMAKE_CXX_FLAGS` (`-march=native` tests the ISA of your machine). The CI flags of each target are listed in [CI Targets and Flags](#51-ci-targets-and-flags).
 - **Build time.** `-DCMAKE_UNITY_BUILD=ON` groups the translation units, which makes the build up to 7× faster (55 s instead of 401 s in one measurement). Precompiled headers are enabled by default (`-DMIPP_PRECOMPILED_HEADERS=OFF` disables them).
 - **Selecting tests.** Each test case is tagged with its function name. `./build/bin/run-tests "[add]"` runs the tests of `add` in all APIs, and `./build/bin/run-tests --list-tests` lists them.
 - **Iterations.** Each test runs 10 random iterations by default. The `N_ITER` environment variable changes it at run time (`N_ITER=100 ./build/bin/run-tests`), and `./gen_mipp_tests.py -N <n>` changes the default.
@@ -104,9 +104,6 @@ The complete test suite takes several minutes to build. While working on one fun
 ```
 
 This generates the C++ Object tests for LMUL 1 only, without half-vectors, and for the unmasked and Merge-Masked variants only.
-
-!!! warning "C tests and half-vectors"
-    The C API does not expose the masked half-vector functions (`mipp_add_float32_mask_d2`), but the test generator writes tests for them. The C tests therefore do not compile on the targets with half-vectors (AVX, AVX-512, RVV). Generate the C tests with `--no-ldiv` on these targets. The CI only builds the C++ Object tests.
 
 ### 4.2. Examples
 
@@ -126,18 +123,7 @@ gcc -std=c11   -O3 -march=native -DMIPP_PRINT_INFO -I../include -o mipp_c   mipp
 
 ### 5.1. CI Targets and Flags
 
-The GitLab CI builds and runs the tests with GCC 14 and Clang 20 on 14 targets. The flags it passes in `CMAKE_CXX_FLAGS` are:
-
-| Target | Flags |
-| :--- | :--- |
-| `sse2`, `sse3`, `ssse3`, `sse4.1`, `sse4.2` | `-msse2`, `-msse3`, `-mssse3`, `-msse4.1`, `-msse4.2` |
-| `avx`, `avx2`, `avx2-fma` | `-mavx`, `-mavx2`, `-mavx2 -mfma` |
-| `avx512f`, `avx512bw`, `avx512dq` | `-mavx512f`, then `-mavx512bw`, then `-mavx512dq`, cumulatively |
-| `armv8-neon` | `-march=armv8.1-a+simd` |
-| `riscv64-rvv1.0` | `-march=rv64gv1_zve32f_zvl256b -mrvv-vector-bits=zvl` |
-| `x86-scalar` | `-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024` |
-
-On RVV, the CI also disables the unity build and the precompiled headers (`-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF`), and skips the C examples.
+The GitLab CI builds and runs the tests with GCC 14 and Clang 20 on 16 targets (SSE, AVX, AVX-512, NEON, SVE, SVE2, RVV and scalar). The compiler flags of each target, and the build options specific to RVV and SVE, are listed in [Continuous Integration](process/ci.md#11-targets-and-flags): use the same flags in `CMAKE_CXX_FLAGS` to reproduce a job.
 
 ### 5.2. CI Docker Images
 

@@ -30,7 +30,7 @@
 ## Key Highlights
 
 - **Three APIs**: Write code with the C API (C99, `<mipp.h>`), the generic C++ Functional API (C++11, `<mipp.hpp>`), or the expressive C++ Object API with overloaded operators (C++11, `<mipp_obj.hpp>`).
-- **Fallback Guarantee**: Every operation compiles on every supported target, for all 10 data types, through a deterministic 4-level fallback engine (L0 Native Hardware &rarr; L1 Dedicated Emulation &rarr; L2 Generic Emulation &rarr; L3 Scalar Fallback).
+- **Fallback Guarantee**: Every operation compiles on every supported target, for all 10 data types, through a deterministic 4-level fallback engine (L0 Native Hardware &rarr; L1 Dedicated Emulation &rarr; L2 Generic Emulation &rarr; L3 Scalar Fallback). A few functions are not implemented yet on ARMv7 NEON and on RVV without 64-bit elements (see [Known Limitations](https://aff3ct.github.io/MIPP/user/implementation_levels/#known-limitations)).
 - **Scalable & Next-Gen ISAs**: Native support for AVX-512, ARM SVE, and RISC-V Vector 1.0 with hardware register grouping (LMUL).
 - **Zero Overhead & Header-Only**: Pure inlined assembly with zero runtime abstraction penalty. No build system dependencies, precompiled binaries, or external libraries required.
 
@@ -106,9 +106,9 @@ Then add the resulting `include/` directory to your compiler's include path:
 
 ```bash
 # Compilation examples:
-g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include app.cpp -o app          # x86 AVX2
-g++ -std=c++11 -O3 -mavx512f -mavx512bw -I/path/to/mipp/include app.cpp -o app  # x86 AVX-512
-g++ -std=c++11 -O3 -march=armv8-a+simd -I/path/to/mipp/include app.cpp -o app   # ARM NEON
+g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include app.cpp -o app                     # x86 AVX2
+g++ -std=c++11 -O3 -mavx512f -mavx512bw -mavx512dq -I/path/to/mipp/include app.cpp -o app  # x86 AVX-512
+g++ -std=c++11 -O3 -march=armv8-a+simd -I/path/to/mipp/include app.cpp -o app              # ARM NEON
 ```
 
 Each API has a single umbrella header (`<mipp.h>`, `<mipp.hpp>`, `<mipp_obj.hpp>`). Large codebases can instead include only the functions, masking variants and LMULs they use (e.g. `<mipp/obj/fun/m/m2/add.hpp>`), which makes compilation 2× to 4× faster: see [Headers & Compile Time](https://aff3ct.github.io/MIPP/user/headers_and_compile_time/).
@@ -120,11 +120,11 @@ Each API has a single umbrella header (`<mipp.h>`, `<mipp.hpp>`, `<mipp_obj.hpp>
 Comprehensive documentation, interactive tools, and developer guides are available online:
 
 - **[Getting Started](https://aff3ct.github.io/MIPP/user/getting_started/)**: Installation, compilation flags, and complete loop vectorization patterns.
-- **[Interactive API Explorer](https://aff3ct.github.io/MIPP/explorer/)**: Search across all 85+ vector primitives with reverse vendor intrinsic lookup (AVX, NEON, SVE, RVV).
+- **[Interactive API Explorer](https://aff3ct.github.io/MIPP/explorer/)**: Search across all 92 vector primitives with reverse vendor intrinsic lookup (AVX, NEON, SVE, RVV).
 - **[Programming Model](https://aff3ct.github.io/MIPP/user/programming_model/)**: Detailed reference for the C, C++ Functional, and C++ Object APIs.
 - **[Headers & Compile Time](https://aff3ct.github.io/MIPP/user/headers_and_compile_time/)**: Header tree, inclusion granularities, and measured compile times.
 - **[Comparison with Existing SIMD Solutions](https://aff3ct.github.io/MIPP/why_mippv2/#simd-wrappers-comparison)**: In-depth architectural comparison with Google Highway, xsimd, and Eve.
-- **[Vector Types & LMUL](https://aff3ct.github.io/MIPP/user/vector_types_and_lmul/)**: Supported datatypes and register multiplier semantics.
+- **[Vector Types & LMUL](https://aff3ct.github.io/MIPP/user/vector_types_and_lmul/)**: Supported datatypes, register multipliers, half-vectors and type conversions.
 - **[Masking Semantics](https://aff3ct.github.io/MIPP/user/masking_semantics/)**: Predication execution models (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Specifications & Hardware Matrices](https://aff3ct.github.io/MIPP/funcs_support/)**: Complete mathematical specifications and target architecture matrices.
 - **[Developer Guide](https://aff3ct.github.io/MIPP/developer/)**: Generation pipeline, setup, and tutorials to add a function, an implementation or an ISA.

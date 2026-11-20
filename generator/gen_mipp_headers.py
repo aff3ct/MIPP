@@ -649,7 +649,8 @@ def print_summary_table(include_dir, sorted_names=None):
         m = re.search(r'_(m|d)(\d+)', func_name)
         if m and int(m.group(2)) != 1:
             return "LM/D"
-        if func_name.endswith(("_mask", "_maskz", "_masks")):
+        # The variant comes before the LMUL suffix: mipp_<isa>_add_float32_mask_m1
+        if re.search(r'_(mask|maskz|masks)(_|$)', func_name):
             return "Msk"
         return "Std"
 

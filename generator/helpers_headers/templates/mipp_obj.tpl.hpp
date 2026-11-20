@@ -9,12 +9,12 @@
 #include "mipp/internal/interfaces/cpp/functions/load/set_k.hpp"
 #include "mipp/internal/interfaces/cpp/functions/store/get.hpp"
 #include "mipp/internal/interfaces/cpp/functions/store/get_k.hpp"
-#include "mipp/internal/interfaces/cpp/functions/lmul/low.hpp"
-#include "mipp/internal/interfaces/cpp/functions/lmul/low_k.hpp"
-#include "mipp/internal/interfaces/cpp/functions/lmul/high.hpp"
-#include "mipp/internal/interfaces/cpp/functions/lmul/high_k.hpp"
-#include "mipp/internal/interfaces/cpp/functions/lmul/combine.hpp"
-#include "mipp/internal/interfaces/cpp/functions/lmul/combine_k.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/low.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/low_k.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/high.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/high_k.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/combine.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/combine_k.hpp"
 
 namespace mipp
 {

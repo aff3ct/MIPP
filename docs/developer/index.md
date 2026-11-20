@@ -34,7 +34,7 @@ These rules hold for the whole code base. The tutorials rely on them.
 
 - **Generated files are never edited.** `include/`, `tests/src/{c,cpp,obj}/`, `docs/funcs_support/`, `docs/isas_support/`, `docs/assets/data/`, `docs/developer/reference/cli.md` and `docs/developer/reference/registries/` are ignored by Git and overwritten at each generation. Fix the JSON input or the generator instead.
 - **The scalar reference is the specification.** Every declared function has a scalar implementation for exactly its declared datatypes, otherwise the generator stops. This implementation is both the <span class="mipp-isa-badge lvl-3">L3</span> fallback and the reference of every generated test.
-- **Every combination exists on every generated ISA.** If no <span class="mipp-isa-badge lvl-0">L0</span>, <span class="mipp-isa-badge lvl-1">L1</span> or <span class="mipp-isa-badge lvl-2">L2</span> candidate applies, the resolver emits the <span class="mipp-isa-badge lvl-3">L3</span> fallback, which converts the registers to scalar arrays and calls the scalar reference. The only exception today is a set of half-vector (`d2`) functions on RVV, which compile but stop at run time when called (see [Known Limitations](../user/implementation_levels.md#5-known-limitations)).
+- **Every combination exists on every generated ISA.** If no <span class="mipp-isa-badge lvl-0">L0</span>, <span class="mipp-isa-badge lvl-1">L1</span> or <span class="mipp-isa-badge lvl-2">L2</span> candidate applies, the resolver emits the <span class="mipp-isa-badge lvl-3">L3</span> fallback, which converts the registers to scalar arrays and calls the scalar reference. The exceptions are a few functions on 64-bit elements in some configurations (`float64` on ARMv7 NEON, 64-bit elements on RVV with `ELEN` < 64): they compile, but stop at run time when called, with a `MIPP_PANIC_STUB` message. [Known Limitations](../user/implementation_levels.md#5-known-limitations) lists them.
 - **Conditions split, they do not replace.** An entry with an `if` condition is emitted under `#if <condition>`. For the rest of the condition space, the resolver keeps looking for another candidate. For instance, an AArch64-only native entry gives <span class="mipp-isa-badge lvl-0">L0</span> under `#if defined(__aarch64__)` and the <span class="mipp-isa-badge lvl-3">L3</span> fallback under `#if !defined(__aarch64__)`.
 - **Levels propagate.** The effective level of an <span class="mipp-isa-badge lvl-1">L1</span> or <span class="mipp-isa-badge lvl-2">L2</span> implementation is the highest level among its dependencies. An <span class="mipp-isa-badge lvl-2">L2</span> sequence that calls an <span class="mipp-isa-badge lvl-3">L3</span> function is reported as <span class="mipp-isa-badge lvl-3">L3</span>. The summary table of `gen_mipp_headers.py` and the API Explorer report effective levels.
 - **ISAs are discovered.** Each directory of `generator/simd_ext/` is an ISA. Adding a target does not require any change in the Python code.
@@ -84,6 +84,7 @@ generator/
 │   ├── registry_scalar_isa.json     # Descriptor of the scalar target
 │   ├── generic_emu_templates*.json  # Generic emulation templates (Level 2)
 │   ├── generic_emu_implems*.json    # Generic emulation entries (Level 2)
+│   ├── generic_ldiv_mask.json       # Generic half-vector and LMUL-changing templates (low, high, combine, wcvt, ncvt)
 │   ├── funcs_docs.json              # Function descriptions and formulas
 │   ├── jinja_keywords.json          # Jinja2 keywords (not parsed as DSL placeholders)
 │   ├── schemas/                     # JSON Schemas of all the registries and ISA files
@@ -105,12 +106,13 @@ generator/
 │   ├── tests_builder.py             # Test engine and test audits
 │   ├── dialect_adapters.py          # C, C++ Functional and C++ Object syntax adapters
 │   ├── domain_resolver.py           # Input domains and mask patterns
+│   ├── indexed_tests.py             # Tests of the indexed accesses (gather, scatter)
 │   ├── tests_specs.json             # Per-function test properties
 │   ├── tests_templates.json         # Test code templates
 │   └── schemas/                     # JSON Schemas of the two files above
 │
 └── simd_ext/                        # One directory per target
-    ├── scalar/                      # scalar_gen.py: emits the scalar target from the registries
+    ├── scalar/                      # scalar_gen.py (emits the scalar target from the registries), scalar_explorer.json
     ├── sse/                         # SSE to SSE4.2
     ├── avx/                         # AVX, AVX2, FMA
     ├── avx512/                      # AVX-512F, BW, DQ, ...
@@ -119,4 +121,4 @@ generator/
     └── rvv/                         # RISC-V Vector 1.0
 ```
 
-Each ISA directory holds `<isa>_isa.json`, `<isa>_native_templates.json` and `<isa>_native_implems.json`, plus the optional `<isa>_emu_*.json` (<span class="mipp-isa-badge lvl-1">L1</span>) and `<isa>_explorer.json` (API Explorer metadata). See [Add an ISA](tutorials/add_isa.md).
+Each ISA directory holds `<isa>_isa.json`, `<isa>_native_templates.json` and `<isa>_native_implems.json`, plus the optional `<isa>_emu_*.json` (<span class="mipp-isa-badge lvl-1">L1</span>), `<isa>_ldiv_mask.json` (half-vectors and functions that change the LMUL) and `<isa>_explorer.json` (API Explorer metadata). See [Add an ISA](tutorials/add_isa.md).

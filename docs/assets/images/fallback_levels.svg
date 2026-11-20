@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 452" width="680" height="452" role="img" aria-labelledby="fl-title fl-desc">
   <title id="fl-title">MIPP 4-level fallback hierarchy</title>
-  <desc id="fl-desc">For each function, datatype and target, MIPP uses the first available level. Level 0, native hardware: one intrinsic of the target, for example add_float32 on AVX maps to _mm256_add_ps. Otherwise level 1, dedicated emulation: a short sequence of intrinsics written for this ISA, for example hadd_float32 on AVX. Otherwise level 2, generic emulation: a composition of MIPP primitives, still vectorized, for example fmadd on SSE without FMA computes add(mul(a, b), c). Otherwise level 3, scalar fallback: a loop over the elements, always available, for example wcvt_int32_int64 on RVV.</desc>
+  <desc id="fl-desc">For each function, datatype and target, MIPP uses the first available level. Level 0, native hardware: one intrinsic of the target, for example add_float32 on AVX maps to _mm256_add_ps. Otherwise level 1, dedicated emulation: a short sequence of intrinsics written for this ISA, for example hadd_float32 on AVX. Otherwise level 2, generic emulation: a composition of MIPP primitives, still vectorized, for example fmadd on SSE without FMA computes add(mul(a, b), c). Otherwise level 3, scalar fallback: a loop over the elements, always available, for example mul_int64 on NEON, which has no 64-bit integer multiplication.</desc>
   <defs>
     <style>
       .ttl  { font: 700 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
@@ -80,9 +80,9 @@
   <text class="dsc" x="84" y="422">Loop over the elements,</text>
   <text class="dsc" x="84" y="438">always available.</text>
   <rect class="exbox" x="368" y="380" width="242" height="56" rx="8"/>
-  <text class="exh" x="380" y="397">EXAMPLE · RVV</text>
-  <text class="ex"  x="380" y="414">wcvt_int32_int64</text>
-  <text class="ex"  x="380" y="429">→ for each lane: (int64_t) x</text>
+  <text class="exh" x="380" y="397">EXAMPLE · NEON</text>
+  <text class="ex"  x="380" y="414">mul_int64</text>
+  <text class="ex"  x="380" y="429">→ for each lane: a * b</text>
 
   <!-- ===== Preference axis ===== -->
   <rect x="640" y="8" width="8" height="440" rx="4" fill="url(#fl-grad)"/>
