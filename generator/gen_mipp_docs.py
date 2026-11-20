@@ -1246,6 +1246,12 @@ def main(argv=None):
         print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json)...")
         from gen_mipp_api_data import export_api_data
         export_api_data(project_root)
+        # Source code of the "Algorithm" modal: symbol tables of the generated headers (include/)
+        print("[MIPP DocGen] Exporting the header symbol tables of the Algorithm modal (docs/assets/data/algo/)...")
+        from helpers_docs.algo_sources import export_algo_sources
+        simd_ext_dir = os.path.join(base_generator_dir, "simd_ext")
+        algo_isas = sorted(d for d in os.listdir(simd_ext_dir) if os.path.isdir(os.path.join(simd_ext_dir, d)))
+        export_algo_sources(project_root, algo_isas)
 
     if "dev_reference" in parts:
         print("[MIPP DocGen] Writing the Developer Guide reference (docs/developer/reference/cli.md, registries/)...")

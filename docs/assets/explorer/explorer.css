@@ -2031,6 +2031,97 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   }
 }
 
+/* Vendor intrinsics of the Algorithm modal (click for details, see intrinsic_tooltip.js) */
+.mipp-intrinsic-ref {
+  cursor: pointer;
+  border-bottom: 1px dotted currentColor;
+  border-radius: 2px;
+  transition: background 0.15s ease;
+}
+
+.mipp-intrinsic-ref:hover,
+.mipp-intrinsic-ref:focus-visible,
+.mipp-intrinsic-ref.active {
+  background: var(--mipp-accent-glow);
+  border-bottom-style: solid;
+  outline: none;
+}
+
+.mipp-intrinsic-tooltip {
+  max-width: 560px;
+}
+
+.mipp-intrinsic-tooltip .mipp-macro-tooltip-title code {
+  font-size: 0.8rem;
+  background: none;
+  padding: 0;
+}
+
+.mipp-intrinsic-isa {
+  font-weight: 500;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.74rem;
+}
+
+.mipp-intrinsic-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.mipp-intrinsic-label {
+  font-size: 0.74rem;
+  color: var(--md-default-fg-color--light);
+}
+
+.mipp-intrinsic-uses {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.15rem 0.6rem;
+  align-items: baseline;
+  max-height: 14rem;
+  overflow-y: auto;
+}
+
+.mipp-intrinsic-use {
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--md-code-font, monospace);
+  font-size: 0.76rem;
+  color: var(--mipp-accent-hover);
+}
+
+.mipp-intrinsic-use:hover,
+.mipp-intrinsic-use:focus-visible {
+  text-decoration: underline;
+}
+
+.mipp-intrinsic-dts {
+  font-family: var(--md-code-font, monospace);
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--lighter);
+}
+
+.mipp-intrinsic-doc {
+  align-self: flex-start;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--mipp-accent-hover);
+  text-decoration: none;
+}
+
+.mipp-intrinsic-doc:hover {
+  text-decoration: underline;
+}
+
+[data-md-color-scheme="slate"] .mipp-intrinsic-use,
+[data-md-color-scheme="slate"] .mipp-intrinsic-doc {
+  color: #38bdf8;
+}
+
 /* Clickable Mask Badge */
 /* Test & Scalar Variant Switcher Buttons (Matching Left Sidebar Mask Badges) */
 /* Static Read-only Variant Badges */
@@ -2661,6 +2752,19 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 [data-md-color-scheme="slate"] .mipp-godbolt-btn {
   color: #94a3b8 !important;
   border-color: rgba(255, 255, 255, 0.16);
+}
+
+/* Discreet link to the runnable version of the Flat C Code (main + scalar reference) */
+.mipp-godbolt-run-link {
+  font-size: 0.72rem;
+  color: var(--md-default-fg-color--lighter, #94a3b8);
+  text-decoration: none;
+  padding: 0.25rem 0.2rem;
+}
+
+.mipp-godbolt-run-link:hover {
+  color: var(--mipp-accent, #0ea5e9);
+  text-decoration: underline;
 }
 
 [data-md-color-scheme="slate"] .mipp-godbolt-btn:hover {
@@ -3311,4 +3415,98 @@ button.mipp-variant-sq-badge:hover:not(.active) {
   body:has(#mipp-explorer-app) .md-top {
     top: calc(var(--mipp-header-sticky-top, 0.65rem) + var(--mipp-header-height, 140px) + var(--mipp-header-gap, 0.85rem)) !important;
   }
+}
+/* --------------------------------------------------------------------------
+   Algorithm modal: call tree, source link, compare view
+   -------------------------------------------------------------------------- */
+.mipp-algo-tree {
+  border: 1px solid var(--mipp-card-border, #e2e8f0);
+  border-radius: var(--mipp-border-radius, 8px);
+  padding: 0.6rem 0.8rem;
+  font-size: 0.78rem;
+}
+
+.mipp-algo-tree-title {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.mipp-algo-tree ul {
+  list-style: none;
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.mipp-algo-tree > ul {
+  padding-left: 0;
+}
+
+.mipp-algo-tree li {
+  margin: 0.2rem 0;
+  position: relative;
+}
+
+.mipp-algo-tree ul ul li::before {
+  content: "";
+  position: absolute;
+  left: -0.75rem;
+  top: 0.62rem;
+  width: 0.5rem;
+  border-top: 1px solid var(--mipp-card-border, #cbd5e1);
+}
+
+.mipp-algo-tree ul ul {
+  border-left: 1px solid var(--mipp-card-border, #cbd5e1);
+  margin-left: 0.25rem;
+}
+
+.mipp-algo-tree-name,
+.mipp-algo-tree-link {
+  font-family: var(--md-code-font, monospace);
+  font-size: 0.76rem;
+}
+
+.mipp-algo-tree-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--md-typeset-a-color, #0284c7);
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+
+.mipp-algo-tree-link:hover {
+  text-decoration: underline;
+}
+
+.mipp-algo-tree-isa {
+  margin-left: 0.35rem;
+  font-size: 0.68rem;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  border: 1px solid var(--mipp-card-border, #cbd5e1);
+  color: var(--md-default-fg-color--light, #475569);
+}
+
+.mipp-algo-tree-own {
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--md-default-fg-color--lighter, #94a3b8);
+}
+
+.mipp-algo-source {
+  font-size: 0.74rem;
+  color: var(--md-default-fg-color--light, #475569);
+}
+
+/* Compare ISAs: one code box per ISA, side by side */
+.mipp-algo-compare {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.mipp-algo-compare .mipp-code-box pre code {
+  white-space: pre;
 }

@@ -2,6 +2,7 @@
  * MIPP API Explorer - Syntax Highlighter & Typography
  */
 import { escapeHtml, ICON_COPY } from "./explorer.config.js";
+import { isIntrinsicName } from "./components/intrinsic_tooltip.js";
 
 export function formatCppObjProto(str, lmulKey = "1") {
   if (!str) return "";
@@ -71,7 +72,11 @@ export function formatMathHtml(expr) {
   return clean;
 }
 
-export function highlightCpp(code, customMacros = {}) {
+/**
+ * Highlights C/C++ code. `options.isa`: vendor intrinsics of this ISA become clickable
+ * (`.mipp-intrinsic-ref`, see components/intrinsic_tooltip.js).
+ */
+export function highlightCpp(code, customMacros = {}, options = {}) {
   if (!code) return "";
   const cleanCode = code.trim();
 
@@ -126,6 +131,8 @@ export function highlightCpp(code, customMacros = {}) {
       const macroInfo = customMacros[token];
       const macroDef = typeof macroInfo === "object" ? (macroInfo.definition || macroInfo.body || "") : String(macroInfo);
       html += `<span class="mipp-hl-macro mipp-macro-ref" data-macro-name="${escapeHtml(token)}" data-macro-def="${escapeHtml(macroDef)}" tabindex="0" role="button" title="Click to view macro definition">${escapeHtml(token)}</span>`;
+    } else if (match[7] && options.isa && isIntrinsicName(token, options.isa) && /^\s*\(/.test(cleanCode.slice(tokenRegex.lastIndex))) {
+      html += `<span class="mipp-hl-fn mipp-intrinsic-ref" data-intrinsic="${escapeHtml(token)}" data-isa="${escapeHtml(options.isa)}" tabindex="0" role="button" title="${escapeHtml(token)}: click for details">${escapeHtml(token)}</span>`;
     } else if (cls) {
       html += `<span class="${cls}">${escapeHtml(token)}</span>`;
     } else {

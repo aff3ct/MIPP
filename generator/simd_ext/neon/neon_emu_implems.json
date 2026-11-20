@@ -9,6 +9,72 @@
             "if": "!defined(__aarch64__)"
         }
     ],
+    "fmsub": [
+        {
+            "instr_name": "fmsq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "fmsq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__ARM_FEATURE_FMA) || defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlsq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "!defined(__ARM_FEATURE_FMA) && !defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlsq",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_3args_acc_neg"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fmaq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "fmaq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "defined(__ARM_FEATURE_FMA) || defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlaq",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_3args_acc_neg",
+            "if": "!defined(__ARM_FEATURE_FMA) && !defined(__aarch64__)"
+        },
+        {
+            "instr_name": "mlaq",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "arith_3args_acc_neg"
+        }
+    ],
     "hadd": [
         {
             "instr_name": "add",
@@ -86,6 +152,52 @@
                 "uint8"
             ],
             "template": "hreduc_emu"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "shift_var",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "shift_var"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "shrq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "shift_var",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "shrq",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "shift_var"
         }
     ]
 }

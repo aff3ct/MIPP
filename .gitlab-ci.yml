@@ -96,6 +96,7 @@ generation-docs:
     - python3 -m venv .venv
     - source .venv/bin/activate
     - pip3 install -r requirements.txt
+    - ./gen_mipp_headers.py --granularity fine # read by the Algorithm modal of the API Explorer
     - ./gen_mipp_docs.py
 
 # ANALYSIS ------------------------------------------------------------------------------------------------------------

@@ -10,7 +10,7 @@ Part of this site is generated from the same JSON files as the headers. This pag
 | :--- | :--- | :--- |
 | `isas_support` | `isas_support/`: Hardware Support pages | `MippInfo`, `write_mipp_infos*()` in `gen_mipp_docs.py` |
 | `funcs_support` | `funcs_support/`: Function Support pages | `SpecFuncInfos` in `gen_mipp_docs.py` |
-| `explorer` | `assets/data/mipp_api_index.json`: data of the API Explorer | `gen_mipp_api_data.py` |
+| `explorer` | `assets/data/mipp_api_index.json`: data of the API Explorer; `assets/data/algo/`: symbol tables of the generated headers, for the Algorithm modal ([§3.1](#31-algorithm-modal)) | `gen_mipp_api_data.py`, `helpers_docs/algo_sources.py` |
 | `dev_reference` | `developer/reference/cli.md` and `developer/reference/registries/` | `helpers_docs/` |
 | `includes` | `includes/generated/`: tables included in hand-written pages | `helpers_docs/includes.py` |
 
@@ -53,6 +53,40 @@ The levels of the functions that change the LMUL between `m1` and `d2` (`low`, `
 The file is written without indentation, since only the Explorer reads it. `data.js` resolves its URL from the module itself (`../data/mipp_api_index.json` relative to `assets/explorer/data.js`), so the Explorer works whatever the base path of the site (`/MIPP/` on GitHub Pages). It is fetched with `cache: "no-cache"`: the browser revalidates its copy with the server (`ETag` / `Last-Modified`) and downloads the file again only when it changed.
 
 To make `mkdocs serve` pick up a new data file without a restart, the script also copies it to `site/` and to the temporary directories of a running `mkdocs serve`. `mkdocs serve` sends no cache validators, so locally the file is downloaded at each visit.
+
+### 3.1. Algorithm Modal
+
+The Algorithm modal (button of the Hardware Matrix tab) shows the code of one function for one ISA, datatype, mask variant, LMUL and set of compiler flags. This code is not rebuilt from the templates: it is the code of the generated headers, so it cannot drift from what the CI compiles.
+
+**Data.** `helpers_docs/algo_sources.py` (called by `gen_mipp_docs.py --only explorer`, after `gen_mipp_headers.py`) splits the C headers of each ISA (`include/mipp/internal/simd_ext/<isa>/c/`) into top-level symbols (macros, types, functions) and writes `assets/data/algo/<isa>.json`:
+
+| Key | Content |
+| :--- | :--- |
+| `symbols` | For each name, its definitions: `kind`, exact `code` (with its `// Level N` comment), `cond` (the `#if` conditions under which it is defined) and `deps` (the other symbols it uses). |
+| `imports` | The tables it uses: `scalar` (fallbacks), the parent ISA (`sse` for the AVX half-vectors), `interface` (the shared macros of `interfaces/c/common.h`, such as `MIPP_LMUL_STRIDE`). |
+| `includes` | The system headers of the ISA (`<immintrin.h>`, ...). |
+| `cpp` | For each C function, the call of the C++ Functional API that wraps it (`mipp_avx_add_float32_mask_m1` -> `add<M, float32_t, 1>`), read from the generated C++ wrappers. |
+
+`index.json` also holds the ISA selection logic of `interfaces/c/common.h` (`MIPP_AVX`, `MIPP_BW`, ...). A table weighs 5 to 8 MB (0.2 to 0.4 MB compressed); the modal loads the tables of an ISA when it shows this ISA.
+
+**Assembly** (`docs/assets/explorer/algo_source.js`). `targetMacros()` gives the macros the compiler defines for the flags of the Godbolt link (`-mavx2` defines `__AVX2__`, `__AVX__`, the SSE macros, ...) and evaluates the selection logic. `closure()` resolves the root function, `mipp_<isa>_<func>_<dt>[_<variant>]_<lmul>`, then its dependencies, keeping the definition whose conditions hold (a small preprocessor evaluates the `#if` expressions and the nested conditions of the bodies).
+
+- **Flat C Code** (`buildFlatCode()`): the macros, types and functions of the closure, then a `test` function that calls the function in a loop over `n` registers. In the assembly of `test` (Compiler Explorer, "Open in Godbolt"), the MIPP calls are gone and the loop only contains the instructions of the operation; the header of the code says when a scalar fallback (Level 3) may stay a function call. The discreet "Run" link opens the same code with `buildFlatCode(..., { verify: true })`: a `main` runs `test` once on values of the test domain of the function (`test_specs`) and compares the result with the scalar reference of MIPP.
+- **Abstract C++ Implementation** (`buildAbstractCode()`): the body of the function with the types `rvd<T, LMUL>` / `rvm<T, LMUL>` and the calls of the C++ Functional API (`mipp::select(mipp::cmplt(r0, r1), r0, r1)`). The functions and types of another ISA (scalar fallback, SSE half-vectors of AVX) keep their C names. The code compiles with `#include <mipp.hpp>`. Below the code:
+    - **How it is built** (`callTree()`): the MIPP functions called, recursively, each with what its body is (native, dedicated emulation, composition, scalar fallback, LMUL wrapper; `sourceOf()` reads it from the code) and its level, the highest level of everything it uses. This is where the level propagation shows: `min<int64>` on AVX is a composition of `select` (L0) and `cmplt` (L3, scalar fallback), so it is L3. Each function opens in the modal (with a back button).
+- **Compare ISAs**: the abstract view of the same function on several ISAs, side by side.
+
+**Vendor intrinsics** (`components/intrinsic_tooltip.js`). In the three views, `highlightCpp(code, macros, { isa })` makes the intrinsics of the ISA clickable (`_mm*`, NEON `v...q_...`, `sv...`, `__riscv_...`). The tooltip shows:
+
+- the extension the intrinsic needs: the feature macros that every definition using it tests (`defined(__AVX2__)`, `defined(__AVX512BW__)`, ...), only the highest one on the SSE hierarchy;
+- the MIPP functions of the ISA that use it, found in the tables already loaded; each one opens in the modal;
+- a link to the official documentation: the Intel Intrinsics Guide, the Arm intrinsics page (SVE names in the ACLE form, `svadd[_f32]_z`, computed by `sveDocName()`), or the page of the family in the RVV intrinsics documentation (no page per intrinsic).
+
+No external data is embedded.
+
+Above the code, a line explains the LMUL (software registers `r1`, `r2`, ... or RVV register groups, the half-vector of each target) and the mask variant (native predication or `select` after the operation, from the call tree), with links to the user guide. The level shown in the modal is the effective level computed from the real code (`effectiveLevel()`): the `// Level N` comment of the headers already gives this effective level, not the kind of the body.
+
+**Checking.** Both views can be generated for every combination outside the browser, by running the modules with a JavaScript engine (`setAlgoLoader()` replaces `fetch`), then compiled with the flags of their Godbolt link: the abstract code against `<mipp.hpp>`, the Flat C Code with its verification `main`. The Flat C Code must compile, the loop of `test` must contain no call up to Level 2, and the program must print `OK` where it can run.
 
 ---
 

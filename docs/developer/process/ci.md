@@ -14,7 +14,7 @@ Every push runs the whole pipeline.
 | :--- | :--- | :--- |
 | `generation` | `generation-headers` | `./gen_mipp_headers.py --simd-ext sse avx avx512 rvv neon scalar sve --granularity fine` (the granularity comes from the `MIPP_GRANULARITY` variable). |
 | | `generation-tests` | `./gen_mipp_tests.py obj --lmul 0 8 --ldiv 2 --mask-kind unmasked mask maskz masks`: the C++ Object tests, for the base registers, LMUL 8 and the half-vectors. |
-| | `generation-docs` | `./gen_mipp_docs.py`. |
+| | `generation-docs` | `./gen_mipp_headers.py --granularity fine`, then `./gen_mipp_docs.py` (the headers are read by the Algorithm modal of the API Explorer). |
 | `analysis` | `analysis-cppcheck` | `ci/analysis-cppcheck.sh` on the generated headers. |
 | `build` | `build-test-examples` | Compiles the programs of `examples/` with `-Werror`, for each target of the matrix. In fine granularity, also checks that `mipp_fine_grained.cpp` includes atomic headers only. Then compiles the code examples of the documentation (`scripts/check_doc_snippets.sh --build-only`, see [Code Examples of the User Guide](../setup.md#61-code-examples-of-the-user-guide)). |
 | | `build-test-unit` | Configures and builds the unit tests (`tests/`) for each target of the matrix. |

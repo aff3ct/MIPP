@@ -502,10 +502,25 @@ def resolve_candidates(isa, funcs, lmul=0):
                 new_rem = intersect_conds(remaining_conds[key], neg_resolved)
                 remaining_conds[key] = new_rem
 
+    def dep_pending(req_key, region):
+        """A dependency can still gain branches at the current level in this region: deciding the
+        condition of the candidate now would restrict it to the branches resolved so far (e.g. sin
+        float64 on AVX-512 restricted to __MIC__ because the AVX-512F branch of round was not
+        resolved yet)."""
+        rem = remaining_conds.get(req_key)
+        if rem is None or rem == "0" or intersect_conds(rem, region) is None:
+            return False
+        return any(not c.get("resolved", False) and not c.get("emitted", False) and c["level"] <= max_level
+                   for c in candidates_map.get(req_key, []))
+
     max_level = 2
     changed = True
+    # once a pass changes nothing because of the deferred candidates (dependency cycles), one pass
+    # resolves them with the branches available
+    allow_pending = False
     while changed:
         changed = False
+        deferred = False
         for key in candidates_map:
             f, dt_key, mask_kind = key
             rem_cond = remaining_conds[key]
@@ -559,6 +574,7 @@ def resolve_candidates(isa, funcs, lmul=0):
                     
                 reqs = _get_candidate_reqs(cand, isa, funcs, lmul=lmul)
                 deps_satisfied = True
+                defer = False
                 restricted_target_cond = target_cond
                 for req_f in reqs:
                     for req_dt_key in reqs[req_f]:
@@ -577,6 +593,9 @@ def resolve_candidates(isa, funcs, lmul=0):
                         if req_key not in working_impls:
                             deps_satisfied = False
                             break
+                        if not allow_pending and dep_pending(req_key, restricted_target_cond):
+                            defer = True
+                            break
                         compat_conds = []
                         for w_cond in working_impls[req_key]:
                             if not are_conds_mutually_exclusive(restricted_target_cond, w_cond):
@@ -592,9 +611,14 @@ def resolve_candidates(isa, funcs, lmul=0):
                         if restricted_target_cond is None:
                             deps_satisfied = False
                             break
-                    if not deps_satisfied:
+                    if not deps_satisfied or defer:
                         break
-                        
+
+                if defer:
+                    # keep this (higher priority) candidate for a later pass
+                    deferred = True
+                    break
+
                 if deps_satisfied:
                     restricted_target_cond = normalize_cond(restricted_target_cond)
                     if restricted_target_cond == "0":
@@ -614,9 +638,15 @@ def resolve_candidates(isa, funcs, lmul=0):
                     changed = True
                     break
                     
-        if not changed:
-            if max_level < 4:
+        if changed:
+            allow_pending = False
+        else:
+            if deferred and not allow_pending:
+                allow_pending = True
+                changed = True
+            elif max_level < 4:
                 max_level += 1
+                allow_pending = False
                 changed = True
             else:
                 unresolved = [k for k, cond in remaining_conds.items() if cond != "0"]
@@ -691,6 +721,8 @@ def resolve_candidates(isa, funcs, lmul=0):
 # mask kind): the highest level among the active candidates. Read by the d2-by-mask wrappers
 # (codegen/ldiv_mask.py), which inherit the level of the LMUL 1 function they call.
 BASE_LEVELS = {}
+# The same, per branch: [(condition of the candidate, level), ...] (the conditions split the cases)
+BASE_LEVEL_BRANCHES = {}
 
 def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
     resolved = resolve_candidates(isa, funcs, lmul=lmul)
@@ -699,6 +731,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
             levels = [c.get("level", 3) for c, c_cond in rcands if c_cond != "0"]
             if levels:
                 BASE_LEVELS[(isa["name"], rf, rdt_key, rmask_kind)] = min(max(levels), 3)
+                BASE_LEVEL_BRANCHES[(isa["name"], rf, rdt_key, rmask_kind)] = [
+                    (c_cond, min(c.get("level", 3), 3)) for c, c_cond in rcands if c_cond != "0"]
     if file is None:
         return resolved
 

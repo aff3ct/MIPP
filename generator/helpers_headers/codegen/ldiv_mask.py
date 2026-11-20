@@ -22,7 +22,7 @@ from tools import *
 from tools import build_func_name_internal
 from input_validation import validate_ldiv_mask_config, make_level_detector
 from codegen.emit_helpers import emit_panic_stub
-from codegen.candidate_resolver import BASE_LEVELS
+from codegen.candidate_resolver import BASE_LEVELS, BASE_LEVEL_BRANCHES
 from codegen.lmul_orchestrator import maybe_emit_ldiv_separator, record_lmul1_definition
 
 _HELPERS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -366,10 +366,25 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
         print(f"in ldiv_mask : error : '{f}' ({dt_par}) on '{isa['name']}' : every template has an \"if\", "
               f"a fallback without \"if\" is needed (generic_ldiv_mask.json)")
         sys.exit(1)
+    level_lines = None
     if not chain:
         body = _wrapper_body(ctx, params)
-        lvl = BASE_LEVELS.get((isa["name"], f, dt_par + "," + dt_ret, mask_kind), 2)
+        key = (isa["name"], f, dt_par + "," + dt_ret, mask_kind)
+        lvl = BASE_LEVELS.get(key, 2)
         level = _LEVEL_TEXT[lvl] + ": lane-wise, inherited from the LMUL 1 function on the same register"
+        # the LMUL 1 function has branches of different levels (e.g. L2 if defined(__SSE2__), L3
+        # otherwise): the level of each branch under its own condition, not the worst of them
+        branches = BASE_LEVEL_BRANCHES.get(key, [])
+        if len({b_lvl for _, b_lvl in branches}) > 1 and all(c for c, _ in branches):
+            by_level = {}
+            for cond, b_lvl in branches:
+                by_level.setdefault(b_lvl, []).append(cond)
+            level_lines = []
+            for k, (b_lvl, conds) in enumerate(sorted(by_level.items())):
+                cond = conds[0] if len(conds) == 1 else " || ".join(f"({c})" for c in conds)
+                level_lines.append(f"#{'if' if k == 0 else 'elif'} {cond}")
+                level_lines.append(f"\t// {_LEVEL_TEXT[b_lvl]}: lane-wise, inherited from the LMUL 1 function on the same register")
+            level_lines.append("#endif")
     else:
         parts = []
         for k, entry in enumerate(chain):
@@ -404,7 +419,11 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
     if changing and lmul_in == 1:
         # the function without suffix is generated afterwards, as the alias of this one
         record_lmul1_definition(isa["name"], f, dt, mask_kind)
-    print(f"\t// {level}", file=file)
+    if level_lines:
+        for line in level_lines:
+            print(line, file=file)
+    else:
+        print(f"\t// {level}", file=file)
     for line in body.split("\n"):
         if line.strip():
             print("\t" + line, file=file)

@@ -19,7 +19,7 @@
         "items": [
             { "id": "NEON",     "label": "NEON",             "define": "__ARM_NEON",                     "flag": "",     "default": true, "locked": true,  "description": "Base ARM Advanced SIMD (NEON)" },
             { "id": "AArch64",  "label": "AArch64",          "define": "__aarch64__",                    "flag": "",     "default": true, "locked": false, "description": "ARM 64-bit Architecture (AArch64)" },
-            { "id": "FMA",      "label": "FMA",              "define": "__ARM_FEATURE_FMA",              "flag": "+fma", "default": true, "locked": false, "description": "ARM Floating-Point Fused Multiply-Add" },
+            { "id": "FMA",      "label": "FMA",              "define": "__ARM_FEATURE_FMA",              "flag": "",     "default": true, "locked": false, "description": "ARM Floating-Point Fused Multiply-Add (always on AArch64; -mfpu=neon-vfpv4 on ARMv7)" },
             { "id": "Rounding", "label": "Rounding",         "define": "__ARM_FEATURE_DIRECTED_ROUNDING","flag": "",     "default": true, "locked": false, "description": "ARM Directed Rounding Instructions" }
         ]
     },

@@ -17,9 +17,11 @@ import { filterEntries } from "./filters.js";
 import { renderSidebar, updateSidebarUI, bindSidebarEvents } from "./components/sidebar.js";
 import { renderSearchBar, updateSearchBarUI, bindSearchBarEvents, scrollToSearchResults } from "./components/search_bar.js";
 import { renderCard, switchCardTab, renderCardExpandedDetails } from "./components/card.js";
-import { renderAlgoModal } from "./components/modal_algo.js";
+import { renderAlgoModal, algoModalIsa } from "./components/modal_algo.js";
+import { getLoadedSources, loadAlgoSources } from "./algo_source.js";
 import { renderCompareModal } from "./components/modal_compare.js";
 import { showMacroTooltip, hideMacroTooltip, toggleMacroTooltip } from "./syntax.js";
+import { toggleIntrinsicTooltip, hideIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
 
 let headerResizeObserver = null;
 
@@ -482,6 +484,29 @@ function updateModals(modalsContainerEl) {
     ${state.compareModalOpen ? renderCompareModal(apiData) : ""}
   `;
 
+  // The code of the Algorithm modal comes from the header tables of the ISAs, loaded on demand
+  if (state.algoModalOpen && state.algoModalData) {
+    const md = state.algoModalData;
+    const wanted = [algoModalIsa(md)];
+    if (md.view === "compare") {
+      const shown = modalsContainerEl.querySelectorAll("[data-modal-compare-isa].active");
+      shown.forEach((b) => wanted.push(b.getAttribute("data-modal-compare-isa")));
+    }
+    for (const isa of new Set(wanted)) {
+      if (!isa || getLoadedSources(isa) || md.loadError) continue;
+      loadAlgoSources(isa)
+        .then(() => {
+          if (state.algoModalOpen && state.algoModalData === md) updateModals(modalsContainerEl);
+        })
+        .catch((err) => {
+          if (state.algoModalOpen && state.algoModalData === md) {
+            md.loadError = err.message;
+            updateModals(modalsContainerEl);
+          }
+        });
+    }
+  }
+
   // Algo Modal Events
   if (state.algoModalOpen) {
     const algoCloseBtn = modalsContainerEl.querySelector("#mipp-algo-modal-close");
@@ -493,6 +518,61 @@ function updateModals(modalsContainerEl) {
         syncUrlHash(true);
       });
     }
+
+    // Open another function in the modal (with a way back): call tree and intrinsic tooltips
+    const openInAlgoModal = ({ func, isa, dt, mask, lmul }) => {
+      const md = state.algoModalData;
+      const target = apiData.find((x) => x.name === func);
+      if (!md || !target) return;
+      const { history, ...current } = md;
+      state.algoModalData = {
+        ...md, entry: target, isa, simdExt: isa, dt, mask, lmul,
+        view: "abstract", loadError: undefined, history: [...(history || []), current],
+      };
+      updateModals(modalsContainerEl);
+      syncUrlHash(true);
+    };
+    setIntrinsicNavigate(openInAlgoModal);
+    modalsContainerEl.querySelectorAll("[data-algo-nav-func]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openInAlgoModal({
+          func: btn.getAttribute("data-algo-nav-func"),
+          isa: btn.getAttribute("data-algo-nav-isa"),
+          dt: btn.getAttribute("data-algo-nav-dt"),
+          mask: btn.getAttribute("data-algo-nav-mask"),
+          lmul: btn.getAttribute("data-algo-nav-lmul"),
+        });
+      });
+    });
+
+    const algoBackBtn = modalsContainerEl.querySelector("#mipp-algo-modal-back");
+    if (algoBackBtn) {
+      algoBackBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const md = state.algoModalData;
+        if (!md || !md.history || !md.history.length) return;
+        const history = md.history.slice(0, -1);
+        state.algoModalData = { ...md.history[md.history.length - 1], history };
+        updateModals(modalsContainerEl);
+        syncUrlHash(true);
+      });
+    }
+
+    // Compare view: ISAs shown side by side
+    modalsContainerEl.querySelectorAll("[data-modal-compare-isa]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const md = state.algoModalData;
+        if (!md) return;
+        const isa = btn.getAttribute("data-modal-compare-isa");
+        const cur = [...modalsContainerEl.querySelectorAll("[data-modal-compare-isa].active")].map((b) => b.getAttribute("data-modal-compare-isa"));
+        const next = cur.includes(isa) ? cur.filter((i) => i !== isa) : [...cur, isa];
+        if (!next.length) return;
+        md.compareIsas = next;
+        updateModals(modalsContainerEl);
+      });
+    });
 
     const algoShareBtn = modalsContainerEl.querySelector("#mipp-algo-modal-share");
     if (algoShareBtn) {
@@ -540,6 +620,7 @@ function updateModals(modalsContainerEl) {
         if (state.algoModalData) {
           state.algoModalData.isa = ext;
           state.algoModalData.simdExt = ext;
+          state.algoModalData.loadError = undefined;
           updateModals(modalsContainerEl);
           syncUrlHash(true);
         }
@@ -699,6 +780,8 @@ function updateModals(modalsContainerEl) {
   }
 }
 
+let globalListenersBound = false;
+
 export async function initExplorer() {
   const mountEl = document.getElementById("mipp-explorer-app");
   if (!mountEl) {
@@ -758,122 +841,141 @@ export async function initExplorer() {
       scrollToFocusedCard(state.focusedCard, false);
     }
 
-    window.addEventListener("hashchange", () => {
-      state.selectedSimdExts = [...ALL_SIMD_EXTS];
-      state.selectedCategories = [...ALL_CATEGORIES];
-      state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-      state.maskVariant = "unmasked";
-      state.selectedLevels = [0, 1, 2, 3];
-      state.query = "";
-      state.searchField = "all";
-      state.flavor = "cpp";
-      state.lmul = "1";
-      state.intersectionMode = false;
-      state.focusedCard = null;
-      state.expandedCards.clear();
-      state.openedCardsOrder = [];
-      state.cardTabs = {};
-      state.cardScalarTypes = {};
-      state.cardScalarVariants = {};
-      state.cardTestVariants = {};
-      state.cardFlatState = {};
-      state.cardHwMask = {};
+    // Global listeners: registered once. With the instant navigation of Material, initExplorer runs
+    // again at each visit of the page; a second click listener would toggle the macro tooltips twice
+    // (open, then close at once).
+    if (!globalListenersBound) {
+      globalListenersBound = true;
+      window.addEventListener("hashchange", () => {
+        if (!document.getElementById("mipp-explorer-app")) return;
+        state.selectedSimdExts = [...ALL_SIMD_EXTS];
+        state.selectedCategories = [...ALL_CATEGORIES];
+        state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
+        state.maskVariant = "unmasked";
+        state.selectedLevels = [0, 1, 2, 3];
+        state.query = "";
+        state.searchField = "all";
+        state.flavor = "cpp";
+        state.lmul = "1";
+        state.intersectionMode = false;
+        state.focusedCard = null;
+        state.expandedCards.clear();
+        state.openedCardsOrder = [];
+        state.cardTabs = {};
+        state.cardScalarTypes = {};
+        state.cardScalarVariants = {};
+        state.cardTestVariants = {};
+        state.cardFlatState = {};
+        state.cardHwMask = {};
 
-      readUrlHash(ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES);
-      if (state.algoModalOpen && state.algoModalData && state.algoModalData.funcName) {
-        const entry = apiData.find((x) => x.name === state.algoModalData.funcName);
-        if (entry) {
-          state.algoModalData.entry = entry;
-          if (!state.algoModalData.dt) {
-            state.algoModalData.dt = entry.datatypes?.[0] || "float32";
+        readUrlHash(ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES);
+        if (state.algoModalOpen && state.algoModalData && state.algoModalData.funcName) {
+          const entry = apiData.find((x) => x.name === state.algoModalData.funcName);
+          if (entry) {
+            state.algoModalData.entry = entry;
+            if (!state.algoModalData.dt) {
+              state.algoModalData.dt = entry.datatypes?.[0] || "float32";
+            }
+          } else {
+            state.algoModalOpen = false;
+            state.algoModalData = null;
           }
-        } else {
-          state.algoModalOpen = false;
-          state.algoModalData = null;
         }
-      }
-      renderApp();
+        renderApp();
 
-      if (state.focusedCard) {
-        scrollToFocusedCard(state.focusedCard, true);
-      }
-    });
+        if (state.focusedCard) {
+          scrollToFocusedCard(state.focusedCard, true);
+        }
+      });
 
-    document.addEventListener("click", (e) => {
-      // 1. Algo Modal Trigger
-      const algoBtn = e.target.closest("[data-algo-card]");
-      if (algoBtn) {
-        e.stopPropagation();
-        const cardName = algoBtn.getAttribute("data-algo-card");
-        const isa = algoBtn.getAttribute("data-algo-isa");
-        const dt = algoBtn.getAttribute("data-algo-dt");
-        const mask = algoBtn.getAttribute("data-algo-mask") || state.cardHwMask?.[cardName] || "unmasked";
-        const reqFeature = algoBtn.getAttribute("data-algo-feature");
-        const entry = apiData.find((x) => x.name === cardName);
-        if (entry) {
-          state.algoModalOpen = true;
-          state.algoModalData = {
-            entry,
-            isa,
-            dt,
-            mask,
-            lmul: state.lmul || "1",
-            view: "abstract",
-            scalarSize: 256,
-            features: getDefaultFeaturesForModal(reqFeature, isa)
-          };
+      document.addEventListener("click", (e) => {
+        // 1. Algo Modal Trigger
+        const algoBtn = e.target.closest("[data-algo-card]");
+        if (algoBtn) {
+          e.stopPropagation();
+          const cardName = algoBtn.getAttribute("data-algo-card");
+          const isa = algoBtn.getAttribute("data-algo-isa");
+          const dt = algoBtn.getAttribute("data-algo-dt");
+          const mask = algoBtn.getAttribute("data-algo-mask") || state.cardHwMask?.[cardName] || "unmasked";
+          const reqFeature = algoBtn.getAttribute("data-algo-feature");
+          const entry = apiData.find((x) => x.name === cardName);
+          if (entry) {
+            state.algoModalOpen = true;
+            state.algoModalData = {
+              entry,
+              isa,
+              dt,
+              mask,
+              lmul: state.lmul || "1",
+              view: "abstract",
+              scalarSize: 256,
+              features: getDefaultFeaturesForModal(reqFeature, isa)
+            };
+            const modalsContainerEl = document.getElementById("mipp-modals-container");
+            if (modalsContainerEl) {
+              updateModals(modalsContainerEl);
+              syncUrlHash(true);
+            }
+          }
+          return;
+        }
+
+        // 2. Compare Modal Trigger
+        const compareOpenBtn = e.target.closest("#mipp-open-compare-btn, [data-open-compare]");
+        if (compareOpenBtn) {
+          e.stopPropagation();
+          state.compareModalOpen = true;
           const modalsContainerEl = document.getElementById("mipp-modals-container");
-          if (modalsContainerEl) {
-            updateModals(modalsContainerEl);
-            syncUrlHash(true);
+          if (modalsContainerEl) updateModals(modalsContainerEl);
+          return;
+        }
+
+        // 3. Copy Code Buttons
+        const copyBtn = e.target.closest(".copy-proto-btn, .copy-code-btn, [data-copy]");
+        if (copyBtn) {
+          e.stopPropagation();
+          const code = copyBtn.getAttribute("data-copy");
+          if (code) {
+            copyToClipboard(code);
+            const originalHtml = copyBtn.innerHTML;
+            copyBtn.innerHTML = ICON_CHECK;
+            setTimeout(() => {
+              copyBtn.innerHTML = originalHtml;
+            }, 1500);
           }
+          return;
         }
-        return;
-      }
 
-      // 2. Compare Modal Trigger
-      const compareOpenBtn = e.target.closest("#mipp-open-compare-btn, [data-open-compare]");
-      if (compareOpenBtn) {
-        e.stopPropagation();
-        state.compareModalOpen = true;
-        const modalsContainerEl = document.getElementById("mipp-modals-container");
-        if (modalsContainerEl) updateModals(modalsContainerEl);
-        return;
-      }
-
-      // 3. Copy Code Buttons
-      const copyBtn = e.target.closest(".copy-proto-btn, .copy-code-btn, [data-copy]");
-      if (copyBtn) {
-        e.stopPropagation();
-        const code = copyBtn.getAttribute("data-copy");
-        if (code) {
-          copyToClipboard(code);
-          const originalHtml = copyBtn.innerHTML;
-          copyBtn.innerHTML = ICON_CHECK;
-          setTimeout(() => {
-            copyBtn.innerHTML = originalHtml;
-          }, 1500);
+        // 4. Macro and intrinsic tooltips toggle & outside dismissal
+        const intrinsicEl = e.target.closest(".mipp-intrinsic-ref");
+        if (intrinsicEl) {
+          e.stopPropagation();
+          toggleIntrinsicTooltip(intrinsicEl);
+          return;
         }
-        return;
-      }
+        const macroEl = e.target.closest(".mipp-macro-ref");
+        if (macroEl) {
+          e.stopPropagation();
+          toggleMacroTooltip(macroEl);
+          return;
+        }
+        if (!e.target.closest(".mipp-macro-tooltip")) {
+          hideMacroTooltip();
+        }
+      });
 
-      // 4. Macro tooltips toggle & outside dismissal
-      const macroEl = e.target.closest(".mipp-macro-ref");
-      if (macroEl) {
-        e.stopPropagation();
-        toggleMacroTooltip(macroEl);
-        return;
-      }
-      if (!e.target.closest(".mipp-macro-tooltip")) {
-        hideMacroTooltip();
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        hideMacroTooltip();
-      }
-    });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          hideMacroTooltip();
+          hideIntrinsicTooltip();
+        }
+        // Enter / Space on a focused macro or intrinsic opens its tooltip
+        if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".mipp-intrinsic-ref")) {
+          e.preventDefault();
+          toggleIntrinsicTooltip(e.target.closest(".mipp-intrinsic-ref"));
+        }
+      });
+    }
   } catch (err) {
     mountEl.innerHTML = `
       <div style="text-align: center; padding: 3rem 1rem; color: #ef4444;">

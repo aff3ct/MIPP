@@ -1,18 +1,101 @@
 /**
- * MIPP API Explorer - "View Algorithm" Modal Component
- * Displays an abstract, conceptual C++ representation of the operation,
- * its LMUL unrolling (including LMUL = -2 note), and mask emulation layers,
- * OR a fully self-contained, standalone Flat C99 Code implementation
- * with direct Compiler Explorer (Godbolt) execution support.
+ * MIPP API Explorer - "Algorithm" modal.
+ * Shows the code of one function for one ISA, datatype, mask variant, LMUL and set of compiler
+ * flags, taken from the generated headers (algo_source.js): the Abstract C++ view (C++ Functional
+ * API) and the Flat C view (self-contained, runs on Compiler Explorer).
  */
 import { escapeHtml, ICON_COPY, ICON_GODBOLT } from "../explorer.config.js";
-import { highlightCpp, formatFunctionHeaders } from "../syntax.js";
-import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, MASK_MODES_INFO, LEVEL_DESCRIPTIONS, apiMetadata, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
+import { highlightCpp } from "../syntax.js";
+import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
-import { generateFlatSpecializedCode, buildGodboltUrlForFlat, isFeatureSupported } from "../codegen.js";
+import { getCompilerConfigForFlat, buildGodboltUrlForFlat } from "../codegen.js";
+import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName } from "../algo_source.js";
 
 export function getAllModalIsas() {
   return Object.keys(apiMetadata.isas || {});
+}
+
+/** ISA shown by the modal (the one of modalData, or the first ISA). */
+export function algoModalIsa(modalData) {
+  const all = getAllModalIsas();
+  const raw = modalData && (modalData.isa || modalData.simdExt);
+  return all.includes(raw) ? raw : (all[0] || "");
+}
+
+const DOCS = "../user/";
+const ISA_LABEL = () => ({ ...SIMD_EXT_DISPLAY_NAMES, scalar: "Scalar" });
+const levelBadge = (lvl, title) => `<span class="mipp-isa-badge lvl-${lvl === null || lvl === undefined ? "na" : lvl}" title="${escapeHtml(title || "")}">${lvl === null || lvl === undefined ? "–" : `L${lvl}`}</span>`;
+
+/** One or two lines on the LMUL and the mask variant of the shown code, with links to the docs. */
+function contextNotes(isa, lmul, mask, maskBySelect) {
+  const notes = [];
+  const l = String(lmul);
+  const name = ISA_LABEL()[isa] || isa.toUpperCase();
+  if (l === "-2") {
+    const how = {
+      avx: "a register of the narrower ISA (an SSE register for AVX)", avx512: "a register of the narrower ISA (an AVX register for AVX-512)",
+      rvv: "a native fractional register group (mf2)", scalar: "an array of N/2 elements",
+    }[isa] || "the lower half of a full register (the upper lanes are ignored)";
+    notes.push(`<strong>LMUL 1/2</strong> (half-vector, <code>d2</code>): on ${escapeHtml(name)}, ${how}. <a href="${DOCS}vector_types_and_lmul/" target="_blank">Vector types &amp; LMUL</a>`);
+  } else if (l !== "1") {
+    notes.push(isa === "rvv"
+      ? `<strong>LMUL ${l}</strong>: one group of ${l} hardware registers (RVV register grouping), handled by the instructions themselves. <a href="${DOCS}vector_types_and_lmul/" target="_blank">Vector types &amp; LMUL</a>`
+      : `<strong>LMUL ${l}</strong>: ${l} registers (<code>r1</code>, <code>r2</code>, ...) processed one after the other by the LMUL ${Number(l) / 2} function. <a href="${DOCS}vector_types_and_lmul/" target="_blank">Vector types &amp; LMUL</a>`);
+  }
+  const maskText = {
+    mask: "<strong>mask</strong> (merge): the inactive lanes keep the value of the first operand",
+    maskz: "<strong>maskz</strong> (zeroing): the inactive lanes are set to zero",
+    masks: "<strong>masks</strong> (source): the inactive lanes are taken from <code>src</code>",
+  }[mask];
+  if (maskText) {
+    const how = maskBySelect
+      ? "Here the operation is computed on all the lanes, then a <code>select</code> keeps the active ones"
+      : "Here the target applies the mask itself (predicated instruction or masked memory access)";
+    notes.push(`${maskText}. ${how}. <a href="${DOCS}masking_semantics/" target="_blank">Masking semantics</a>`);
+  }
+  return notes;
+}
+
+/** Navigation target of a function of the call tree (null when it is not a public function). */
+function navTarget(cName) {
+  const p = parseCName(cName);
+  if (!p) return null;
+  const entry = apiData.find((e) => e.name === p.func);
+  if (!entry) return null;
+  const dts = entry.datatypes || [];
+  const dt = dts.includes(p.dt) ? p.dt : (dts.includes(p.dt.split(",")[0]) ? p.dt.split(",")[0] : null);
+  return dt ? { ...p, dt } : null;
+}
+
+function treeLabel(cName) {
+  const p = parseCName(cName);
+  if (!p) return escapeHtml(cName);
+  const lm = p.lmul === "1" ? "" : (p.lmul === "-2" ? " · d2" : ` · m${p.lmul}`);
+  const v = p.mask === "unmasked" ? "" : `_${p.mask}`;
+  return `${escapeHtml(p.func)}${v}&lt;${escapeHtml(p.dt.replace(",", ", "))}&gt;${lm}`;
+}
+
+/** Call tree: each function with its own level and its effective level, clickable. */
+function renderTree(node, currentIsa, depth = 0) {
+  if (!node) return "";
+  const nav = navTarget(node.cName);
+  const isaTag = node.table !== currentIsa ? `<span class="mipp-algo-tree-isa">${escapeHtml(ISA_LABEL()[node.table] || node.table)}</span>` : "";
+  const KINDS = {
+    native: ["native", "Instructions of the ISA"],
+    dedicated: ["dedicated emulation", "A sequence of instructions written for this ISA"],
+    composition: ["composition", "Calls other MIPP functions"],
+    fallback: ["scalar fallback", "Copies the registers to arrays and calls the scalar reference"],
+    lanewise: ["from LMUL 1", "Generated from the LMUL 1 function on the same register"],
+    wrapper: ["LMUL wrapper", "One call per register of the LMUL below"],
+    scalar: ["scalar code", "Plain C loop of the MIPP scalar target"],
+  };
+  const k = KINDS[node.kind] || [node.kind, ""];
+  const own = `<span class="mipp-algo-tree-own" title="${escapeHtml(k[1])}">${escapeHtml(k[0])}</span>`;
+  const label = nav && depth > 0
+    ? `<button type="button" class="mipp-algo-tree-link" data-algo-nav-func="${escapeHtml(nav.func)}" data-algo-nav-isa="${escapeHtml(nav.isa)}" data-algo-nav-dt="${escapeHtml(nav.dt)}" data-algo-nav-mask="${escapeHtml(nav.mask)}" data-algo-nav-lmul="${escapeHtml(nav.lmul)}" title="Open ${escapeHtml(node.cName)}">${treeLabel(node.cName)}</button>`
+    : `<span class="mipp-algo-tree-name" title="${escapeHtml(node.cName)}">${treeLabel(node.cName)}</span>`;
+  const kids = node.repeated ? "" : node.children.map((c) => renderTree(c, currentIsa, depth + 1)).join("");
+  return `<li>${label}${isaTag} ${levelBadge(node.effective, "Effective level: the highest level of everything this function uses")} ${own}${node.repeated ? ' <span class="mipp-algo-tree-own">(see above)</span>' : ""}${kids ? `<ul>${kids}</ul>` : ""}</li>`;
 }
 
 export function renderAlgoModal(modalData) {
@@ -22,7 +105,7 @@ export function renderAlgoModal(modalData) {
   const defaultIsa = allModalIsas[0] || "";
   const rawIsa = modalData.isa || modalData.simdExt || defaultIsa;
   const currentIsa = allModalIsas.includes(rawIsa) ? rawIsa : defaultIsa;
-  const currentView = modalData.view === "flat" ? "flat" : "abstract";
+  const currentView = ["flat", "compare"].includes(modalData.view) ? modalData.view : "abstract";
   const currentScalarSize = Number(modalData.scalarSize) || 256;
   const namesMap = { ...SIMD_EXT_DISPLAY_NAMES, scalar: "Scalar" };
 
@@ -43,73 +126,7 @@ export function renderAlgoModal(modalData) {
   // functions that change the LMUL (low, high, combine, wcvt, ncvt) are not defined for every LMUL
   const lmulUndefined = isLmulUndefined(entry, effectiveLmul);
 
-  const numLmul = Number(effectiveLmul) || 1;
   const isHalfLmul = effectiveLmul === "-2";
-
-  // Determine return type and argument names from entry's base C++ prototype
-  const baseProto = entry.prototypes?.cpp || "";
-  const retMatch = baseProto.match(/^(?:template\s*<[^>]+>\s*)?([a-zA-Z0-9_<>]+)\s+[a-zA-Z0-9_]+\s*\(/);
-  const rawRet = retMatch ? retMatch[1].trim() : "rvd<T>";
-  const isVoidReturn = rawRet === "void";
-  const isRvmReturn = rawRet.startsWith("rvm") || (entry.traits && entry.traits.returns_mask);
-
-  const dtMain = currentDt.includes(",") ? currentDt.split(",")[0].trim() : currentDt;
-  const dtIdx = currentDt.includes(",") ? currentDt.split(",")[1].trim() : currentDt;
-
-  const retType1 = isVoidReturn ? "void" : (isRvmReturn ? `rvm<${dtMain}, 1>` : `rvd<${dtMain}, 1>`);
-  const retTypeLmul = isVoidReturn ? "void" : (isRvmReturn ? `rvm<${dtMain}, ${effectiveLmul}>` : `rvd<${dtMain}, ${effectiveLmul}>`);
-
-  const paramMatch = baseProto.match(/\(([^)]*)\)/);
-  let argNames = [];
-  let argTypes = [];
-  let rawArgDecls = [];
-  if (paramMatch && paramMatch[1].trim()) {
-    const parts = paramMatch[1].split(",").map((s) => s.trim());
-    parts.forEach((part, idx) => {
-      const words = part.split(/\s+/);
-      const name = words[words.length - 1].replace(/[^a-zA-Z0-9_]/g, "") || `r${idx}`;
-      argNames.push(name);
-      rawArgDecls.push(part);
-      if (part.includes("*")) {
-        argTypes.push(part.includes("const") ? "const_ptr" : "ptr");
-      } else if (part.includes("rvm") || part.includes("mask") || part.includes("msk")) {
-        argTypes.push("rvm");
-      } else if (part.includes("rvd") || part.includes("reg")) {
-        argTypes.push("rvd");
-      } else {
-        argTypes.push("scalar");
-      }
-    });
-  }
-  if (argNames.length === 0) {
-    argNames = ["r0"];
-    argTypes = ["rvd"];
-    rawArgDecls = ["const rvd<T> r0"];
-  }
-
-  const formatArgDecl = (secLmul) => {
-    return argNames.map((a, idx) => {
-      const t = argTypes[idx];
-      if (t === "const_ptr") return `const ${dtMain}* ${a}`;
-      if (t === "ptr") return `${dtMain}* ${a}`;
-      if (t === "rvm") return `const rvm<${dtMain}, ${secLmul}> ${a}`;
-      if (t === "rvd") {
-        const dtArg = (idx > 0 && currentDt.includes(",")) ? dtIdx : dtMain;
-        return `const rvd<${dtArg}, ${secLmul}> ${a}`;
-      }
-      return rawArgDecls[idx] || `const int ${a}`;
-    }).join(", ");
-  };
-
-  const argDecl1 = formatArgDecl(1);
-  const argDeclLmul = formatArgDecl(effectiveLmul);
-  const callArgs = argNames.join(", ");
-
-  const isScalar = currentIsa === "scalar";
-  const isaInfo = isScalar ? null : (entry.isa_support ? entry.isa_support[currentIsa] : null);
-  const hwLmuls = (isaInfo && isaInfo.hw_lmul) || [1];
-  const currentLmulVal = isHalfLmul ? -2 : numLmul;
-  const isHwLmul = isScalar ? false : hwLmuls.includes(currentLmulVal);
 
   // Features resolution (contextual per ISA)
   const features = modalData.features || {};
@@ -154,344 +171,103 @@ export function renderAlgoModal(modalData) {
     }
   }
 
-  // Check if current datatype's required feature is satisfied
-  const reqFeature = (isaInfo && isaInfo.required_features) ? isaInfo.required_features[currentDt] : null;
-  const fallbackLvl = (isaInfo && isaInfo.fallback_levels && isaInfo.fallback_levels[currentDt] !== undefined)
-    ? isaInfo.fallback_levels[currentDt]
-    : 2;
-
-  const featureSatisfied = isFeatureSupported(isaInfo, currentDt, currentIsa, flatDefines);
-
-  // Compute implementation level based on currentDt, currentMask, effectiveLmul, and feature satisfaction
+  // Effective level of the shown code (set from the real code once the tables are loaded)
   let currentImplLvl = "na";
-  let baseImplLvl = "na";
-  let primitiveImplLvl = "na";
-  if (isScalar) {
-    currentImplLvl = 3;
-    baseImplLvl = 3;
-    primitiveImplLvl = 3;
-  } else if (isaInfo) {
-    baseImplLvl = (isaInfo.by_datatype && isaInfo.by_datatype[currentDt] !== undefined)
-      ? isaInfo.by_datatype[currentDt]
-      : (isaInfo.overall_level !== undefined ? isaInfo.overall_level : 3);
-    if (!featureSatisfied && baseImplLvl < fallbackLvl) {
-      baseImplLvl = fallbackLvl;
-    }
 
-    if (currentMask === "unmasked") {
-      primitiveImplLvl = baseImplLvl;
-    } else {
-      const maskedDict = isaInfo.masked_by_datatype ? isaInfo.masked_by_datatype[currentMask] : null;
-      primitiveImplLvl = (maskedDict && maskedDict[currentDt] !== undefined)
-        ? maskedDict[currentDt]
-        : 2;
-      if (!featureSatisfied && primitiveImplLvl < fallbackLvl) {
-        primitiveImplLvl = fallbackLvl;
-      }
-    }
-
-    currentImplLvl = primitiveImplLvl;
-    const isLmulEmulated = (currentLmulVal !== 1) && !hwLmuls.includes(currentLmulVal);
-    if (isLmulEmulated && currentImplLvl < 2) {
-      currentImplLvl = 2;
-    }
-
-    if (currentImplLvl > 3 || currentImplLvl === undefined) {
-      currentImplLvl = "na";
-    }
-  }
-
-  const lvlDesc = LEVEL_DESCRIPTIONS[currentImplLvl] || (currentImplLvl === "na" ? "Not Supported" : `Level ${currentImplLvl}`);
-
-  const getFeatureMacro = (featId) => {
-    if (!featId) return "";
-    const fItem = (featuresMeta.items || []).find((it) => it.id === featId);
-    return fItem ? fItem.define : featId;
+  // Code of the two views: taken from the generated MIPP headers (algo_source.js)
+  const sources = getLoadedSources(currentIsa);
+  const compilerCfg = getCompilerConfigForFlat(currentIsa, flatDefines, currentScalarSize);
+  const algoCfg = {
+    isa: currentIsa, func: entry.name, dt: currentDt, mask: currentMask, lmul: effectiveLmul,
+    options: compilerCfg.options, simdWidth: currentScalarSize, overrides: flatDefines,
+    compilerLabel: compilerCfg.compilerLabel,
   };
-
-  let requiredDefinesStr = "";
-  if (isScalar) {
-    requiredDefinesStr = `None (Scalar Reference | SIMD Width: ${currentScalarSize} bits)`;
-  } else if (reqFeature && featureSatisfied) {
-    const macro = getFeatureMacro(reqFeature);
-    requiredDefinesStr = `${reqFeature} (${macro})`;
-  } else if (currentImplLvl === 0) {
-    requiredDefinesStr = `None (Baseline ${namesMap[currentIsa] || currentIsa.toUpperCase()})`;
-  } else if (currentImplLvl === 1 || currentImplLvl === 2) {
-    if (reqFeature && !featureSatisfied) {
-      const macro = getFeatureMacro(reqFeature);
-      requiredDefinesStr = `None (Fallback emulation when ${reqFeature} is disabled)`;
-    } else {
-      requiredDefinesStr = "None (Generic Emulation)";
-    }
-  } else if (currentImplLvl === 3) {
-    if (reqFeature && !featureSatisfied) {
-      const macro = getFeatureMacro(reqFeature);
-      requiredDefinesStr = `None (Scalar fallback when ${reqFeature} is disabled)`;
-    } else {
-      requiredDefinesStr = "None (Scalar Fallback)";
-    }
-  } else {
-    requiredDefinesStr = "N/A (Not Supported)";
-  }
-
-  // Helper to harmonize register types in emulation algorithms
-  const formatEmuAlgo = (rawCode, secLmul) => {
-    if (!rawCode) return "";
-    const regType = `rvd<${dtMain}, ${secLmul}>`;
-    const maskType = `rvm<${dtMain}, ${secLmul}>`;
-    return rawCode
-      .replace(/\bmipp::reg\b/g, regType)
-      .replace(/\bmipp::(?:msk|mask)\b/g, maskType)
-      .replace(/\breg\b(?=\s+[a-zA-Z0-9_]+\s*[;=])/g, regType)
-      .replace(/\b(?:msk|mask)\b(?=\s+[a-zA-Z0-9_]+\s*[;=])/g, maskType);
-  };
-
-  // Build Abstract Layered C++ Code
-  const codeLines = [];
-  codeLines.push(`// =============================================================================`);
-  codeLines.push(`// Conceptual Algorithm: mipp::${entry.name} (${namesMap[currentIsa] || currentIsa.toUpperCase()})`);
-  codeLines.push(`// Datatype (T): ${currentDt} | Variant: ${currentMask} | LMUL: ${effectiveLmul}`);
-  codeLines.push(`// Implementation Level: ${currentImplLvl === "na" ? "N/A (Not Supported)" : `Level ${currentImplLvl} (${lvlDesc})`}`);
-  codeLines.push(`// Required Defines: ${requiredDefinesStr}`);
-  if (isHalfLmul) {
-    codeLines.push(`// Note: LMUL = -2 represents LMUL = 1/2 (d2)`);
-  }
-  codeLines.push(`// =============================================================================`);
-  codeLines.push("");
-
-  const cleanSnippetForCpp = (snip, dt, secLmul) => {
-    if (!snip) return "";
-    let s = snip.replace(/;\s*$/, "");
-    s = s.replace(/%set0<[^>]*>%\(\)/g, `mipp::set0<${dt}>()`);
-    s = s.replace(/%r<[^>]*>%/g, `rvd<${dt}, ${secLmul}>`);
-    s = s.replace(/%m<[^>]*>%/g, `rvm<${dt}, ${secLmul}>`);
-    s = s.replace(/%cast<[^>]*>%/g, `mipp::cast`);
-    s = s.replace(/%([a-zA-Z0-9_]+)<[^>]*>%/g, `mipp::$1`);
-    s = s.replace(/%/g, "");
-    s = s.replace(/\brsrc\.r\b/g, "src.r").replace(/\brsrc\b/g, "src");
-    s = s.replace(/,([^\s])/g, ", $1");
-    if (s.startsWith("return ")) {
-      s = s.slice(7).trim();
-    }
-    return s;
-  };
-
-  const getSpecializedFuncName = (maskName) => {
-    return maskName === "unmasked" ? entry.name : `${entry.name}_${maskName}`;
-  };
-
-  const formatSpecializedParams = (secLmul, maskName) => {
-    const argsDecl = formatArgDecl(secLmul);
-    if (maskName === "mask" || maskName === "maskz") {
-      return `const rvm<${dtMain}, ${secLmul}> m0, ${argsDecl}`;
-    } else if (maskName === "masks") {
-      return `const rvm<${dtMain}, ${secLmul}> m0, const rvd<${dtMain}, ${secLmul}> src, ${argsDecl}`;
-    }
-    return argsDecl;
-  };
-
-  const formatSpecializedCallArgs = (maskName, isUnroll = false) => {
-    const innerArgs = argNames.map((a, idx) => {
-      const t = argTypes[idx];
-      if (isUnroll && (t === "rvd" || t === "rvm")) {
-        return `${a}[i]`;
-      }
-      return a;
-    });
-
-    if (maskName === "mask" || maskName === "maskz") {
-      const mArg = isUnroll ? "m0[i]" : "m0";
-      return [mArg, ...innerArgs].join(", ");
-    } else if (maskName === "masks") {
-      const mArg = isUnroll ? "m0[i]" : "m0";
-      const srcArg = isUnroll ? "src[i]" : "src";
-      return [mArg, srcArg, ...innerArgs].join(", ");
-    }
-    return innerArgs.join(", ");
-  };
-
-  const generatePrimitiveBody = (secLmul, secMask) => {
-    const lines = [];
-    const specFuncName = getSpecializedFuncName(secMask);
-    const specCallArgs = formatSpecializedCallArgs(secMask, false);
-    const targetLvl = (secMask === "unmasked") ? baseImplLvl : primitiveImplLvl;
-
-    if (isScalar || targetLvl === 3) {
-      lines.push(`    // Level 3 (Scalar Fallback)`);
-      if (secMask === "mask") {
-        lines.push(`    return scalar_${entry.name}_mask(m0.m, ${argNames.map((a) => `${a}.r`).join(", ")});`);
-      } else if (secMask === "maskz") {
-        lines.push(`    return scalar_${entry.name}_maskz(m0.m, ${argNames.map((a) => `${a}.r`).join(", ")});`);
-      } else if (secMask === "masks") {
-        lines.push(`    return scalar_${entry.name}_masks(m0.m, src.r, ${argNames.map((a) => `${a}.r`).join(", ")});`);
-      } else {
-        lines.push(`    return scalar_${entry.name}(${argNames.map((a) => `${a}.r`).join(", ")});`);
-      }
-    } else if (targetLvl === 0) {
-      lines.push(`    // Level 0 (Native Hardware)`);
-      let nativeSnip = null;
-      if (secMask === "unmasked") {
-        const lmulKey = String(secLmul);
-        const snippetDict = (isaInfo && isaInfo.code_snippets_by_lmul && isaInfo.code_snippets_by_lmul[lmulKey])
-          || (isaInfo && isaInfo.code_snippets)
-          || {};
-        nativeSnip = (baseImplLvl === 0 && featureSatisfied)
-          ? (snippetDict[currentDt] || (isaInfo && isaInfo.code_snippets && isaInfo.code_snippets[currentDt]) || null)
-          : null;
-      } else {
-        nativeSnip = (featureSatisfied && isaInfo && isaInfo.code_snippets_by_mask && isaInfo.code_snippets_by_mask[secMask])
-          ? (isaInfo.code_snippets_by_mask[secMask][currentDt] || isaInfo.code_snippets_by_mask[secMask][dtMain])
-          : null;
-      }
-
-      if (nativeSnip) {
-        const cleaned = cleanSnippetForCpp(nativeSnip, dtMain, secLmul);
-        lines.push(`    return ${cleaned};`);
-      } else {
-        lines.push(`    return mipp::${specFuncName}(${specCallArgs});`);
-      }
-    } else if (targetLvl === 1) {
-      lines.push(`    // Level 1 (Dedicated Emulation)`);
-      let emuSnip = (isaInfo && isaInfo.code_snippets_by_mask && isaInfo.code_snippets_by_mask[secMask])
-        ? (isaInfo.code_snippets_by_mask[secMask][currentDt] || isaInfo.code_snippets_by_mask[secMask][dtMain])
-        : null;
-      const emuAlgo = isaInfo && isaInfo.emulation_algorithms ? (isaInfo.emulation_algorithms[currentDt] || isaInfo.emulation_algorithms[dtMain]) : null;
-      if (emuSnip) {
-        const cleaned = cleanSnippetForCpp(emuSnip, dtMain, secLmul);
-        lines.push(`    return ${cleaned};`);
-      } else if (emuAlgo) {
-        formatEmuAlgo(emuAlgo, secLmul).split("\n").forEach((l) => lines.push(`    ${l}`));
-      } else if (secMask === "maskz") {
-        lines.push(`    return mipp::${entry.name}_masks(m0, mipp::set0<${dtMain}>(), ${callArgs});`);
-      } else {
-        lines.push(`    return mipp::${specFuncName}(${specCallArgs});`);
-      }
-    } else {
-      // Level 2 (Generic Emulation)
-      const emuAlgo = isaInfo && isaInfo.emulation_algorithms ? (isaInfo.emulation_algorithms[currentDt] || isaInfo.emulation_algorithms[dtMain]) : null;
-      if (emuAlgo) {
-        lines.push(`    // Level 2 (Generic Emulation)`);
-        formatEmuAlgo(emuAlgo, secLmul).split("\n").forEach((l) => lines.push(`    ${l}`));
-      } else {
-        lines.push(`    // Level 2 (Generic Emulation)`);
-        lines.push(`    return mipp::${specFuncName}(${specCallArgs});`);
-      }
-    }
-    return lines;
-  };
-
-  const isLmulDecomposed = !isHwLmul && (numLmul > 1 || isHalfLmul);
-  const isMaskDecomposed = (primitiveImplLvl === 2 && currentMask !== "unmasked");
-  const isDecomposed = isLmulDecomposed || isMaskDecomposed;
-
-  if (!isDecomposed) {
-    const specFuncName = getSpecializedFuncName(currentMask);
-    const specParams = formatSpecializedParams(effectiveLmul, currentMask);
-    codeLines.push(`${retTypeLmul} ${specFuncName}(${specParams}) {`);
-    codeLines.push(...generatePrimitiveBody(effectiveLmul, currentMask));
-    codeLines.push(`}`);
-  } else {
-    let sectionIdx = 1;
-
-    if (isMaskDecomposed) {
-      // Step 1: Base Primitive Operation (LMUL = 1, unmasked)
-      codeLines.push(`// ${sectionIdx++}. Base Primitive Operation (LMUL = 1, unmasked)`);
-      codeLines.push(`${retType1} ${entry.name}(${argDecl1}) {`);
-      codeLines.push(...generatePrimitiveBody(1, "unmasked"));
-      codeLines.push(`}`);
-      codeLines.push("");
-
-      // Step 2: Predicated Execution Layer (LMUL = 1, currentMask)
-      const specFuncName1 = getSpecializedFuncName(currentMask);
-      const specParams1 = formatSpecializedParams(1, currentMask);
-      if (currentMask === "mask") {
-        codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Blend Preservation)`);
-        codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation): select`);
-        codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        codeLines.push(`    return mipp::select(m0, op, ${argNames[0]}); // Inactive lanes preserve ${argNames[0]}`);
-        codeLines.push(`}`);
-      } else if (currentMask === "maskz") {
-        codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Zeroing False Lanes)`);
-        codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation): andb`);
-        codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        if (isRvmReturn) {
-          codeLines.push(`    return mipp::andb_k(op, m0); // Inactive lanes set to zero`);
-        } else {
-          codeLines.push(`    return mipp::andb(mipp::torvd(m0), op); // Inactive lanes set to zero`);
-        }
-        codeLines.push(`}`);
-      } else if (currentMask === "masks") {
-        codeLines.push(`// ${sectionIdx++}. Predicated Execution Layer (Source Register Preservation)`);
-        codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-        codeLines.push(`    // Level 2 (Generic Emulation): select`);
-        codeLines.push(`    ${retType1} op = mipp::${entry.name}(${callArgs});`);
-        codeLines.push(`    return mipp::select(m0, op, src); // Inactive lanes preserve src`);
-        codeLines.push(`}`);
-      }
-    } else {
-      // Step 1: Base Primitive Operation (LMUL = 1, currentMask)
-      codeLines.push(`// ${sectionIdx++}. Base Primitive Operation (LMUL = 1, ${currentMask})`);
-      const specFuncName1 = getSpecializedFuncName(currentMask);
-      const specParams1 = formatSpecializedParams(1, currentMask);
-      codeLines.push(`${retType1} ${specFuncName1}(${specParams1}) {`);
-      codeLines.push(...generatePrimitiveBody(1, currentMask));
-      codeLines.push(`}`);
-    }
-
-    if (isLmulDecomposed) {
-      codeLines.push("");
-      const specFuncNameLmul = getSpecializedFuncName(currentMask);
-      const specParamsLmul = formatSpecializedParams(effectiveLmul, currentMask);
-      const unrollCall = formatSpecializedCallArgs(currentMask, true);
-
-      if (isHalfLmul) {
-        codeLines.push(`// ${sectionIdx++}. Sub-vector Specialization (LMUL = -2 / d2)`);
-        codeLines.push(`// Note: LMUL = -2 represents LMUL = 1/2 (d2)`);
-        codeLines.push(`${retTypeLmul} ${specFuncNameLmul}(${specParamsLmul}) {`);
-        codeLines.push(`    // Operation on half-vector via narrower architecture or lower register half`);
-        codeLines.push(`    return mipp::${specFuncNameLmul}< -2 >(${formatSpecializedCallArgs(currentMask, false)});`);
-        codeLines.push(`}`);
-      } else if (numLmul > 1) {
-        codeLines.push(`// ${sectionIdx++}. Vectorized Multi-Register Unrolling (LMUL = ${numLmul})`);
-        codeLines.push(`${retTypeLmul} ${specFuncNameLmul}(${specParamsLmul}) {`);
-        if (isVoidReturn) {
-          codeLines.push(`    for (int i = 0; i < ${numLmul}; i++) {`);
-          codeLines.push(`        mipp::${specFuncNameLmul}(${unrollCall});`);
-          codeLines.push(`    }`);
-        } else {
-          codeLines.push(`    ${retTypeLmul} res;`);
-          codeLines.push(`    for (int i = 0; i < ${numLmul}; i++) {`);
-          codeLines.push(`        res[i] = mipp::${specFuncNameLmul}(${unrollCall});`);
-          codeLines.push(`    }`);
-          codeLines.push(`    return res;`);
-        }
-        codeLines.push(`}`);
-      }
-    }
-  }
-
-  const fullCode = formatFunctionHeaders(codeLines.join("\n"));
-
-  // Flat C99 Code Configuration & Generation
-
-  const flatCfg = {
-    isa: currentIsa,
-    defines: flatDefines,
-    dt: currentDt,
-    mask: currentMask,
-    lmul: effectiveLmul,
-    scalarSize: currentScalarSize
-  };
-
+  const isaLabel = namesMap[currentIsa] || currentIsa.toUpperCase();
+  const tName = (d) => (d.includes(",") ? d.split(",").map((x) => `${x.trim()}_t`).join(" -> ") : `${d}_t`);
+  let fullCode = "";
   let flatStandaloneCode = "";
   let godboltUrl = "";
-  if (currentView === "flat") {
-    flatStandaloneCode = generateFlatSpecializedCode(entry, flatCfg);
-    godboltUrl = buildGodboltUrlForFlat(flatStandaloneCode, currentIsa, flatDefines, currentScalarSize);
+  let godboltRunUrl = "";
+  let abstractCalls = [];
+  let callTreeRoot = null;
+  let loadingHtml = "";
+  if (modalData.loadError) {
+    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">⚠️</span><span>Unable to load the MIPP source code: ${escapeHtml(modalData.loadError)}</span></div>`;
+  } else if (!sources) {
+    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">⏳</span><span>Loading the MIPP source code of ${escapeHtml(isaLabel)}…</span></div>`;
+  } else if (!lmulUndefined) {
+    const abs = buildAbstractCode(entry, sources, algoCfg);
+    abstractCalls = abs.calls || [];
+    callTreeRoot = abs.tree || null;
+    if (abs.rootFound) {
+      currentImplLvl = abs.effectiveLevel;
+    } else {
+      currentImplLvl = "na";
+    }
+    const uses = abstractCalls.filter((c) => !c.scalar).map((c) => `${c.cpp.replace(/<.*$/, "")} (L${c.level === null ? "?" : c.level})`);
+    const head = [
+      "// =============================================================================",
+      `// mipp::${entry.name} | ${isaLabel} | ${tName(currentDt)} | ${currentMask} | LMUL ${isHalfLmul ? "1/2 (-2)" : effectiveLmul}`,
+      `// Compiler flags: ${compilerCfg.options}`,
+      abs.rootFound ? `// Effective level: ${currentImplLvl} (${LEVEL_DESCRIPTIONS[currentImplLvl] || ""})` : "// Not defined for these compiler flags",
+    ];
+    if (uses.length) head.push(`// Calls: ${uses.join(", ")}`);
+    if (abstractCalls.some((c) => c.scalar)) head.push("// The scalar fallback calls the C API of the scalar target (mipp_scalar_*).");
+    head.push("// C++ Functional API (#include <mipp.hpp>): rvd<T, LMUL> = data register, rvm<T, LMUL> = mask.");
+    head.push("// =============================================================================", "");
+    fullCode = head.join("\n") + "\n" + abs.code;
+    if (currentView === "flat") {
+      flatStandaloneCode = buildFlatCode(entry, sources, algoCfg).code;
+      godboltUrl = buildGodboltUrlForFlat(flatStandaloneCode, currentIsa, flatDefines, currentScalarSize);
+      // the same code with a main() that runs it and compares with the scalar reference
+      const runCode = buildFlatCode(entry, sources, algoCfg, { verify: true }).code;
+      godboltRunUrl = buildGodboltUrlForFlat(runCode, currentIsa, flatDefines, currentScalarSize, { execute: true });
+    }
   }
+  // Compare view: the same function on several ISAs, side by side
+  const compareIsas = (modalData.compareIsas && modalData.compareIsas.length)
+    ? modalData.compareIsas.filter((i) => allModalIsas.includes(i))
+    : [currentIsa, ...["sse", "neon", "rvv", "avx", "sve"].filter((i) => i !== currentIsa && allModalIsas.includes(i))].slice(0, 3);
+  let compareHtml = "";
+  if (currentView === "compare" && !lmulUndefined) {
+    const cols = compareIsas.map((isa) => {
+      const src = getLoadedSources(isa);
+      const label = namesMap[isa] || isa.toUpperCase();
+      if (!src) return `<div class="mipp-code-box"><div class="mipp-code-box-header"><span class="mipp-code-lang">${escapeHtml(label)}</span></div><pre><code>Loading…</code></pre></div>`;
+      const cc = getCompilerConfigForFlat(isa, flatDefines, currentScalarSize);
+      const r = buildAbstractCode(entry, src, { ...algoCfg, isa, options: cc.options, compilerLabel: cc.compilerLabel });
+      const lv = r.rootFound ? r.effectiveLevel : null;
+      return `<div class="mipp-code-box">
+        <div class="mipp-code-box-header">
+          <div class="mipp-code-box-header-left">
+            <span class="mipp-code-lang">${escapeHtml(label)}</span>
+            ${levelBadge(lv, lv === null ? "Not defined" : `Effective level ${lv}`)}
+            <span class="mipp-algo-tree-own">${escapeHtml(cc.options)}</span>
+          </div>
+          <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(r.code)}" title="Copy ${escapeHtml(label)} code">${ICON_COPY}</button>
+        </div>
+        <pre><code>${highlightCpp(r.code, {}, { isa })}</code></pre>
+      </div>`;
+    }).join("");
+    compareHtml = `
+      <div class="mipp-modal-ctrl-group mipp-compare-picker">
+        <span class="mipp-control-label">Compare:</span>
+        <div class="mipp-segmented-group">
+          ${allModalIsas.map((isa) => `<button type="button" class="mipp-segment-btn ${compareIsas.includes(isa) ? "active" : ""}" data-modal-compare-isa="${isa}">${escapeHtml((namesMap[isa] || isa.toUpperCase()).replace("ARM ", ""))}</button>`).join("")}
+        </div>
+      </div>
+      <div class="mipp-algo-compare">${cols}</div>`;
+  }
+  const treeHas = (n, f) => Boolean(n) && (f(n) || n.children.some((c) => treeHas(c, f)));
+  const maskBySelect = treeHas(callTreeRoot, (n) => { const p = parseCName(n.cName); return Boolean(p) && p.func === "select"; });
+  const notes = contextNotes(currentIsa, effectiveLmul, currentMask, maskBySelect);
+  const notesHtml = notes.length ? `<div class="mipp-algo-note mipp-algo-context"><span class="mipp-algo-note-icon">📐</span><span>${notes.join("<br>")}</span></div>` : "";
+  const treeHtml = callTreeRoot ? `
+    <div class="mipp-algo-tree">
+      <div class="mipp-algo-tree-title">How it is built <span class="mipp-algo-tree-own">— each function with what its body is and its level: the highest level of everything it uses (<a href="${DOCS}implementation_levels/" target="_blank">implementation levels</a>)</span></div>
+      <ul>${renderTree(callTreeRoot, currentIsa)}</ul>
+    </div>` : "";
+  const lvlDescFinal = LEVEL_DESCRIPTIONS[currentImplLvl] || (currentImplLvl === "na" ? "Not Supported" : `Level ${currentImplLvl}`);
 
   const VARIANT_LETTERS = { unmasked: "U", mask: "M", maskz: "Z", masks: "S" };
   const VARIANT_TITLES = {
@@ -573,6 +349,7 @@ export function renderAlgoModal(modalData) {
             <h3 class="mipp-modal-title" style="margin: 0;">Algorithm: <code>mipp::${escapeHtml(entry.name)}</code></h3>
           </div>
           <div style="display: flex; gap: 0.45rem; align-items: center;">
+            ${(modalData.history && modalData.history.length) ? `<button class="mipp-modal-share-btn" id="mipp-algo-modal-back" title="Back to ${escapeHtml(modalData.history[modalData.history.length - 1].entry.name)}" aria-label="Back">←</button>` : ""}
             <button class="mipp-modal-share-btn" id="mipp-algo-modal-share" title="Copy direct link to this algorithm" aria-label="Share direct link">🔗</button>
             <button class="mipp-modal-close-btn" id="mipp-algo-modal-close" title="Close modal" aria-label="Close modal">×</button>
           </div>
@@ -637,14 +414,17 @@ export function renderAlgoModal(modalData) {
             <button type="button" class="mipp-modal-tab-btn ${currentView === 'flat' ? 'active' : ''}" data-modal-view="flat" role="tab" aria-selected="${currentView === 'flat'}">
               Flat C Code
             </button>
+            <button type="button" class="mipp-modal-tab-btn ${currentView === 'compare' ? 'active' : ''}" data-modal-view="compare" role="tab" aria-selected="${currentView === 'compare'}">
+              Compare ISAs
+            </button>
           </div>
 
           <!-- Active View Content -->
-          ${lmulUndefined ? undefinedLmulNotice(entry, effectiveLmul) : currentView === 'abstract' ? `
-            <!-- Register Types Note (Abstract View Only) -->
+          ${lmulUndefined ? undefinedLmulNotice(entry, effectiveLmul) : currentView === 'compare' ? `${notesHtml}${compareHtml}` : loadingHtml ? loadingHtml : currentView === 'abstract' ? `
+            ${notesHtml}
             <div class="mipp-algo-note">
               <span class="mipp-algo-note-icon">💡</span>
-              <span><strong>Registers:</strong> <code>rvd&lt;T, LMUL&gt;</code> represents vector <strong>data</strong> registers, and <code>rvm&lt;T, LMUL&gt;</code> represents vector <strong>mask</strong> registers.</span>
+              <span>The code of the MIPP headers for these flags, written with the C++ Functional API: <code>rvd&lt;T, LMUL&gt;</code> is a <strong>data</strong> register, <code>rvm&lt;T, LMUL&gt;</code> a <strong>mask</strong> register. Each <code>mipp::</code> call is another MIPP function, with its own level.</span>
             </div>
 
             <!-- Abstract C++ Code Box -->
@@ -652,24 +432,31 @@ export function renderAlgoModal(modalData) {
               <div class="mipp-code-box-header">
                 <div class="mipp-code-box-header-left" style="display: flex; gap: 0.55rem; align-items: center; flex-wrap: wrap;">
                   <span class="mipp-code-lang">Abstract C++ Implementation</span>
-                  <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Implementation Level: Level ${currentImplLvl} (${escapeHtml(lvlDesc)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
+                  <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Effective implementation level: Level ${currentImplLvl} (${escapeHtml(lvlDescFinal)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
                 </div>
                 <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(fullCode)}" title="Copy algorithm code">
                   ${ICON_COPY}
                 </button>
               </div>
-              <pre><code>${highlightCpp(fullCode)}</code></pre>
+              <pre><code>${highlightCpp(fullCode, {}, { isa: currentIsa })}</code></pre>
             </div>
+            ${treeHtml}
           ` : `
+            <div class="mipp-algo-note">
+              <span class="mipp-algo-note-icon">💡</span>
+              <span>Self-contained C: the function and everything it uses, as in the MIPP headers. Open it in Godbolt and look at the assembly of <code>test</code>: the MIPP calls are inlined, only the instructions of the operation remain in the loop.</span>
+            </div>
+            ${notesHtml}
             <!-- Flat C99 Code Box -->
             <div class="mipp-code-box">
               <div class="mipp-code-box-header">
                 <div class="mipp-code-box-header-left" style="display: flex; gap: 0.55rem; align-items: center; flex-wrap: wrap;">
                   <span class="mipp-code-lang">Flat C Code</span>
-                  <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Implementation Level: Level ${currentImplLvl} (${escapeHtml(lvlDesc)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
+                  <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Effective implementation level: Level ${currentImplLvl} (${escapeHtml(lvlDescFinal)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
-                  <a href="${godboltUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-btn" title="Open and compile in Godbolt">
+                  <a href="${godboltRunUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-run-link" title="Open in Godbolt with a main() that runs test() once and compares the result with the scalar reference of MIPP">Run</a>
+                  <a href="${godboltUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-btn" title="Open in Godbolt and look at the assembly of test()">
                     ${ICON_GODBOLT}
                     <span>Open in Godbolt</span>
                   </a>
@@ -678,7 +465,7 @@ export function renderAlgoModal(modalData) {
                   </button>
                 </div>
               </div>
-              <pre><code>${highlightCpp(flatStandaloneCode, entry.scalar_macros || {})}</code></pre>
+              <pre><code>${highlightCpp(flatStandaloneCode, entry.scalar_macros || {}, { isa: currentIsa })}</code></pre>
             </div>
           `}
         </div>
