@@ -50,7 +50,9 @@ The main fields of a `primitives` entry:
 
 The levels of the functions that change the LMUL between `m1` and `d2` (`low`, `high`, `combine`, `wcvt`, `ncvt`) do not come from the candidate resolution: they are given by the half-vector templates. For the ISAs with half-vectors by mask, the script gets them from `compute_changing_levels()` (`codegen/ldiv_mask.py`), which runs the half-vector generation without writing anything.
 
-To make `mkdocs serve` pick up a new data file without a restart, the script also copies it to `site/` and to the temporary directories of a running `mkdocs serve`.
+The file is written without indentation, since only the Explorer reads it. `data.js` resolves its URL from the module itself (`../data/mipp_api_index.json` relative to `assets/explorer/data.js`), so the Explorer works whatever the base path of the site (`/MIPP/` on GitHub Pages). It is fetched with `cache: "no-cache"`: the browser revalidates its copy with the server (`ETag` / `Last-Modified`) and downloads the file again only when it changed.
+
+To make `mkdocs serve` pick up a new data file without a restart, the script also copies it to `site/` and to the temporary directories of a running `mkdocs serve`. `mkdocs serve` sends no cache validators, so locally the file is downloaded at each visit.
 
 ---
 

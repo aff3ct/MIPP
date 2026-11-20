@@ -1128,7 +1128,8 @@ def generate_mipp_api_data(project_root=None):
     }
 
     with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(export_payload, f, indent=2, ensure_ascii=False)
+        # Compact: the file is only read by the Explorer (about half the size of indent=2)
+        json.dump(export_payload, f, separators=(",", ":"), ensure_ascii=False)
 
     # Live sync to site/ and active MkDocs livereload temporary cache directories
     import glob, shutil

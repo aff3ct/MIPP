@@ -112,72 +112,66 @@ export const INTRINSIC_INDEX = new Map();
 export async function loadApiData() {
   if (apiData.length > 0) return apiData;
 
-  const candidatePaths = [
-    "../../assets/data/mipp_api_index.json",
-    "../assets/data/mipp_api_index.json",
-    "assets/data/mipp_api_index.json",
-    "/assets/data/mipp_api_index.json",
-  ];
+  // Resolved from this module (assets/explorer/data.js), so it does not depend on
+  // the page URL nor on the site base path (e.g. /MIPP/ on GitHub Pages).
+  // "no-cache" revalidates with the server (ETag / Last-Modified): the file is
+  // downloaded again only when it changed, otherwise the browser cache answers.
+  const dataUrl = new URL("../data/mipp_api_index.json", import.meta.url).href;
 
-  for (const path of candidatePaths) {
-    try {
-      const fetchUrl = path + (path.includes("?") ? "&" : "?") + "v=" + Date.now();
-      const resp = await fetch(fetchUrl, { cache: "no-cache" });
-      if (resp.ok) {
-        const contentLength = resp.headers.get("content-length");
-        const totalBytes = contentLength ? parseInt(contentLength, 10) : 0;
-        if (resp.body && window.ReadableStream && totalBytes > 0) {
-          const reader = resp.body.getReader();
-          let loadedBytes = 0;
-          const chunks = [];
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            chunks.push(value);
-            loadedBytes += value.length;
-            const pct = Math.min(100, Math.round((loadedBytes / totalBytes) * 100));
-            const fillEl = document.getElementById("mipp-load-progress-fill");
-            const textEl = document.getElementById("mipp-load-progress-text");
-            if (fillEl) fillEl.style.width = `${pct}%`;
-            if (textEl) {
-              textEl.textContent = `${pct}% (${(loadedBytes / (1024 * 1024)).toFixed(1)} MB / ${(totalBytes / (1024 * 1024)).toFixed(1)} MB)`;
-            }
-          }
-          const allChunks = new Uint8Array(loadedBytes);
-          let pos = 0;
-          for (const chunk of chunks) {
-            allChunks.set(chunk, pos);
-            pos += chunk.length;
-          }
-          const text = new TextDecoder("utf-8").decode(allChunks);
-          const rawObj = JSON.parse(text);
-          if (Array.isArray(rawObj)) {
-            apiData = rawObj;
-            apiMetadata = { primitives: rawObj, isas: {}, datatypes: {}, levels: {} };
-          } else {
-            apiData = rawObj.primitives || [];
-            apiMetadata = rawObj;
-          }
-          initApiDataIndexes(apiData, apiMetadata);
-          return apiData;
-        } else {
-          const rawObj = await resp.json();
-          if (Array.isArray(rawObj)) {
-            apiData = rawObj;
-            apiMetadata = { primitives: rawObj, isas: {}, datatypes: {}, levels: {} };
-          } else {
-            apiData = rawObj.primitives || [];
-            apiMetadata = rawObj;
-          }
-          initApiDataIndexes(apiData, apiMetadata);
-          return apiData;
-        }
-      }
-    } catch (err) {
-      // Try next candidate
-    }
+  let resp;
+  try {
+    resp = await fetch(dataUrl, { cache: "no-cache" });
+  } catch (err) {
+    throw new Error(`Unable to load ${dataUrl}: ${err.message}`);
   }
-  throw new Error("Unable to load mipp_api_index.json from candidate paths.");
+  if (!resp.ok) throw new Error(`Unable to load ${dataUrl}: HTTP ${resp.status}`);
+
+  // Content-Length is the size on the wire: with gzip / brotli it is smaller than
+  // the decoded stream, so only show a percentage for an uncompressed response.
+  const contentLength = parseInt(resp.headers.get("content-length") || "0", 10);
+  const totalBytes = resp.headers.get("content-encoding") ? 0 : contentLength;
+  const fillEl = document.getElementById("mipp-load-progress-fill");
+  const textEl = document.getElementById("mipp-load-progress-text");
+  const mb = (n) => (n / (1024 * 1024)).toFixed(1);
+
+  let rawObj;
+  if (resp.body && window.ReadableStream) {
+    const reader = resp.body.getReader();
+    let loadedBytes = 0;
+    const chunks = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loadedBytes += value.length;
+      if (totalBytes > 0) {
+        const pct = Math.min(100, Math.round((loadedBytes / totalBytes) * 100));
+        if (fillEl) fillEl.style.width = `${pct}%`;
+        if (textEl) textEl.textContent = `${pct}% (${mb(loadedBytes)} MB / ${mb(totalBytes)} MB)`;
+      } else if (textEl) {
+        textEl.textContent = `${mb(loadedBytes)} MB`;
+      }
+    }
+    const allChunks = new Uint8Array(loadedBytes);
+    let pos = 0;
+    for (const chunk of chunks) {
+      allChunks.set(chunk, pos);
+      pos += chunk.length;
+    }
+    rawObj = JSON.parse(new TextDecoder("utf-8").decode(allChunks));
+  } else {
+    rawObj = await resp.json();
+  }
+
+  if (Array.isArray(rawObj)) {
+    apiData = rawObj;
+    apiMetadata = { primitives: rawObj, isas: {}, datatypes: {}, levels: {} };
+  } else {
+    apiData = rawObj.primitives || [];
+    apiMetadata = rawObj;
+  }
+  initApiDataIndexes(apiData, apiMetadata);
+  return apiData;
 }
 
 export function initApiDataIndexes(data, metadata = null) {

@@ -255,13 +255,63 @@ def level_to_badge(level):
         return badge_na
 
 
+# ---------------------------------------------------------------------------
+# Hardware Support pages: titles and navigation
+# ---------------------------------------------------------------------------
+
+INTERSECTION_TITLE = "All Targets"
+
+def isa_display_name(isa_name):
+    """Display name of an ISA ('AVX-512'), from 'display_name' of <isa>_explorer.json."""
+    if isa_name == "intersection":
+        return INTERSECTION_TITLE
+    explorer_file = os.path.join(path, "simd_ext", isa_name, f"{isa_name}_explorer.json")
+    try:
+        with open(explorer_file, encoding="utf-8") as f:
+            return json.load(f).get("display_name", isa_name.upper())
+    except OSError:
+        return isa_name.upper()
+
+def category_title(category):
+    return category[:1].upper() + category[1:]
+
+def write_isa_page_header(f, isa_name, masked):
+    name = isa_display_name(isa_name)
+    variants = "masked variants (`mask`, `maskz`, `masks`)" if masked else "unmasked functions"
+    print(f"# {name}{' (Masked)' if masked else ''}\n", file=f)
+    if isa_name == "intersection":
+        intro = (f"Worst implementation level among all the targets, for the {variants} at LMUL = 1: "
+                 "a function at <span class=\"mipp-badge lvl-0\">L0</span> here is native on every target.")
+    else:
+        intro = (f"Implementation level of the {variants} on {name}, at LMUL = 1. "
+                 "When the level depends on a compiler flag, the best level is shown.")
+    print(intro + " See the [legend](index.md#implementation-levels).", file=f)
+
+MASK_VARIANT_TITLES = {"mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": "Source-Masked"}
+
+def write_isas_support_nav(base_dir, isa_names):
+    """Navigation of docs/isas_support/ (mkdocs-awesome-pages-plugin)."""
+    lines = ["nav:", "  - Overview: index.md", f"  - {INTERSECTION_TITLE}: intersection.md"]
+    for isa_name in isa_names:
+        name = isa_display_name(isa_name)
+        lines.append(f"  - {name}: {isa_name}.md")
+        lines.append(f"  - {name} (Masked): {isa_name}_masked.md")
+    with open(os.path.join(base_dir, ".pages"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+def write_funcs_support_nav(base_dir):
+    """Navigation of docs/funcs_support/: overview first, then the categories."""
+    with open(os.path.join(base_dir, ".pages"), "w", encoding="utf-8") as f:
+        f.write("nav:\n  - Overview: index.md\n  - ...\n")
+
 def write_mipp_infos(mipp_infos, base_dir):
     for isa_info in mipp_infos.isa_infos:
         file_path = os.path.join(base_dir, f"{isa_info.isa_name}.md")
         with open(file_path, "w", encoding="utf-8") as f:
+            write_isa_page_header(f, isa_info.isa_name, masked=False)
             for category, funcs in categories.items():
                 dttypes = all_datatypes
-                print(f"\n## {category}\n", file=f)
+                print(f"\n## {category_title(category)}\n", file=f)
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                 for func in funcs:
@@ -356,13 +406,14 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
     for isa_info in mipp_infos.isa_infos:
         file_path = os.path.join(base_dir, f"{isa_info.isa_name}_masked.md")
         with open(file_path, "w", encoding="utf-8") as f:
+            write_isa_page_header(f, isa_info.isa_name, masked=True)
             dttypes = all_datatypes
             for mkind in ["mask", "maskz", "masks"]:
-                print(f"\n## Variant: `{mkind}`\n", file=f)
+                print(f"\n## {MASK_VARIANT_TITLES[mkind]} (`{mkind}`)\n", file=f)
                 for category, funcs in categories.items():
                     if not exists_msk_in_category(category, mkind):
                         continue
-                    print(f"\n### {category}\n", file=f)
+                    print(f"\n### {category_title(category)}\n", file=f)
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                     for func in funcs:
@@ -975,7 +1026,7 @@ Every MIPP function is resolved against a deterministic 4-level hierarchy:
 
 ## Universal Portability & Guaranteed Vectorization
 
-- [**Universal Architecture Intersection Matrix**](intersection.md): Lists operations guaranteed to execute as SIMD vector instructions across **all** supported target ISAs. If an algorithm restricts its primitives to this matrix, it is guaranteed to vectorize on x86, ARM, and RISC-V targets without hitting scalar fallbacks.
+- [**All Targets (Intersection Matrix)**](intersection.md): For each function and datatype, the worst level among **all** the supported target ISAs. A primitive shown at <span class="mipp-badge lvl-0">L0</span>, <span class="mipp-badge lvl-1">L1</span> or <span class="mipp-badge lvl-2">L2</span> there executes as SIMD instructions on x86, ARM and RISC-V alike; one at <span class="mipp-badge lvl-3">L3</span> falls back to scalar code on at least one target.
 
 ---
 
@@ -1172,6 +1223,7 @@ def main(argv=None):
 
         # Generate ISA Support Guide Landing Page
         write_isas_support_index(isas_support_dir)
+        write_isas_support_nav(isas_support_dir, [i.isa_name for i in mipp_infos.isa_infos])
 
     if "funcs_support" in parts:
         # Generate Function Support Documentation
@@ -1187,6 +1239,7 @@ def main(argv=None):
 
         # Generate Function Reference Guide Landing Page
         write_funcs_support_index(funcs_support_dir, categories)
+        write_funcs_support_nav(funcs_support_dir)
 
     if "explorer" in parts:
         # Export Interactive API Explorer metadata
