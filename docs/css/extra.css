@@ -1,10 +1,9 @@
 /* ==========================================================================
-   MIPP Modern Documentation Stylesheet
-   High-Performance Computing & Silicon Theme
+   MIPP documentation stylesheet (overrides of Material for MkDocs)
    ========================================================================== */
 
 /* --------------------------------------------------------------------------
-   1. Design Tokens & Palette Customization
+   1. Design tokens and palettes
    -------------------------------------------------------------------------- */
 
 :root {
@@ -24,9 +23,26 @@
   --mipp-radius-md: 10px;
   --mipp-radius-lg: 16px;
   --mipp-transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Implementation levels (L0 to L3, N/A): shared by the docs and the API Explorer */
+  --mipp-lvl-0: #10b981;
+  --mipp-lvl-0-bg: rgba(16, 185, 129, 0.12);
+  --mipp-lvl-0-border: rgba(16, 185, 129, 0.3);
+  --mipp-lvl-1: #3b82f6;
+  --mipp-lvl-1-bg: rgba(59, 130, 246, 0.12);
+  --mipp-lvl-1-border: rgba(59, 130, 246, 0.3);
+  --mipp-lvl-2: #f59e0b;
+  --mipp-lvl-2-bg: rgba(245, 158, 11, 0.12);
+  --mipp-lvl-2-border: rgba(245, 158, 11, 0.3);
+  --mipp-lvl-3: #6b7280;
+  --mipp-lvl-3-bg: rgba(107, 114, 128, 0.12);
+  --mipp-lvl-3-border: rgba(107, 114, 128, 0.3);
+  --mipp-lvl-na: #94a3b8;
+  --mipp-lvl-na-bg: rgba(148, 163, 184, 0.1);
+  --mipp-lvl-na-border: rgba(148, 163, 184, 0.2);
 }
 
-/* Dark Mode (Slate / Obsidian) */
+/* Dark scheme (slate) */
 [data-md-color-scheme="slate"] {
   --md-default-bg-color: #0b0f19;
   --md-default-bg-color--light: #111827;
@@ -52,9 +68,25 @@
   --mipp-card-bg: rgba(17, 24, 39, 0.7);
   --mipp-card-border: rgba(255, 255, 255, 0.08);
   --mipp-card-hover-border: rgba(56, 189, 248, 0.4);
+
+  --mipp-lvl-0: #34d399;
+  --mipp-lvl-0-bg: rgba(52, 211, 153, 0.15);
+  --mipp-lvl-0-border: rgba(52, 211, 153, 0.35);
+  --mipp-lvl-1: #60a5fa;
+  --mipp-lvl-1-bg: rgba(96, 165, 250, 0.15);
+  --mipp-lvl-1-border: rgba(96, 165, 250, 0.35);
+  --mipp-lvl-2: #fbbf24;
+  --mipp-lvl-2-bg: rgba(251, 191, 36, 0.15);
+  --mipp-lvl-2-border: rgba(251, 191, 36, 0.35);
+  --mipp-lvl-3: #9ca3af;
+  --mipp-lvl-3-bg: rgba(156, 163, 175, 0.15);
+  --mipp-lvl-3-border: rgba(156, 163, 175, 0.3);
+  --mipp-lvl-na: #64748b;
+  --mipp-lvl-na-bg: rgba(100, 116, 139, 0.12);
+  --mipp-lvl-na-border: rgba(100, 116, 139, 0.25);
 }
 
-/* Light Mode (Crisp Clean Slate) */
+/* Light scheme (default) */
 [data-md-color-scheme="default"] {
   --md-default-bg-color: #f8fafc;
   --md-default-bg-color--light: #ffffff;
@@ -82,44 +114,39 @@
 }
 
 /* --------------------------------------------------------------------------
-   2. Global Typography & Layout Polishing
+   2. Typography and layout
    -------------------------------------------------------------------------- */
 
-/* Expanded Layout for Spacious & Airy Reading Experience with Outer Breathing Room */
+/* Wider grid (84rem) with side padding */
 .md-grid {
-  max-width: 84rem !important;
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
+  max-width: 84rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .md-header__inner {
-  padding-top: 0.35rem !important;
-  padding-bottom: 0.35rem !important;
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
-}
-
-.md-tabs__inner {
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
+  padding-top: 0.35rem;
+  padding-bottom: 0.35rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 /* Full-width body for homepage and pages with hidden navigation */
 .md-content:only-child,
 .md-main__inner:not(:has(.md-sidebar--primary:not([hidden]))) .md-content {
-  max-width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
-/* Width Harmony: ensure all content blocks (p, headings, pre, admonitions, tables)
+/* Same maximum width for all the content blocks (p, headings, pre, admonitions, tables)
    align to the exact same maximum content width so tables never stick out wider than text */
 .md-content__inner {
-  max-width: 100% !important;
+  max-width: 100%;
 }
 
 .md-typeset {
-  max-width: 100% !important;
+  max-width: 100%;
   font-family: var(--mipp-font-sans);
   letter-spacing: -0.011em;
 }
@@ -148,8 +175,8 @@
 .md-typeset__scrollwrap,
 .md-typeset__table,
 .md-typeset div.arithmatex {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Eliminate full-bleed negative margins on code blocks and formulas across all viewports */
@@ -159,9 +186,9 @@
 .md-typeset pre,
 .md-typeset .highlighttable,
 .md-typeset div.arithmatex {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  width: 100% !important;
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
 }
 
 code,
@@ -184,15 +211,15 @@ pre,
 }
 
 [data-md-color-scheme="default"] .md-typeset :not(pre)>code {
-  background-color: #ffffff !important;
-  color: #0284c7 !important;
+  background-color: #ffffff;
+  color: #0284c7;
   border: 1px solid #e2e8f0;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 [data-md-color-scheme="slate"] .md-typeset :not(pre)>code {
-  background-color: rgba(14, 165, 233, 0.12) !important;
-  color: #38bdf8 !important;
+  background-color: rgba(14, 165, 233, 0.12);
+  color: #38bdf8;
   border: 1px solid rgba(14, 165, 233, 0.28);
 }
 
@@ -204,30 +231,30 @@ pre,
 }
 
 /* --------------------------------------------------------------------------
-   3. Glassmorphism Navigation & Header
+   3. Header, tabs and search
    -------------------------------------------------------------------------- */
 
 .md-header {
-  background-color: var(--mipp-glass-bg) !important;
+  background-color: var(--mipp-glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid var(--mipp-card-border);
 }
 
 .md-header__button.md-logo img {
-  width: 32px !important;
-  height: 32px !important;
-  border-radius: 8px !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Tabs bar shares the same unified glass header with a subtle hairline divider */
+/* Tabs bar: same translucent background as the header, thin divider */
 .md-tabs {
-  background-color: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border-top: 1px solid var(--mipp-card-border);
-  border-bottom: none !important;
+  border-bottom: none !important; /* Material adds one with [data-md-color-primary=white] */
 }
 
 .md-tabs__link {
@@ -239,7 +266,7 @@ pre,
 
 /* Light Mode Header & Tabs Explicit High-Contrast Text */
 [data-md-color-scheme="default"] .md-header {
-  color: #0f172a !important;
+  color: #0f172a;
 }
 
 [data-md-color-scheme="default"] .md-header__title,
@@ -253,11 +280,11 @@ pre,
 [data-md-color-scheme="default"] .md-source,
 [data-md-color-scheme="default"] .md-source__repository,
 [data-md-color-scheme="default"] .md-source__facts {
-  color: #334155 !important;
+  color: #334155;
 }
 
 [data-md-color-scheme="default"] .md-tabs__link {
-  color: #475569 !important;
+  color: #475569;
 }
 
 [data-md-color-scheme="default"] .md-tabs__item--active .md-tabs__link,
@@ -266,10 +293,10 @@ pre,
   font-weight: 600;
 }
 
-/* Light Mode Modern Clean Search Bar */
+/* Search bar (light) */
 [data-md-color-scheme="default"] .md-search__form {
-  background-color: #ffffff !important;
-  border: 1px solid #cbd5e1 !important;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   border-radius: var(--mipp-radius-sm);
   transition: var(--mipp-transition);
@@ -283,30 +310,30 @@ pre,
 }
 
 [data-md-color-scheme="default"] .md-search__input {
-  background-color: transparent !important;
-  color: #0f172a !important;
-  border: none !important;
+  background-color: transparent;
+  color: #0f172a;
+  border: none;
 }
 
 [data-md-color-scheme="default"] .md-search__input::placeholder {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 [data-md-color-scheme="default"] .md-search__icon {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 /* Light Mode Search Results Popup */
 [data-md-color-scheme="default"] .md-search__output {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  color: #0f172a;
   border: 1px solid #e2e8f0;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
 }
 
 [data-md-color-scheme="default"] .md-search-result__meta {
-  background-color: #f8fafc !important;
-  color: #64748b !important;
+  background-color: #f8fafc;
+  color: #64748b;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -320,11 +347,11 @@ pre,
 [data-md-color-scheme="slate"] .md-source,
 [data-md-color-scheme="slate"] .md-source__repository,
 [data-md-color-scheme="slate"] .md-source__facts {
-  color: #f1f5f9 !important;
+  color: #f1f5f9;
 }
 
 [data-md-color-scheme="slate"] .md-tabs__link {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 [data-md-color-scheme="slate"] .md-tabs__item--active .md-tabs__link,
@@ -335,8 +362,8 @@ pre,
 
 /* Dark Mode Search Bar */
 [data-md-color-scheme="slate"] .md-search__form {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--mipp-radius-sm);
   transition: var(--mipp-transition);
 }
@@ -349,21 +376,21 @@ pre,
 }
 
 [data-md-color-scheme="slate"] .md-search__input {
-  background-color: transparent !important;
-  color: #f1f5f9 !important;
-  border: none !important;
+  background-color: transparent;
+  color: #f1f5f9;
+  border: none;
 }
 
 [data-md-color-scheme="slate"] .md-search__input::placeholder {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 [data-md-color-scheme="slate"] .md-search__icon {
-  color: #94a3b8 !important;
+  color: #94a3b8;
 }
 
 /* --------------------------------------------------------------------------
-   4. MIPP Implementation Levels Badges
+   4. Implementation level badges (L0 to L3)
    -------------------------------------------------------------------------- */
 
 /* Generic badge container (Pill shape identical to Explorer) */
@@ -382,114 +409,73 @@ pre,
   white-space: nowrap;
 }
 
-/* Level 0 - Native Hardware Intrinsics */
-.mipp-lvl-0,
+/* Native Hardware */
 .lvl-0 {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: var(--mipp-lvl-0-bg);
+  color: var(--mipp-lvl-0);
+  border: 1px solid var(--mipp-lvl-0-border);
 }
 
-/* Level 1 - ISA Dedicated Emulation */
-.mipp-lvl-1,
+/* Dedicated Emulation */
 .lvl-1 {
-  background: rgba(59, 130, 246, 0.12);
-  color: #3b82f6;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--mipp-lvl-1-bg);
+  color: var(--mipp-lvl-1);
+  border: 1px solid var(--mipp-lvl-1-border);
 }
 
-/* Level 2 - Generic Portable Emulation */
-.mipp-lvl-2,
+/* Generic Emulation */
 .lvl-2 {
-  background: rgba(245, 158, 11, 0.12);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: var(--mipp-lvl-2-bg);
+  color: var(--mipp-lvl-2);
+  border: 1px solid var(--mipp-lvl-2-border);
 }
 
-/* Level 3 - Scalar Loop Fallback */
-.mipp-lvl-3,
+/* Scalar Fallback */
 .lvl-3 {
-  background: rgba(107, 114, 128, 0.12);
-  color: #6b7280;
-  border: 1px solid rgba(107, 114, 128, 0.3);
+  background: var(--mipp-lvl-3-bg);
+  color: var(--mipp-lvl-3);
+  border: 1px solid var(--mipp-lvl-3-border);
 }
 
-/* Level NA */
-.mipp-lvl-na,
+/* not applicable */
 .lvl-na {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-/* Dark mode palette adjustments (matching Explorer slate mode) */
-[data-md-color-scheme="slate"] .mipp-lvl-0,
-[data-md-color-scheme="slate"] .lvl-0 {
-  background: rgba(52, 211, 153, 0.15);
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.35);
-}
-
-[data-md-color-scheme="slate"] .mipp-lvl-1,
-[data-md-color-scheme="slate"] .lvl-1 {
-  background: rgba(96, 165, 250, 0.15);
-  color: #60a5fa;
-  border-color: rgba(96, 165, 250, 0.35);
-}
-
-[data-md-color-scheme="slate"] .mipp-lvl-2,
-[data-md-color-scheme="slate"] .lvl-2 {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.35);
-}
-
-[data-md-color-scheme="slate"] .mipp-lvl-3,
-[data-md-color-scheme="slate"] .lvl-3 {
-  background: rgba(156, 163, 175, 0.15);
-  color: #9ca3af;
-  border-color: rgba(156, 163, 175, 0.3);
-}
-
-[data-md-color-scheme="slate"] .mipp-lvl-na,
-[data-md-color-scheme="slate"] .lvl-na {
-  background: rgba(100, 116, 139, 0.12);
-  color: #64748b;
-  border-color: rgba(100, 116, 139, 0.25);
+  background: var(--mipp-lvl-na-bg);
+  color: var(--mipp-lvl-na);
+  border: 1px solid var(--mipp-lvl-na-border);
 }
 
 /* --------------------------------------------------------------------------
-   5. Code Blocks & Tabs Styling
+   5. Code blocks and content tabs
    -------------------------------------------------------------------------- */
 
 .md-typeset pre {
   margin: 1rem 0;
-  max-width: 100% !important;
-  width: 100% !important;
+  max-width: 100%;
+  width: 100%;
 }
 
 .md-typeset pre>code,
 .md-content__inner>.highlight>pre>code,
 .md-content__inner>pre>code {
-  border-radius: var(--mipp-radius-md) !important;
-  border: 1px solid var(--mipp-card-border) !important;
-  border-left-width: 1px !important;
-  border-right-width: 1px !important;
+  border-radius: var(--mipp-radius-md);
+  border: 1px solid var(--mipp-card-border);
+  border-left-width: 1px;
+  border-right-width: 1px;
   font-size: 0.72rem;
   line-height: 1.45;
   padding: 0.65rem 0.85rem;
-  box-sizing: border-box !important;
-  max-width: 100% !important;
-  width: 100% !important;
-  overflow-x: auto !important;
+  box-sizing: border-box;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: auto;
   display: block !important;
 }
 
 [data-md-color-scheme="default"] .md-typeset pre>code,
 [data-md-color-scheme="default"] .md-content__inner>.highlight>pre>code {
-  background-color: var(--md-code-bg-color) !important;
+  background-color: var(--md-code-bg-color);
   color: var(--md-code-fg-color);
-  border-color: #e2e8f0 !important;
+  border-color: #e2e8f0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
@@ -497,7 +483,7 @@ pre,
    so that it does not overflow its rounded corners */
 [data-md-color-scheme="default"] .highlight,
 [data-md-color-scheme="default"] .highlight>pre {
-  background-color: transparent !important;
+  background-color: transparent;
 }
 
 /* Inside a tab, the white code is flush with the white tab content: a thin
@@ -512,9 +498,9 @@ pre,
 
 [data-md-color-scheme="slate"] .md-typeset pre>code,
 [data-md-color-scheme="slate"] .md-content__inner>.highlight>pre>code {
-  background-color: #080c14 !important;
+  background-color: #080c14;
   color: #e2e8f0;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
@@ -531,8 +517,8 @@ pre,
 .md-typeset code .cm,
 .md-typeset code .cs,
 .md-typeset code .sd {
-  color: var(--md-code-hl-comment-color) !important;
-  font-style: italic !important;
+  color: var(--md-code-hl-comment-color);
+  font-style: italic;
 }
 
 /* --------------------------------------------------------------------------
@@ -550,9 +536,9 @@ body[data-toc-hidden="true"] .md-content {
 
 /* TOC Collapse Button in Sidebar Header */
 .md-sidebar--secondary .md-nav__title {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .mipp-toc-collapse-btn {
@@ -616,9 +602,9 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
 /* Tabbed sets (Segmented Control style) */
 .md-typeset .tabbed-set {
-  border-radius: var(--mipp-radius-md) !important;
-  border: 1px solid var(--mipp-card-border) !important;
-  overflow: hidden !important;
+  border-radius: var(--mipp-radius-md);
+  border: 1px solid var(--mipp-card-border);
+  overflow: hidden;
   background: var(--mipp-card-bg);
 }
 
@@ -635,8 +621,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 .md-typeset .tabbed-block pre>code {
   border: none !important;
   border-radius: 0 !important;
-  box-shadow: none !important;
-  margin: 0 !important;
+  box-shadow: none;
+  margin: 0;
 }
 
 /* Text, lists and admonitions inside a tab: inner margin aligned on the text of
@@ -670,48 +656,48 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 }
 
 .md-typeset .tabbed-block .md-typeset__table {
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  margin: 0 !important;
-  background: transparent !important;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin: 0;
+  background: transparent;
 }
 
 .md-typeset .tabbed-block table:not([class]) {
-  margin: 0 !important;
-  border: none !important;
+  margin: 0;
+  border: none;
 }
 
 .md-typeset .tabbed-block table:not([class]) th {
-  border-top: none !important;
+  border-top: none;
   border-top-left-radius: 0 !important;
   border-top-right-radius: 0 !important;
 }
 
 .md-typeset .tabbed-block table:not([class]) tr:last-child td {
-  border-bottom: none !important;
+  border-bottom: none;
 }
 
 /* --------------------------------------------------------------------------
-   6. Admonitions & Compact Modern Tables
+   6. Admonitions and tables
    -------------------------------------------------------------------------- */
 
 .md-typeset .admonition,
 .md-typeset details {
-  border-radius: var(--mipp-radius-md) !important;
-  border-left-width: 4px !important;
-  overflow: hidden !important;
+  border-radius: var(--mipp-radius-md);
+  border-left-width: 4px;
+  overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
   border-top: 1px solid var(--mipp-card-border);
   border-right: 1px solid var(--mipp-card-border);
   border-bottom: 1px solid var(--mipp-card-border);
 }
 
-/* Admonition Title: seamless edge-to-edge color strip with matching rounded top corners */
+/* Admonition title: full-width color strip with rounded top corners */
 .md-typeset .admonition-title,
 .md-typeset summary {
-  max-width: none !important;
-  width: calc(100% + 1.2rem) !important;
+  max-width: none;
+  width: calc(100% + 1.2rem);
   margin: 0 -0.6rem 0.6rem -0.6rem !important;
   border-top-left-radius: inherit !important;
   border-top-right-radius: inherit !important;
@@ -720,51 +706,51 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 /* Table wrapper: eliminate negative margins so tables align perfectly with paragraphs */
 .md-typeset__scrollwrap {
   margin: 1.2rem 0 !important;
-  max-width: 100% !important;
-  width: 100% !important;
+  max-width: 100%;
+  width: 100%;
 }
 
-/* Table container styling with full-width seamless scrolling */
+/* Table container: full width, horizontal scrolling */
 .md-typeset__table {
-  padding: 0 !important;
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: auto !important;
+  padding: 0;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
   border-radius: var(--mipp-radius-md);
   border: 1px solid var(--mipp-card-border);
-  margin: 0 !important;
+  margin: 0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
   background-color: var(--mipp-card-bg);
-  box-sizing: border-box !important;
+  box-sizing: border-box;
 }
 
 /* Compact, dense and readable table cells */
 .md-typeset table:not([class]) {
-  border-collapse: collapse !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  display: table !important;
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 100%;
+  display: table;
   font-size: 0.76rem;
   line-height: 1.35;
-  margin: 0 !important;
-  border: none !important;
-  background: transparent !important;
+  margin: 0;
+  border: none;
+  background: transparent;
 }
 
 .md-typeset table:not([class]) thead,
 .md-typeset table:not([class]) thead tr {
-  background-color: rgba(14, 165, 233, 0.08) !important;
+  background-color: rgba(14, 165, 233, 0.08);
 }
 
 .md-typeset table:not([class]) th {
-  background-color: rgba(14, 165, 233, 0.08) !important;
+  background-color: rgba(14, 165, 233, 0.08);
   font-weight: 700;
   font-size: 0.74rem;
   letter-spacing: 0.02em;
   padding: 0.45rem 0.65rem;
   white-space: nowrap;
-  border-bottom: 2px solid rgba(14, 165, 233, 0.3) !important;
+  border-bottom: 2px solid rgba(14, 165, 233, 0.3);
   color: var(--md-default-fg-color);
   text-align: left;
 }
@@ -805,11 +791,11 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   background-color: rgba(14, 165, 233, 0.05);
 }
 
-/* Architecture & Implementation Matrix: Modern Status Chips */
+/* Level badges in the support matrices */
 .md-typeset table td:has(.mipp-badge),
 .md-typeset table td:has(.twemoji) {
-  text-align: center !important;
-  padding: 0.25rem 0.35rem !important;
+  text-align: center;
+  padding: 0.25rem 0.35rem;
 }
 
 .md-typeset table td .mipp-badge {
@@ -860,75 +846,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   display: block;
 }
 
-/* 0: Native Hardware (Green #28A745) */
-.md-typeset table td>span[style*="28A745"],
-.md-typeset table td>span[style*="28a745"] {
-  background: rgba(34, 197, 94, 0.12) !important;
-  color: #16a34a !important;
-  border: 1px solid rgba(34, 197, 94, 0.3) !important;
-}
-
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="28A745"],
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="28a745"] {
-  background: rgba(34, 197, 94, 0.18) !important;
-  color: #4ade80 !important;
-  border-color: rgba(74, 222, 128, 0.35) !important;
-  box-shadow: 0 0 8px rgba(34, 197, 94, 0.2);
-}
-
-/* 1: Dedicated Emulation (Blue #007BFF / #3B42F5) */
-.md-typeset table td>span[style*="007BFF"],
-.md-typeset table td>span[style*="007bff"],
-.md-typeset table td>span[style*="3B42F5"],
-.md-typeset table td>span[style*="3b42f5"] {
-  background: rgba(14, 165, 233, 0.12) !important;
-  color: #0284c7 !important;
-  border: 1px solid rgba(14, 165, 233, 0.3) !important;
-}
-
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="007BFF"],
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="007bff"],
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="3B42F5"],
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="3b42f5"] {
-  background: rgba(14, 165, 233, 0.18) !important;
-  color: #38bdf8 !important;
-  border-color: rgba(56, 189, 248, 0.35) !important;
-  box-shadow: 0 0 8px rgba(14, 165, 233, 0.2);
-}
-
-/* 2: Generic Emulation (Vibrant Yellow #FFD20D / #ffd20d) */
-.md-typeset table td>span[style*="FFD20D"],
-.md-typeset table td>span[style*="ffd20d"] {
-  background: rgba(255, 210, 13, 0.18) !important;
-  color: #b48200 !important;
-  border: 1px solid rgba(234, 179, 8, 0.45) !important;
-}
-
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="FFD20D"],
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="ffd20d"] {
-  background: rgba(255, 210, 13, 0.16) !important;
-  color: #ffd20d !important;
-  border-color: rgba(255, 210, 13, 0.5) !important;
-  box-shadow: 0 0 8px rgba(255, 210, 13, 0.3);
-}
-
-/* 3: Scalar Fallback & N/A (Slate/Grey #6C757D / #6c757d) */
-.md-typeset table td>span[style*="6C757D"],
-.md-typeset table td>span[style*="6c757d"] {
-  background: rgba(148, 163, 184, 0.1) !important;
-  color: #64748b !important;
-  border: 1px solid rgba(148, 163, 184, 0.2) !important;
-}
-
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="6C757D"],
-[data-md-color-scheme="slate"] .md-typeset table td>span[style*="6c757d"] {
-  background: rgba(148, 163, 184, 0.12) !important;
-  color: #94a3b8 !important;
-  border-color: rgba(148, 163, 184, 0.2) !important;
-}
-
 /* --------------------------------------------------------------------------
-   7. Hero Section & Modern Landing Page Components
+   7. Home page (hero, buttons, cards)
    -------------------------------------------------------------------------- */
 
 .mipp-hero {
@@ -936,26 +855,6 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   text-align: center;
   max-width: 900px;
   margin: 0 auto;
-}
-
-.mipp-hero-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.9rem;
-  border-radius: 9999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  background: rgba(14, 165, 233, 0.12);
-  color: #0284c7;
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  margin-bottom: 1.2rem;
-  box-shadow: 0 0 16px rgba(14, 165, 233, 0.12);
-}
-
-[data-md-color-scheme="slate"] .mipp-hero-tag {
-  color: #38bdf8;
 }
 
 .mipp-hero-title {
@@ -975,7 +874,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   -webkit-text-fill-color: transparent;
 }
 
-/* Punchy MIPPv2 Silicon Chip Badge */
+/* MIPPv2 badge next to the title */
 .mipp-hero-title .mippv2,
 .mippv2 {
   display: inline-flex;
@@ -995,23 +894,23 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   cursor: default;
 }
 
-/* Light Mode: Vibrant Electric Indigo / Cyan Badge */
+/* Light scheme */
 [data-md-color-scheme="default"] .mipp-hero-title .mippv2,
 [data-md-color-scheme="default"] .mippv2 {
   background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
-  color: #ffffff !important;
-  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
   border: 1px solid rgba(14, 165, 233, 0.9);
   box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Dark Mode: Cyber Neon Cyan / Indigo Badge */
+/* Dark scheme */
 [data-md-color-scheme="slate"] .mipp-hero-title .mippv2,
 [data-md-color-scheme="slate"] .mippv2 {
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(99, 102, 241, 0.35) 100%);
-  color: #38bdf8 !important;
-  -webkit-text-fill-color: #38bdf8 !important;
+  color: #38bdf8;
+  -webkit-text-fill-color: #38bdf8;
   border: 1px solid rgba(56, 189, 248, 0.75);
   box-shadow: 0 0 18px rgba(14, 165, 233, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
   text-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
@@ -1025,7 +924,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   font-size: 1.15rem;
   line-height: 1.6;
   color: var(--md-default-fg-color--light);
-  margin-bottom: 2rem !important;
+  margin-bottom: 2rem;
   max-width: 750px;
   margin-left: auto;
   margin-right: auto;
@@ -1051,9 +950,9 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   font-size: 0.9rem;
   font-weight: 600;
   line-height: 1.2;
-  white-space: nowrap !important;
+  white-space: nowrap;
   flex-shrink: 0;
-  text-decoration: none !important;
+  text-decoration: none;
   transition: var(--mipp-transition);
 }
 
@@ -1090,86 +989,6 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 /* --------------------------------------------------------------------------
    Featured MIPP API Explorer Showcase Card (Homepage)
    -------------------------------------------------------------------------- */
-.mipp-explorer-showcase-card {
-  margin: 2rem 0;
-  padding: 1.5rem 1.75rem;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%), var(--mipp-card-bg);
-  border: 1.5px solid var(--mipp-card-hover-border, #38bdf8);
-  border-radius: var(--mipp-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  box-shadow: 0 8px 24px rgba(14, 165, 233, 0.12);
-  transition: var(--mipp-transition);
-}
-
-.mipp-explorer-showcase-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(14, 165, 233, 0.22);
-}
-
-.mipp-explorer-showcase-content {
-  flex: 1;
-}
-
-.mipp-explorer-showcase-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 0.18rem 0.55rem;
-  border-radius: 9999px;
-  background: var(--mipp-accent-glow);
-  color: var(--mipp-accent);
-  margin-bottom: 0.5rem;
-}
-
-.mipp-explorer-showcase-title {
-  font-size: 1.35rem;
-  font-weight: 800;
-  margin: 0 0 0.35rem 0;
-  color: var(--md-default-fg-color);
-  letter-spacing: -0.01em;
-}
-
-.mipp-explorer-showcase-desc {
-  font-size: 0.88rem;
-  color: var(--md-default-fg-color--light);
-  line-height: 1.5;
-  margin: 0 0 0.75rem 0;
-}
-
-.mipp-explorer-showcase-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  font-size: 0.75rem;
-  color: var(--md-default-fg-color--lighter);
-}
-
-.mipp-explorer-showcase-chips span {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.55rem;
-  background: var(--md-default-bg-color--lighter);
-  border-radius: 6px;
-}
-
-.mipp-explorer-showcase-action {
-  flex-shrink: 0;
-}
-
-@media (max-width: 768px) {
-  .mipp-explorer-showcase-card {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 1.25rem;
-  }
-}
 
 /* Hardware Target Chips */
 .mipp-chips-container {
@@ -1201,16 +1020,14 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 }
 
 /* 2x2 Feature Cards Grid (Homepage) */
-.mipp-home-grid,
-.mipp-grid-2x2 {
+.mipp-home-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.25rem;
   margin: 2.5rem 0;
 }
 
-.mipp-home-card,
-.mipp-grid-2x2 .mipp-card {
+.mipp-home-card {
   padding: 1.4rem;
   border-radius: var(--mipp-radius-md);
   background: var(--mipp-card-bg);
@@ -1221,23 +1038,20 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   height: 100%;
 }
 
-.mipp-home-card:hover,
-.mipp-grid-2x2 .mipp-card:hover {
+.mipp-home-card:hover {
   transform: translateY(-2px);
   border-color: var(--mipp-card-hover-border);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 }
 
-.mipp-home-card-header,
-.mipp-grid-2x2 .mipp-card-header {
+.mipp-home-card-header {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   margin-bottom: 0.75rem;
 }
 
-.mipp-home-card-icon,
-.mipp-card-icon {
+.mipp-home-card-icon {
   width: 36px;
   height: 36px;
   min-width: 36px;
@@ -1252,8 +1066,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   line-height: 1;
 }
 
-.mipp-home-card-title,
-.mipp-grid-2x2 .mipp-card-title {
+.mipp-home-card-title {
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: -0.01em;
@@ -1262,28 +1075,22 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   line-height: 1.3;
 }
 
-.mipp-home-card-desc,
-.mipp-card-desc-home {
+.mipp-home-card-desc {
   font-size: 0.88rem;
   line-height: 1.6;
   color: var(--md-default-fg-color--lighter);
-  margin: 0 !important;
+  margin: 0;
 }
 
-[data-md-color-scheme="slate"] .mipp-home-card:hover,
-[data-md-color-scheme="slate"] .mipp-grid-2x2 .mipp-card:hover {
+[data-md-color-scheme="slate"] .mipp-home-card:hover {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
 }
 
 /* Dark mode image adjustments (selective invert only for explicitly tagged elements) */
-[data-md-color-scheme="slate"] img.invert-dark {
-  filter: invert(0.88);
-}
-
 /* Remove top GitHub button from navigation drawer / sidebar */
 .md-nav__source,
 .md-sidebar .md-source {
-  display: none !important;
+  display: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -1295,17 +1102,17 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   /* Ensure the main container fills at least the available viewport height,
      preventing sticky sidebar collapse and keeping footer at bottom on short pages */
   .md-main__inner {
-    margin-top: 0 !important;
+    margin-top: 0;
     min-height: calc(100vh - 4.8rem);
   }
 
   /* Fixed/sticky sidebar bounded cleanly between tabs header and footer */
   .md-sidebar {
-    position: sticky !important;
+    position: sticky;
     top: 4.8rem !important;
-    height: calc(100vh - 4.8rem) !important;
-    max-height: calc(100vh - 4.8rem) !important;
-    padding: 0 !important;
+    height: calc(100vh - 4.8rem);
+    max-height: calc(100vh - 4.8rem);
+    padding: 0;
     overflow: hidden;
   }
 
@@ -1313,10 +1120,10 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
      preventing scroll chaining and strictly stopping before footer */
   .md-sidebar__scrollwrap {
     height: 100% !important;
-    max-height: 100% !important;
-    padding: 1.2rem 0 !important;
-    overflow-y: auto !important;
-    overscroll-behavior: contain !important;
+    max-height: 100%;
+    padding: 1.2rem 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
   }
@@ -1341,7 +1148,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
   /* Preserve main content top spacing when md-main__inner margin-top is 0 */
   .md-content__inner {
-    padding-top: 1.5rem !important;
+    padding-top: 1.5rem;
   }
 
   /* Keep footer layered cleanly below main content */
@@ -1352,7 +1159,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 }
 
 /* --------------------------------------------------------------------------
-   8. Mobile Navigation Drawer (Floating Pills - Mobile/Tablet only < 1220px)
+   8. Navigation drawer (< 1220px)
    -------------------------------------------------------------------------- */
 
 @media screen and (max-width: 76.1875em) {
@@ -1360,86 +1167,86 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   /* Strictly hide TOC toggle links inside drawer to prevent duplicate entries */
   .md-nav--primary .md-nav__link[for="__toc"],
   .md-nav--primary [for="__toc"] {
-    display: none !important;
+    display: none;
   }
 
-  /* Seamless background for mobile drawer and submenus */
+  /* Same background for the drawer and its submenus */
   .md-nav--primary,
   .md-nav--primary .md-nav {
-    background-color: var(--md-default-bg-color) !important;
+    background-color: var(--md-default-bg-color);
   }
 
   [data-md-color-scheme="slate"] .md-nav--primary,
   [data-md-color-scheme="slate"] .md-nav--primary .md-nav {
-    background-color: #0b0f19 !important;
+    background-color: #0b0f19;
   }
 
   [data-md-color-scheme="default"] .md-nav--primary,
   [data-md-color-scheme="default"] .md-nav--primary .md-nav {
-    background-color: #f8fafc !important;
+    background-color: #f8fafc;
   }
 
-  /* Modern Drawer Header (Root & Submenu headers) */
+  /* Drawer headers (root and submenus) */
   .md-nav--primary .md-nav__title {
-    height: auto !important;
-    padding: 1rem 1rem !important;
-    line-height: 1.4 !important;
-    font-size: 0.92rem !important;
-    font-weight: 700 !important;
+    height: auto;
+    padding: 1rem 1rem;
+    line-height: 1.4;
+    font-size: 0.92rem;
+    font-weight: 700;
     letter-spacing: -0.01em;
-    border-bottom: 1px solid var(--mipp-card-border) !important;
+    border-bottom: 1px solid var(--mipp-card-border);
     display: flex !important;
-    align-items: center !important;
-    gap: 0.75rem !important;
-    white-space: normal !important;
+    align-items: center;
+    gap: 0.75rem;
+    white-space: normal;
   }
 
   [data-md-color-scheme="default"] .md-nav--primary .md-nav__title,
   [data-md-color-scheme="default"] .md-nav--primary .md-nav__title[for="__drawer"] {
-    background: #ffffff !important;
-    color: #0f172a !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    background: #ffffff;
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
   }
 
   [data-md-color-scheme="slate"] .md-nav--primary .md-nav__title,
   [data-md-color-scheme="slate"] .md-nav--primary .md-nav__title[for="__drawer"] {
-    background: #0f172a !important;
-    color: #f8fafc !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: #0f172a;
+    color: #f8fafc;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   /* Logo container in mobile drawer header */
   .md-nav--primary .md-nav__title .md-logo {
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+    position: static;
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     flex-shrink: 0;
   }
 
   .md-nav--primary .md-nav__title .md-logo img {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 8px !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
   }
 
   /* Submenu Back button arrow */
   .md-nav--primary .md-nav__title .md-nav__icon {
-    position: static !important;
-    margin: 0 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 28px !important;
-    height: 28px !important;
+    position: static;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
     flex-shrink: 0;
-    border-radius: 6px !important;
-    background: rgba(14, 165, 233, 0.1) !important;
-    color: var(--md-accent-fg-color) !important;
-    transition: var(--mipp-transition) !important;
+    border-radius: 6px;
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--md-accent-fg-color);
+    transition: var(--mipp-transition);
   }
 
   .md-nav--primary .md-nav__title .md-nav__icon:hover {
@@ -1449,27 +1256,27 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
   /* Floating Pills: eliminate harsh horizontal lines */
   .md-nav--primary .md-nav__item {
-    border-top: none !important;
-    margin: 0.15rem 0 !important;
+    border-top: none;
+    margin: 0.15rem 0;
   }
 
   .md-nav--primary .md-nav__title~.md-nav__list {
-    box-shadow: none !important;
-    padding: 0.5rem 0.65rem !important;
+    box-shadow: none;
+    padding: 0.5rem 0.65rem;
   }
 
   .md-nav--primary .md-nav__link:not([for="__toc"]) {
     display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    align-items: center;
+    justify-content: space-between;
     padding: 0.55rem 0.85rem !important;
-    border-radius: var(--mipp-radius-sm, 7px) !important;
-    font-size: 0.82rem !important;
-    font-weight: 500 !important;
-    color: var(--md-default-fg-color) !important;
-    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    position: relative !important;
-    margin-top: 0 !important;
+    border-radius: var(--mipp-radius-sm, 7px);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--md-default-fg-color);
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    margin-top: 0;
   }
 
   /* Hover state on items */
@@ -1493,13 +1300,13 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
   [data-md-color-scheme="default"] .md-nav--primary .md-nav__item--active>.md-nav__link:not([for="__toc"]),
   [data-md-color-scheme="default"] .md-nav--primary .md-nav__link--active:not([for="__toc"]) {
-    background-color: rgba(14, 165, 233, 0.12) !important;
+    background-color: rgba(14, 165, 233, 0.12);
     color: #0284c7 !important;
   }
 
   [data-md-color-scheme="slate"] .md-nav--primary .md-nav__item--active>.md-nav__link:not([for="__toc"]),
   [data-md-color-scheme="slate"] .md-nav--primary .md-nav__link--active:not([for="__toc"]) {
-    background-color: rgba(56, 189, 248, 0.15) !important;
+    background-color: rgba(56, 189, 248, 0.15);
     color: #38bdf8 !important;
     box-shadow: 0 0 16px rgba(14, 165, 233, 0.15);
   }
@@ -1519,10 +1326,10 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     box-shadow: 0 0 8px #0ea5e9;
   }
 
-  /* Sleek chevrons for nested menu items */
+  /* Chevrons of the nested menu items */
   .md-nav--primary .md-nav__link .md-nav__icon {
-    width: 1rem !important;
-    height: 1rem !important;
+    width: 1rem;
+    height: 1rem;
     opacity: 0.55;
     transition: transform 0.2s ease, opacity 0.2s ease;
     margin: 0 !important;
@@ -1535,7 +1342,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 }
 
 /* --------------------------------------------------------------------------
-   9. Mobile Phone & Compact Screen Optimization (< 960px & < 720px)
+   9. Small screens (< 960px and < 720px)
    -------------------------------------------------------------------------- */
 
 @media screen and (max-width: 59.984375em) {
@@ -1543,16 +1350,16 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   /* 0. Prevent any horizontal page panning / viewport scrolling on mobile */
   html,
   body {
-    overflow-x: hidden !important;
-    max-width: 100vw !important;
-    width: 100% !important;
+    overflow-x: hidden;
+    max-width: 100vw;
+    width: 100%;
   }
 
   .md-container,
   .md-main,
   .md-content {
     overflow-x: hidden;
-    max-width: 100% !important;
+    max-width: 100%;
   }
 
   /* 1. Drastically reduce outer margins & paddings on mobile to maximize viewport width */
@@ -1569,13 +1376,13 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   }
 
   .md-main__inner {
-    margin-top: 0 !important;
+    margin-top: 0;
   }
 
   .md-content__inner {
-    margin-left: 0.15rem !important;
-    margin-right: 0.15rem !important;
-    padding-top: 0.35rem !important;
+    margin-left: 0.15rem;
+    margin-right: 0.15rem;
+    padding-top: 0.35rem;
   }
 
   .md-typeset {
@@ -1585,7 +1392,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   /* 2. Header Icons: drastically reduce padding and margin left/right */
   .md-header__button {
     margin: 0 !important;
-    padding: 0.2rem 0.15rem !important;
+    padding: 0.2rem 0.15rem;
   }
 
   .md-header__button.md-logo {
@@ -1600,46 +1407,46 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
   .md-header__title {
     margin-left: 0.2rem !important;
-    font-size: 0.85rem !important;
+    font-size: 0.85rem;
     font-weight: 700;
   }
 
   .md-header__topic {
-    font-size: 0.85rem !important;
+    font-size: 0.85rem;
   }
 
   .md-header .md-icon svg {
-    width: 20px !important;
-    height: 20px !important;
+    width: 20px;
+    height: 20px;
   }
 
   [data-md-color-scheme="default"] .md-search__inner {
-    background-color: #ffffff !important;
+    background-color: #ffffff;
   }
 
   /* 3. Slightly decrease typography on mobile */
   .md-typeset {
-    font-size: 0.78rem !important;
-    line-height: 1.55 !important;
+    font-size: 0.78rem;
+    line-height: 1.55;
   }
 
   .md-typeset h1 {
     font-size: 1.35rem !important;
     line-height: 1.22 !important;
-    margin-top: 0.5rem !important;
+    margin-top: 0.5rem;
     margin-bottom: 0.55rem !important;
   }
 
   .md-typeset h2 {
-    font-size: 1.15rem !important;
-    line-height: 1.28 !important;
-    margin-top: 1.2rem !important;
-    margin-bottom: 0.45rem !important;
+    font-size: 1.15rem;
+    line-height: 1.28;
+    margin-top: 1.2rem;
+    margin-bottom: 0.45rem;
   }
 
   .md-typeset h3 {
     font-size: 1.0rem !important;
-    line-height: 1.32 !important;
+    line-height: 1.32;
     margin-top: 0.9rem !important;
     margin-bottom: 0.35rem !important;
   }
@@ -1647,7 +1454,7 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   .md-typeset h4,
   .md-typeset h5,
   .md-typeset h6 {
-    font-size: 0.88rem !important;
+    font-size: 0.88rem;
   }
 
   .md-typeset p {
@@ -1660,13 +1467,13 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   .md-typeset .highlight,
   .md-typeset pre,
   .md-typeset .highlighttable {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    margin-top: 0.55rem !important;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0.55rem;
     margin-bottom: 0.55rem !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   /* Restore left and right visible borders and rounded corners on mobile */
@@ -1674,32 +1481,32 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   .md-content__inner>pre>code,
   .md-typeset .highlight pre>code,
   .md-typeset pre>code {
-    border: 1px solid var(--mipp-card-border) !important;
-    border-left-width: 1px !important;
-    border-right-width: 1px !important;
-    border-top-width: 1px !important;
-    border-bottom-width: 1px !important;
+    border: 1px solid var(--mipp-card-border);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
     border-radius: var(--mipp-radius-sm) !important;
-    font-size: 0.65rem !important;
-    line-height: 1.38 !important;
-    padding: 0.45rem 0.55rem !important;
-    box-sizing: border-box !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    overflow-x: auto !important;
-    display: block !important;
+    font-size: 0.65rem;
+    line-height: 1.38;
+    padding: 0.45rem 0.55rem;
+    box-sizing: border-box;
+    max-width: 100%;
+    width: 100%;
+    overflow-x: auto;
+    display: block;
   }
 
   [data-md-color-scheme="default"] .md-content__inner>.highlight>pre>code,
   [data-md-color-scheme="default"] .md-typeset pre>code {
-    border-color: #e2e8f0 !important;
-    background-color: #ffffff !important;
+    border-color: #e2e8f0;
+    background-color: #ffffff;
   }
 
   [data-md-color-scheme="slate"] .md-content__inner>.highlight>pre>code,
   [data-md-color-scheme="slate"] .md-typeset pre>code {
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    background-color: #080c14 !important;
+    border-color: rgba(255, 255, 255, 0.08);
+    background-color: #080c14;
   }
 
   /* Code block filename / title header on mobile */
@@ -1729,31 +1536,31 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   .md-typeset .tabbed-block pre>code {
     border: none !important;
     border-radius: 0 !important;
-    margin: 0 !important;
-    box-shadow: none !important;
+    margin: 0 !important; /* beats the margin-bottom !important of the code blocks above */
+    box-shadow: none;
   }
 
   .md-typeset :not(pre)>code {
-    font-size: 0.76em !important;
-    padding: 0.08em 0.3em !important;
+    font-size: 0.76em;
+    padding: 0.08em 0.3em;
   }
 
   /* Neutralize tabbed labels negative margins on mobile */
   .md-typeset .tabbed-set {
-    margin: 0.55rem 0 !important;
-    max-width: 100% !important;
-    width: 100% !important;
+    margin: 0.55rem 0;
+    max-width: 100%;
+    width: 100%;
   }
 
   .md-content__inner>.tabbed-set .tabbed-labels,
   .md-typeset .tabbed-labels {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    margin-left: 0;
+    margin-right: 0;
     padding-left: 0 !important;
-    padding-right: 0 !important;
-    font-size: 0.7rem !important;
-    max-width: 100% !important;
-    width: 100% !important;
+    padding-right: 0;
+    font-size: 0.7rem;
+    max-width: 100%;
+    width: 100%;
   }
 
   .md-content__inner>.tabbed-set .tabbed-labels~.tabbed-control--prev,
@@ -1763,15 +1570,15 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   }
 
   .md-typeset .tabbed-labels>label {
-    padding: 0.3rem 0.55rem !important;
+    padding: 0.3rem 0.55rem;
   }
 
   /* Arithmatex / math blocks on mobile */
   .md-typeset div.arithmatex {
-    margin-left: 0 !important;
-    margin-right: 0 !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
+    margin-left: 0;
+    margin-right: 0;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   /* 5. Reduce tables and matrix chips size */
@@ -1780,17 +1587,17 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   }
 
   .md-typeset table:not([class]) {
-    font-size: 0.66rem !important;
+    font-size: 0.66rem;
   }
 
   .md-typeset table:not([class]) th {
-    padding: 0.3rem 0.35rem !important;
-    font-size: 0.66rem !important;
+    padding: 0.3rem 0.35rem;
+    font-size: 0.66rem;
   }
 
   .md-typeset table:not([class]) td {
     padding: 0.25rem 0.3rem !important;
-    font-size: 0.66rem !important;
+    font-size: 0.66rem;
   }
 
   .md-typeset table td:has(.twemoji) {
@@ -1811,51 +1618,38 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
   /* 6. Landing Page Hero on Mobile */
   .mipp-hero {
-    padding: 1.2rem 0.25rem 0.8rem 0.25rem !important;
-  }
-
-  .mipp-hero-tag {
-    font-size: 0.72rem !important;
-    padding: 0.2rem 0.6rem !important;
-    margin-bottom: 0.6rem !important;
+    padding: 1.2rem 0.25rem 0.8rem 0.25rem;
   }
 
   .mipp-hero-title {
-    font-size: 1.75rem !important;
-    line-height: 1.15 !important;
+    font-size: 1.75rem;
+    line-height: 1.15;
     letter-spacing: -0.02em !important;
-    margin-bottom: 0.5rem !important;
+    margin-bottom: 0.5rem;
   }
 
   .mipp-hero-subtitle {
-    font-size: 0.88rem !important;
-    line-height: 1.4 !important;
+    font-size: 0.88rem;
+    line-height: 1.4;
   }
 
   .mipp-chips-container {
-    gap: 0.35rem !important;
+    gap: 0.35rem;
   }
 
   .mipp-chip {
-    font-size: 0.72rem !important;
-    padding: 0.2rem 0.55rem !important;
+    font-size: 0.72rem;
+    padding: 0.2rem 0.55rem;
   }
 
-  .mipp-home-grid,
-  .mipp-grid-2x2 {
-    margin: 1.25rem 0 !important;
-    gap: 0.85rem !important;
-    grid-template-columns: 1fr !important;
+  .mipp-home-grid {
+    margin: 1.25rem 0;
+    gap: 0.85rem;
+    grid-template-columns: 1fr;
   }
 
   .mipp-home-card {
-    padding: 1.1rem !important;
+    padding: 1.1rem;
   }
 
-  .mipp-card-desc-home {
-    padding-left: 0.6rem !important;
-    padding-right: 0.6rem !important;
-    padding-top: 0.2rem !important;
-    padding-bottom: 0.4rem !important;
-  }
 }
