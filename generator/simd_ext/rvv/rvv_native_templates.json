@@ -161,11 +161,19 @@
             "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, ({{ isa_dt_par.to_ptr }}*) p0, %N<tp>%);"
         ]
     },
+    "mask_1arg": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_v{{ instr_name }}(m0.m, %N<tp>%);"
+    },
     "mask_2args": {
         "format": "short",
         "code": [
             "{{ isa.prefix }}_v{{ instr_name }}(m0.m, m1.m, %N<tp>%);"
         ]
+    },
+    "mask_2args_swap": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_v{{ instr_name }}(m1.m, m0.m, %N<tp>%);"
     },
     "merge": {
         "format": "short",

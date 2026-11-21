@@ -97,6 +97,13 @@
             "template": "mask_2args"
         }
     ],
+    "andnb_k": [
+        {
+            "instr_name": "mandn",
+            "datatypes": "all_datatypes",
+            "template": "mask_2args_swap"
+        }
+    ],
     "cast": [
         {
             "instr_name": "vreinterpret",
@@ -720,6 +727,13 @@
             "datatypes": "all_int_uint",
             "template": "scalar_notb_msks",
             "variant": "s"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "mnot",
+            "datatypes": "all_datatypes",
+            "template": "mask_1arg"
         }
     ],
     "orb": [

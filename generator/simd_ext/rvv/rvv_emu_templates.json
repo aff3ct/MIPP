@@ -449,6 +449,20 @@
             "return ret;"
         ]
     },
+    "pow2_sll": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "%r<tp>% one;",
+            "one.r = {{ isa.prefix }}_vmv_v_x_{{ isa_dt_par.data_ext }}(1, %N<tp>%);",
+            "res.r = {{ isa.prefix }}_vsll_vv_{{ isa_dt_par.data_ext }}(one.r, r0.r, %N<tp>%);",
+            "// vsll uses the low log2(SEW) bits of the shift: the lanes shifted by SEW or more are 0",
+            "%m<tp>% big;",
+            "big.m = {{ isa.prefix }}_vmsgeu_vx_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.data_ext_logi }}(r0.r, {{ dt_par.n_bits }}, %N<tp>%);",
+            "res.r = {{ isa.prefix }}_vmerge_vxm_{{ isa_dt_par.data_ext }}(res.r, 0, big.m, %N<tp>%);",
+            "return res;"
+        ]
+    },
     "round_float": {
         "format": "long",
         "code": [
@@ -457,6 +471,18 @@
             "%r<tp>% ret;",
             "ret.r = {{isa.prefix}}_{{instr_name}}_f_x_v_{{isa_dt_par.data_ext}}(tmp.r,%N<tp>%);",
             "return ret;"
+        ]
+    },
+    "round_float_rmm": {
+        "format": "long",
+        "code": [
+            "%r<c:int|b:tp>% tmp;",
+            "tmp.r = {{ isa.prefix }}_vfcvt_x_f_v_{{ isa_dt_par.int_data_ext }}_rm(r0.r, __RISCV_FRM_RMM, %N<tp>%);",
+            "%r<tp>% rf;",
+            "rf.r = {{ isa.prefix }}_vfcvt_f_x_v_{{ isa_dt_par.data_ext }}(tmp.r, %N<tp>%);",
+            "// |x| >= 2^p (and NaN, Inf) are already integers: kept",
+            "%m<tp>% small = %cmplt<tp>%(%abs<tp>%(r0), %set1<tp>%({{ '4503599627370496.0' if dt_par.n_bits == 64 else '8388608.0f' }}));",
+            "return %select<tp>%(small, rf, r0);"
         ]
     },
     "scalar_get": {
@@ -604,6 +630,18 @@
             "tmp.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(tmp.r, r0.r, m0.m, %N<tp>%);",
             "// store w regular vse",
             "{{ isa.prefix }}_vse{{ isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) p0, tmp.r , %N<tp>%);"
+        ]
+    },
+    "trunc_float_rtz": {
+        "format": "long",
+        "code": [
+            "%r<c:int|b:tp>% tmp;",
+            "tmp.r = {{ isa.prefix }}_vfcvt_x_f_v_{{ isa_dt_par.int_data_ext }}_rm(r0.r, __RISCV_FRM_RTZ, %N<tp>%);",
+            "%r<tp>% rf;",
+            "rf.r = {{ isa.prefix }}_vfcvt_f_x_v_{{ isa_dt_par.data_ext }}(tmp.r, %N<tp>%);",
+            "// |x| >= 2^p (and NaN, Inf) are already integers: kept",
+            "%m<tp>% small = %cmplt<tp>%(%abs<tp>%(r0), %set1<tp>%({{ '4503599627370496.0' if dt_par.n_bits == 64 else '8388608.0f' }}));",
+            "return %select<tp>%(small, rf, r0);"
         ]
     }
 }

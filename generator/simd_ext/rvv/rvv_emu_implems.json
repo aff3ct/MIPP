@@ -575,13 +575,6 @@
             "variant": "s"
         }
     ],
-    "notb_k": [
-        {
-            "instr_name": "morn",
-            "datatypes": "all_datatypes",
-            "template": "notb_k"
-        }
-    ],
     "orb": [
         {
             "instr_name": "or",
@@ -595,11 +588,18 @@
             "variant": "z"
         }
     ],
+    "pow2": [
+        {
+            "instr_name": "pow2",
+            "datatypes": "all_uint",
+            "template": "pow2_sll"
+        }
+    ],
     "round": [
         {
-            "instr_name": "vfcvt",
+            "instr_name": "round",
             "datatypes": "all_float",
-            "template": "round_float"
+            "template": "round_float_rmm"
         }
     ],
     "rshift": [
@@ -768,6 +768,13 @@
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        }
+    ],
+    "trunc": [
+        {
+            "instr_name": "trunc",
+            "datatypes": "all_float",
+            "template": "trunc_float_rtz"
         }
     ],
     "xorb": [
