@@ -461,10 +461,12 @@ pre,
   border: 1px solid var(--mipp-lvl-na-border);
 }
 
-/* Level badges in running text, headings and legends (outside the API
-   Explorer and the support matrices): sized relative to the surrounding text
-   and kept on the baseline, so they read as a discreet inline tag */
-.md-typeset :is(.mipp-isa-badge, .mipp-badge):not(#mipp-explorer-app *, td *) {
+/* Level badges in running text, headings, legends and text tables (outside
+   the API Explorer and the cells of the generated support matrices, which use
+   .mipp-badge): sized relative to the surrounding text and kept on the
+   baseline, so they read as a discreet inline tag */
+.md-typeset .mipp-isa-badge:not(#mipp-explorer-app *),
+.md-typeset .mipp-badge:not(td *) {
   display: inline-block;
   min-width: 0;
   height: auto;
