@@ -188,6 +188,9 @@ template <class T>
 requires (detail::is_supported_int_v<T> || detail::is_supported_fp_v<T>)
 bool will_reduction_hadd_overflow(const T* inputs, size_t size, const int32_t* mask = nullptr, bool is_maskz = false, const T* inputs_src = nullptr) {
     if constexpr (detail::is_supported_fp_v<T>) return false;
+    // the reference sum wraps around (modulo 2^n) for the unsigned types, and for the 8/16-bit signed
+    // types (computed in int, then converted back): the result is defined, it must be checked
+    else if constexpr (std::is_unsigned_v<T> || sizeof(T) < sizeof(int)) return false;
     else {
         using L = detail::lim<T>;
         int64_t sum_pos = 0;

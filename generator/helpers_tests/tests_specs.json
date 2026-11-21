@@ -344,7 +344,7 @@
                     },
                     "float64": {
                         "type": "max_abs_diff",
-                        "value": 1e-8
+                        "value": 1e-08
                     }
                 }
             },
@@ -401,7 +401,7 @@
                     },
                     "float64": {
                         "type": "max_abs_diff",
-                        "value": 1e-9
+                        "value": 1e-09
                     }
                 }
             },
@@ -415,15 +415,55 @@
         },
         "cvt": {
             "domain": {
-                "by_datatype": {
-                    "int64": {
-                        "min": -2147483647,
-                        "max": 2147483647
+                "rules": [
+                    {
+                        "datatype": "float32,int32",
+                        "min": -2147483520.0,
+                        "max": 2147483520.0
                     },
-                    "uint64": {
-                        "min": 0,
-                        "max": 2147483647
+                    {
+                        "datatype": "float32,uint32",
+                        "min": 0.0,
+                        "max": 4294967040.0
+                    },
+                    {
+                        "datatype": "float64,int64",
+                        "min": -9.223372036854775e+18,
+                        "max": 9.223372036854775e+18
+                    },
+                    {
+                        "datatype": "float64,uint64",
+                        "min": 0.0,
+                        "max": 1.844674407370955e+19
                     }
+                ]
+            },
+            "special_values": {
+                "by_datatype": {
+                    "float32": [
+                        0.5,
+                        0.75,
+                        1.5,
+                        2.999,
+                        -0.75,
+                        -0.25,
+                        7.5,
+                        1000000.5,
+                        16777215.0,
+                        2147483520.0
+                    ],
+                    "float64": [
+                        0.5,
+                        0.75,
+                        1.5,
+                        2.999,
+                        -0.75,
+                        -0.25,
+                        7.5,
+                        1000000000000000.5,
+                        4503599627370495.5,
+                        9.223372036854775e+18
+                    ]
                 }
             }
         },
@@ -503,7 +543,7 @@
                 "by_datatype": {
                     "float32": {
                         "type": "hybrid",
-                        "abs_value": 1e-04,
+                        "abs_value": 0.0001,
                         "rel_value": 1e-06
                     },
                     "float64": {
@@ -712,12 +752,14 @@
                 },
                 "by_datatype": {
                     "float32": {
-                        "type": "relative_percent",
-                        "value": 0.001
+                        "type": "hybrid",
+                        "abs_value": 1e-30,
+                        "rel_value": 0.001
                     },
                     "float64": {
-                        "type": "relative_percent",
-                        "value": 0.0001
+                        "type": "hybrid",
+                        "abs_value": 1e-300,
+                        "rel_value": 0.0001
                     }
                 }
             }
@@ -741,51 +783,54 @@
                     "float64": "bitwise"
                 }
             },
-            "domain": {
-                "by_datatype": {
-                    "int8": {
-                        "min": 0,
-                        "max": 7
-                    },
-                    "uint8": {
-                        "min": 0,
-                        "max": 7
-                    },
-                    "int16": {
-                        "min": 0,
-                        "max": 15
-                    },
-                    "uint16": {
-                        "min": 0,
-                        "max": 15
-                    },
-                    "int32": {
-                        "min": 0,
-                        "max": 31
-                    },
-                    "uint32": {
-                        "min": 0,
-                        "max": 31
-                    },
-                    "int64": {
-                        "min": 0,
-                        "max": 63
-                    },
-                    "uint64": {
-                        "min": 0,
-                        "max": 63
-                    },
-                    "float32": {
-                        "min": 0,
-                        "max": 31
-                    },
-                    "float64": {
-                        "min": 0,
-                        "max": 63
+            "domain_src": {},
+            "input_domain": [
+                {},
+                {
+                    "by_datatype": {
+                        "int8": {
+                            "min": 0,
+                            "max": 7
+                        },
+                        "uint8": {
+                            "min": 0,
+                            "max": 7
+                        },
+                        "int16": {
+                            "min": 0,
+                            "max": 15
+                        },
+                        "uint16": {
+                            "min": 0,
+                            "max": 15
+                        },
+                        "int32": {
+                            "min": 0,
+                            "max": 31
+                        },
+                        "uint32": {
+                            "min": 0,
+                            "max": 31
+                        },
+                        "int64": {
+                            "min": 0,
+                            "max": 63
+                        },
+                        "uint64": {
+                            "min": 0,
+                            "max": 63
+                        },
+                        "float32": {
+                            "min": 0,
+                            "max": 31
+                        },
+                        "float64": {
+                            "min": 0,
+                            "max": 63
+                        }
                     }
                 }
-            },
-            "domain_src": {}
+            ]
         },
         "mul": {
             "overflow_check": "mul",
@@ -859,10 +904,47 @@
             "comparison": "tolerance"
         },
         "round": {
-            "skip_condition": {
-                "type": "fractional_part",
-                "value": 0.5,
-                "tol": 1e-05
+            "special_values": {
+                "by_datatype": {
+                    "float32": [
+                        0.5,
+                        -0.5,
+                        1.5,
+                        -1.5,
+                        2.5,
+                        -2.5,
+                        3.5,
+                        -3.5,
+                        -0.0,
+                        0.49999997,
+                        -0.49999997,
+                        8388607.5,
+                        -8388607.5,
+                        8388608.0,
+                        16777216.0,
+                        1e+30,
+                        -1e+30
+                    ],
+                    "float64": [
+                        0.5,
+                        -0.5,
+                        1.5,
+                        -1.5,
+                        2.5,
+                        -2.5,
+                        3.5,
+                        -3.5,
+                        -0.0,
+                        0.49999999999999994,
+                        -0.49999999999999994,
+                        4503599627370495.5,
+                        -4503599627370495.5,
+                        4503599627370496.0,
+                        9007199254740992.0,
+                        1e+300,
+                        -1e+300
+                    ]
+                }
             }
         },
         "rshift": {
@@ -873,51 +955,54 @@
                     "float64": "bitwise"
                 }
             },
-            "domain": {
-                "by_datatype": {
-                    "int8": {
-                        "min": 0,
-                        "max": 7
-                    },
-                    "uint8": {
-                        "min": 0,
-                        "max": 7
-                    },
-                    "int16": {
-                        "min": 0,
-                        "max": 15
-                    },
-                    "uint16": {
-                        "min": 0,
-                        "max": 15
-                    },
-                    "int32": {
-                        "min": 0,
-                        "max": 31
-                    },
-                    "uint32": {
-                        "min": 0,
-                        "max": 31
-                    },
-                    "int64": {
-                        "min": 0,
-                        "max": 63
-                    },
-                    "uint64": {
-                        "min": 0,
-                        "max": 63
-                    },
-                    "float32": {
-                        "min": 0,
-                        "max": 31
-                    },
-                    "float64": {
-                        "min": 0,
-                        "max": 63
+            "domain_src": {},
+            "input_domain": [
+                {},
+                {
+                    "by_datatype": {
+                        "int8": {
+                            "min": 0,
+                            "max": 7
+                        },
+                        "uint8": {
+                            "min": 0,
+                            "max": 7
+                        },
+                        "int16": {
+                            "min": 0,
+                            "max": 15
+                        },
+                        "uint16": {
+                            "min": 0,
+                            "max": 15
+                        },
+                        "int32": {
+                            "min": 0,
+                            "max": 31
+                        },
+                        "uint32": {
+                            "min": 0,
+                            "max": 31
+                        },
+                        "int64": {
+                            "min": 0,
+                            "max": 63
+                        },
+                        "uint64": {
+                            "min": 0,
+                            "max": 63
+                        },
+                        "float32": {
+                            "min": 0,
+                            "max": 31
+                        },
+                        "float64": {
+                            "min": 0,
+                            "max": 63
+                        }
                     }
                 }
-            },
-            "domain_src": {}
+            ]
         },
         "rsqrt": {
             "domain": {
@@ -961,7 +1046,7 @@
                 "by_datatype": {
                     "float32": {
                         "type": "hybrid",
-                        "abs_value": 1e-04,
+                        "abs_value": 0.0001,
                         "rel_value": 1e-06
                     },
                     "float64": {
@@ -1205,6 +1290,50 @@
         "xorb": {
             "comparison": "bitwise",
             "support_obj": true
+        },
+        "trunc": {
+            "special_values": {
+                "by_datatype": {
+                    "float32": [
+                        0.5,
+                        -0.5,
+                        1.5,
+                        -1.5,
+                        2.5,
+                        -2.5,
+                        3.5,
+                        -3.5,
+                        -0.0,
+                        0.49999997,
+                        -0.49999997,
+                        8388607.5,
+                        -8388607.5,
+                        8388608.0,
+                        16777216.0,
+                        1e+30,
+                        -1e+30
+                    ],
+                    "float64": [
+                        0.5,
+                        -0.5,
+                        1.5,
+                        -1.5,
+                        2.5,
+                        -2.5,
+                        3.5,
+                        -3.5,
+                        -0.0,
+                        0.49999999999999994,
+                        -0.49999999999999994,
+                        4503599627370495.5,
+                        -4503599627370495.5,
+                        4503599627370496.0,
+                        9007199254740992.0,
+                        1e+300,
+                        -1e+300
+                    ]
+                }
+            }
         }
     }
 }

@@ -115,7 +115,8 @@ class DomainResolver:
             return dist_raw.get("type", "uniform"), dist_raw.get("sigma")
         return str(dist_raw) if dist_raw else "uniform", None
 
-    def resolve_domain_spec(self, func_spec: dict, var_name: str = "inputs1", dt: str = "", lmul: str = "", mkind: Optional[str] = None) -> Optional[dict]:
+    def resolve_domain_spec(self, func_spec: dict, var_name: str = "inputs1", dt: str = "", lmul: str = "", mkind: Optional[str] = None,
+                            dt_pair: str = "") -> Optional[dict]:
         domain_node = self._get_domain_node(func_spec, var_name, mkind=mkind)
         if domain_node is None:
             return None
@@ -133,7 +134,8 @@ class DomainResolver:
                 for rule in domain_node["rules"]:
                     r_dt = rule.get("datatype")
                     r_lmul = rule.get("lmul")
-                    dt_match = (not r_dt) or (r_dt == raw_dt)
+                    # a rule may name a datatype pair "src,dst" (conversions): it matches dt_pair
+                    dt_match = (not r_dt) or (r_dt == raw_dt) or (bool(dt_pair) and r_dt == dt_pair)
                     lmul_match = (not r_lmul) or (str(r_lmul) == str(lmul))
                     if dt_match and lmul_match:
                         return self._extract_spec_for_var(rule, var_idx) or rule
@@ -163,7 +165,35 @@ class DomainResolver:
         return None
 
     def render_input_filling(self, func_spec: dict, var_name: str = "inputs1", dialect: str = "c",
-                              dt_cstd: str = "", lmul_suffix: str = "", lmul: str = "", mkind: str = "") -> List[str]:
+                              dt_cstd: str = "", lmul_suffix: str = "", lmul: str = "", mkind: str = "",
+                              dt_pair: str = "") -> List[str]:
+        lines = self._render_input_filling_base(func_spec, var_name, dialect, dt_cstd, lmul_suffix, lmul, mkind, dt_pair)
+        return lines + self._render_special_values(func_spec, var_name, dialect, dt_cstd)
+
+    def _render_special_values(self, func_spec: dict, var_name: str, dialect: str, dt_cstd: str) -> List[str]:
+        """`special_values` (by_datatype): values mixed into the random inputs (every other iteration,
+        at a position that changes with the iteration), e.g. the halves for round."""
+        sv = func_spec.get("special_values")
+        if not isinstance(sv, dict) or var_name not in ("inputs1", "inputs2", "inputs3"):
+            return []
+        by_dt = sv.get("by_datatype", {})
+        def _arr(dt, vals):
+            lits = ", ".join(repr(float(v)) if isinstance(v, float) or dt.startswith("float") else str(v) for v in vals)
+            return (f"{{ static const {dt}_t sv_[] = {{{lits}}}; "
+                    f"if (n % 2 == 0) {var_name}[i] = sv_[(i + n / 2) % (sizeof(sv_) / sizeof(sv_[0]))]; }}")
+        if dialect not in ("cpp", "obj"):
+            raw_dt = dt_cstd.replace("_t", "")
+            return [f"\t\t\t{_arr(raw_dt, by_dt[raw_dt])}"] if raw_dt in by_dt else []
+        out, first = [], True
+        for dt, vals in by_dt.items():
+            kw = "if constexpr" if first else "else if constexpr"
+            first = False
+            out.append(f"\t\t\t{kw} (std::is_same_v<T, {dt}_t>) {_arr(dt, vals)}")
+        return out
+
+    def _render_input_filling_base(self, func_spec: dict, var_name: str = "inputs1", dialect: str = "c",
+                                   dt_cstd: str = "", lmul_suffix: str = "", lmul: str = "", mkind: str = "",
+                                   dt_pair: str = "") -> List[str]:
         is_cpp = (dialect in ("cpp", "obj"))
         active_lmul = lmul_suffix or lmul
         distribution, sigma = self._extract_distribution(func_spec, mkind=mkind)
@@ -196,7 +226,7 @@ class DomainResolver:
                 )
 
             spec = self.resolve_domain_spec(func_spec, var_name=var_name, dt=dt_cstd,
-                                            lmul=active_lmul, mkind=mkind)
+                                            lmul=active_lmul, mkind=mkind, dt_pair=dt_pair)
             expr = self._spec_to_random_call(spec, is_cpp=False, dt_cstd=dt_cstd,
                                              distribution=distribution, sigma=sigma)
             return [f"\t\t\t{var_name}[i] = {expr};"]
@@ -374,7 +404,10 @@ class DomainResolver:
                 r_dt = rule.get("datatype")
                 r_lmul = rule.get("lmul")
                 cond_parts = []
-                if r_dt:
+                if r_dt and "," in r_dt:  # datatype pair "src,dst" (conversions)
+                    src, dst = (x.strip() for x in r_dt.split(","))
+                    cond_parts.append(f"std::is_same_v<T, {src}_t> && std::is_same_v<T_dst, {dst}_t>")
+                elif r_dt:
                     cond_parts.append(f"std::is_same_v<T, {r_dt}_t>")
                 if r_lmul:
                     lmul_val = self._parse_lmul_val(r_lmul)

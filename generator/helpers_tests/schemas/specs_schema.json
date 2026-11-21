@@ -215,7 +215,7 @@
             "type": "object",
             "properties": {
                 "datatype": {
-                    "description": "Datatype of the rule (omitted: any).",
+                    "description": "Datatype of the rule (omitted: any), or a datatype pair `src,dst` for the conversions (`float32,uint32`).",
                     "type": "string"
                 },
                 "lmul": {
@@ -275,7 +275,7 @@
             "type": "object",
             "properties": {
                 "type": {
-                    "description": "`exact`: no difference. `max_abs_diff`: |r − ref| ≤ `value`. `relative_percent`: |r − ref| ≤ `value` × |ref| (`value` is a fraction: `0.01` for 1 %). `hybrid`: `abs_value` and `rel_value`; not implemented yet, the generator uses an absolute tolerance of 0.001.",
+                    "description": "`exact`: no difference. `max_abs_diff`: |r − ref| ≤ `value`. `relative_percent`: |r − ref| ≤ `value` × |ref| (`value` is a fraction: `0.01` for 1 %). `hybrid`: |r − ref| ≤ `abs_value` + `rel_value` × |ref|.",
                     "type": "string",
                     "enum": [
                         "exact",
@@ -355,7 +355,7 @@
                     ]
                 },
                 "input_domain": {
-                    "description": "Domain per input, as a list (first input first). Takes precedence over `domain`.",
+                    "description": "Domain per input, as a list (first input first). Takes precedence over `domain`. For a function that takes a register and a scalar (`lshift`, `rshift`), a list of two domains draws the scalar separately with the second one (otherwise the scalar is the first lane of the first input).",
                     "$ref": "#/definitions/domain_or_list"
                 },
                 "domain": {
@@ -561,6 +561,29 @@
                             }
                         }
                     ]
+                },
+                "special_values": {
+                    "description": "Values mixed into the random inputs: every other iteration, each lane takes one of these values (cycling, at a position that changes with the iteration). Used to test the cases that random values never hit (the halves of `round`, `-0.0`, the limits of the conversions).",
+                    "type": "object",
+                    "properties": {
+                        "by_datatype": {
+                            "description": "Values per datatype of the inputs (`float32`, `float64`, ...).",
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number"
+                                }
+                            },
+                            "propertyNames": {
+                                "title": "datatype"
+                            }
+                        }
+                    },
+                    "required": [
+                        "by_datatype"
+                    ],
+                    "additionalProperties": false
                 }
             },
             "additionalProperties": false

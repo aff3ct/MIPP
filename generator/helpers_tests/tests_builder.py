@@ -104,6 +104,20 @@ class TestsBuilderEngine:
         args_info = self.get_proto_args_info(func_name)
         return sum(1 for arg in args_info if arg.get("type") == "msk")
 
+    def scalar_arg_from_inputs2(self, func_name: str) -> bool:
+        """A register + scalar function (`lshift`, `rshift`) whose spec gives one domain per input
+        (`input_domain` list of 2): the scalar is drawn in `inputs2` with the second domain, instead
+        of being `inputs1[0]` (which forces the domain of the scalar on the whole register)."""
+        proto_ref = self.interfaces.get(func_name, {}).get("proto_ref", "")
+        if "2args_reg_val" not in proto_ref:
+            return False
+        spec = self.specs["functions"].get(func_name, {})
+        for node in (spec, spec.get("unmasked", {})):
+            dom = node.get("input_domain") if isinstance(node, dict) else None
+            if isinstance(dom, list) and len(dom) >= 2:
+                return True
+        return False
+
     def _build_op_call_args(self, func_name: str, mkind: str, is_scalar: bool = False) -> List[str]:
         proto_ref = self.interfaces.get(func_name, {}).get("proto_ref", "")
         proto_spec = self.protos.get(proto_ref, {})
@@ -122,6 +136,8 @@ class TestsBuilderEngine:
             elif atype == "val":
                 if arg.get("fixeddatatype") in ("uint32", "uint"):
                     args.append("0")
+                elif self.scalar_arg_from_inputs2(func_name):
+                    args.append("inputs2[0]")
                 elif "2args_reg_val" in proto_ref or "1arg" in proto_ref or reg_i == 1:
                     args.append("inputs1[0]")
                 else:
@@ -536,11 +552,16 @@ class TestsBuilderEngine:
 
     # The set of keys that are valid in a leaf tolerance spec.
     # Used to safely extract a fallback spec from a by_datatype parent spec.
-    _TOLERANCE_LEAF_KEYS: frozenset = frozenset({"type", "value"})
+    _TOLERANCE_LEAF_KEYS: frozenset = frozenset({"type", "value", "abs_value", "rel_value"})
 
-    def _leaf_tol_expr(self, ttype: str, val: float, dt_cpp: str, ref_var: str) -> str:
+    def _leaf_tol_expr(self, ttype: str, val: float, dt_cpp: str, ref_var: str,
+                       abs_val: float = 0.0, rel_val: float = 0.0) -> str:
         """Generates a single C++ tolerance expression for a scalar spec (no by_* keys)."""
-        if ttype == "relative_percent":
+        if ttype == "hybrid":
+            # |r - ref| <= abs_value + rel_value * |ref|
+            f32 = f"({dt_cpp})((float){abs_val} + abs_diff::abs_diff({ref_var}) * (float){rel_val})"
+            f64 = f"({dt_cpp})((double){abs_val} + abs_diff::abs_diff({ref_var}) * (double){rel_val})"
+        elif ttype == "relative_percent":
             f32 = f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (float){val})"
             f64 = f"({dt_cpp})(abs_diff::abs_diff({ref_var}) * (double){val})"
         else:  # max_abs_diff
@@ -617,7 +638,8 @@ class TestsBuilderEngine:
         # --- Leaf: plain type + value ---
         ttype = spec.get("type", "max_abs_diff")
         val = spec.get("value", 0.001)
-        return self._leaf_tol_expr(ttype, val, dt_cpp, ref_var)
+        return self._leaf_tol_expr(ttype, val, dt_cpp, ref_var,
+                                   abs_val=spec.get("abs_value", 0.0), rel_val=spec.get("rel_value", 0.0))
 
     def _cpp_cast(self, dt_cpp: str) -> str:
         """Returns the C cast type to use for a numeric literal given the C++ datatype."""
@@ -1189,7 +1211,8 @@ class TestsBuilderEngineC:
         
         # alignas(64): load/store require a pointer aligned on the register size (64 bytes covers AVX-512)
         body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs1[{size_var}];")
-        if not is_1arg:
+        has_inputs2 = not is_1arg or self.engine.scalar_arg_from_inputs2(func_name)
+        if has_inputs2:
             body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs2[{size_var}];")
         if is_3arg:
             body_lines.append(f"\t\t[[maybe_unused]] alignas(64) {dt_cstd} inputs3[{size_var}];")
@@ -1210,8 +1233,8 @@ class TestsBuilderEngineC:
         body_lines.append("\t\t{")
 
         # Fill inputs
-        body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs1", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
-        if not is_1arg:
+        body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs1", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind, dt_pair=(dt_name if "," in dt_name else "")))
+        if has_inputs2:
             body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs2", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
         if is_3arg:
             body_lines.extend(self.engine.domain_resolver.render_input_filling(func_spec, "inputs3", dialect="c", dt_cstd=dt_cstd, lmul_suffix=lmul_suffix, mkind=mkind))
