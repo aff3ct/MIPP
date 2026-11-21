@@ -601,6 +601,12 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.cosh_f64"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.cosh_f32"
         }
     ],
     "cvt": [
@@ -1379,6 +1385,12 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.sinh_f64"
+        },
+        {
+            "datatypes": [
+                "float32"
+            ],
+            "template_ref": "tpl_generic_emu.sinh_f32"
         }
     ],
     "sub": [

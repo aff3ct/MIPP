@@ -776,6 +776,16 @@
             "return %fmadd<tp>%(x2, %mul<tp>%(result, reduced_x), reduced_x);"
         ]
     },
+    "cosh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% abs_x = %abs<tp>%(r0);",
+            "%r<tp>% h = %exp<tp>%(%mul<tp>%(abs_x, %set1<tp>%(0.5f)));",
+            "%r<tp>% m = %mul<tp>%(h, %mul<tp>%(h, %set1<tp>%(0.5f)));  // e^|x| / 2",
+            "%r<tp>% q = %div<tp>%(%set1<tp>%(0.25f), m);                // e^-|x| / 2",
+            "return %add<tp>%(m, q);"
+        ]
+    },
     "cosh_f64": {
         "format": "long",
         "code": [
@@ -1557,6 +1567,22 @@
             "/* 4. Negative Zero Preservation */",
             "%m<tp>% is_neg_zero_mask = %cmpeq<tp>%(input_x, %set1<tp>%(-0.0));",
             "return %select<tp>%(is_neg_zero_mask, input_x, result);"
+        ]
+    },
+    "sinh_f32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% abs_x = %abs<tp>%(r0);",
+            "%r<tp>% h = %exp<tp>%(%mul<tp>%(abs_x, %set1<tp>%(0.5f)));",
+            "%r<tp>% m = %mul<tp>%(h, %mul<tp>%(h, %set1<tp>%(0.5f)));  // e^|x| / 2",
+            "%r<tp>% q = %div<tp>%(%set1<tp>%(0.25f), m);                // e^-|x| / 2",
+            "%r<tp>% res = %xorb<tp>%(%sub<tp>%(m, q), %andb<tp>%(r0, %set1<tp>%(-0.0f)));",
+            "// |x| < 0.5: m - q cancels; Taylor x + x^3/6 + x^5/120 + x^7/5040 (error < 1e-8 relative)",
+            "%r<tp>% x2 = %mul<tp>%(r0, r0);",
+            "%r<tp>% p = %fmadd<tp>%(x2, %set1<tp>%(1.0f / 5040.0f), %set1<tp>%(1.0f / 120.0f));",
+            "p = %fmadd<tp>%(x2, p, %set1<tp>%(1.0f / 6.0f));",
+            "%r<tp>% small = %fmadd<tp>%(%mul<tp>%(r0, x2), p, r0);",
+            "return %select<tp>%(%cmplt<tp>%(abs_x, %set1<tp>%(0.5f)), small, res);"
         ]
     },
     "sinh_f64": {
