@@ -178,6 +178,21 @@
   background-color: var(--md-accent-fg-color--transparent);
 }
 
+/* "Mathematical semantics" box under the description of a Function Support
+   page (generator/gen_mipp_docs.py), as in the API Explorer */
+.md-typeset .mipp-math-semantics {
+  margin: 0.9em 0;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--mipp-card-border);
+  border-radius: var(--mipp-radius-sm);
+  background-color: var(--mipp-card-bg);
+  overflow-x: auto;
+}
+
+.md-typeset .mipp-math-semantics p {
+  margin: 0;
+}
+
 /* "Open in the API Explorer" link under the description of a Function Support
    page (generator/gen_mipp_docs.py) */
 .md-typeset .mipp-explorer-link {
@@ -745,6 +760,72 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
 .md-typeset .tabbed-block table:not([class]) tr:last-child td {
   border-bottom: none;
+}
+
+/* Inline code in tab labels (e.g. "Zero-Masked (Z)"): plain letter, no chip */
+.md-typeset .tabbed-labels>label code {
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  font-size: 0.92em;
+}
+
+/* Nested tabbed set (e.g. mask variants in a datatype tab): a light segmented
+   control instead of a second row of underlined tabs */
+.md-typeset .tabbed-block>.tabbed-set {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.md-typeset .tabbed-block>.tabbed-set>.tabbed-labels {
+  gap: 0.25rem;
+  padding: 0.4rem 0.75rem !important;
+  box-shadow: none;
+  border-bottom: 1px solid var(--mipp-card-border);
+  font-size: 0.62rem;
+}
+
+/* No sliding underline of Material: the active pill is enough */
+.md-typeset .tabbed-block>.tabbed-set>.tabbed-labels::before {
+  display: none;
+}
+
+.md-typeset .tabbed-block>.tabbed-set>.tabbed-labels>label {
+  padding: 0;
+  border: 1px solid transparent !important;
+  border-radius: 999px;
+  font-weight: 500;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .tabbed-block>.tabbed-set>.tabbed-labels>label:hover {
+  color: var(--md-accent-fg-color);
+}
+
+/* Material moves the label padding to its anchor */
+.md-typeset .tabbed-block>.tabbed-set>.tabbed-labels>label>a {
+  padding: 0.2rem 0.65rem;
+}
+
+/* Active pill (Material links input n to label n; up to 10 nested tabs) */
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(1):checked~.tabbed-labels>:nth-child(1),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(2):checked~.tabbed-labels>:nth-child(2),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(3):checked~.tabbed-labels>:nth-child(3),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(4):checked~.tabbed-labels>:nth-child(4),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(5):checked~.tabbed-labels>:nth-child(5),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(6):checked~.tabbed-labels>:nth-child(6),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(7):checked~.tabbed-labels>:nth-child(7),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(8):checked~.tabbed-labels>:nth-child(8),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(9):checked~.tabbed-labels>:nth-child(9),
+.md-typeset .tabbed-block>.tabbed-set>input:nth-child(10):checked~.tabbed-labels>:nth-child(10) {
+  border-color: rgba(14, 165, 233, 0.35) !important;
+  background: rgba(14, 165, 233, 0.1);
+  color: var(--md-accent-fg-color);
+  font-weight: 600;
 }
 
 /* --------------------------------------------------------------------------

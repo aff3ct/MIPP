@@ -8,6 +8,8 @@ import os
 import shutil
 import json
 import copy
+import io
+import re
 
 path = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, path)
@@ -290,6 +292,38 @@ def write_isa_page_header(f, isa_name, masked):
     print(intro + " See the [legend](index.md#implementation-levels).", file=f)
 
 MASK_VARIANT_TITLES = {"mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": "Source-Masked"}
+
+# Tab titles of the mask variants, as in the implementation matrix of the
+# Function Support pages (identical titles: content.tabs.link syncs them)
+SCALAR_VARIANT_TAB_TITLES = {
+    "no_mask": "Unmasked (`U`)",
+    "mask": "Merge-Masked (`M`)",
+    "maskz": "Zero-Masked (`Z`)",
+    "masks": "Source-Masked (`S`)",
+}
+
+def scalar_mask_variants(func, scalar_entry):
+    """Mask variants of the scalar reference of a function (same rule as
+    gen_c_functions_scalar_one in simd_ext/scalar/scalar_gen.py)."""
+    if scalar_entry.get("variants"):
+        return list(scalar_entry["variants"])
+    variants = ["no_mask"]
+    support = interfaces[func].get("variants")
+    if support is not None:
+        if support.is_maskable():
+            variants.append("mask")
+        if support.is_maskzable():
+            variants.append("maskz")
+        if support.is_masksable():
+            variants.append("masks")
+    return variants
+
+def dt_tab_label(dt):
+    """Tab title of a datatype or datatype pair ("float32 → int32")."""
+    parts = [p.strip() for p in dt.split(",")]
+    if len(parts) == 2 and parts[0] != parts[1]:
+        return f"{parts[0]} → {parts[1]}"
+    return parts[0]
 
 def write_isas_support_nav(base_dir, isa_names):
     """Navigation of docs/isas_support/ (mkdocs-awesome-pages-plugin)."""
@@ -746,18 +780,62 @@ class SpecFuncInfo:
         return "\n".join(lines)
 
     def write_func_algo(self, file):
+        """Scalar reference of the function: one tab per datatype (the entry of
+        registry_scalar_implems.json that covers it, e.g. bitwise integers vs
+        floats), then one tab per mask variant, labelled like the tabs of the
+        implementation matrix so that content.tabs.link keeps them in sync."""
         if self.func_name not in scalar_implems:
             return
         isa = scalar_isa
         funcs = interfaces
         f = self.func_name
-        ff = scalar_implems[self.func_name][0]
-        datatypes = ff["datatypes"] if ff.get("datatypes") else funcs[f]["datatypes"]
-        dt = datatypes[0]
+        lmul = scalar_ref_lmul(f)
 
-        print("```c", file=file)
-        gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=scalar_ref_lmul(f))
-        print("```\n", file=file)
+        entry_of = {}
+        for ff in scalar_implems[f]:
+            for dt in (ff["datatypes"] or funcs[f]["datatypes"]):
+                entry_of.setdefault(dt, ff)
+        dts = [dt for dt in funcs[f]["datatypes"] if dt in entry_of]
+        dts += [dt for dt in entry_of if dt not in dts]
+
+        def scalar_code(ff, dt, variant):
+            buf = io.StringIO()
+            gen_c_functions_scalar_one(isa, buf, funcs, f, dict(ff, variants=[variant]), dt, lmul=lmul)
+            # the level comment of the headers means nothing for the reference itself
+            return re.sub(r"^[ \t]*// Level \d[^\n]*\n", "", buf.getvalue(), flags=re.M).strip("\n")
+
+        def code_block(code, indent):
+            pad = " " * indent
+            lines = ["```c"] + code.split("\n") + ["```"]
+            return "\n".join(pad + l if l else l for l in lines) + "\n"
+
+        def write_dt(dt, label, indent):
+            ff = entry_of[dt]
+            variants = scalar_mask_variants(f, ff)
+            pad = " " * indent
+            print(f'{pad}=== "{label}"\n', file=file)
+            if len(variants) == 1:
+                print(code_block(scalar_code(ff, dt, variants[0]), indent + 4), file=file)
+                return
+            for variant in variants:
+                print(f'{pad}    === "{SCALAR_VARIANT_TAB_TITLES[variant]}"\n', file=file)
+                print(code_block(scalar_code(ff, dt, variant), indent + 8), file=file)
+
+        print('<div class="mipp-scalar-reference" markdown>\n', file=file)
+        pairs = [dt.split(",") for dt in dts]
+        if len(dts) > 26 and all(len(p) == 2 for p in pairs):
+            # Many datatype pairs (cast: 100): source type tabs, then target type tabs
+            sources = list(dict.fromkeys(p[0].strip() for p in pairs))
+            for src in sources:
+                print(f'=== "{src} →"\n', file=file)
+                for dt in dts:
+                    a, b = (x.strip() for x in dt.split(","))
+                    if a == src:
+                        write_dt(dt, f"→ {b}", 4)
+        else:
+            for dt in dts:
+                write_dt(dt, dt_tab_label(dt), 0)
+        print('</div>\n', file=file)
 
     def write_spec_func_info(self, base_dir, mipp_infos=None):
         file_path = os.path.join(base_dir, self.category, f"{self.func_name}.md")
@@ -768,6 +846,12 @@ class SpecFuncInfo:
             doc_entry = funcs_docs.get(self.func_name, {})
             desc = doc_entry.get("description", "Vector function reference.")
             print(f"{desc}\n", file=f)
+            latex = doc_entry.get("latex")
+            if latex:
+                # Same formula as the API Explorer, typeset by MathJax (pymdownx.arithmatex)
+                print('<div class="mipp-math-semantics" markdown>\n', file=f)
+                print(f"**Mathematical semantics:** \\({latex}\\)\n", file=f)
+                print("</div>\n", file=f)
             print(f"[Open in the API Explorer →](../../explorer/index.md#focus={self.func_name})"
                   "{ .mipp-explorer-link }\n", file=f)
 
@@ -855,7 +939,7 @@ class SpecFuncInfo:
 
             if self.variant_set and self.variant_set.is_any_mask():
                 print("## Mask Execution Variants\n", file=f)
-                variants = []
+                variants = ["- **Unmasked (no suffix / `<mipp::U>`)**: All elements evaluated, no mask argument."]
                 if self.variant_set.is_maskable():
                     variants.append("- **Merge-Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements keep the value of the first operand.")
                 if self.variant_set.is_maskzable():
@@ -867,8 +951,11 @@ class SpecFuncInfo:
             if mipp_infos is not None:
                 self.write_isa_matrix(f, mipp_infos)
 
-            print("## Reference Algorithm\n", file=f)
-            print("!!! note\n    The scalar reference implementation below demonstrates exact mathematical semantics across datatypes and masking modes.\n", file=f)
+            # Excluded from the site search (Material: pragma on the heading of the
+            # section): the same code for each datatype and variant tab
+            print("## Reference Algorithm { data-search-exclude }\n", file=f)
+            print("The scalar reference of MIPP defines the expected result of the function, for each datatype and mask variant: "
+                  "the unit tests compare the SIMD implementations of every target with it.\n", file=f)
             self.write_func_algo(f)
 
             self.write_test_specs(f)
@@ -893,14 +980,15 @@ class SpecFuncInfo:
             dts = all_datatypes
             dts_headers = all_datatypes_short
         
-        variants = [("Unmasked", None)]
+        # Same titles as the tabs of the Reference Algorithm (linked tabs)
+        variants = [(SCALAR_VARIANT_TAB_TITLES["no_mask"], None)]
         if self.variant_set and self.variant_set.is_any_mask():
             if self.variant_set.is_maskable():
-                variants.append(("Merge-Masked (`M`)", "mask"))
+                variants.append((SCALAR_VARIANT_TAB_TITLES["mask"], "mask"))
             if self.variant_set.is_maskzable():
-                variants.append(("Zero-Masked (`Z`)", "maskz"))
+                variants.append((SCALAR_VARIANT_TAB_TITLES["maskz"], "maskz"))
             if self.variant_set.is_masksable():
-                variants.append(("Source-Masked (`S`)", "masks"))
+                variants.append((SCALAR_VARIANT_TAB_TITLES["masks"], "masks"))
                 
         for var_title, var_kind in variants:
             print(f'=== "{var_title}"', file=file)

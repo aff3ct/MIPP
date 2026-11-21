@@ -68,7 +68,7 @@ export function renderSearchBar() {
         <div class="mipp-controls-group">
           <span class="mipp-control-label">Variant:</span>
           <div class="mipp-segmented-group" id="mipp-mask-group" title="Filter by variant">
-            <button class="mipp-segment-btn ${state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked">U</button>
+            <button class="mipp-segment-btn ${state.maskVariant === "unmasked" ? "active" : ""}" data-mask-variant="unmasked" title="Unmasked (no suffix)">U</button>
             <button class="mipp-segment-btn ${state.maskVariant === "mask" ? "active" : ""}" data-mask-variant="mask" title="Merge-Masked (_mask)">M</button>
             <button class="mipp-segment-btn ${state.maskVariant === "maskz" ? "active" : ""}" data-mask-variant="maskz" title="Zero-Masked (_maskz)">Z</button>
             <button class="mipp-segment-btn ${state.maskVariant === "masks" ? "active" : ""}" data-mask-variant="masks" title="Source-Masked (_masks)">S</button>

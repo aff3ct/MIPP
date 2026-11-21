@@ -271,10 +271,10 @@ export function renderAlgoModal(modalData) {
 
   const VARIANT_LETTERS = { unmasked: "U", mask: "M", maskz: "Z", masks: "S" };
   const VARIANT_TITLES = {
-    unmasked: "Unmasked",
-    mask: "Mask (merge)",
-    maskz: "Maskz (zeroing)",
-    masks: "Masks (sourcing)"
+    unmasked: "Unmasked (U)",
+    mask: "Merge-Masked (M)",
+    maskz: "Zero-Masked (Z)",
+    masks: "Source-Masked (S)"
   };
 
   const simdWidthHtml = `
