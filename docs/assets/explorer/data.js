@@ -179,6 +179,36 @@ export async function loadApiData() {
   return apiData;
 }
 
+// Details of the functions (scalar reference, scalar macros, test specification),
+// in a separate file (generator/gen_mipp_api_data.py, API_DETAIL_FIELDS): only read
+// once a card tab or the Algorithm modal is opened, so loaded after the first
+// display. Merged into the entries of apiData; apiDetailsLoaded tells the views
+// whether to show them or a loading note.
+export let apiDetailsLoaded = false;
+let apiDetailsPromise = null;
+
+export function loadApiDetails() {
+  if (apiDetailsPromise) return apiDetailsPromise;
+  const detailsUrl = new URL("../data/mipp_api_details.json", import.meta.url).href;
+  apiDetailsPromise = fetch(detailsUrl, { cache: "no-cache" })
+    .then((resp) => {
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      return resp.json();
+    })
+    .then((details) => {
+      for (const entry of apiData) {
+        if (details[entry.name]) Object.assign(entry, details[entry.name]);
+      }
+      apiDetailsLoaded = true;
+      return apiData;
+    })
+    .catch((err) => {
+      apiDetailsPromise = null; // allow a later retry
+      throw new Error(`Unable to load ${detailsUrl}: ${err.message}`);
+    });
+  return apiDetailsPromise;
+}
+
 export function initApiDataIndexes(data, metadata = null) {
   if (data && Array.isArray(data)) apiData = data;
   if (metadata) apiMetadata = metadata;

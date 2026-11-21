@@ -4,10 +4,13 @@
 import { escapeHtml } from "../explorer.config.js";
 import { getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
-import { ALL_MASK_MODES, MASK_MODES_INFO, maskSupportOf } from "../data.js";
+import { ALL_MASK_MODES, MASK_MODES_INFO, maskSupportOf, apiDetailsLoaded } from "../data.js";
+import { detailsLoadingNote } from "./tab_algos.js";
 
 export function renderTabSpecs(entry) {
   const cardName = entry.name;
+  // The test specification is in the details, loaded after the first display
+  if (!apiDetailsLoaded) return detailsLoadingNote("verification specification");
   const testSpecs = entry.test_specs || {};
   const variants = testSpecs.variants || {};
 
@@ -29,13 +32,13 @@ export function renderTabSpecs(entry) {
   return `
     <div style="display: flex; flex-direction: column; gap: 0.8rem;">
       <!-- Overview Badges -->
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: 0.8rem;">
-        <div style="font-size: 0.75rem; padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; font-size: var(--mipp-fs-base, 0.72rem);">
+        <div style="font-size: var(--mipp-fs-base, 0.72rem); padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">
           <strong>Comparison:</strong> <code>${escapeHtml(variantSpec.comparison || testSpecs.comparison || "exact")}</code>
         </div>
         ${variantSpec.overflow_check
           ? `
-            <div style="font-size: 0.75rem; padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">
+            <div style="font-size: var(--mipp-fs-base, 0.72rem); padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">
               <strong>Overflow Check:</strong> <code>${escapeHtml(variantSpec.overflow_check)}</code>
             </div>
           `
@@ -43,7 +46,7 @@ export function renderTabSpecs(entry) {
         }
         ${variantSpec.mask_pattern
           ? `
-            <div style="font-size: 0.75rem; padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">
+            <div style="font-size: var(--mipp-fs-base, 0.72rem); padding: 0.35rem 0.65rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 4px;">
               <strong>Mask Pattern:</strong> <code>${escapeHtml(variantSpec.mask_pattern)}</code>
             </div>
           `

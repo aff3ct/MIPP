@@ -82,8 +82,7 @@ export function renderTabHw(entry) {
           <thead>
             <tr>
               <th class="mipp-hw-col-ext">
-                <span class="mipp-hw-header-full">SIMD Extension</span>
-                <span class="mipp-hw-header-short">Ext</span>
+                ISA
               </th>
               <th class="mipp-hw-col-dts">Datatypes</th>
               <th class="mipp-hw-col-tier">Level</th>

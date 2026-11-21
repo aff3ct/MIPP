@@ -4,7 +4,9 @@ MIPP API Data Generator (gen_mipp_api_data.py)
 Extracts and normalizes metadata from registry_interfaces, funcs_docs, tests_specs,
 and per-ISA hardware implementations using candidate_resolver to compute effective
 acceleration levels and build a comprehensive vendor intrinsics reverse index.
-Exports: docs/assets/data/mipp_api_index.json
+Exports: docs/assets/data/mipp_api_index.json (cards, filters, search) and
+docs/assets/data/mipp_api_details.json (fields only read once a card or a modal
+is opened, loaded after the first display).
 """
 import sys
 import os
@@ -13,6 +15,11 @@ import re
 import copy
 import io
 import textwrap
+
+# Fields of a function exported to mipp_api_details.json instead of the index:
+# scalar reference (Scalar C Reference tab, Algorithm modal) and test specification
+# (Verification Specs tab, "Run in Godbolt")
+API_DETAIL_FIELDS = ("reference_algo", "reference_algos", "scalar_macros", "test_specs")
 
 # Ensure paths work whether executed from repo root or generator/
 base_generator_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1112,10 +1119,17 @@ def generate_mipp_api_data(project_root=None):
     # Sort entries alphabetically by function name
     api_entries.sort(key=lambda x: x["name"])
 
-    # 5. Export JSON to docs/assets/data/mipp_api_index.json
+    # 5. Export JSON to docs/assets/data/: the index, needed for the first display
+    # (cards, filters, search), and the details, only read once a card tab or the
+    # Algorithm modal is opened: the Explorer loads them after the first display
     output_dir = os.path.join(project_root, "docs", "assets", "data")
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, "mipp_api_index.json")
+    details_file = os.path.join(output_dir, "mipp_api_details.json")
+    details_payload = {
+        e["name"]: {k: e.pop(k) for k in API_DETAIL_FIELDS if k in e}
+        for e in api_entries
+    }
 
     export_payload = {
         "isas": isas_meta,
@@ -1130,28 +1144,26 @@ def generate_mipp_api_data(project_root=None):
     with open(output_file, "w", encoding="utf-8") as f:
         # Compact: the file is only read by the Explorer (about half the size of indent=2)
         json.dump(export_payload, f, separators=(",", ":"), ensure_ascii=False)
+    with open(details_file, "w", encoding="utf-8") as f:
+        json.dump(details_payload, f, separators=(",", ":"), ensure_ascii=False)
 
     # Live sync to site/ and active MkDocs livereload temporary cache directories
     import glob, shutil
-    site_output = os.path.join(project_root, "site", "assets", "data", "mipp_api_index.json")
-    if os.path.exists(os.path.dirname(site_output)):
-        try:
-            shutil.copyfile(output_file, site_output)
-        except Exception:
-            pass
-    for temp_dir in glob.glob("/var/folders/*/*/*/mkdocs_*/assets/data"):
-        try:
-            shutil.copyfile(output_file, os.path.join(temp_dir, "mipp_api_index.json"))
-        except Exception:
-            pass
-    for temp_dir in glob.glob("/tmp/mkdocs_*/assets/data"):
-        try:
-            shutil.copyfile(output_file, os.path.join(temp_dir, "mipp_api_index.json"))
-        except Exception:
-            pass
+    data_dirs = [os.path.join(project_root, "site", "assets", "data")]
+    data_dirs += glob.glob("/var/folders/*/*/*/mkdocs_*/assets/data") + glob.glob("/tmp/mkdocs_*/assets/data")
+    for data_dir in data_dirs:
+        if not os.path.isdir(data_dir):
+            continue
+        for src in (output_file, details_file):
+            try:
+                shutil.copyfile(src, os.path.join(data_dir, os.path.basename(src)))
+            except Exception:
+                pass
 
     file_size_kb = os.path.getsize(output_file) / 1024
-    print(f"[gen_mipp_api_data] Successfully generated {len(api_entries)} functions in {output_file} ({file_size_kb:.1f} KB)")
+    details_size_kb = os.path.getsize(details_file) / 1024
+    print(f"[gen_mipp_api_data] Successfully generated {len(api_entries)} functions in {output_file} ({file_size_kb:.1f} KB)"
+          f" and {details_file} ({details_size_kb:.1f} KB)")
     return output_file
 
 

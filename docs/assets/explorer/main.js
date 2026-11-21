@@ -6,6 +6,7 @@ import {
   apiData,
   apiMetadata,
   loadApiData,
+  loadApiDetails,
   ALL_SIMD_EXTS,
   ALL_CATEGORIES,
   ALL_DATATYPES,
@@ -124,7 +125,7 @@ function mountAppShell(appEl) {
 
     <!-- Side-by-side Compare Floating Bar -->
     <div class="mipp-compare-bar ${state.compareSet.size >= 1 ? "visible" : ""}">
-      <span class="mipp-compare-bar-text" style="font-weight: 600; font-size: 0.88rem;">
+      <span class="mipp-compare-bar-text" style="font-weight: 600; font-size: var(--mipp-fs-md, 0.8rem);">
         Compare (${state.compareSet.size}/3): <span style="color: var(--mipp-accent);">${Array.from(state.compareSet).join(", ")}</span>
       </span>
       <div style="display: flex; gap: 0.5rem;">
@@ -194,7 +195,7 @@ function renderCards(cardsContainerEl) {
         <div class="mipp-no-results" style="text-align: center; padding: 3rem 1rem; background: var(--mipp-card-bg, #ffffff); border-radius: var(--mipp-border-radius-lg); border: 1px dashed var(--mipp-card-border, #cbd5e1);">
           <div style="margin-bottom: 0.5rem; color: var(--md-default-fg-color--lighter, #94a3b8);">${ICON_NO_RESULTS}</div>
           <h3 style="margin: 0 0 0.5rem 0;">No matching MIPP primitives found</h3>
-          <p style="color: var(--md-default-fg-color--lighter, #94a3b8); margin: 0 0 1rem 0; font-size: 0.88rem;">
+          <p style="color: var(--md-default-fg-color--lighter, #94a3b8); margin: 0 0 1rem 0; font-size: var(--mipp-fs-md, 0.8rem);">
             Try adjusting your search terms or checking options in the sidebar filter.
           </p>
           <button id="mipp-reset-all-filters" class="mipp-filter-chip" style="background: var(--mipp-accent); color: white; border: none; padding: 0.45rem 1rem; cursor: pointer;">
@@ -469,6 +470,7 @@ function attachCardInternalListeners(cardEl, entry) {
 }
 
 function updateCompareBar(compareBarEl) {
+  syncUrlHash(true); // comparison selection (cmp), see updateModals
   if (!compareBarEl) return;
   const isVisible = state.compareSet.size >= 1;
   compareBarEl.classList.toggle("visible", isVisible);
@@ -511,6 +513,39 @@ function bindCompareBarEvents(appEl) {
   }
 }
 
+// Size of the Algorithm modal chosen by the user (desktop: CSS resize from the
+// bottom right corner). The modal is rebuilt at each change (ISA, datatype,
+// view...), so the size is kept here and applied again after each render; it
+// is also remembered in the browser (a display preference, not part of the URL).
+const ALGO_MODAL_SIZE_KEY = "mipp_algo_modal_size";
+let algoModalSize = null;
+try {
+  algoModalSize = JSON.parse(localStorage.getItem(ALGO_MODAL_SIZE_KEY) || "null");
+} catch (e) {
+  algoModalSize = null;
+}
+
+function applyAlgoModalSize(modalsContainerEl) {
+  const el = modalsContainerEl.querySelector(".mipp-algo-modal-content");
+  if (!el || !algoModalSize || !window.matchMedia("(min-width: 769px)").matches) return;
+  if (algoModalSize.width) el.style.width = algoModalSize.width;
+  if (algoModalSize.height) el.style.height = algoModalSize.height;
+}
+
+// The browser writes the new size as an inline style at the end of a resize
+function rememberAlgoModalSize() {
+  const el = document.querySelector("#mipp-modals-container .mipp-algo-modal-content");
+  if (!el || (!el.style.width && !el.style.height)) return;
+  const size = { width: el.style.width || null, height: el.style.height || null };
+  if (algoModalSize && size.width === algoModalSize.width && size.height === algoModalSize.height) return;
+  algoModalSize = size;
+  try {
+    localStorage.setItem(ALGO_MODAL_SIZE_KEY, JSON.stringify(size));
+  } catch (e) {
+    /* private mode: kept for this visit only */
+  }
+}
+
 function updateModals(modalsContainerEl) {
   if (!modalsContainerEl) return;
 
@@ -518,6 +553,12 @@ function updateModals(modalsContainerEl) {
     ${state.algoModalOpen ? renderAlgoModal(state.algoModalData) : ""}
     ${state.compareModalOpen ? renderCompareModal(apiData) : ""}
   `;
+
+  applyAlgoModalSize(modalsContainerEl);
+
+  // The URL always encodes the current view (shareable link): every render of
+  // the app ends here (renderApp), like every change of a modal
+  syncUrlHash(true);
 
   // The code of the Algorithm modal comes from the header tables of the ISAs, loaded on demand
   if (state.algoModalOpen && state.algoModalData) {
@@ -800,7 +841,7 @@ function updateModals(modalsContainerEl) {
           try {
             await navigator.clipboard.writeText(textToCopy);
             const origHtml = btn.innerHTML;
-            btn.innerHTML = `<span style="font-size: 0.75rem; color: #10b981;">✓</span>`;
+            btn.innerHTML = `<span style="font-size: var(--mipp-fs-base, 0.72rem); color: #10b981;">✓</span>`;
             setTimeout(() => {
               btn.innerHTML = origHtml;
             }, 1500);
@@ -813,11 +854,33 @@ function updateModals(modalsContainerEl) {
   }
 }
 
+// Loads mipp_api_details.json once the cards are displayed, then redraws the
+// views that showed a loading note: expanded cards on the Scalar C Reference or
+// Verification Specs tab, and the Algorithm modal (scalar macros, test domain
+// of "Run in Godbolt")
+function loadDetailsInBackground() {
+  loadApiDetails()
+    .then(() => {
+      const appEl = document.getElementById("mipp-explorer-app");
+      if (!appEl) return;
+      const detailTabs = ["scalar", "specs"];
+      const cardsNeedIt = [...state.expandedCards].some((name) => detailTabs.includes(state.cardTabs[name]));
+      if (cardsNeedIt) {
+        renderApp();
+      } else if (state.algoModalOpen) {
+        const modalsContainerEl = appEl.querySelector("#mipp-modals-container");
+        if (modalsContainerEl) updateModals(modalsContainerEl);
+      }
+    })
+    .catch((err) => console.warn("[MIPP Explorer]", err.message));
+}
+
 // Default view of the Explorer (search, filters, opened cards, modals), before
 // the URL hash is applied. Needed at each visit of the page, not only on a
 // hash change: the state module survives the instant navigation of Material,
 // so the search of a previous visit would still filter the cards targeted by a
-// link such as "explorer/#focus=cast". The comparison selection is kept.
+// link such as "explorer/#focus=cast". The comparison selection is reset too:
+// it is part of the URL (cmp), like the rest of the view.
 function resetViewState() {
   state.selectedSimdExts = [...ALL_SIMD_EXTS];
   state.selectedCategories = [...ALL_CATEGORIES];
@@ -841,6 +904,7 @@ function resetViewState() {
   state.algoModalOpen = false;
   state.algoModalData = null;
   state.compareModalOpen = false;
+  state.compareSet.clear();
 }
 
 let globalListenersBound = false;
@@ -895,11 +959,34 @@ export async function initExplorer() {
       scrollToFocusedCard(state.focusedCard, false);
     }
 
+    // Details (scalar reference, test specification): after the first display
+    loadDetailsInBackground();
+
     // Global listeners: registered once. With the instant navigation of Material, initExplorer runs
     // again at each visit of the page; a second click listener would toggle the macro tooltips twice
     // (open, then close at once).
     if (!globalListenersBound) {
       globalListenersBound = true;
+
+      // End of a resize of the Algorithm modal (see rememberAlgoModalSize)
+      document.addEventListener("mouseup", rememberAlgoModalSize);
+
+      // "/" on the Explorer page: focus the search bar of the Explorer instead of
+      // opening the site search (Material listens on the document; "s" and "f"
+      // still open the site search). Capture phase, to run before Material.
+      window.addEventListener("keydown", (e) => {
+        if (e.key !== "/" || e.ctrlKey || e.metaKey || e.altKey) return;
+        const explorerInput = document.getElementById("mipp-search-input");
+        if (!explorerInput) return; // not on the Explorer page
+        const t = e.target;
+        if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+        const siteSearch = document.getElementById("__search");
+        if (siteSearch && siteSearch.checked) return;
+        e.preventDefault();
+        e.stopPropagation();
+        explorerInput.focus();
+        explorerInput.select();
+      }, true);
       window.addEventListener("hashchange", () => {
         if (!document.getElementById("mipp-explorer-app")) return;
         resetViewState();

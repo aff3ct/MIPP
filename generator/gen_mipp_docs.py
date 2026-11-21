@@ -1135,7 +1135,8 @@ def build_arg_parser():
             "function per ISA, found with the candidate resolver of the header generator;\n"
             "- 'funcs_support': Function Support pages ('docs/funcs_support/'), one page per function with its "
             "prototypes and support tables;\n"
-            "- 'explorer': data file of the API Explorer ('docs/assets/data/mipp_api_index.json');\n"
+            "- 'explorer': data files of the API Explorer ('docs/assets/data/mipp_api_index.json' and "
+            "'mipp_api_details.json');\n"
             "- 'dev_reference': command-line and registry reference of the Developer Guide "
             "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/');\n"
             "- 'includes': tables included in the hand-written pages ('docs/includes/generated/'): LMUL and "
@@ -1252,7 +1253,7 @@ def main(argv=None):
 
     if "explorer" in parts:
         # Export Interactive API Explorer metadata
-        print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json)...")
+        print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json, mipp_api_details.json)...")
         from gen_mipp_api_data import export_api_data
         export_api_data(project_root)
         # Source code of the "Algorithm" modal: symbol tables of the generated headers (include/)

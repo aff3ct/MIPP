@@ -78,9 +78,32 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   display: none;
 }
 
+/* Typography scale of the Explorer: five sizes, used by every font-size of
+   this file and of the HTML of the components (with a fallback, for the
+   tooltips appended to the body). The UI size (S / M / L, display settings)
+   only changes the factor. xs: uppercase labels and counters; sm: tabs, table
+   headers, chips; base: text, controls and code (the size of the code blocks
+   of the documentation); md: search field and emphasized text; lg: titles. */
+#mipp-explorer-app {
+  --mipp-fs-scale: 1;
+  --mipp-fs-xs: calc(0.6rem * var(--mipp-fs-scale));
+  --mipp-fs-sm: calc(0.66rem * var(--mipp-fs-scale));
+  --mipp-fs-base: calc(0.72rem * var(--mipp-fs-scale));
+  --mipp-fs-md: calc(0.8rem * var(--mipp-fs-scale));
+  --mipp-fs-lg: calc(0.95rem * var(--mipp-fs-scale));
+}
+
+#mipp-explorer-app.mipp-font-sm {
+  --mipp-fs-scale: 0.92;
+}
+
+#mipp-explorer-app.mipp-font-lg {
+  --mipp-fs-scale: 1.1;
+}
+
 /* Font Size & Padding Scaling Variants */
 #mipp-explorer-app.mipp-font-sm {
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   --mipp-card-header-pad: 0.22rem 0.45rem;
   --mipp-card-details-pad: 0.22rem 0.45rem;
   --mipp-proto-pad: 0.12rem 0.35rem;
@@ -124,11 +147,9 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   margin: 0;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-card-name {
-  font-size: 0.85rem;
   line-height: 1.12;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-cat-badge {
-  font-size: 0.58rem;
   padding: 0.02rem 0.3rem;
   line-height: 1.1;
 }
@@ -136,7 +157,6 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.16rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-isa-badge {
-  font-size: 0.62rem;
   padding: 0.02rem 0.32rem;
   line-height: 1.12;
 }
@@ -144,18 +164,13 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   width: 16px;
   height: 16px;
   min-width: 16px;
-  font-size: 0.58rem;
   border-radius: 3px;
-}
-#mipp-explorer-app.mipp-font-sm .mipp-code-box-title {
-  font-size: 0.68rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-card:not(.expanded) .mipp-card-desc {
   margin: 0 !important;
   margin-bottom: 0 !important;
   padding: 0;
   padding-bottom: 0;
-  font-size: 0.70rem;
   line-height: 1.12;
   white-space: nowrap;
   overflow: hidden;
@@ -167,7 +182,6 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   margin: 0 !important;
   margin-bottom: 0.35rem !important;
   padding: 0;
-  font-size: 0.72rem;
   line-height: 1.35;
   white-space: normal;
   overflow: visible;
@@ -198,7 +212,6 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.2rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-card-tab-btn {
-  font-size: 0.66rem;
   padding: 0.16rem 0.4rem;
   gap: 0.25rem;
 }
@@ -206,32 +219,23 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.35rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-hw-table {
-  font-size: 0.66rem;
   margin-bottom: 0.2rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-hw-table th {
-  font-size: 0.60rem;
   padding: 0.2rem 0.38rem;
   letter-spacing: 0.02em;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-hw-table td {
-  font-size: 0.65rem;
   padding: 0.2rem 0.38rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-code-box-header {
-  font-size: 0.65rem;
   padding: 0.18rem 0.42rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-code-box pre {
-  font-size: 0.66rem !important;
   padding: 0.32rem 0.45rem !important;
   line-height: 1.35 !important;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-code-box pre code {
-  font-size: 0.66rem !important;
-}
 #mipp-explorer-app.mipp-font-sm .copy-proto-btn {
-  font-size: 0.62rem;
   padding: 0.12rem 0.25rem;
 }
 #mipp-explorer-app.mipp-font-sm .copy-proto-btn svg,
@@ -240,32 +244,23 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   height: 11px;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-godbolt-btn {
-  font-size: 0.64rem;
   padding: 0.18rem 0.45rem;
   border-radius: 4px;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-scalar-header {
   margin-bottom: 0.22rem;
-  font-size: 0.66rem;
   gap: 0.3rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-scalar-dt-select {
-  font-size: 0.65rem;
   padding: 0.12rem 0.35rem;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-specs-table {
-  font-size: 0.65rem;
-}
 #mipp-explorer-app.mipp-font-sm .mipp-specs-table th {
-  font-size: 0.60rem;
   padding: 0.2rem 0.38rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-specs-table td {
-  font-size: 0.65rem;
   padding: 0.2rem 0.38rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-math-semantics {
-  font-size: 0.68rem;
   padding: 0.25rem 0.45rem;
 }
 
@@ -278,36 +273,22 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 #mipp-explorer-app.mipp-font-sm .mipp-modal-header h2,
 #mipp-explorer-app.mipp-font-sm .mipp-modal-title {
-  font-size: 0.86rem !important;
   gap: 0.35rem !important;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-modal-header div[style*="font-size: 0.8rem"] {
-  font-size: 0.66rem !important;
+#mipp-explorer-app.mipp-font-sm .mipp-modal-header div[style*="--mipp-fs-base"] {
   margin-top: 0.15rem !important;
-}
-#mipp-explorer-app.mipp-font-sm .mipp-modal-header .mipp-icon-btn,
-#mipp-explorer-app.mipp-font-sm .mipp-modal-close-btn {
-  font-size: 0.95rem !important;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-modal-body {
   padding: 0.75rem 0.85rem !important;
   gap: 0.65rem !important;
 }
-#mipp-explorer-app.mipp-font-sm #mipp-algo-modal-backdrop span[style*="font-size: 0.8rem"] {
-  font-size: 0.68rem !important;
-}
 #mipp-explorer-app.mipp-font-sm #mipp-algo-modal-backdrop .mipp-dt-badge,
 #mipp-explorer-app.mipp-font-sm #mipp-algo-modal-backdrop .mipp-filter-chip {
-  font-size: 0.62rem !important;
   padding: 0.1rem 0.32rem !important;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-modal-content .mipp-code-box pre {
-  font-size: 0.68rem !important;
   padding: 0.35rem 0.5rem !important;
   line-height: 1.35 !important;
-}
-#mipp-explorer-app.mipp-font-sm .mipp-modal-content .mipp-code-box pre code {
-  font-size: 0.68rem !important;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-compare-modal-content {
   border-radius: 8px;
@@ -321,51 +302,28 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.6rem !important;
   border-radius: 6px;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-compare-col h3,
-#mipp-explorer-app.mipp-font-sm .mipp-compare-col-name {
-  font-size: 0.85rem !important;
-}
 #mipp-explorer-app.mipp-font-sm .mipp-compare-col p,
-#mipp-explorer-app.mipp-font-sm .mipp-compare-col-desc {
-  font-size: 0.68rem !important;
-}
 #mipp-explorer-app.mipp-font-sm .mipp-compare-col .mipp-control-label {
-  font-size: 0.63rem !important;
   margin-bottom: 0.15rem !important;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-compare-col div[style*="font-size: 0.82rem"] {
-  font-size: 0.68rem !important;
+#mipp-explorer-app.mipp-font-sm .mipp-compare-col div[style*="--mipp-fs-md"] {
   padding: 0.25rem 0.4rem !important;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-compare-col .mipp-math-formula {
-  font-size: 0.68rem !important;
-}
 #mipp-explorer-app.mipp-font-sm .mipp-compare-col .mipp-isa-badge {
-  font-size: 0.60rem !important;
   padding: 0.02rem 0.28rem !important;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-compare-col .mipp-dt-badge {
-  font-size: 0.60rem !important;
   padding: 0.02rem 0.28rem !important;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-compare-col pre {
-  font-size: 0.67rem !important;
   padding: 0.35rem 0.45rem !important;
 }
-#mipp-explorer-app.mipp-font-sm .mipp-compare-col pre code {
-  font-size: 0.67rem !important;
-}
 #mipp-explorer-app.mipp-font-sm .mipp-compare-bar {
-  font-size: 0.68rem;
   padding: 0.35rem 0.75rem;
   border-radius: 20px;
 }
 #mipp-explorer-app.mipp-font-sm #mipp-clear-compare-btn {
-  font-size: 0.65rem;
   padding: 0.15rem 0.45rem;
-}
-#mipp-explorer-app.mipp-font-sm .mipp-brand-title {
-  font-size: 1.05rem;
 }
 
 /* Mode S: Scaled Search Bubble Controls (Dialect, LMUL, Size, Share, Reset) */
@@ -376,7 +334,6 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.35rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-control-label {
-  font-size: 0.68rem;
   letter-spacing: 0.03em;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-segmented-group {
@@ -386,18 +343,16 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 #mipp-explorer-app.mipp-font-sm .mipp-segment-btn {
   padding: 0.18rem 0.48rem;
-  font-size: 0.68rem;
   border-radius: 4px;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-action-btn {
   padding: 0.2rem 0.52rem;
-  font-size: 0.68rem;
   gap: 0.3rem;
   border-radius: 4px;
 }
 
 #mipp-explorer-app.mipp-font-md {
-  font-size: 0.88rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   --mipp-card-header-pad: 0.35rem 0.75rem;
   --mipp-card-details-pad: 0.45rem 0.75rem;
   --mipp-proto-pad: 0.35rem 0.65rem;
@@ -412,17 +367,17 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.3rem;
 }
 #mipp-explorer-app.mipp-font-md .mipp-brand-title {
-  font-size: 1.18rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
 }
 #mipp-explorer-app.mipp-font-md .mipp-card-name {
-  font-size: 1.15rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
 }
 #mipp-explorer-app.mipp-font-md .mipp-code-box pre code {
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 #mipp-explorer-app.mipp-font-lg {
-  font-size: 0.98rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   --mipp-card-header-pad: 1.15rem 1.45rem;
   --mipp-card-details-pad: 1.15rem 1.45rem;
   --mipp-proto-pad: 0.85rem 1.25rem;
@@ -430,14 +385,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   --mipp-tab-content-pad: 1.25rem;
   --mipp-code-box-pad: 1rem 1.3rem;
 }
-#mipp-explorer-app.mipp-font-lg .mipp-brand-title {
-  font-size: 1.28rem;
-}
 #mipp-explorer-app.mipp-font-lg .mipp-card-name {
-  font-size: 1.25rem;
-}
-#mipp-explorer-app.mipp-font-lg .mipp-code-box pre code {
-  font-size: 0.86rem;
 }
 
 /* --------------------------------------------------------------------------
@@ -495,7 +443,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 .md-typeset .mipp-brand-title,
 .mipp-brand-title {
-  font-size: 1.2rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   font-weight: 800;
   margin: 0 !important;
   padding: 0;
@@ -563,7 +511,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   height: 42px;
   box-sizing: border-box;
   padding: 0 2.75rem 0 2.85rem;
-  font-size: 0.95rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   font-family: inherit;
   border-radius: var(--mipp-border-radius);
   border: 1.5px solid var(--mipp-card-border, rgba(255, 255, 255, 0.15));
@@ -605,7 +553,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
-  font-size: 0.85rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   width: 100%;
   box-sizing: border-box;
 }
@@ -635,7 +583,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 .mipp-control-label {
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--md-default-fg-color--lighter, #94a3b8);
@@ -650,7 +598,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-options-btn {
-  font-size: 1.15rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
 }
 
 .mipp-options-popover {
@@ -677,7 +625,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-options-popover-title {
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -709,17 +657,17 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 #mipp-font-size-group [data-font-size="sm"] {
-  font-size: 0.7rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   font-weight: 500;
 }
 
 #mipp-font-size-group [data-font-size="md"] {
-  font-size: 0.84rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   font-weight: 600;
 }
 
 #mipp-font-size-group [data-font-size="lg"] {
-  font-size: 0.98rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   font-weight: 700;
 }
 
@@ -748,7 +696,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   border: none;
   cursor: pointer;
   padding: 0.35rem 0.75rem;
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 500;
   border-radius: var(--mipp-border-radius-sm);
   color: var(--md-default-fg-color--light, #475569);
@@ -809,7 +757,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   border: 1px solid var(--mipp-card-border, #e2e8f0);
   border-radius: var(--mipp-border-radius-sm);
   padding: 0.4rem 0.75rem;
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 500;
   color: var(--md-default-fg-color);
   cursor: pointer;
@@ -848,7 +796,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   background: var(--md-default-bg-color--light, #ffffff);
   border: 1px solid var(--mipp-card-border, #e2e8f0);
   border-radius: var(--mipp-border-radius-sm);
-  font-size: 0.95rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   color: var(--md-default-fg-color);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -931,7 +879,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-filters-toggle-count {
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 500;
   color: var(--mipp-accent, #0ea5e9);
 }
@@ -944,7 +892,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
     width: 100%;
     padding: 0.6rem 0.9rem;
     font: inherit;
-    font-size: 0.8rem;
+    font-size: var(--mipp-fs-base, 0.72rem);
     font-weight: 600;
     color: var(--md-default-fg-color);
     background: var(--mipp-card-bg, #ffffff);
@@ -1020,7 +968,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 .md-typeset .mipp-filter-title,
 .mipp-sidebar .mipp-filter-title,
 .mipp-filter-title {
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1100,7 +1048,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 .mipp-filter-chip {
   cursor: pointer;
   user-select: none;
-  font-size: 0.75rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   padding: 0.25rem 0.55rem;
   border-radius: 20px;
   border: 1px solid var(--mipp-card-border, #e2e8f0);
@@ -1128,7 +1076,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.82rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   cursor: pointer;
   user-select: none;
   padding: 0.15rem 0;
@@ -1149,9 +1097,11 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 .mipp-badge-count {
   margin-left: auto;
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   background: var(--md-default-bg-color--lighter, #f1f5f9);
-  color: var(--md-default-fg-color--lighter, #64748b);
+  /* --light, not --lighter: on this grey background, --lighter is under the
+     4.5:1 contrast of WCAG AA */
+  color: var(--md-default-fg-color--light, #475569);
   padding: 0.1rem 0.4rem;
   border-radius: 10px;
   font-weight: 600;
@@ -1162,7 +1112,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
    -------------------------------------------------------------------------- */
 .mipp-dt-badge {
   font-family: var(--md-code-font, monospace);
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
@@ -1210,7 +1160,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
    -------------------------------------------------------------------------- */
 .mipp-dt-group-badge {
   font-family: var(--md-code-font, monospace);
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   padding: 0.15rem 0.55rem;
   border-radius: 4px;
@@ -1243,7 +1193,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 /* Sub-extension required tag in parenthesis and italics */
 .mipp-req-feature-tag {
-  font-size: 0.74rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-style: italic;
   color: var(--md-default-fg-color--lighter, #94a3b8);
   margin-left: 0.35rem;
@@ -1339,7 +1289,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   align-items: center;
   justify-content: space-between;
   padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   color: var(--md-default-fg-color--lighter, #94a3b8);
 }
 
@@ -1424,7 +1374,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-card-name {
-  font-size: 1.15rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   font-weight: 700;
   font-family: var(--md-code-font, "JetBrains Mono", monospace);
   color: var(--md-default-fg-color);
@@ -1432,7 +1382,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-cat-badge {
-  font-size: 0.68rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -1449,7 +1399,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 /* Match reason chip (e.g. matched via vendor intrinsic) */
 .mipp-matched-chip {
-  font-size: 0.68rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   font-family: var(--md-code-font, monospace);
   background: rgba(245, 158, 11, 0.15);
   color: #d97706;
@@ -1471,7 +1421,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-isa-badge {
-  font-size: 0.7rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   font-weight: 600;
   font-family: var(--md-code-font, monospace);
   padding: 0.15rem 0.55rem;
@@ -1578,7 +1528,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 /* Card Description */
 .mipp-card-desc {
-  font-size: 0.85rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   line-height: 1.4;
   color: var(--md-default-fg-color--light, #475569);
   margin: 0;
@@ -1763,7 +1713,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   border-radius: 8px;
   padding: 0.6rem 0.8rem;
   max-width: 420px;
-  font-size: 0.82rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   animation: mippFadeIn 0.15s ease;
   box-sizing: border-box;
 }
@@ -1781,14 +1731,14 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 .mipp-macro-tooltip-title {
   font-weight: 700;
   color: var(--mipp-accent, #0284c7);
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 .mipp-macro-tooltip-close {
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   padding: 0.1rem 0.3rem;
   border-radius: 4px;
   line-height: 1;
@@ -1807,7 +1757,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   background: var(--md-code-bg-color, #f8fafc);
   border-radius: 4px;
   font-family: var(--md-code-font, monospace);
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.45;
@@ -1827,7 +1777,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   .mipp-macro-tooltip {
     max-width: calc(100vw - 20px) !important;
     padding: 0.5rem 0.65rem;
-    font-size: 0.78rem;
+    font-size: var(--mipp-fs-base, 0.72rem);
   }
 }
 
@@ -1852,7 +1802,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-intrinsic-tooltip .mipp-macro-tooltip-title code {
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   background: none;
   padding: 0;
 }
@@ -1860,7 +1810,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 .mipp-intrinsic-isa {
   font-weight: 500;
   color: var(--md-default-fg-color--light);
-  font-size: 0.74rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 .mipp-intrinsic-body {
@@ -1870,7 +1820,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-intrinsic-label {
-  font-size: 0.74rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   color: var(--md-default-fg-color--light);
 }
 
@@ -1890,7 +1840,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   text-align: left;
   cursor: pointer;
   font-family: var(--md-code-font, monospace);
-  font-size: 0.76rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   color: var(--mipp-accent-hover);
 }
 
@@ -1901,13 +1851,13 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 .mipp-intrinsic-dts {
   font-family: var(--md-code-font, monospace);
-  font-size: 0.7rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   color: var(--md-default-fg-color--lighter);
 }
 
 .mipp-intrinsic-doc {
   align-self: flex-start;
-  font-size: 0.76rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   color: var(--mipp-accent-hover);
   text-decoration: none;
@@ -1943,7 +1893,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   justify-content: center;
   border-radius: 4px;
   font-family: var(--md-code-font, monospace);
-  font-size: 0.70rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   font-weight: 700;
   line-height: 1;
   text-align: center;
@@ -1990,7 +1940,7 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 
 /* Integrated Code Box Header Title */
 .mipp-code-box-title {
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   color: var(--md-default-fg-color--light, #475569);
   font-family: var(--md-text-font, sans-serif);
@@ -2013,7 +1963,7 @@ button.mipp-variant-sq-badge:hover:not(.active) {
   border-left: 4px solid #f59e0b;
   border-radius: 6px;
   color: #b45309;
-  font-size: 0.82rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   line-height: 1.45;
 }
 
@@ -2026,7 +1976,7 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 
 .mipp-unsupported-icon {
   display: inline-flex;
-  font-size: 1.1rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   line-height: 1;
   flex-shrink: 0;
 }
@@ -2109,14 +2059,14 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 }
 
 .mipp-explorer-loading-title {
-  font-size: 1rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   font-weight: 600;
   color: var(--md-default-fg-color);
 }
 
 .mipp-explorer-loading p {
   margin: 0.4rem 0 0 0;
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 /* Without JavaScript, only the <noscript> message is shown */
@@ -2168,7 +2118,7 @@ html:not(.js) .mipp-explorer-loading {
 }
 
 #mipp-load-progress-text {
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   margin-top: 0.4rem;
   color: var(--mipp-accent, #0ea5e9);
@@ -2233,7 +2183,7 @@ html:not(.js) .mipp-explorer-loading {
   border: none;
   border-bottom: 2px solid transparent;
   padding: var(--mipp-tab-pad, 0.45rem 0.8rem);
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   color: var(--md-default-fg-color--lighter, #94a3b8);
   cursor: pointer;
@@ -2277,7 +2227,7 @@ html:not(.js) .mipp-explorer-loading {
 .mipp-hw-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   margin-bottom: 0.25rem;
 }
 
@@ -2287,7 +2237,9 @@ html:not(.js) .mipp-explorer-loading {
   background: var(--md-default-bg-color--lighter, #f1f5f9);
   color: var(--md-default-fg-color--light, #475569);
   font-weight: 600;
-  font-size: 0.72rem;
+  /* uppercase label: xs, on one line */
+  font-size: var(--mipp-fs-xs, 0.6rem);
+  white-space: nowrap;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 1.5px solid var(--mipp-card-border, #e2e8f0);
@@ -2370,7 +2322,7 @@ html:not(.js) .mipp-explorer-loading {
   background: var(--md-default-bg-color, #ffffff);
   color: var(--md-default-fg-color--light, #64748b);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   transition: all 0.15s ease;
 }
 
@@ -2395,15 +2347,7 @@ html:not(.js) .mipp-explorer-loading {
 
 .mipp-hw-no-algo {
   color: var(--md-default-fg-color--lighter, #94a3b8);
-  font-size: 0.9rem;
-}
-
-.mipp-hw-header-short {
-  display: none;
-}
-
-.mipp-hw-header-full {
-  display: inline;
+  font-size: var(--mipp-fs-md, 0.8rem);
 }
 
 /* Mobile Responsive Hardware Table */
@@ -2414,7 +2358,7 @@ html:not(.js) .mipp-explorer-loading {
   }
 
   .mipp-hw-table {
-    font-size: 0.75rem;
+    font-size: var(--mipp-fs-base, 0.72rem);
   }
 
   .mipp-hw-table th,
@@ -2426,15 +2370,7 @@ html:not(.js) .mipp-explorer-loading {
     width: 65px;
     min-width: 60px;
     max-width: 75px;
-    font-size: 0.75rem;
-  }
-
-  .mipp-hw-header-full {
-    display: none;
-  }
-
-  .mipp-hw-header-short {
-    display: inline;
+    font-size: var(--mipp-fs-base, 0.72rem);
   }
 
   .mipp-hw-col-tier {
@@ -2483,7 +2419,7 @@ html:not(.js) .mipp-explorer-loading {
   padding: 0.35rem 0.65rem;
   background: rgba(0, 0, 0, 0.02);
   border-bottom: 1px solid var(--mipp-card-border, #e2e8f0);
-  font-size: 0.74rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   color: var(--md-default-fg-color--light, #64748b);
   width: 100%;
   box-sizing: border-box;
@@ -2508,7 +2444,7 @@ html:not(.js) .mipp-explorer-loading {
   align-items: center;
   justify-content: center;
   padding: 0.25rem 0.35rem;
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 500;
   cursor: pointer;
   border-radius: var(--mipp-border-radius-sm, 4px);
@@ -2556,7 +2492,7 @@ html:not(.js) .mipp-explorer-loading {
   box-sizing: border-box !important;
   overflow-x: auto;
   font-family: var(--md-code-font, monospace);
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   line-height: 1.45;
   color: var(--md-code-fg-color, #0f172a);
   tab-size: 4 !important;
@@ -2599,7 +2535,7 @@ html:not(.js) .mipp-explorer-loading {
   border: 1px solid var(--mipp-card-border, #cbd5e1);
   border-radius: var(--mipp-border-radius-sm, 4px);
   padding: 0.25rem 0.65rem;
-  font-size: 0.76rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
@@ -2650,7 +2586,7 @@ html:not(.js) .mipp-explorer-loading {
 }
 
 .mipp-scalar-dt-select {
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-family: var(--md-code-font, monospace);
   padding: 0.25rem 0.6rem;
   border-radius: var(--mipp-border-radius-sm);
@@ -2678,7 +2614,7 @@ html:not(.js) .mipp-explorer-loading {
 .mipp-specs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 .mipp-specs-table th {
@@ -2687,7 +2623,7 @@ html:not(.js) .mipp-explorer-loading {
   background: var(--md-default-bg-color--lighter, #f1f5f9);
   color: var(--md-default-fg-color--light, #475569);
   font-weight: 600;
-  font-size: 0.72rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   border-bottom: 1.5px solid var(--mipp-card-border, #e2e8f0);
@@ -2853,9 +2789,24 @@ html:not(.js) .mipp-explorer-loading {
 }
 
 .mipp-algo-modal-content {
-  width: 95vw !important;
-  max-width: 1400px !important;
+  width: 95vw;
+  max-width: 1400px;
   max-height: 92vh;
+}
+
+/* Desktop: the Algorithm modal can be resized from its bottom right corner.
+   No !important on its size: the browser writes the size chosen by the user as
+   an inline style, which main.js keeps across the renders of the modal
+   (applyAlgoModalSize) */
+@media (min-width: 769px) {
+  .mipp-algo-modal-content {
+    width: min(95vw, 1400px);
+    max-width: 98vw;
+    max-height: 96vh;
+    min-width: 600px;
+    min-height: 320px;
+    resize: both;
+  }
 }
 
 /* Algorithm Modal Internal Tabs: Abstract C++ vs Flat C99 */
@@ -2898,8 +2849,8 @@ html:not(.js) .mipp-explorer-loading {
   background: transparent;
   border: none;
   border-bottom: 2.5px solid transparent;
-  padding: 0.55rem 1.15rem;
-  font-size: 0.88rem;
+  padding: 0.4rem 0.9rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   color: var(--md-default-fg-color--lighter, #94a3b8);
   cursor: pointer;
@@ -2955,14 +2906,14 @@ html:not(.js) .mipp-explorer-loading {
   border: 1px solid rgba(14, 165, 233, 0.22);
   border-left: 3.5px solid var(--mipp-accent, #0ea5e9);
   border-radius: var(--mipp-border-radius-sm, 4px);
-  font-size: 0.82rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   line-height: 1.45;
   color: var(--md-default-fg-color, #334155);
 }
 
 .mipp-algo-note-icon {
   display: inline-flex;
-  font-size: 1rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   line-height: 1;
   flex-shrink: 0;
   color: var(--mipp-accent, #0ea5e9);
@@ -2970,7 +2921,7 @@ html:not(.js) .mipp-explorer-loading {
 
 .mipp-algo-note code {
   font-family: var(--md-code-font, monospace);
-  font-size: 0.8rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 600;
   padding: 0.1rem 0.35rem;
   background: rgba(14, 165, 233, 0.1);
@@ -3019,7 +2970,7 @@ html:not(.js) .mipp-explorer-loading {
   border: 1px solid transparent;
   border-radius: var(--mipp-border-radius-sm, 4px);
   color: var(--md-default-fg-color--lighter, #94a3b8);
-  font-size: 1.25rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -3060,7 +3011,7 @@ html:not(.js) .mipp-explorer-loading {
   border: 1px solid transparent;
   border-radius: var(--mipp-border-radius-sm, 4px);
   color: var(--md-default-fg-color--lighter, #94a3b8);
-  font-size: 0.95rem;
+  font-size: var(--mipp-fs-lg, 0.95rem);
   line-height: 1;
   cursor: pointer;
   padding: 0;
@@ -3122,7 +3073,7 @@ html:not(.js) .mipp-explorer-loading {
   color: #ffffff;
   padding: 0.65rem 1.15rem;
   border-radius: var(--mipp-border-radius);
-  font-size: 0.85rem;
+  font-size: var(--mipp-fs-md, 0.8rem);
   font-weight: 600;
   box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4);
   transform: translateY(100px);
@@ -3213,7 +3164,7 @@ html:not(.js) .mipp-explorer-loading {
 
   .mipp-segment-btn {
     padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+    font-size: var(--mipp-fs-base, 0.72rem);
   }
 
   .mipp-card:not(.expanded) .mipp-card-desc {
@@ -3250,8 +3201,7 @@ html:not(.js) .mipp-explorer-loading {
   }
 
   .mipp-modal-tab-btn {
-    padding: 0.45rem 0.85rem;
-    font-size: 0.82rem;
+    padding: 0.35rem 0.7rem;
   }
 
   .mipp-compare-grid {
@@ -3284,7 +3234,7 @@ html:not(.js) .mipp-explorer-loading {
   border: 1px solid var(--mipp-card-border, #e2e8f0);
   border-radius: var(--mipp-border-radius, 8px);
   padding: 0.6rem 0.8rem;
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 .mipp-algo-tree-title {
@@ -3324,7 +3274,7 @@ html:not(.js) .mipp-explorer-loading {
 .mipp-algo-tree-name,
 .mipp-algo-tree-link {
   font-family: var(--md-code-font, monospace);
-  font-size: 0.76rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
 }
 
 .mipp-algo-tree-link {
@@ -3342,7 +3292,7 @@ html:not(.js) .mipp-explorer-loading {
 
 .mipp-algo-tree-isa {
   margin-left: 0.35rem;
-  font-size: 0.68rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   padding: 0 0.3rem;
   border-radius: 4px;
   border: 1px solid var(--mipp-card-border, #cbd5e1);
@@ -3350,13 +3300,13 @@ html:not(.js) .mipp-explorer-loading {
 }
 
 .mipp-algo-tree-own {
-  font-size: 0.7rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
   font-weight: 400;
   color: var(--md-default-fg-color--lighter, #94a3b8);
 }
 
 .mipp-algo-source {
-  font-size: 0.74rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   color: var(--md-default-fg-color--light, #475569);
 }
 
@@ -3396,7 +3346,7 @@ html:not(.js) .mipp-explorer-loading {
 .mipp-card-spec-link {
   margin-left: auto;
   padding: 0.3rem 0.4rem;
-  font-size: 0.78rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
   font-weight: 500;
   white-space: nowrap;
   color: var(--mipp-accent, #0284c7);
@@ -3413,4 +3363,73 @@ html:not(.js) .mipp-explorer-loading {
 #__search:checked ~ .md-container .mipp-explorer-header,
 #__search:checked ~ .md-container .mipp-compare-bar {
   z-index: 1;
+}
+
+/* Modal titles on the typography scale (an h3 of Material otherwise) */
+#mipp-explorer-app .mipp-modal-title {
+  font-size: var(--mipp-fs-md, 0.8rem);
+}
+
+/* Phones: compact header (about 160 px instead of 277 px). No brand title (the
+   page title is in the Material header); the controls on a 2-column grid, the
+   label above its buttons: API and the actions, then Variant and LMUL. */
+@media (max-width: 768px) {
+  .mipp-explorer-header {
+    gap: 0.5rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .mipp-header-brand {
+    display: none;
+  }
+
+  .mipp-search-input {
+    height: 38px;
+  }
+
+  .mipp-controls-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "api actions"
+      "variant lmul";
+    align-items: end;
+    gap: 0.45rem 0.6rem;
+  }
+
+  .mipp-controls-row > .mipp-controls-group:nth-child(1) { grid-area: api; }
+  .mipp-controls-row > .mipp-controls-group:nth-child(2) { grid-area: variant; }
+  .mipp-controls-row > .mipp-controls-group:nth-child(3) { grid-area: lmul; }
+  .mipp-controls-row > .mipp-actions-group { grid-area: actions; }
+
+  .mipp-controls-row > .mipp-controls-group {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: auto;
+    flex-wrap: nowrap;
+    gap: 0.15rem;
+  }
+
+  .mipp-controls-row .mipp-control-label {
+    font-size: var(--mipp-fs-xs, 0.6rem);
+  }
+
+  .mipp-controls-row .mipp-segmented-group {
+    flex-wrap: nowrap;
+  }
+
+  .mipp-controls-row .mipp-segment-btn {
+    padding: 0.25rem 0.35rem;
+  }
+
+  .mipp-controls-row > .mipp-actions-group {
+    width: auto;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+
+  .mipp-controls-row .mipp-actions-label {
+    display: none;
+  }
 }

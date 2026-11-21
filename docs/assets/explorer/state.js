@@ -83,6 +83,10 @@ export function syncUrlHash(replace = false) {
   if (state.maskVariant && state.maskVariant !== "unmasked") {
     params.set("mask", state.maskVariant);
   }
+  if (state.selectedLevels && state.selectedLevels.length < 4) {
+    params.set("lvl", state.selectedLevels.join(","));
+  }
+  if (state.intersectionMode) params.set("inter", "1");
 
   const activeFocus = (state.focusedCard && state.expandedCards.has(state.focusedCard))
     ? state.focusedCard
@@ -107,6 +111,23 @@ export function syncUrlHash(replace = false) {
     }
   }
 
+  // The other expanded cards, in opening order: name:tab[:sub-state of the tab]
+  const others = state.openedCardsOrder.filter((c) => c !== activeFocus && state.expandedCards.has(c));
+  if (others.length) {
+    params.set("open", others.map((c) => {
+      const tab = state.cardTabs[c] || "proto";
+      const sub = tab === "scalar" ? state.cardScalarTypes[c]
+        : tab === "specs" ? state.cardTestVariants[c]
+        : tab === "hw" && state.cardHwMask[c] && state.cardHwMask[c] !== "unmasked" ? state.cardHwMask[c]
+        : "";
+      return sub ? `${c}:${tab}:${sub}` : `${c}:${tab}`;
+    }).join(","));
+  }
+
+  // Comparison: selected functions and modal
+  if (state.compareSet.size) params.set("cmp", [...state.compareSet].join(","));
+  if (state.compareModalOpen) params.set("cmp_open", "1");
+
   // Algo Modal state serialization
   if (state.algoModalOpen && state.algoModalData) {
     const mData = state.algoModalData;
@@ -118,6 +139,7 @@ export function syncUrlHash(replace = false) {
       if (mData.mask && mData.mask !== "unmasked") params.set("algo_mask", mData.mask);
       if (mData.lmul && mData.lmul !== "1") params.set("algo_lmul", mData.lmul);
       if (mData.view && mData.view !== "abstract") params.set("algo_view", mData.view);
+      if (mData.compareIsas && mData.compareIsas.length) params.set("algo_cmp", mData.compareIsas.join(","));
       if (mData.scalarSize && mData.scalarSize !== 256) params.set("algo_scalarsize", String(mData.scalarSize));
       if (mData.features) {
         const currentIsa = mData.simdExt || mData.isa || "avx";
@@ -239,6 +261,26 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
       }
     }
 
+    // The other expanded cards (after the focused one, in opening order)
+    if (params.has("open")) {
+      for (const item of params.get("open").split(",")) {
+        const [name, tab, sub] = item.split(":");
+        if (!name || state.expandedCards.has(name)) continue;
+        state.expandedCards.add(name);
+        state.openedCardsOrder.push(name);
+        if (VALID_CARD_TABS.includes(tab)) state.cardTabs[name] = tab;
+        if (sub && tab === "scalar") state.cardScalarTypes[name] = sub;
+        if (sub && tab === "specs") state.cardTestVariants[name] = sub;
+        if (sub && tab === "hw" && ALL_MASK_MODES.includes(sub)) state.cardHwMask[name] = sub;
+      }
+    }
+
+    // Comparison
+    if (params.has("cmp")) {
+      state.compareSet = new Set(params.get("cmp").split(",").filter(Boolean).slice(0, 3));
+    }
+    state.compareModalOpen = params.get("cmp_open") === "1" && state.compareSet.size >= 2;
+
     // Restore Algo Modal state
     if (params.has("algo_func")) {
       state.algoModalOpen = true;
@@ -275,6 +317,9 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
         scalarSize: scalarSize,
         features: features
       };
+      if (params.has("algo_cmp")) {
+        state.algoModalData.compareIsas = params.get("algo_cmp").split(",").filter(Boolean);
+      }
     }
   } catch (err) {
     console.warn("Failed to parse URL hash:", err);

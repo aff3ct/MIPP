@@ -179,7 +179,7 @@ export function renderTabProto(entry) {
           <div class="mipp-code-box-header-left" style="display: flex; align-items: center; gap: 0.5rem;">
             <span class="mipp-code-box-title">${title}</span>
             ${isUnsupported
-      ? `<span style="font-size: 0.75rem; color: #f59e0b; font-style: italic;">(${globalVariant} unsupported, showing unmasked)</span>`
+      ? `<span style="font-size: var(--mipp-fs-base, 0.72rem); color: #f59e0b; font-style: italic;">(${globalVariant} unsupported, showing unmasked)</span>`
       : ""
     }
           </div>

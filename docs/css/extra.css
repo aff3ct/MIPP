@@ -155,6 +155,13 @@
   box-sizing: border-box;
 }
 
+/* Previous / next links to another section, hidden by footer-nav.js: the
+   display of Material would override the [hidden] attribute */
+.md-footer__link[hidden],
+.md-footer__inner[hidden] {
+  display: none;
+}
+
 /* "Search in the API Explorer" link at the top of the search results
    (javascripts/search-explorer-link.js) */
 .mipp-search-explorer-link {

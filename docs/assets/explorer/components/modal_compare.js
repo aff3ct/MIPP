@@ -17,15 +17,15 @@ export function renderCompareColumn(entry) {
   return `
     <div class="mipp-compare-col">
       <div style="display: flex; align-items: center; justify-content: space-between;">
-        <h3 class="mipp-compare-col-name" style="margin: 0; font-family: var(--md-code-font, monospace); font-size: 1.1rem;">${escapeHtml(entry.name)}</h3>
+        <h3 class="mipp-compare-col-name" style="margin: 0; font-family: var(--md-code-font, monospace); font-size: var(--mipp-fs-lg, 0.95rem);">${escapeHtml(entry.name)}</h3>
         <span class="mipp-cat-badge">${escapeHtml(entry.category)}</span>
       </div>
 
-      <p class="mipp-compare-col-desc" style="font-size: 0.82rem; margin: 0; color: var(--md-default-fg-color--light);">${escapeHtml(entry.description)}</p>
+      <p class="mipp-compare-col-desc" style="font-size: var(--mipp-fs-md, 0.8rem); margin: 0; color: var(--md-default-fg-color--light);">${escapeHtml(entry.description)}</p>
 
       <div>
         <div class="mipp-control-label" style="margin-bottom: 0.3rem;">Mathematical Semantics</div>
-        <div style="font-size: 0.82rem; background: var(--md-default-bg-color--lighter); padding: 0.4rem; border-radius: 4px;">
+        <div style="font-size: var(--mipp-fs-md, 0.8rem); background: var(--md-default-bg-color--lighter); padding: 0.4rem; border-radius: 4px;">
           ${(entry.latex || entry.math_semantics) ? renderMathFormula(entry) : "N/A"}
         </div>
       </div>
@@ -43,7 +43,7 @@ export function renderCompareColumn(entry) {
       <div>
         <div class="mipp-control-label" style="margin-bottom: 0.3rem;">Active Prototype (${state.flavor.toUpperCase()})</div>
         <div class="mipp-code-box">
-          <pre style="padding: 0.5rem; font-size: 0.72rem;"><code>${highlightCpp(activeProto)}</code></pre>
+          <pre style="padding: 0.5rem; font-size: var(--mipp-fs-base, 0.72rem);"><code>${highlightCpp(activeProto)}</code></pre>
         </div>
       </div>
 
@@ -66,10 +66,10 @@ export function renderCompareModal(apiData) {
     <div id="mipp-compare-modal-backdrop" class="mipp-modal-backdrop ${state.compareModalOpen ? "visible active" : ""}">
       <div class="mipp-modal-content mipp-compare-modal-content" style="max-width: 95vw; width: 1200px;">
         <div class="mipp-modal-header">
-          <h2 class="mipp-modal-title" style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
+          <h2 class="mipp-modal-title" style="margin: 0; font-size: var(--mipp-fs-md, 0.8rem); display: flex; align-items: center; gap: 0.5rem;">
             <span>Side-by-Side Primitive Comparison</span>
           </h2>
-          <button id="mipp-close-compare-btn" class="mipp-icon-btn mipp-modal-close-btn" style="font-size: 1.2rem;" title="Close comparison modal">✕</button>
+          <button id="mipp-close-compare-btn" class="mipp-icon-btn mipp-modal-close-btn" style="font-size: var(--mipp-fs-lg, 0.95rem);" title="Close comparison modal">✕</button>
         </div>
         <div class="mipp-compare-grid">
           ${selectedEntries.map((e) => renderCompareColumn(e)).join("")}

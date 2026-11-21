@@ -5,7 +5,8 @@ theme:
   # Template overrides (404 page)
   custom_dir: overrides
   logo: assets/images/mipp_ico.jpg
-  favicon: assets/images/mipp_ico_circle.png
+  # 48 px (the 512 px source, mipp_ico_circle.png, weighs 149 KB)
+  favicon: assets/images/mipp_favicon_48.png
   font:
     text: Inter
     code: JetBrains Mono
@@ -120,4 +121,5 @@ extra_javascript:
   - javascripts/toc-toggle.js
   - javascripts/header-height.js
   - javascripts/search-explorer-link.js
+  - javascripts/footer-nav.js
   - assets/explorer/explorer.js

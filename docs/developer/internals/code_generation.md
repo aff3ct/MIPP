@@ -67,6 +67,8 @@ For each key (function, datatype pair, mask variant), the candidates are sorted 
 
 `resolve_candidates()` (`codegen/candidate_resolver.py`) chooses, for each key, one or several candidates with disjoint conditions that together cover all the cases.
 
+### 4.1. Resolution Passes
+
 Each key has a **remaining condition**, initially *true*: the cases for which no implementation is chosen yet. The resolver repeats the following pass until nothing changes:
 
 1. For each key whose remaining condition is not *false*, try the candidates in order, skipping those above the current maximum level and those whose `simd_size` does not match the register size of this LMUL.
@@ -75,6 +77,8 @@ Each key has a **remaining condition**, initially *true*: the cases for which no
 4. If the candidate is accepted, it is recorded with its target condition, and the remaining condition of the key becomes `remaining && !target`. The pass restarts.
 
 The maximum level starts at <span class="mipp-isa-badge lvl-2">L2</span>. When a pass changes nothing, it is raised to <span class="mipp-isa-badge lvl-3">L3</span>, then to the stubs. This order matters: every vector implementation of every function is found before any scalar fallback is accepted, so that an <span class="mipp-isa-badge lvl-2">L2</span> sequence can rely on a native function that is resolved later in the same pass.
+
+### 4.2. Preprocessor Conditions
 
 The conditions are C preprocessor expressions. `cond_utils.py` intersects, negates and simplifies them, and decides whether two conditions are mutually exclusive, knowing that the `define` of the ISA is true. This is how an AArch64-only native entry ends up as two branches:
 
@@ -87,21 +91,30 @@ static inline ... mipp_neon_<function>_float64(...) { /* Level 3 */ }
 #endif
 ```
 
-**Dependencies of the scalar fallback.** On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fallback converts the masks with `torvd` and `torvm` (`hw_mask_requires_torvd`), and extracts them with `store` (`hw_mask_extract_via_store`); with bitfield masks (`hw_mask_is_bitfield`, AVX-512) it copies the bits directly. These functions are dependencies of the fallback. On scalable layouts, the half-vector fallback is also guarded by the minimum vector length (`layout.vlen_guard_template`).
+### 4.3. Dependencies of the Scalar Fallback
 
-**Effective level.** After the resolution, the level of each chosen candidate becomes the highest level among itself and its dependencies (for a dependency with several branches, the best one counts). An <span class="mipp-isa-badge lvl-2">L2</span> sequence that calls an <span class="mipp-isa-badge lvl-3">L3</span> function is reported as <span class="mipp-isa-badge lvl-3">L3</span> in the generated comment, in the summary table and in the documentation.
+On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fallback converts the masks with `torvd` and `torvm` (`hw_mask_requires_torvd`), and extracts them with `store` (`hw_mask_extract_via_store`); with bitfield masks (`hw_mask_is_bitfield`, AVX-512) it copies the bits directly. These functions are dependencies of the fallback. On scalable layouts, the half-vector fallback is also guarded by the minimum vector length (`layout.vlen_guard_template`).
+
+### 4.4. Effective Level
+
+After the resolution, the level of each chosen candidate becomes the highest level among itself and its dependencies (for a dependency with several branches, the best one counts). An <span class="mipp-isa-badge lvl-2">L2</span> sequence that calls an <span class="mipp-isa-badge lvl-3">L3</span> function is reported as <span class="mipp-isa-badge lvl-3">L3</span> in the generated comment, in the summary table and in the documentation.
 
 ---
 
 ## 5. Emission
 
-`resolve_and_emit_missing_functions()` writes the resolved functions of one LMUL. For each function, it first writes the `static` prototypes of all its variants, so that the bodies can call each other in any order, then one body per chosen candidate, under `#if <target condition>` when the condition is not *true*:
+`resolve_and_emit_missing_functions()` writes the resolved functions of one LMUL. For each function, it first writes the `static` prototypes of all its variants, so that the bodies can call each other in any order, then one body per chosen candidate, under `#if <target condition>` when the condition is not *true*.
+
+### 5.1. Bodies per Candidate Type
+
 
 - **Implementation entries** (`native_or_emu`, `generic_emu`). The template is rendered with Jinja2 (variables `isa`, `instr_name`, `dt_par`, `dt_ret`, `isa_dt_par`, `isa_dt_ret`, `cstdint_ret`, `func_name`, `lmul`, `mask_kind`), then the DSL markers are replaced by C names and calls (`parse_placeholders()` in `tools.py`). `emit_function_body()` (`codegen/emit_helpers.py`) writes the prototype, a `// Level N (...)` comment and the body.
 - **Scalar fallback** (`auto_scalar`). `_gen_c_auto_scalar_fallback_one()` copies each register argument into a scalar register of the same size (`memcpy`), calls the `mipp_scalar_*` function and copies the result back.
 - **Stub.** The body is `MIPP_PANIC_STUB("MIPP panic: '<function>' is unimplemented.");`. In C++ the macro throws `mipp::stub_exception`, which the generated tests catch and report as a warning; in C it prints the message and exits. When a datatype is only available under a condition (e.g. NEON `float64` on AArch64), the `#else` branch of a lane-wise half-vector function is not a stub: it is an L3 body that calls the LMUL 1 function, copying the registers with `memcpy` (on ARMv7 the d2 types are arrays). The functions that change the LMUL or the datatype (`combine`, `gather`, conversions…) still get a stub there.
 
-Example of an emitted <span class="mipp-isa-badge lvl-0">L0</span> function (`avx/c/functions/arithmetic/u/m1/add.h`, fine granularity):
+### 5.2. Example
+
+An emitted <span class="mipp-isa-badge lvl-0">L0</span> function (`avx/c/functions/arithmetic/u/m1/add.h`, fine granularity):
 
 ```c
 static inline rvd_avx_float32_m1_t mipp_avx_add_float32_m1(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
