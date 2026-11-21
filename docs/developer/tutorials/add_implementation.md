@@ -185,7 +185,7 @@ Reuse them in `helpers_headers/generic_emu_implems_mask.json`, as `add`, `max` o
 ]
 ```
 
-The masked variants then follow the level of the unmasked one. An ISA with native masked instructions adds entries with a `variant` field in its own `*_native_implems.json` instead, as AVX-512 and RVV do. SVE has predicated instructions, but no such entry yet: its masked variants use the generic templates.
+The masked variants then follow the level of the unmasked one. An ISA with native masked instructions adds entries with a `variant` field in its own `*_native_implems.json` instead, as AVX-512, SVE (predicated instructions: `svadd_f32_m`, `svadd_f32_z`) and RVV do.
 
 ---
 
@@ -201,11 +201,11 @@ The `absdiff` of this tutorial (LMUL 1, unmasked) gives:
 
 | ISA | <span class="mipp-isa-badge lvl-0">L0</span> | <span class="mipp-isa-badge lvl-2">L2</span> | <span class="mipp-isa-badge lvl-3">L3</span> |
 | :--- | :--- | :--- | :--- |
-| NEON | `float32`, 8/16/32-bit integers; `float64` on AArch64 | `int64`, `uint64` on AArch64 | `float64`, `int64`, `uint64` on ARMv7 |
-| AVX | | `float32`, `float64`; the integers except `int64` with AVX2 | `int64`; the integers without AVX2 |
-| SSE | | `float32`; `float64`, `int16`, `uint8` with SSE2; `int32`, `int8`, `uint32`, `uint16` with SSE4.1 | `int64`, `uint64`; the others without these extensions |
+| NEON | `float32`, 8/16/32-bit integers; `float64` on AArch64 | `int64`, `uint64` | `float64` on ARMv7 |
+| AVX | | all the datatypes | |
+| SSE | | all the datatypes | |
 
-The masked variants are <span class="mipp-isa-badge lvl-2">L2</span> wherever the unmasked function is <span class="mipp-isa-badge lvl-0">L0</span> or <span class="mipp-isa-badge lvl-2">L2</span>, and <span class="mipp-isa-badge lvl-3">L3</span> elsewhere. On SSE, `absdiff` follows the levels of `max` and `min`: x86 has no 64-bit integer `max` / `min` instruction before AVX-512, hence the L3 for `int64` and `uint64`.
+The masked variants are <span class="mipp-isa-badge lvl-2">L2</span> wherever the unmasked function is <span class="mipp-isa-badge lvl-0">L0</span> or <span class="mipp-isa-badge lvl-2">L2</span>, and <span class="mipp-isa-badge lvl-3">L3</span> elsewhere. On x86, `absdiff` is <span class="mipp-isa-badge lvl-2">L2</span> for every datatype: where the ISA has no `max` / `min` instruction (64-bit integers before AVX-512, some 8/16/32-bit integers before SSE4.1), `max` and `min` are themselves dedicated or generic emulations (compare and `select`), not scalar fallbacks.
 
 Then run the tests on each target you changed (see [Setup](../setup.md#4-build-and-run-the-unit-tests)). On NEON the first run fails for `int32` and `int64`: the [test properties](add_function.md#step-6-set-the-test-properties) of `absdiff` must keep the signed differences in range.
 
