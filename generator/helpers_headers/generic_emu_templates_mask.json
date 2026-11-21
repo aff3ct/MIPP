@@ -300,6 +300,12 @@
             "}"
         ]
     },
+    "store_mskz_vec": {
+        "format": "long",
+        "code": [
+            "%{{ func_name }}<tp>%(p0, %andb<tp>%(r0, %torvd<tp>%(m0)));"
+        ]
+    },
     "storeu_msk": {
         "format": "long",
         "code": [

@@ -1,18 +1,74 @@
 {
+    "cvt_f32_u32": {
+        "format": "long",
+        "code": [
+            "%r<tr>% res;",
+            "__m256 two31 = _mm256_set1_ps(2147483648.0f);",
+            "__m256 big = _mm256_cmp_ps(r0.r, two31, _CMP_GE_OQ);",
+            "__m256 lo = _mm256_castsi256_ps(_mm256_cvttps_epi32(r0.r));",
+            "__m256 hi = _mm256_xor_ps(_mm256_castsi256_ps(_mm256_cvttps_epi32(_mm256_sub_ps(r0.r, two31))), _mm256_castsi256_ps(_mm256_set1_epi32((int32_t)0x80000000)));",
+            "res.r = _mm256_castps_si256(_mm256_blendv_ps(lo, hi, big));",
+            "return res;"
+        ]
+    },
     "cvt_f64_i64": {
         "format": "long",
         "code": [
-            "%r<c:int|b:64>% res;",
-            "res.r = _mm256_cvtepi32_epi64(_mm256_cvttpd_epi32(r0.r));",
+            "%r<tr>% res;",
+            "%r<tp>% t = %trunc<tp>%(r0);",
+            "%r<tp>% y;",
+            "y.r = _mm256_mul_pd(t.r, _mm256_set1_pd(2.3283064365386962890625e-10));",
+            "%r<tp>% ty = %trunc<tp>%(y);",
+            "__m256d hi_d = _mm256_sub_pd(ty.r, _mm256_and_pd(_mm256_cmp_pd(ty.r, y.r, _CMP_GT_OQ), _mm256_set1_pd(1.0)));",
+            "__m256d lo_d = _mm256_sub_pd(t.r, _mm256_mul_pd(hi_d, _mm256_set1_pd(4294967296.0)));",
+            "__m128i flip = _mm_set1_epi32((int32_t)0x80000000);",
+            "__m128i lo_u = _mm_xor_si128(_mm256_cvttpd_epi32(_mm256_sub_pd(lo_d, _mm256_set1_pd(2147483648.0))), flip);",
+            "{% if dt_ret.category == 'uint' %}__m128i hi_i = _mm_xor_si128(_mm256_cvttpd_epi32(_mm256_sub_pd(hi_d, _mm256_set1_pd(2147483648.0))), flip);",
+            "{% else %}__m128i hi_i = _mm256_cvttpd_epi32(hi_d);{% endif %}",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_unpacklo_epi32(lo_u, hi_i)), _mm_unpackhi_epi32(lo_u, hi_i), 1);",
             "return res;"
         ]
     },
     "cvt_i64_f64": {
         "format": "long",
         "code": [
-            "%r<c:float|b:64>% res;",
-            "__m256i idx = _mm256_setr_epi32(0, 2, 4, 6, 0, 0, 0, 0);",
-            "res.r = _mm256_cvtepi32_pd(_mm256_castsi256_si128(_mm256_permutevar8x32_epi32(r0.r, idx)));",
+            "%r<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i mask32 = _mm_set1_epi64x(0xFFFFFFFFLL), magic = _mm_set1_epi64x(0x4330000000000000LL);",
+            "__m128d m52 = _mm_set1_pd(4503599627370496.0), two32 = _mm_set1_pd(4294967296.0);",
+            "__m128d lo_lo = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_lo, mask32), magic)), m52);",
+            "__m128d lo_hi = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_hi, mask32), magic)), m52);",
+            "__m128d hi_lo = _mm_cvtepi32_pd(_mm_shuffle_epi32(r0_lo, _MM_SHUFFLE(3, 1, 3, 1)));",
+            "__m128d hi_hi = _mm_cvtepi32_pd(_mm_shuffle_epi32(r0_hi, _MM_SHUFFLE(3, 1, 3, 1)));",
+            "res.r = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_add_pd(_mm_mul_pd(hi_lo, two32), lo_lo)), _mm_add_pd(_mm_mul_pd(hi_hi, two32), lo_hi), 1);",
+            "return res;"
+        ]
+    },
+    "cvt_u32_f32": {
+        "format": "long",
+        "code": [
+            "%r<tr>% res;",
+            "__m256 x = _mm256_castsi256_ps(r0.r);",
+            "__m256i lo = _mm256_castps_si256(_mm256_and_ps(x, _mm256_castsi256_ps(_mm256_set1_epi32(0x0000FFFF))));",
+            "__m256i hi = _mm256_castps_si256(_mm256_and_ps(x, _mm256_castsi256_ps(_mm256_set1_epi32((int32_t)0xFFFF0000))));",
+            "__m256 hi_f = _mm256_cvtepi32_ps(hi);  // signed: + 2^32 when the top bit is set",
+            "hi_f = _mm256_add_ps(hi_f, _mm256_and_ps(_mm256_cmp_ps(hi_f, _mm256_setzero_ps(), _CMP_LT_OQ), _mm256_set1_ps(4294967296.0f)));",
+            "res.r = _mm256_add_ps(hi_f, _mm256_cvtepi32_ps(lo));",
+            "return res;"
+        ]
+    },
+    "cvt_u64_f64": {
+        "format": "long",
+        "code": [
+            "%r<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i mask32 = _mm_set1_epi64x(0xFFFFFFFFLL), magic = _mm_set1_epi64x(0x4330000000000000LL);",
+            "__m128d m52 = _mm_set1_pd(4503599627370496.0), two32 = _mm_set1_pd(4294967296.0);",
+            "__m128d lo_lo = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_lo, mask32), magic)), m52);",
+            "__m128d lo_hi = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_hi, mask32), magic)), m52);",
+            "__m128d hi_lo = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_srli_epi64(r0_lo, 32), magic)), m52);",
+            "__m128d hi_hi = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_srli_epi64(r0_hi, 32), magic)), m52);",
+            "res.r = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_add_pd(_mm_mul_pd(hi_lo, two32), lo_lo)), _mm_add_pd(_mm_mul_pd(hi_hi, two32), lo_hi), 1);",
             "return res;"
         ]
     },
@@ -52,7 +108,7 @@
             "fx = _mm256_sub_ps(tmp, mask);",
             "",
             "tmp = _mm256_mul_ps(fx, cephes_exp_C1);",
-            "__m256 z = _mm256_mul_ps(x, cephes_exp_C2);",
+            "__m256 z = _mm256_mul_ps(fx, cephes_exp_C2);",
             "x = _mm256_sub_ps(x, tmp);",
             "x = _mm256_sub_ps(x, z);",
             "",
@@ -191,6 +247,62 @@
             ""
         ]
     },
+    "lshift8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = _mm256_and_si256(_mm256_slli_epi16(r0.r, s0), _mm256_set1_epi8((char)(0xFF << s0)));",
+            "return res;"
+        ]
+    },
+    "maskload_s": {
+        "format": "long",
+        "code": [
+            "%r<tp>% ld;",
+            "ld.r = _mm256_maskload_{% if dt_par.category == 'float' %}{{ isa_dt_par.data_ext }}{% else %}epi{{ dt_par.n_bits }}{% endif %}(({% if dt_par.n_bits == 64 and dt_par.category != 'float' %}long long{% elif dt_par.category != 'float' %}int{% else %}{{ isa_dt_par.to_ptr }}{% endif %}*)p0, {% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(m0.m){% else %}m0.m{% endif %});",
+            "return %select<tp>%(m0, ld, rsrc);"
+        ]
+    },
+    "mul64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "__m256i lo = _mm256_mul_epu32(r0.r, r1.r);",
+            "__m256i t1 = _mm256_mul_epu32(_mm256_srli_epi64(r0.r, 32), r1.r);",
+            "__m256i t2 = _mm256_mul_epu32(r0.r, _mm256_srli_epi64(r1.r, 32));",
+            "res.r = _mm256_add_epi64(lo, _mm256_slli_epi64(_mm256_add_epi64(t1, t2), 32));",
+            "return res;"
+        ]
+    },
+    "mul8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "__m256i even = _mm256_mullo_epi16(r0.r, r1.r);",
+            "__m256i odd = _mm256_mullo_epi16(_mm256_srli_epi16(r0.r, 8), _mm256_srli_epi16(r1.r, 8));",
+            "res.r = _mm256_or_si256(_mm256_slli_epi16(odd, 8), _mm256_and_si256(even, _mm256_set1_epi16(0x00FF)));",
+            "return res;"
+        ]
+    },
+    "notb_k_xor": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "__m256 ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));",
+            "{% if isa_dt_par.data_ext_msk == 'ps' %}res.m = _mm256_xor_ps(m0.m, ones);",
+            "{% elif isa_dt_par.data_ext_msk == 'pd' %}res.m = _mm256_xor_pd(m0.m, _mm256_castps_pd(ones));",
+            "{% else %}res.m = _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(m0.m), ones));{% endif %}",
+            "return res;"
+        ]
+    },
+    "pow2_sllv": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = _mm256_sllv_epi{{ dt_par.n_bits }}(_mm256_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(1), r0.r);",
+            "return res;"
+        ]
+    },
     "reduce_16": {
         "format": "long",
         "code": [
@@ -305,6 +417,166 @@
             "%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);",
             "rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);",
             "return %getfirst<tp>%(rs5);"
+        ]
+    },
+    "reduce_shift": {
+        "format": "long",
+        "code": [
+            "%r<tp>% v = r0;",
+            "%r<c:uint|b:8>% b = %cast<tp,c:uint|b:8>%(v);",
+            "b.r = _mm256_permute2x128_si256(b.r, b.r, 0x01);",
+            "v = %{{ instr_name }}<tp>%(v, %cast<c:uint|b:8,tp>%(b));",
+            "{% for sh in [8, 4, 2, 1] %}{% if sh * 8 >= dt_par.n_bits %}b = %cast<tp,c:uint|b:8>%(v);",
+            "b.r = _mm256_srli_si256(b.r, {{ sh }});",
+            "v = %{{ instr_name }}<tp>%(v, %cast<c:uint|b:8,tp>%(b));",
+            "{% endif %}{% endfor %}return %getfirst<tp>%(v);"
+        ]
+    },
+    "rshift_i64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "__m256i sign = _mm256_srai_epi32(_mm256_shuffle_epi32(r0.r, _MM_SHUFFLE(3, 3, 1, 1)), 31);",
+            "res.r = _mm256_or_si256(_mm256_srli_epi64(r0.r, s0), _mm256_slli_epi64(sign, 64 - s0));",
+            "return res;"
+        ]
+    },
+    "rshift_i8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "__m256i u = _mm256_xor_si256(r0.r, _mm256_set1_epi8((char)0x80));",
+            "u = _mm256_and_si256(_mm256_srli_epi16(u, s0), _mm256_set1_epi8((char)(0xFF >> s0)));",
+            "res.r = _mm256_sub_epi8(u, _mm256_set1_epi8((char)(0x80 >> s0)));",
+            "return res;"
+        ]
+    },
+    "rshift_u8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = _mm256_and_si256(_mm256_srli_epi16(r0.r, s0), _mm256_set1_epi8((char)(0xFF >> s0)));",
+            "return res;"
+        ]
+    },
+    "split_1arg": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi), 1);",
+            "return res;"
+        ]
+    },
+    "split_2args": {
+        "format": "long",
+        "code": [
+            "{% set sfx = (('epu' if dt_par.category == 'uint' else 'epi') if instr_name in ['min', 'max', 'adds', 'subs'] else 'epi') ~ dt_par.n_bits %}%r<tp>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i r1_lo = _mm256_castsi256_si128(r1.r), r1_hi = _mm256_extractf128_si256(r1.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_{{ sfx }}(r0_lo, r1_lo)), _mm_{{ instr_name }}_{{ sfx }}(r0_hi, r1_hi), 1);",
+            "return res;"
+        ]
+    },
+    "split_cmp": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i r1_lo = _mm256_castsi256_si128(r1.r), r1_hi = _mm256_extractf128_si256(r1.r, 1);",
+            "res.m = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo, r1_lo)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi, r1_hi), 1);",
+            "return res;"
+        ]
+    },
+    "split_lshift8": {
+        "format": "long",
+        "code": [
+            "{% macro F(a) %}_mm_and_si128(_mm_slli_epi16({{ a }}, s0), _mm_set1_epi8((char)(0xFF << s0))){% endmacro %}",
+            "%r<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "return res;"
+        ]
+    },
+    "split_mul64": {
+        "format": "long",
+        "code": [
+            "{% macro F(a, b) %}_mm_add_epi64(_mm_mul_epu32({{ a }}, {{ b }}), _mm_slli_epi64(_mm_add_epi64(_mm_mul_epu32(_mm_srli_epi64({{ a }}, 32), {{ b }}), _mm_mul_epu32({{ a }}, _mm_srli_epi64({{ b }}, 32))), 32)){% endmacro %}",
+            "%r<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i b_lo = _mm256_castsi256_si128(r1.r), b_hi = _mm256_extractf128_si256(r1.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo', 'b_lo') }}), {{ F('a_hi', 'b_hi') }}, 1);",
+            "return res;"
+        ]
+    },
+    "split_mul8": {
+        "format": "long",
+        "code": [
+            "{% macro F(a, b) %}_mm_or_si128(_mm_slli_epi16(_mm_mullo_epi16(_mm_srli_epi16({{ a }}, 8), _mm_srli_epi16({{ b }}, 8)), 8), _mm_and_si128(_mm_mullo_epi16({{ a }}, {{ b }}), _mm_set1_epi16(0x00FF))){% endmacro %}",
+            "%r<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i b_lo = _mm256_castsi256_si128(r1.r), b_hi = _mm256_extractf128_si256(r1.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo', 'b_lo') }}), {{ F('a_hi', 'b_hi') }}, 1);",
+            "return res;"
+        ]
+    },
+    "split_reduce": {
+        "format": "long",
+        "code": [
+            "{% set sfx = (('epu' if dt_par.category == 'uint' else 'epi') if instr_name in ['min', 'max', 'adds', 'subs'] else 'epi') ~ dt_par.n_bits %}",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i v = _mm_{{ instr_name }}_{{ sfx }}(r0_lo, r0_hi);",
+            "{% for sh in [8, 4, 2, 1] %}{% if sh * 8 >= dt_par.n_bits %}v = _mm_{{ instr_name }}_{{ sfx }}(v, _mm_srli_si128(v, {{ sh }}));",
+            "{% endif %}{% endfor %}return ({{ cstdint_ret }}){{ '_mm_cvtsi128_si64' if dt_par.n_bits == 64 else '_mm_cvtsi128_si32' }}(v);"
+        ]
+    },
+    "split_rshift_i64": {
+        "format": "long",
+        "code": [
+            "{% macro F(a) %}_mm_or_si128(_mm_srli_epi64({{ a }}, s0), _mm_slli_epi64(_mm_srai_epi32(_mm_shuffle_epi32({{ a }}, _MM_SHUFFLE(3, 3, 1, 1)), 31), 64 - s0)){% endmacro %}",
+            "%r<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "return res;"
+        ]
+    },
+    "split_rshift_i8": {
+        "format": "long",
+        "code": [
+            "{% macro F(a) %}_mm_sub_epi8(_mm_and_si128(_mm_srli_epi16(_mm_xor_si128({{ a }}, _mm_set1_epi8((char)0x80)), s0), _mm_set1_epi8((char)(0xFF >> s0))), _mm_set1_epi8((char)(0x80 >> s0))){% endmacro %}",
+            "%r<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "return res;"
+        ]
+    },
+    "split_rshift_u8": {
+        "format": "long",
+        "code": [
+            "{% macro F(a) %}_mm_and_si128(_mm_srli_epi16({{ a }}, s0), _mm_set1_epi8((char)(0xFF >> s0))){% endmacro %}",
+            "%r<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "return res;"
+        ]
+    },
+    "split_shift": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo, s0)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi, s0), 1);",
+            "return res;"
+        ]
+    },
+    "split_torvm": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i zero = _mm_setzero_si128(), ones = _mm_cmpeq_epi32(zero, zero);",
+            "res.m = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_xor_si128(_mm_cmpeq_epi{{ dt_par.n_bits }}(r0_lo, zero), ones)), _mm_xor_si128(_mm_cmpeq_epi{{ dt_par.n_bits }}(r0_hi, zero), ones), 1);",
+            "return res;"
         ]
     },
     "torvm_float32": {

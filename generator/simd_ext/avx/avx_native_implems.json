@@ -43,6 +43,12 @@
             "datatypes": "all_datatypes",
             "template": "logi_m_2args",
             "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_ps",
+            "if": "!defined(__AVX2__)"
         }
     ],
     "andnb": [
@@ -64,6 +70,12 @@
             "datatypes": "all_datatypes",
             "template": "logi_m_2args",
             "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "andnot",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_ps",
+            "if": "!defined(__AVX2__)"
         }
     ],
     "cast": [
@@ -301,6 +313,24 @@
             "instr_name": "load",
             "datatypes": "all_datatypes",
             "template": "load"
+        },
+        {
+            "instr_name": "maskload",
+            "datatypes": "all_float",
+            "variant": "z",
+            "template": "maskload_z"
+        },
+        {
+            "instr_name": "maskload",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "variant": "z",
+            "template": "maskload_z",
+            "if": "defined(__AVX2__)"
         }
     ],
     "loadu": [
@@ -308,17 +338,38 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load"
+        },
+        {
+            "instr_name": "maskload",
+            "datatypes": "all_float",
+            "variant": "z",
+            "template": "maskload_z"
+        },
+        {
+            "instr_name": "maskload",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "variant": "z",
+            "template": "maskload_z",
+            "if": "defined(__AVX2__)"
         }
     ],
     "lshift": [
         {
             "instr_name": "slli",
             "datatypes": [
-                "int16",
+                "int64",
                 "int32",
-                "int64"
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
             ],
-            "template": "sxl",
+            "template": "sxl_var",
             "if": "defined(__AVX2__)"
         }
     ],
@@ -376,6 +427,15 @@
             ],
             "template": "arith_2args",
             "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "mullo",
+            "datatypes": [
+                "uint32",
+                "uint16"
+            ],
+            "template": "arith_2args_int",
+            "if": "defined(__AVX2__)"
         }
     ],
     "none": [
@@ -404,24 +464,32 @@
             "datatypes": "all_datatypes",
             "template": "logi_m_2args",
             "if": "defined(__AVX2__)"
-        }
-    ],
-    "round": [
+        },
         {
-            "instr_name": "round",
-            "datatypes": "all_float",
-            "template": "round_float"
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_ps",
+            "if": "!defined(__AVX2__)"
         }
     ],
     "rshift": [
         {
+            "instr_name": "srai",
+            "datatypes": [
+                "int32",
+                "int16"
+            ],
+            "template": "sxl_var",
+            "if": "defined(__AVX2__)"
+        },
+        {
             "instr_name": "srli",
             "datatypes": [
-                "int16",
-                "int32",
-                "int64"
+                "uint64",
+                "uint32",
+                "uint16"
             ],
-            "template": "sxl",
+            "template": "sxl_var",
             "if": "defined(__AVX2__)"
         }
     ],
@@ -522,6 +590,11 @@
     ],
     "set1_k": [
         {
+            "instr_name": "set1_k",
+            "datatypes": "all_int_uint",
+            "template": "set1_k_int"
+        },
+        {
             "datatypes": "all_8bit",
             "template": "set1_k-8"
         },
@@ -574,6 +647,24 @@
             "instr_name": "store",
             "datatypes": "all_datatypes",
             "template": "store"
+        },
+        {
+            "instr_name": "maskstore",
+            "datatypes": "all_float",
+            "variant": "m",
+            "template": "maskstore_m"
+        },
+        {
+            "instr_name": "maskstore",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "variant": "m",
+            "template": "maskstore_m",
+            "if": "defined(__AVX2__)"
         }
     ],
     "storeu": [
@@ -581,6 +672,24 @@
             "instr_name": "storeu",
             "datatypes": "all_datatypes",
             "template": "store"
+        },
+        {
+            "instr_name": "maskstore",
+            "datatypes": "all_float",
+            "variant": "m",
+            "template": "maskstore_m"
+        },
+        {
+            "instr_name": "maskstore",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "variant": "m",
+            "template": "maskstore_m",
+            "if": "defined(__AVX2__)"
         }
     ],
     "sub": [
@@ -652,6 +761,12 @@
             "datatypes": "all_datatypes",
             "template": "logi_m_2args",
             "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "logi_m_2args_ps",
+            "if": "!defined(__AVX2__)"
         }
     ]
 }

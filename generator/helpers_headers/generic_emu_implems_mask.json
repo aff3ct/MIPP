@@ -1163,6 +1163,12 @@
         {
             "instr_name": "store",
             "datatypes": "all_datatypes",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.store_mskz_vec"
+        },
+        {
+            "instr_name": "store",
+            "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.store_msk"
         },
@@ -1174,6 +1180,12 @@
         }
     ],
     "storeu": [
+        {
+            "instr_name": "storeu",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.store_mskz_vec"
+        },
         {
             "instr_name": "storeu",
             "datatypes": "all_datatypes",
