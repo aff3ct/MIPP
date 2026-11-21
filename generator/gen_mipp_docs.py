@@ -241,6 +241,11 @@ class MippInfo:
 # ISA Support Matrix Writers
 # ---------------------------------------------------------------------------
 
+# Heading pragma excluding the section from the site search: the search shows
+# a table as its flattened cell text ("add L0 L0 - L2 ..."), unreadable for the
+# level matrices; the Function Support page of each function is found instead
+NO_SEARCH = " { data-search-exclude }"
+
 badge_l0 = '<span class="mipp-badge lvl-0">L0</span>'
 badge_l1 = '<span class="mipp-badge lvl-1">L1</span>'
 badge_l2 = '<span class="mipp-badge lvl-2">L2</span>'
@@ -357,7 +362,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                 single_type_funcs = [func for func in funcs if not is_pair_function(func)]
                 if not single_type_funcs:
                     continue
-                print(f"\n## {category_title(category)}\n", file=f)
+                print(f"\n## {category_title(category)}{NO_SEARCH}\n", file=f)
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                 for func in single_type_funcs:
@@ -373,7 +378,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                     print(line, file=f)
 
             # Type Conversions (cvt)
-            print("\n## Type Conversions (`cvt`)\n", file=f)
+            print(f"\n## Type Conversions (`cvt`){NO_SEARCH}\n", file=f)
             print("| Function | " + " | ".join(all_datatypes_same_size_short) + " |", file=f)
             print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_same_size)) + " |", file=f)
             func = "cvt"
@@ -388,7 +393,7 @@ def write_mipp_infos(mipp_infos, base_dir):
             print(line, file=f)
 
             # Widening Conversions (wcvt)
-            print("\n## Widening Conversions (`wcvt`)\n", file=f)
+            print(f"\n## Widening Conversions (`wcvt`){NO_SEARCH}\n", file=f)
             print("| Function | " + " | ".join(all_datatypes_widenning_short) + " |", file=f)
             print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_widenning)) + " |", file=f)
             func = "wcvt"
@@ -405,7 +410,7 @@ def write_mipp_infos(mipp_infos, base_dir):
             # Narrowing Conversions (ncvt)
             if "ncvt" in interfaces:
                 ncvt_dts = interfaces["ncvt"]["datatypes"]
-                print("\n## Narrowing Conversions (`ncvt`)\n", file=f)
+                print(f"\n## Narrowing Conversions (`ncvt`){NO_SEARCH}\n", file=f)
                 print("| Function | " + " | ".join(pair_to_short(p) for p in ncvt_dts) + " |", file=f)
                 print("| :--- | " + " | ".join([":---:"] * len(ncvt_dts)) + " |", file=f)
                 func = "ncvt"
@@ -417,7 +422,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                 print(line, file=f)
 
             # Cartesian product table for cast and cast_k
-            print("\n## Type Reinterpretations (`cast` & `cast_k`)\n", file=f)
+            print(f"\n## Type Reinterpretations (`cast` & `cast_k`){NO_SEARCH}\n", file=f)
             print("| Function | " + " | ".join(all_datatypes_short_cart_prod) + " |", file=f)
             print("| :--- | " + " | ".join([":---:"] * len(all_datatypes_cart_prod)) + " |", file=f)
             for func in ["cast", "cast_k"]:
@@ -457,7 +462,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
                 for category, funcs in categories.items():
                     if not exists_msk_in_category(category, mkind):
                         continue
-                    print(f"\n### {category_title(category)}\n", file=f)
+                    print(f"\n### {category_title(category)}{NO_SEARCH}\n", file=f)
                     print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                     print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                     for func in funcs:
@@ -956,7 +961,7 @@ class SpecFuncInfo:
 
             # Excluded from the site search (Material: pragma on the heading of the
             # section): the same code for each datatype and variant tab
-            print("## Reference Algorithm { data-search-exclude }\n", file=f)
+            print(f"## Reference Algorithm{NO_SEARCH}\n", file=f)
             print("The scalar reference of MIPP defines the expected result of the function, for each datatype and mask variant: "
                   "the unit tests compare the SIMD implementations of every target with it.\n", file=f)
             self.write_func_algo(f)
@@ -964,7 +969,7 @@ class SpecFuncInfo:
             self.write_test_specs(f)
 
     def write_isa_matrix(self, file, mipp_infos):
-        print("## Architecture & Implementation Matrix\n", file=file)
+        print(f"## Architecture & Implementation Matrix{NO_SEARCH}\n", file=file)
         print(f'<small>**Legend:** {badge_l0} Native Hardware &bull; {badge_l1} Dedicated Emulation &bull; {badge_l2} Generic Emulation &bull; {badge_l3} Scalar Fallback &bull; {badge_na} N/A &nbsp;—&nbsp; *[Full details & latency](../index.md#implementation-levels)*</small>\n', file=file)
         
         if self.func_name in ("cast", "cast_k"):
