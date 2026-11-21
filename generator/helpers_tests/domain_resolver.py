@@ -51,7 +51,13 @@ class DomainResolver:
                 elif isinstance(inp_dom, dict):
                     return inp_dom
             if "domain" in d:
-                return d["domain"]
+                dom = d["domain"]
+                # One domain per input (first input first): the domain of this input, which
+                # can itself depend on the datatype (`by_datatype`, `default`, ...)
+                if isinstance(dom, list) and dom:
+                    var_idx = self._get_var_idx(var_name)
+                    return dom[var_idx] if var_idx < len(dom) else dom[0]
+                return dom
             return None
 
         # 1. Search in specific mkind if provided
@@ -109,7 +115,12 @@ class DomainResolver:
         if mkind and mkind in func_spec and isinstance(func_spec[mkind], dict):
             dist_raw = func_spec[mkind].get("distribution")
         if dist_raw is None:
-            dist_raw = func_spec.get("distribution", "uniform")
+            dist_raw = func_spec.get("distribution")
+        # Unmasked C tests (no mkind): the `unmasked` section, as for the domains (_get_domain_node)
+        if dist_raw is None and not mkind and isinstance(func_spec.get("unmasked"), dict):
+            dist_raw = func_spec["unmasked"].get("distribution")
+        if dist_raw is None:
+            dist_raw = "uniform"
 
         if isinstance(dist_raw, dict):
             return dist_raw.get("type", "uniform"), dist_raw.get("sigma")
