@@ -1,16 +1,42 @@
 {
+    "abs": [
+        {
+            "instr_name": "abs",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "std_1_reg_z"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "bin_s"
         }
     ],
     "andb": [
         {
             "instr_name": "and",
+            "datatypes": "all_datatypes",
+            "template": "logic_2_z"
+        },
+        {
+            "instr_name": "and",
             "datatypes": "all_int_uint",
-            "template": "andb"
+            "variant": "s",
+            "template": "bin_s"
         }
     ],
     "andb_k": [
@@ -18,6 +44,13 @@
             "instr_name": "and",
             "datatypes": "all_datatypes",
             "template": "andb_k"
+        }
+    ],
+    "andnb": [
+        {
+            "instr_name": "bic",
+            "datatypes": "all_datatypes",
+            "template": "logic_bic_z"
         }
     ],
     "andnb_k": [
@@ -34,6 +67,34 @@
             "template": "std_2_reg_in_no_msk"
         }
     ],
+    "cmpge": [
+        {
+            "instr_name": "cmpge",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmpgt": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmple": [
+        {
+            "instr_name": "cmple",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmplt": [
+        {
+            "instr_name": "cmplt",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk"
+        }
+    ],
     "cmpneq": [
         {
             "instr_name": "cmpne",
@@ -41,11 +102,33 @@
             "template": "std_2_reg_in_no_msk"
         }
     ],
+    "cvt": [
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "float64,int64",
+                "float64,uint64",
+                "int64,float64",
+                "uint64,float64",
+                "float32,int32",
+                "float32,uint32",
+                "int32,float32",
+                "uint32,float32"
+            ],
+            "template": "cvt_z"
+        }
+    ],
     "div": [
         {
             "instr_name": "div",
             "datatypes": "all_float",
             "template": "std_2_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "variant": "s",
+            "template": "bin_s"
         }
     ],
     "fmadd": [
@@ -53,6 +136,104 @@
             "instr_name": "mla",
             "datatypes": "all_float",
             "template": "std_3_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "mla",
+            "datatypes": [
+                "int32"
+            ],
+            "template": "std_3_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "mad",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32"
+            ],
+            "variant": "s",
+            "template": "ter_s"
+        }
+    ],
+    "fmsub": [
+        {
+            "instr_name": "nmls",
+            "datatypes": "all_float",
+            "template": "std_3_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "nmsb",
+            "datatypes": "all_float",
+            "variant": "s",
+            "template": "ter_s"
+        }
+    ],
+    "fnmadd": [
+        {
+            "instr_name": "mls",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32"
+            ],
+            "template": "std_3_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "msb",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int32"
+            ],
+            "variant": "s",
+            "template": "ter_s"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "nmla",
+            "datatypes": "all_float",
+            "template": "std_3_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "nmad",
+            "datatypes": "all_float",
+            "variant": "s",
+            "template": "ter_s"
+        }
+    ],
+    "gather": [
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "float64,float64",
+                "int64,int64",
+                "uint64,uint64",
+                "float32,float32",
+                "int32,int32",
+                "uint32,uint32"
+            ],
+            "template": "gather"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "float64,float64",
+                "int64,int64",
+                "uint64,uint64",
+                "float32,float32",
+                "int32,int32",
+                "uint32,uint32"
+            ],
+            "variant": "s",
+            "template": "gather_s"
+        }
+    ],
+    "getfirst": [
+        {
+            "instr_name": "lasta",
+            "datatypes": "all_datatypes",
+            "template": "getfirst_lasta"
         }
     ],
     "hadd": [
@@ -62,11 +243,31 @@
             "template": "reduce"
         }
     ],
+    "hmax": [
+        {
+            "instr_name": "maxv",
+            "datatypes": "all_datatypes",
+            "template": "reduce"
+        }
+    ],
+    "hmin": [
+        {
+            "instr_name": "minv",
+            "datatypes": "all_datatypes",
+            "template": "reduce"
+        }
+    ],
     "load": [
         {
             "instr_name": "ld1",
             "datatypes": "all_datatypes",
             "template": "load"
+        },
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "load_s"
         }
     ],
     "loadu": [
@@ -74,6 +275,51 @@
             "instr_name": "ld1",
             "datatypes": "all_datatypes",
             "template": "load"
+        },
+        {
+            "instr_name": "ld1",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "load_s"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int_uint",
+            "template": "shift_n_z"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int_uint",
+            "variant": "s",
+            "template": "shift_s"
+        }
+    ],
+    "max": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "bin_s"
+        }
+    ],
+    "min": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_datatypes",
+            "template": "std_2_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "bin_s"
         }
     ],
     "mul": [
@@ -81,6 +327,26 @@
             "instr_name": "mul",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "bin_s"
+        }
+    ],
+    "neg": [
+        {
+            "instr_name": "neg",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "std_1_reg_z"
         }
     ],
     "none": [
@@ -90,11 +356,31 @@
             "template": "testz_1arg"
         }
     ],
+    "notb": [
+        {
+            "instr_name": "not",
+            "datatypes": "all_datatypes",
+            "template": "logic_not_z"
+        }
+    ],
     "notb_k": [
         {
             "instr_name": "not",
             "datatypes": "all_datatypes",
             "template": "notb_k"
+        }
+    ],
+    "orb": [
+        {
+            "instr_name": "orr",
+            "datatypes": "all_datatypes",
+            "template": "logic_2_z"
+        },
+        {
+            "instr_name": "orr",
+            "datatypes": "all_int_uint",
+            "variant": "s",
+            "template": "bin_s"
         }
     ],
     "orb_k": [
@@ -104,11 +390,82 @@
             "template": "andb_k"
         }
     ],
+    "round": [
+        {
+            "instr_name": "rinta",
+            "datatypes": "all_float",
+            "template": "std_1_reg_z"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "template": "shift_n_z"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "template": "shift_n_z"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "variant": "s",
+            "template": "shift_s"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "s",
+            "template": "shift_s"
+        }
+    ],
+    "scatter": [
+        {
+            "instr_name": "scatter",
+            "datatypes": [
+                "float64,float64",
+                "int64,int64",
+                "uint64,uint64",
+                "float32,float32",
+                "int32,int32",
+                "uint32,uint32"
+            ],
+            "template": "scatter"
+        },
+        {
+            "instr_name": "scatter",
+            "datatypes": [
+                "float64,float64",
+                "int64,int64",
+                "uint64,uint64",
+                "float32,float32",
+                "int32,int32",
+                "uint32,uint32"
+            ],
+            "variant": "z",
+            "template": "scatter_z"
+        }
+    ],
+    "sqrt": [
+        {
+            "instr_name": "sqrt",
+            "datatypes": "all_float",
+            "template": "std_1_reg_z"
+        }
+    ],
     "store": [
         {
             "instr_name": "st1",
             "datatypes": "all_datatypes",
             "template": "store"
+        },
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "store_z"
         }
     ],
     "storeu": [
@@ -116,6 +473,12 @@
             "instr_name": "st1",
             "datatypes": "all_datatypes",
             "template": "store"
+        },
+        {
+            "instr_name": "st1",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "store_z"
         }
     ],
     "sub": [
@@ -123,6 +486,46 @@
             "instr_name": "sub",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk_z"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "bin_s"
+        }
+    ],
+    "torvd": [
+        {
+            "instr_name": "dup",
+            "datatypes": "all_datatypes",
+            "template": "torvd_dup"
+        }
+    ],
+    "torvm": [
+        {
+            "instr_name": "cmpne",
+            "datatypes": "all_datatypes",
+            "template": "torvm_cmpne"
+        }
+    ],
+    "trunc": [
+        {
+            "instr_name": "rintz",
+            "datatypes": "all_float",
+            "template": "std_1_reg_z"
+        }
+    ],
+    "xorb": [
+        {
+            "instr_name": "eor",
+            "datatypes": "all_datatypes",
+            "template": "logic_2_z"
+        },
+        {
+            "instr_name": "eor",
+            "datatypes": "all_int_uint",
+            "variant": "s",
+            "template": "bin_s"
         }
     ],
     "xorb_k": [

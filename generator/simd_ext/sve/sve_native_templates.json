@@ -1,15 +1,49 @@
 {
+    "bin_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(m0.m, r0.r, r1.r);"
+    },
+    "bin_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, r1.r);"
+    },
     "cast": {
         "format": "short",
         "code": [
             "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_ret.data_ext}}_{{isa_dt_par.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}"
         ]
     },
+    "cast_cvt": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
     "cast_k": {
         "format": "short",
         "code": [
             " m0.m;"
         ]
+    },
+    "cmp_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
+    },
+    "gather_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(m0.m, p0, r0.r);"
+    },
+    "load_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}ld1_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
+    },
+    "reduce_z": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r);"
+        ]
+    },
+    "scatter_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(m0.m, p0, r0.r, r1.r);"
     },
     "select": {
         "format": "short",
@@ -41,10 +75,46 @@
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(s0);"
         ]
     },
+    "shift_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_m(m0.m, r0.r, (uint{{ dt_par.n_bits }}_t)s0);"
+    },
+    "shift_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, (uint{{ dt_par.n_bits }}_t)s0);"
+    },
+    "std_2_reg_unpred": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    },
+    "store_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}st1_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
+    },
+    "ter_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(m0.m, r0.r, r1.r, r2.r);"
+    },
+    "ter_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, r1.r, r2.r);"
+    },
     "testz_2args": {
         "format": "long",
         "code": [
             "\treturn !{{ isa.prefix }}{{ instr_name }}(m0.m, m1.m);"
         ]
+    },
+    "un_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(r0.r, m0.m, r0.r);"
+    },
+    "un_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(rsrc.r, m0.m, r0.r);"
+    },
+    "un_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r);"
     }
 }

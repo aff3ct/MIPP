@@ -17,10 +17,72 @@
             "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m1.m, m0.m);"
         ]
     },
+    "bin_s": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(m0.m, r0.r, r1.r), rsrc.r);",
+            "return res;"
+        ]
+    },
+    "cvt_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}cvt_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}_z({% if dt_par.n_bits >= dt_ret.n_bits %}svptrue_{{ isa_dt_par.data_ext_logi }}(){% else %}svptrue_{{ isa_dt_ret.data_ext_logi }}(){% endif %}, r0.r);"
+    },
+    "gather": {
+        "format": "short",
+        "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, r0.r);"
+    },
+    "gather_s": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(m0.m, p0, r0.r), rsrc.r);",
+            "return res;"
+        ]
+    },
+    "getfirst_lasta": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}lasta_{{ isa_dt_par.data_ext }}(svpfalse_b(), r0.r);"
+        ]
+    },
     "load": {
         "format": "short",
         "code": [
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0);"
+        ]
+    },
+    "load_s": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}ld1_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0), rsrc.r);",
+            "return res;"
+        ]
+    },
+    "logic_2_z": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'float' %}svreinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}{{ instr_name }}_{% if dt_par.category == 'float' %}u{{ dt_par.n_bits }}{% else %}{{ isa_dt_par.data_ext }}{% endif %}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% else %}r0.r{% endif %}, {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r){% else %}r1.r{% endif %})){% else %}{{ isa.prefix }}{{ instr_name }}_{% if dt_par.category == 'float' %}u{{ dt_par.n_bits }}{% else %}{{ isa_dt_par.data_ext }}{% endif %}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% else %}r0.r{% endif %}, {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r){% else %}r1.r{% endif %}){% endif %};",
+            "return res;"
+        ]
+    },
+    "logic_bic_z": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'float' %}svreinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}bic_{% if dt_par.category == 'float' %}u{{ dt_par.n_bits }}{% else %}{{ isa_dt_par.data_ext }}{% endif %}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r){% else %}r1.r{% endif %}, {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% else %}r0.r{% endif %})){% else %}{{ isa.prefix }}bic_{% if dt_par.category == 'float' %}u{{ dt_par.n_bits }}{% else %}{{ isa_dt_par.data_ext }}{% endif %}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r){% else %}r1.r{% endif %}, {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% else %}r0.r{% endif %}){% endif %};",
+            "return res;"
+        ]
+    },
+    "logic_not_z": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'float' %}svreinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}not_{% if dt_par.category == 'float' %}u{{ dt_par.n_bits }}{% else %}{{ isa_dt_par.data_ext }}{% endif %}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% else %}r0.r{% endif %})){% else %}{{ isa.prefix }}not_{% if dt_par.category == 'float' %}u{{ dt_par.n_bits }}{% else %}{{ isa_dt_par.data_ext }}{% endif %}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'float' %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% else %}r0.r{% endif %}){% endif %};",
+            "return res;"
         ]
     },
     "notb_k": {
@@ -34,6 +96,30 @@
         "code": [
             "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r);"
         ]
+    },
+    "scatter": {
+        "format": "short",
+        "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, r0.r, r1.r);"
+    },
+    "scatter_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, r0.r, {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, r1.r, {{ isa.prefix }}dup_n_{{ isa_dt_par.data_ext }}(0)));"
+    },
+    "shift_n_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, (uint{{ dt_par.n_bits }}_t)s0);"
+    },
+    "shift_s": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(m0.m, r0.r, (uint{{ dt_par.n_bits }}_t)s0), rsrc.r);",
+            "return res;"
+        ]
+    },
+    "std_1_reg_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r);"
     },
     "std_2_reg_in_no_msk": {
         "format": "short",
@@ -59,10 +145,40 @@
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
         ]
     },
+    "store_z": {
+        "format": "long",
+        "code": [
+            "{{ isa.prefix }}st1_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, r0.r, {{ isa.prefix }}dup_n_{{ isa_dt_par.data_ext }}(0)));"
+        ]
+    },
+    "ter_s": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(m0.m, r0.r, r1.r, r2.r), rsrc.r);",
+            "return res;"
+        ]
+    },
     "testz_1arg": {
         "format": "long",
         "code": [
             "\treturn !{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
+        ]
+    },
+    "torvd_dup": {
+        "format": "long",
+        "code": [
+            "%r<tr>% res;",
+            "res.r = {% if dt_par.category == 'uint' %}svdup_n_u{{ dt_par.n_bits }}_z(m0.m, (uint{{ dt_par.n_bits }}_t)-1){% else %}svreinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}(svdup_n_u{{ dt_par.n_bits }}_z(m0.m, (uint{{ dt_par.n_bits }}_t)-1)){% endif %};",
+            "return res;"
+        ]
+    },
+    "torvm_cmpne": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "res.m = svcmpne_n_u{{ dt_par.n_bits }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'uint' %}r0.r{% else %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r){% endif %}, 0);",
+            "return res;"
         ]
     }
 }
