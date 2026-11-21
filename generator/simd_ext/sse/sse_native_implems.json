@@ -1,4 +1,16 @@
 {
+    "abs": [
+        {
+            "instr_name": "abs",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "arith_1arg",
+            "if": "defined(__SSSE3__)"
+        }
+    ],
     "add": [
         {
             "instr_name": "add",
@@ -15,6 +27,25 @@
                 "int16",
                 "int8",
                 "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_uint",
+            "template": "arith_2args_epi",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "adds": [
+        {
+            "instr_name": "adds",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
             ],
             "template": "arith_2args",
             "if": "defined(__SSE2__)"
@@ -152,6 +183,24 @@
             ],
             "template": "arith_2args",
             "if": "defined(__SSE4_1__)"
+        },
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args_epi",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "uint64"
+            ],
+            "template": "arith_2args_epi",
+            "if": "defined(__SSE4_1__)"
         }
     ],
     "cmpge": [
@@ -240,6 +289,14 @@
             ],
             "template": "arith_2args",
             "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cmplt",
+            "datatypes": [
+                "int8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
         }
     ],
     "cmpneq": [
@@ -249,6 +306,14 @@
                 "float32"
             ],
             "template": "arith_2args"
+        },
+        {
+            "instr_name": "cmpneq",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
         }
     ],
     "cvt": [
@@ -301,6 +366,77 @@
             "if": "defined(__SSE2__)"
         }
     ],
+    "fmadd": [
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "fmsub": [
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "fnmadd": [
+        {
+            "instr_name": "fnmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fnmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args",
+            "if": "defined(__FMA__)"
+        }
+    ],
+    "getfirst": [
+        {
+            "instr_name": "cvtss",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "getfirst_ps"
+        },
+        {
+            "instr_name": "cvtsd",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "getfirst_pd",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvtsi128_si32",
+            "datatypes": [
+                "int32",
+                "int16",
+                "int8",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "getfirst_si",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvtsi128_si64",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "getfirst_si",
+            "if": "defined(__SSE2__) && (defined(__x86_64__) || defined(_M_X64))"
+        }
+    ],
     "load": [
         {
             "instr_name": "load",
@@ -313,6 +449,21 @@
             "instr_name": "loadu",
             "datatypes": "all_datatypes",
             "template": "load"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "slli",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "sxl_epi",
+            "if": "defined(__SSE2__)"
         }
     ],
     "max": [
@@ -406,6 +557,45 @@
             ],
             "template": "arith_2args",
             "if": "defined(__SSE4_1__)"
+        },
+        {
+            "instr_name": "mullo",
+            "datatypes": [
+                "uint16"
+            ],
+            "template": "arith_2args_epi",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "mullo",
+            "datatypes": [
+                "uint32"
+            ],
+            "template": "arith_2args_epi",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
+    "none": [
+        {
+            "instr_name": "movemask",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "none_movemask"
+        },
+        {
+            "instr_name": "movemask",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "none_movemask",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "movemask",
+            "datatypes": "all_int_uint",
+            "template": "none_movemask",
+            "if": "defined(__SSE2__)"
         }
     ],
     "orb": [
@@ -452,6 +642,44 @@
             "datatypes": "all_int_uint",
             "template": "logi_m_2args_si128",
             "if": "defined(__SSE2__)"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "srai",
+            "datatypes": [
+                "int32",
+                "int16"
+            ],
+            "template": "sxl_epi",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "sxl_epi",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "rsqrt": [
+        {
+            "instr_name": "rsqrt",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_1arg"
+        }
+    ],
+    "select": [
+        {
+            "instr_name": "blendv",
+            "datatypes": "all_datatypes",
+            "template": "select_blendv",
+            "if": "defined(__SSE4_1__)"
         }
     ],
     "set": [
@@ -508,6 +736,20 @@
             "instr_name": "setzero",
             "datatypes": "all_int",
             "template": "set0_si128"
+        },
+        {
+            "instr_name": "setzero",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "set0",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "setzero",
+            "datatypes": "all_uint",
+            "template": "set0_si128",
+            "if": "defined(__SSE2__)"
         }
     ],
     "set0_k": [
@@ -550,6 +792,26 @@
             ],
             "template": "set1x",
             "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "set1",
+            "datatypes": "all_uint",
+            "template": "set1_epi",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "set1_k": [
+        {
+            "instr_name": "set1",
+            "datatypes": "all_int_uint",
+            "template": "set1_k_int",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "set1_k",
+            "datatypes": "all_float",
+            "template": "set1_k_float",
+            "if": "defined(__SSE2__)"
         }
     ],
     "set_k": [
@@ -577,6 +839,23 @@
                 "uint64"
             ],
             "template": "set_k-64",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "sqrt": [
+        {
+            "instr_name": "sqrt",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "arith_1arg"
+        },
+        {
+            "instr_name": "sqrt",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "arith_1arg",
             "if": "defined(__SSE2__)"
         }
     ],
@@ -613,6 +892,56 @@
             ],
             "template": "arith_2args",
             "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_uint",
+            "template": "arith_2args_epi",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "subs": [
+        {
+            "instr_name": "subs",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "testz",
+            "datatypes": "all_int_uint",
+            "template": "testz_si128",
+            "if": "defined(__SSE4_1__)"
+        },
+        {
+            "instr_name": "testz",
+            "datatypes": "all_float",
+            "template": "testz_cast",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
+    "torvd": [
+        {
+            "instr_name": "torvd",
+            "datatypes": "all_datatypes",
+            "template": "torvd",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "zero-overhead struct field copy: on SSE the mask register is the data register (__m128, __m128d, __m128i)"
+        }
+    ],
+    "trunc": [
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "trunc_float",
+            "if": "defined(__SSE4_1__)"
         }
     ],
     "xorb": [

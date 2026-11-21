@@ -1,1 +1,261 @@
-{}
+{
+    "cmpeq": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "cmpeq64_sse2",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cmpgt": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "cmpgt64_sse2",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "cvt": [
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "int64,float64"
+            ],
+            "template": "cvt_i64_f64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "uint64,float64"
+            ],
+            "template": "cvt_u64_f64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "float64,int64"
+            ],
+            "template": "cvt_f64_i64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "float64,uint64"
+            ],
+            "template": "cvt_f64_u64",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "uint32,float32"
+            ],
+            "template": "cvt_u32_f32",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "float32,uint32"
+            ],
+            "template": "cvt_f32_u32",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "hadd": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "template": "reduce_shift",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "hmax": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_datatypes",
+            "template": "reduce_shift",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "hmin": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_datatypes",
+            "template": "reduce_shift",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "hmul": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "template": "reduce_shift",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "lshift",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "lshift8",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "mul8_sse2",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "mul32_sse2",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "mul64_sse2",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "notb_k",
+            "datatypes": "all_datatypes",
+            "template": "notb_k_xor",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "rshift",
+            "datatypes": [
+                "uint8"
+            ],
+            "template": "rshift_u8",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "rshift",
+            "datatypes": [
+                "int8"
+            ],
+            "template": "rshift_i8",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "rshift",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "rshift_i64",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "select": [
+        {
+            "instr_name": "select",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "select_logic"
+        },
+        {
+            "instr_name": "select",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "select_logic",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "select",
+            "datatypes": "all_int_uint",
+            "template": "select_logic",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "testz",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "testz_movemask"
+        },
+        {
+            "instr_name": "testz",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "testz_movemask",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "testz",
+            "datatypes": "all_int_uint",
+            "template": "testz_movemask",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "torvm": [
+        {
+            "instr_name": "torvm",
+            "datatypes": [
+                "float32",
+                "int32",
+                "int16",
+                "int8",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "torvm_cmp",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "torvm",
+            "datatypes": "all_64bit",
+            "template": "torvm_cmp",
+            "if": "defined(__SSE4_1__)"
+        },
+        {
+            "instr_name": "torvm",
+            "datatypes": "all_64bit",
+            "template": "torvm_cmp64_sse2",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "trunc": [
+        {
+            "instr_name": "trunc",
+            "datatypes": "all_float",
+            "template": "trunc_magic",
+            "if": "defined(__SSE2__)"
+        }
+    ]
+}

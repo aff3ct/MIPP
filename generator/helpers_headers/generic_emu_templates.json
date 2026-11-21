@@ -140,6 +140,22 @@
             "return %select<tp>%(lt_one_mask, %set1<tp>%(0.0/0.0), result);"
         ]
     },
+    "adds_int": {
+        "format": "long",
+        "code": [
+            "%r<tp>% s = %add<tp>%(r0, r1);",
+            "%r<tp>% ovf = %andb<tp>%(%xorb<tp>%(r0, s), %xorb<tp>%(r1, s));",
+            "%r<tp>% sat = %xorb<tp>%(%set1<tp>%(INT{{ dt_par.n_bits }}_MAX), %torvd<tp>%(%cmplt<tp>%(r0, %set0<tp>%())));",
+            "return %select<tp>%(%cmplt<tp>%(ovf, %set0<tp>%()), sat, s);"
+        ]
+    },
+    "adds_uint": {
+        "format": "long",
+        "code": [
+            "%r<tp>% s = %add<tp>%(r0, r1);",
+            "return %orb<tp>%(s, %torvd<tp>%(%cmplt<tp>%(s, r0)));"
+        ]
+    },
     "andb_k_emu": {
         "format": "long",
         "code": [
@@ -787,12 +803,24 @@
             "return res;"
         ]
     },
+    "div2_int": {
+        "format": "long",
+        "code": [
+            "return %rshift<tp>%(r0, 1);"
+        ]
+    },
     "div4": {
         "format": "long",
         "code": [
             "%r<tp>% tmp = %set1<tp>%(4);",
             "%r<tp>% res = %div<tp>%(r0, tmp);",
             "return res;"
+        ]
+    },
+    "div4_int": {
+        "format": "long",
+        "code": [
+            "return %rshift<tp>%(r0, 2);"
         ]
     },
     "exp_f32": {
@@ -1263,9 +1291,25 @@
             "return %exp<tp>%(arg);"
         ]
     },
+    "round_float": {
+        "format": "long",
+        "code": [
+            "%r<tp>% t = %trunc<tp>%(r0);",
+            "%r<tp>% frac = %abs<tp>%(%sub<tp>%(r0, t));",
+            "%r<tp>% one = %orb<tp>%(%andb<tp>%(r0, %set1<tp>%(-0.0)), %set1<tp>%(1.0));",
+            "%m<tp>% up = %cmpge<tp>%(frac, %set1<tp>%(0.5));",
+            "return %add<tp>%(t, %andb<tp>%(%torvd<tp>%(up), one));"
+        ]
+    },
     "round_int": {
         "format": "short",
         "code": "r0.r;"
+    },
+    "rsqrt_div": {
+        "format": "long",
+        "code": [
+            "return %div<tp>%(%set1<tp>%(1.0), %sqrt<tp>%(r0));"
+        ]
     },
     "select_via_andnot_ps_emu": {
         "format": "long",
@@ -1404,6 +1448,12 @@
             "return %torvm<tp>%(%cast<c:uint|b:tp,tp>%(%set<c:uint|b:tp>%(tab)));"
         ]
     },
+    "shift_float": {
+        "format": "long",
+        "code": [
+            "return %cast<c:uint|b:tp,tp>%(%{{ instr_name }}<c:uint|b:tp>%(%cast<tp,c:uint|b:tp>%(r0), s0));"
+        ]
+    },
     "sin_f32": {
         "format": "long",
         "code": [
@@ -1530,6 +1580,22 @@
             "/* 4. Sign Restoration & Return */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0));",
             "return %xorb<tp>%(result, sign_bit);"
+        ]
+    },
+    "subs_int": {
+        "format": "long",
+        "code": [
+            "%r<tp>% d = %sub<tp>%(r0, r1);",
+            "%r<tp>% ovf = %andb<tp>%(%xorb<tp>%(r0, r1), %xorb<tp>%(r0, d));",
+            "%r<tp>% sat = %xorb<tp>%(%set1<tp>%(INT{{ dt_par.n_bits }}_MAX), %torvd<tp>%(%cmplt<tp>%(r0, %set0<tp>%())));",
+            "return %select<tp>%(%cmplt<tp>%(ovf, %set0<tp>%()), sat, d);"
+        ]
+    },
+    "subs_uint": {
+        "format": "long",
+        "code": [
+            "%r<tp>% d = %sub<tp>%(r0, r1);",
+            "return %andnb<tp>%(%torvd<tp>%(%cmplt<tp>%(r0, r1)), d);"
         ]
     },
     "tan_f32": {

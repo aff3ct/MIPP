@@ -7,6 +7,10 @@
         {
             "datatypes": "all_int",
             "template_ref": "tpl_generic_emu.abs"
+        },
+        {
+            "datatypes": "all_uint",
+            "template_ref": "tpl_generic_emu.round_int"
         }
     ],
     "acos": [
@@ -54,6 +58,16 @@
                 "uint64"
             ],
             "template_ref": "tpl_generic_emu.arith_2args_u"
+        }
+    ],
+    "adds": [
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.adds_int"
+        },
+        {
+            "datatypes": "all_uint",
+            "template_ref": "tpl_generic_emu.adds_uint"
         }
     ],
     "andb": [
@@ -318,18 +332,6 @@
         },
         {
             "datatypes": [
-                "int64",
-                "int32",
-                "uint64",
-                "uint32"
-            ],
-            "preferred_simd_ext": [
-                "avx"
-            ],
-            "template_ref": "tpl_generic_emu.cmpeq_via_cast_emu"
-        },
-        {
-            "datatypes": [
                 "uint16",
                 "uint8"
             ],
@@ -378,6 +380,10 @@
             "preferred_simd_ext": [
                 "avx"
             ],
+            "template_ref": "tpl_generic_emu.cmpge_u_emu"
+        },
+        {
+            "datatypes": "all_int",
             "template_ref": "tpl_generic_emu.cmpge_u_emu"
         }
     ],
@@ -495,6 +501,10 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.cmple_u_emu"
+        },
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.cmple_u_emu"
         }
     ],
     "cmplt": [
@@ -536,6 +546,10 @@
             "preferred_simd_ext": [
                 "avx"
             ],
+            "template_ref": "tpl_generic_emu.cmplt_u_emu"
+        },
+        {
+            "datatypes": "all_int",
             "template_ref": "tpl_generic_emu.cmplt_u_emu"
         }
     ],
@@ -615,6 +629,10 @@
             "instr_name": "div2",
             "datatypes": "all_float",
             "template_ref": "tpl_generic_emu.div2"
+        },
+        {
+            "datatypes": "all_int_uint",
+            "template_ref": "tpl_generic_emu.div2_int"
         }
     ],
     "div4": [
@@ -622,6 +640,10 @@
             "instr_name": "div4",
             "datatypes": "all_float",
             "template_ref": "tpl_generic_emu.div4"
+        },
+        {
+            "datatypes": "all_int_uint",
+            "template_ref": "tpl_generic_emu.div4_int"
         }
     ],
     "exp": [
@@ -838,27 +860,22 @@
             "template_ref": "tpl_generic_emu.log_f64"
         }
     ],
+    "lshift": [
+        {
+            "instr_name": "lshift",
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.shift_float"
+        }
+    ],
     "max": [
         {
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "preferred_simd_ext": [
-                "neon"
-            ],
+            "datatypes": "all_int_uint",
             "template_ref": "tpl_generic_emu.max_emu"
         }
     ],
     "min": [
         {
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "preferred_simd_ext": [
-                "neon"
-            ],
+            "datatypes": "all_int_uint",
             "template_ref": "tpl_generic_emu.min_emu"
         }
     ],
@@ -1024,6 +1041,23 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.round_int"
+        },
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.round_float"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "rshift",
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.shift_float"
+        }
+    ],
+    "rsqrt": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.rsqrt_div"
         }
     ],
     "select": [
@@ -1369,6 +1403,16 @@
             "template_ref": "tpl_generic_emu.arith_2args_u"
         }
     ],
+    "subs": [
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.subs_int"
+        },
+        {
+            "datatypes": "all_uint",
+            "template_ref": "tpl_generic_emu.subs_uint"
+        }
+    ],
     "tan": [
         {
             "datatypes": [
@@ -1432,6 +1476,12 @@
                 "sve"
             ],
             "template_ref": "tpl_generic_emu.torvm_emu"
+        }
+    ],
+    "trunc": [
+        {
+            "datatypes": "all_int_uint",
+            "template_ref": "tpl_generic_emu.round_int"
         }
     ],
     "xorb": [
