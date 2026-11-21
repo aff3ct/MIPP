@@ -166,16 +166,21 @@
    (javascripts/search-explorer-link.js) */
 .mipp-search-explorer-link {
   display: block;
-  padding: 0.55rem 0.8rem;
-  font-size: 0.68rem;
+  margin: 0.5rem 0.6rem;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.66rem;
   font-weight: 500;
   color: var(--md-accent-fg-color);
-  border-bottom: 0.05rem solid var(--md-default-fg-color--lightest);
+  background-color: var(--md-accent-fg-color--transparent);
+  border: 1px solid color-mix(in srgb, var(--md-accent-fg-color) 25%, transparent);
+  border-radius: var(--mipp-radius-sm);
+  transition: var(--mipp-transition);
 }
 
 .mipp-search-explorer-link:hover,
 .mipp-search-explorer-link:focus {
-  background-color: var(--md-accent-fg-color--transparent);
+  border-color: var(--md-accent-fg-color);
+  background-color: color-mix(in srgb, var(--md-accent-fg-color) 16%, transparent);
 }
 
 /* "Mathematical semantics" box under the description of a Function Support
@@ -292,11 +297,24 @@ pre,
    3. Header, tabs and search
    -------------------------------------------------------------------------- */
 
+/* The glass is drawn by a pseudo-element: a blurred header would be the
+   containing block of its fixed descendants (the full-screen search of mobile
+   would shrink to the header) and would isolate their backdrop (the search
+   popup could not blur the page) */
 .md-header {
+  background-color: transparent;
+  border-bottom: 1px solid var(--mipp-card-border);
+}
+
+.md-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background-color: var(--mipp-glass-bg);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid var(--mipp-card-border);
+  pointer-events: none;
 }
 
 .md-header__button.md-logo img {
@@ -386,24 +404,6 @@ pre,
   color: #64748b;
 }
 
-/* Light Mode Search Results Popup */
-[data-md-color-scheme="default"] .md-search__output {
-  background-color: #ffffff;
-  color: #0f172a;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
-}
-
-[data-md-color-scheme="default"] .md-search-result__meta {
-  background-color: #f8fafc;
-  color: #64748b;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-[data-md-color-scheme="default"] .md-search-result__link:hover {
-  background-color: #f1f5f9 !important;
-}
-
 /* Dark Mode Header & Tabs Contrast */
 [data-md-color-scheme="slate"] .md-header__title,
 [data-md-color-scheme="slate"] .md-header__button,
@@ -453,6 +453,92 @@ pre,
 
 [data-md-color-scheme="slate"] .md-search__icon {
   color: #94a3b8;
+}
+
+/* Search results popup: a frosted glass card detached from the search bar,
+   with light separators (Material draws them with --md-default-fg-color--lightest,
+   which is a text color here and too strong for a line) */
+[data-md-color-scheme="default"] {
+  --mipp-search-glass: rgba(255, 255, 255, 0.9);
+  --mipp-search-overlay: rgba(15, 23, 42, 0.18);
+  --mipp-search-border: rgba(15, 23, 42, 0.08);
+  --mipp-search-sep: rgba(15, 23, 42, 0.06);
+  --mipp-search-hover: rgba(14, 165, 233, 0.06);
+  --mipp-search-shadow: 0 24px 48px -16px rgba(15, 23, 42, 0.22), 0 4px 12px -4px rgba(15, 23, 42, 0.08);
+}
+
+[data-md-color-scheme="slate"] {
+  --mipp-search-glass: rgba(17, 24, 39, 0.68);
+  --mipp-search-overlay: rgba(0, 0, 0, 0.45);
+  --mipp-search-border: rgba(148, 163, 184, 0.16);
+  --mipp-search-sep: rgba(148, 163, 184, 0.1);
+  --mipp-search-hover: rgba(56, 189, 248, 0.08);
+  --mipp-search-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.6), 0 4px 12px -4px rgba(0, 0, 0, 0.4);
+}
+
+@media screen and (min-width: 60em) {
+  /* Material squares the corners joining the bar and the popup: keep the bar
+     rounded, the popup floats under it */
+  [data-md-toggle="search"]:checked ~ .md-header .md-search__form {
+    border-radius: var(--mipp-radius-sm);
+  }
+
+  [data-md-toggle="search"]:checked ~ .md-header .md-search__output {
+    top: 2.25rem;
+    overflow: hidden;
+    border: 1px solid var(--mipp-search-border);
+    border-radius: var(--mipp-radius-md);
+    background-color: var(--mipp-search-glass);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: var(--mipp-search-shadow);
+  }
+
+  .md-search__scrollwrap {
+    background-color: transparent;
+  }
+
+  /* Lighter than the Material overlay (54 % black): the glass would turn grey */
+  [data-md-toggle="search"]:checked ~ .md-header .md-search__overlay {
+    background-color: var(--mipp-search-overlay);
+  }
+}
+
+.md-search-result__meta {
+  background-color: transparent;
+  color: var(--md-default-fg-color--lighter);
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--mipp-search-sep);
+}
+
+.md-search-result__item {
+  box-shadow: 0 -1px var(--mipp-search-sep);
+}
+
+.md-search-result__item:first-child {
+  box-shadow: none;
+}
+
+.md-search-result__link:focus,
+.md-search-result__link:hover,
+.md-search-result__more > summary:focus > div,
+.md-search-result__more > summary:hover > div {
+  background-color: var(--mipp-search-hover);
+}
+
+.md-search-result__icon {
+  color: var(--md-default-fg-color--lighter);
+}
+
+/* Result titles keep the Material size (the mobile headings of the pages are
+   enlarged with !important) */
+.md-search-result .md-typeset h1 {
+  margin: 0.55rem 0 !important;
+  font-size: 0.8rem !important;
+  font-weight: 400;
+  line-height: 1.4 !important;
 }
 
 /* --------------------------------------------------------------------------
