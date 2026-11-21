@@ -80,7 +80,9 @@ Here is the standard, battle-tested pattern to vectorize any loop over an arbitr
 1. **Vector Main Loop**: Process contiguous chunks of $N$ elements with SIMD.
 2. **Tail Loop (Remainder)**: Handle remaining $S \pmod N$ elements.
 
-### Complete Working Example (SAXPY with Tail Loop)
+### Complete Working Example (Leaky ReLU with Tail Loop)
+
+The Leaky ReLU activation keeps the positive elements and scales the others: `y[i] = x[i] > 0 ? x[i] : alpha * x[i]`. In the vector loop, the comparison returns a mask (one boolean per lane), and `select` takes, lane by lane, `x` where the mask is set and `alpha * x` elsewhere: there is no branch.
 
 The three programs are also in the repository (`examples/doc/getting_started/c.c`, `fun.cpp` and `obj.cpp`), where they are compiled and run by the documentation checks.
 
@@ -90,10 +92,10 @@ The three programs are also in the repository (`examples/doc/getting_started/c.c
     --8<-- "examples/doc/getting_started/c.c"
     ```
 
-    Compile and run (with the code saved as `saxpy.c`):
+    Compile and run (with the code saved as `leaky_relu.c`):
     ```bash
-    gcc -std=c99 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.c -o saxpy
-    ./saxpy
+    gcc -std=c99 -O3 -mavx2 -I/path/to/mipp/include leaky_relu.c -o leaky_relu
+    ./leaky_relu
     ```
 
 === "C++ Functional API"
@@ -102,10 +104,10 @@ The three programs are also in the repository (`examples/doc/getting_started/c.c
     --8<-- "examples/doc/getting_started/fun.cpp"
     ```
 
-    Compile and run (with the code saved as `saxpy.cpp`):
+    Compile and run (with the code saved as `leaky_relu.cpp`):
     ```bash
-    g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
-    ./saxpy
+    g++ -std=c++11 -O3 -mavx2 -I/path/to/mipp/include leaky_relu.cpp -o leaky_relu
+    ./leaky_relu
     ```
 
 === "C++ Object API"
@@ -114,10 +116,10 @@ The three programs are also in the repository (`examples/doc/getting_started/c.c
     --8<-- "examples/doc/getting_started/obj.cpp"
     ```
 
-    Compile and run (with the code saved as `saxpy.cpp`):
+    Compile and run (with the code saved as `leaky_relu.cpp`):
     ```bash
-    g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/mipp/include saxpy.cpp -o saxpy
-    ./saxpy
+    g++ -std=c++11 -O3 -mavx2 -I/path/to/mipp/include leaky_relu.cpp -o leaky_relu
+    ./leaky_relu
     ```
 
 ---

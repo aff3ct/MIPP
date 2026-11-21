@@ -4,43 +4,38 @@
 
 #include <mipp.hpp>
 
-// Computes y[i] = a * x[i] + y[i] (SAXPY) over arbitrary size S
-void saxpy_mipp(float a, const float* x, float* y, size_t size)
+// Computes y[i] = x[i] > 0 ? x[i] : alpha * x[i] (Leaky ReLU) over an arbitrary size
+void leaky_relu(float alpha, const float* x, float* y, size_t size)
 {
-    constexpr size_t N = mipp::N<float>(); // Elements per SIMD register (e.g. 8 on AVX2)
-    const size_t vec_limit = (size / N) * N;
-    mipp::rvd<float> va = mipp::set1<float>(a);
+    constexpr size_t N = mipp::N<float>(); // elements per register (e.g. 8 with AVX2)
+    const size_t vec_end = (size / N) * N;
+    mipp::rvd<float> vzero  = mipp::set1<float>(0.f);
+    mipp::rvd<float> valpha = mipp::set1<float>(alpha);
 
     // 1. Vector main loop
-    for (size_t i = 0; i < vec_limit; i += N)
-    {
-        mipp::rvd<float> vx = mipp::loadu<float>(&x[i]);
-        mipp::rvd<float> vy = mipp::loadu<float>(&y[i]);
-
-        mipp::rvd<float> vres = mipp::fmadd(va, vx, vy);
-
-        mipp::storeu(&y[i], vres);
+    for (size_t i = 0; i < vec_end; i += N) {
+        mipp::rvd<float> vx  = mipp::loadu<float>(&x[i]);
+        mipp::rvm<float> pos = mipp::cmpgt(vx, vzero);                       // comparison -> mask
+        mipp::rvd<float> vy  = mipp::select(pos, vx, mipp::mul(vx, valpha)); // branch-free
+        mipp::storeu(&y[i], vy);
     }
-
-    // 2. Scalar tail loop for remaining elements
-    for (size_t i = vec_limit; i < size; ++i)
-    {
-        y[i] += a * x[i];
-    }
+    // 2. Scalar tail loop for the remaining elements
+    for (size_t i = vec_end; i < size; i++)
+        y[i] = x[i] > 0.f ? x[i] : alpha * x[i];
 }
 
 int main()
 {
-    const size_t size = 1007;
-    std::vector<float> x(size, 2.0f);
-    std::vector<float> y(size, 1.0f);
+    std::vector<float> x(1007), y(1007);
+    for (size_t i = 0; i < x.size(); i++)
+        x[i] = (i % 2) ? 2.0f : -2.0f;
 
-    saxpy_mipp(3.0f, x.data(), y.data(), size);
+    leaky_relu(0.1f, x.data(), y.data(), x.size());
 
     size_t errors = 0;
-    for (size_t i = 0; i < size; i++)
-        if (y[i] != 7.0f) errors++;
-    std::cout << "y[0] = " << y[0] << ", y[1006] = " << y[1006] << " (expected: 7.0), "
+    for (size_t i = 0; i < y.size(); i++)
+        if (y[i] != ((i % 2) ? 2.0f : -0.2f)) errors++;
+    std::cout << "y[0] = " << y[0] << ", y[1] = " << y[1] << " (expected -0.2, 2), "
               << errors << " error(s)" << std::endl;
     return errors == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

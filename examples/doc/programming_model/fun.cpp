@@ -85,27 +85,28 @@ static void masked()
 
 // §5: remainder handled with masked memory accesses
 // --8<-- [start:masked_tail]
-// y[i] = a * x[i] + y[i]
-void saxpy(std::size_t n, float a, const float* x, float* y)
+// y[i] = x[i] > 0 ? x[i] : alpha * x[i]
+void leaky_relu(std::size_t n, float alpha, const float* x, float* y)
 {
     constexpr std::size_t N = mipp::N<float>();
-    const mipp::rvd<float> va = mipp::set1<float>(a);
+    const mipp::rvd<float> vzero  = mipp::set1<float>(0.f);
+    const mipp::rvd<float> valpha = mipp::set1<float>(alpha);
 
     std::size_t i = 0;
     for (; i + N <= n; i += N) {
-        mipp::rvd<float> vx = mipp::loadu<float>(x + i);
-        mipp::rvd<float> vy = mipp::loadu<float>(y + i);
-        mipp::storeu(y + i, mipp::fmadd(va, vx, vy));
+        mipp::rvd<float> vx  = mipp::loadu<float>(x + i);
+        mipp::rvm<float> pos = mipp::cmpgt(vx, vzero);
+        mipp::storeu(y + i, mipp::select(pos, vx, mipp::mul(vx, valpha)));
     }
 
     if (i < n) { // fewer than N elements left
         int32_t active[N];
         for (std::size_t j = 0; j < N; j++)
             active[j] = (i + j < n);
-        mipp::rvm<float> m  = mipp::set_k<float>(active);         // lane j active iff i + j < n
-        mipp::rvd<float> vx = mipp::loadu<mipp::Z>(m, x + i);     // inactive lanes are not read (set to 0)
-        mipp::rvd<float> vy = mipp::loadu<mipp::Z>(m, y + i);
-        mipp::storeu<mipp::M>(m, y + i, mipp::fmadd(va, vx, vy)); // inactive lanes are not written
+        mipp::rvm<float> m   = mipp::set_k<float>(active);     // lane j active iff i + j < n
+        mipp::rvd<float> vx  = mipp::loadu<mipp::Z>(m, x + i); // inactive lanes are not read (set to 0)
+        mipp::rvm<float> pos = mipp::cmpgt(vx, vzero);
+        mipp::storeu<mipp::M>(m, y + i, mipp::select(pos, vx, mipp::mul(vx, valpha))); // inactive lanes are not written
     }
 }
 // --8<-- [end:masked_tail]
@@ -115,11 +116,11 @@ static void masked_tail()
     const int N = mipp::N<float>();
     for (int n = 0; n <= 3 * N + 1 && n + 1 < DOC_BUF; n++) {
         float x[DOC_BUF], y[DOC_BUF];
-        for (int i = 0; i < DOC_BUF; i++) { x[i] = 2.f; y[i] = 1.f; }
-        saxpy((std::size_t)n, 3.f, x, y);
+        for (int i = 0; i < DOC_BUF; i++) { x[i] = (i % 2) ? 2.f : -2.f; y[i] = 99.f; }
+        leaky_relu((std::size_t)n, 0.1f, x, y);
         for (int i = 0; i < n; i++)
-            DOC_CHECK(y[i] == 7.f);
-        DOC_CHECK(y[n] == 1.f); // the element after the end is not written
+            DOC_CHECK(y[i] == ((i % 2) ? 2.f : -0.2f));
+        DOC_CHECK(y[n] == 99.f); // the element after the end is not written
     }
 }
 
