@@ -141,10 +141,6 @@
         "format": "short",
         "code": "_mm256_maskstore_{% if dt_par.category == 'float' %}{{ isa_dt_par.data_ext }}{% else %}epi{{ dt_par.n_bits }}{% endif %}(({% if dt_par.n_bits == 64 and dt_par.category != 'float' %}long long{% elif dt_par.category != 'float' %}int{% else %}{{ isa_dt_par.to_ptr }}{% endif %}*)p0, {% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(m0.m){% else %}m0.m{% endif %}, r0.r);"
     },
-    "round_float": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_NEAREST_INT |_MM_FROUND_NO_EXC));"
-    },
     "select_float": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m);"
@@ -205,15 +201,6 @@
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(s0);"
     },
-    "set1_k-16": {
-        "format": "long",
-        "code": [
-            "%r<c:int>% tmp1;",
-            "tmp1.r = _mm256_set1_epi16(s0 ? (int16_t)0xFFFF : (int16_t)0);",
-            "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %torvm<tp>%(tmp2);"
-        ]
-    },
     "set1_k-32": {
         "format": "long",
         "code": [
@@ -228,15 +215,6 @@
         "code": [
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi64x(s0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
-            "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %torvm<tp>%(tmp2);"
-        ]
-    },
-    "set1_k-8": {
-        "format": "long",
-        "code": [
-            "%r<c:int>% tmp1;",
-            "tmp1.r = _mm256_set1_epi8(s0 ? (int8_t)0xFF : (int8_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
             "return %torvm<tp>%(tmp2);"
         ]
@@ -300,10 +278,6 @@
     "store": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
-    },
-    "sxl": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, s0);"
     },
     "sxl_var": {
         "format": "short",

@@ -7,7 +7,7 @@
                 "uint64"
             ],
             "template": "cmpeq64_sse2",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ],
     "cmpgt": [
@@ -17,7 +17,7 @@
                 "int64"
             ],
             "template": "cmpgt64_sse2",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_2__)"
         }
     ],
     "cvt": [
@@ -130,7 +130,7 @@
                 "uint32"
             ],
             "template": "mul32_sse2",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         },
         {
             "instr_name": "mul",
@@ -182,7 +182,8 @@
             "datatypes": [
                 "float32"
             ],
-            "template": "select_logic"
+            "template": "select_logic",
+            "if": "!defined(__SSE4_1__)"
         },
         {
             "instr_name": "select",
@@ -190,13 +191,13 @@
                 "float64"
             ],
             "template": "select_logic",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         },
         {
             "instr_name": "select",
             "datatypes": "all_int_uint",
             "template": "select_logic",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ],
     "testz": [
@@ -205,7 +206,8 @@
             "datatypes": [
                 "float32"
             ],
-            "template": "testz_movemask"
+            "template": "testz_movemask",
+            "if": "!defined(__SSE4_1__)"
         },
         {
             "instr_name": "testz",
@@ -213,13 +215,13 @@
                 "float64"
             ],
             "template": "testz_movemask",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         },
         {
             "instr_name": "testz",
             "datatypes": "all_int_uint",
             "template": "testz_movemask",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ],
     "torvm": [
@@ -247,7 +249,7 @@
             "instr_name": "torvm",
             "datatypes": "all_64bit",
             "template": "torvm_cmp64_sse2",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ],
     "trunc": [
@@ -255,7 +257,7 @@
             "instr_name": "trunc",
             "datatypes": "all_float",
             "template": "trunc_magic",
-            "if": "defined(__SSE2__)"
+            "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ]
 }

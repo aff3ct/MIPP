@@ -102,22 +102,9 @@
         "format": "short",
         "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext_msk }}(m0.m);"
     },
-    "notb_k_fxx": {
-        "format": "long",
-        "code": [
-            "%m<c:uint|b:32>% m0i = %cast_k<tp,c:uint|b:32>%(m0);",
-            "%m<c:uint|b:32>% resi;",
-            "resi.m = {{ isa.prefix }}mvnq_u32(m0i.m);",
-            "return %cast_k<c:uint|b:32,tp>%(resi);"
-        ]
-    },
     "round_away": {
         "format": "short",
         "code": "{{ isa.prefix }}rndaq_{{ isa_dt_par.data_ext }}(r0.r);"
-    },
-    "round_float": {
-        "format": "short",
-        "code": "{{ isa.prefix }}rndnq_{{ isa_dt_par.data_ext }}(r0.r);"
     },
     "rsqrt": {
         "format": "short",

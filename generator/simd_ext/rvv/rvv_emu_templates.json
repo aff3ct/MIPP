@@ -440,15 +440,6 @@
             "return res;"
         ]
     },
-    "notb_k": {
-        "format": "long",
-        "code": [
-            "%m<tp>% ret;",
-            "ret = %set0_k<tp>%();",
-            "ret.m = {{isa.prefix}}_v{{instr_name}}_mm_{{isa_dt_par.data_ext_logi}}(ret.m,m0.m, %N<tp>%);",
-            "return ret;"
-        ]
-    },
     "pow2_sll": {
         "format": "long",
         "code": [
@@ -461,16 +452,6 @@
             "big.m = {{ isa.prefix }}_vmsgeu_vx_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.data_ext_logi }}(r0.r, {{ dt_par.n_bits }}, %N<tp>%);",
             "res.r = {{ isa.prefix }}_vmerge_vxm_{{ isa_dt_par.data_ext }}(res.r, 0, big.m, %N<tp>%);",
             "return res;"
-        ]
-    },
-    "round_float": {
-        "format": "long",
-        "code": [
-            "%r<c:int|b:tp>%  tmp;",
-            "tmp.r = {{isa.prefix}}_{{instr_name}}_x_f_v_{{isa_dt_par.int_data_ext}}_rm(r0.r,__RISCV_FRM_RNE,%N<tp>%);",
-            "%r<tp>% ret;",
-            "ret.r = {{isa.prefix}}_{{instr_name}}_f_x_v_{{isa_dt_par.data_ext}}(tmp.r,%N<tp>%);",
-            "return ret;"
         ]
     },
     "round_float_rmm": {

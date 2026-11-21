@@ -112,15 +112,6 @@
             ],
             "template": "hreduc_emu",
             "if": "!defined(__aarch64__)"
-        },
-        {
-            "instr_name": "add",
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "template": "reduce_64",
-            "if": "!defined(__aarch64__)"
         }
     ],
     "hmax": [
@@ -146,7 +137,8 @@
                 "int64",
                 "uint64"
             ],
-            "template": "reduce_64"
+            "template": "reduce_64",
+            "if": "defined(__aarch64__)"
         }
     ],
     "hmin": [
@@ -172,7 +164,8 @@
                 "int64",
                 "uint64"
             ],
-            "template": "reduce_64"
+            "template": "reduce_64",
+            "if": "defined(__aarch64__)"
         }
     ],
     "hmul": [
@@ -198,14 +191,6 @@
                 "uint8"
             ],
             "template": "hreduc_emu"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": [
-                "int64",
-                "uint64"
-            ],
-            "template": "reduce_64"
         }
     ],
     "lshift": [

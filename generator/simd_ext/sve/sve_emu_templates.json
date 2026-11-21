@@ -1,10 +1,4 @@
 {
-    "andb": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext}}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r);"
-        ]
-    },
     "andb_k": {
         "format": "short",
         "code": [

@@ -595,19 +595,15 @@
             "template": "set1_k_int"
         },
         {
-            "datatypes": "all_8bit",
-            "template": "set1_k-8"
-        },
-        {
-            "datatypes": "all_16bit",
-            "template": "set1_k-16"
-        },
-        {
-            "datatypes": "all_32bit",
+            "datatypes": [
+                "float32"
+            ],
             "template": "set1_k-32"
         },
         {
-            "datatypes": "all_64bit",
+            "datatypes": [
+                "float64"
+            ],
             "template": "set1_k-64"
         }
     ],

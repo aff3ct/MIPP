@@ -607,12 +607,6 @@
             "return %cast_k<c:int|b:tp,tp>%(%cmpeq<c:int|b:tp>%(r0s, r1s));"
         ]
     },
-    "cmpeq_via_cast_emu": {
-        "format": "long",
-        "code": [
-            "return %cast_k<c:float,tp>%(%cmpeq<c:float>%(%cast<tp,c:float>%(r0), %cast<tp,c:float>%(r1)));"
-        ]
-    },
     "cmpge_u_emu": {
         "format": "long",
         "code": "return %notb_k<tp>%(%cmpgt<tp>%(r1, r0));"

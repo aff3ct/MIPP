@@ -271,18 +271,6 @@
             "return ({{ cstdint_ret }}){{ isa.prefix }}_reduce_{{ instr_name }}_{{ 'epu' if dt_par.category == 'uint' and instr_name in ['max', 'min'] else 'epi' }}{{ dt_par.n_bits }}(r0.r);"
         ]
     },
-    "round": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT);"
-        ]
-    },
-    "roundf": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);"
-        ]
-    },
     "scatter": {
         "format": "short",
         "code": [
