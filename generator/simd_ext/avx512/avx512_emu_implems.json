@@ -1,4 +1,36 @@
 {
+    "fmadd": [
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "m3_s",
+            "variant": "s"
+        }
+    ],
+    "fmsub": [
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "m3_s",
+            "variant": "s"
+        }
+    ],
+    "fnmadd": [
+        {
+            "instr_name": "fnmadd",
+            "datatypes": "all_float",
+            "template": "m3_s",
+            "variant": "s"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fnmsub",
+            "datatypes": "all_float",
+            "template": "m3_s",
+            "variant": "s"
+        }
+    ],
     "gather": [
         {
             "instr_name": "gather",
@@ -107,6 +139,15 @@
             ],
             "template": "reduce_8",
             "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "uint16",
+                "uint8"
+            ],
+            "template": "reduce_shift",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "hmin": [
@@ -165,6 +206,15 @@
             ],
             "template": "reduce_8",
             "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": [
+                "uint16",
+                "uint8"
+            ],
+            "template": "reduce_shift",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "hmul": [
@@ -190,6 +240,84 @@
                 "int16"
             ],
             "template": "reduce_16",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "reduce_shift",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "lshift": [
+        {
+            "instr_name": "lshift",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "lshift8",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "mul64",
+            "if": "!defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "mul8",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "pow2": [
+        {
+            "instr_name": "pow2",
+            "datatypes": [
+                "uint64",
+                "uint32"
+            ],
+            "template": "pow2_sllv",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "pow2",
+            "datatypes": [
+                "uint16"
+            ],
+            "template": "pow2_sllv",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "rshift": [
+        {
+            "instr_name": "rshift",
+            "datatypes": [
+                "uint8"
+            ],
+            "template": "rshift_u8",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "rshift",
+            "datatypes": [
+                "int8"
+            ],
+            "template": "rshift_i8",
             "if": "defined(__AVX512BW__)"
         }
     ],
