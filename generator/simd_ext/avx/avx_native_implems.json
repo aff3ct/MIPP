@@ -728,16 +728,6 @@
             "template": "trunc_float"
         }
     ],
-    "wcvt": [
-        {
-            "instr_name": "cvt",
-            "datatypes": [
-                "uint32,uint64"
-            ],
-            "template": "wcvt_int_uint",
-            "if": "defined(__AVX2__)"
-        }
-    ],
     "xorb": [
         {
             "instr_name": "xor",

@@ -310,14 +310,5 @@
     "trunc_float": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r,(_MM_FROUND_TO_ZERO |_MM_FROUND_NO_EXC));"
-    },
-    "wcvt_int_uint": {
-        "format": "long",
-        "code": [
-            "// cast to si128 from si256 and then cvt",
-            "%r<tr>% res;",
-            "res.r = {{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext_var }}({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si128(r0.r));",
-            "return res;"
-        ]
     }
 }

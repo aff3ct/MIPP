@@ -2573,15 +2573,6 @@
             "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
-    "wcvt": [
-        {
-            "instr_name": "cvt",
-            "datatypes": [
-                "uint32,uint64"
-            ],
-            "template": "wcvt_int_uint"
-        }
-    ],
     "xorb": [
         {
             "instr_name": "xor",
