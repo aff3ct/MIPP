@@ -2,6 +2,8 @@ site_name: MIPP Documentation
 site_url: https://aff3ct.github.io/MIPP/
 theme:
   name: material
+  # Template overrides (404 page)
+  custom_dir: overrides
   logo: assets/images/mipp_ico.jpg
   favicon: assets/images/mipp_ico_circle.png
   font:
@@ -15,6 +17,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
+    - navigation.indexes
     - navigation.top
     - navigation.footer
     - toc.follow
@@ -24,6 +27,7 @@ theme:
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
+    - content.tooltips
   palette:
     # 1. Automatic mode (adapts to system preferences by default)
     - media: "(prefers-color-scheme)"
@@ -49,7 +53,8 @@ theme:
 
   language: en
 
-repo_url: https://github.com/aff3ct/MIPP/
+# MIPPv2 lives on the develop branch (master is MIPPv1)
+repo_url: https://github.com/aff3ct/MIPP/tree/develop
 
 watch:
   - examples/doc
@@ -114,4 +119,5 @@ extra_javascript:
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
   - javascripts/toc-toggle.js
   - javascripts/header-height.js
+  - javascripts/search-explorer-link.js
   - assets/explorer/explorer.js

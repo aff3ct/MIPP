@@ -1,0 +1,24 @@
+{#-
+  Page shown for an unknown URL (theme.custom_dir: overrides): search and the
+  main entry points instead of the bare "404 - Not found" of Material.
+-#}
+{% extends "main.html" %}
+{% block content %}
+  <div class="mipp-404">
+    <h1>Page not found</h1>
+    <p>
+      This page does not exist, or it has been renamed or moved.
+      Search the documentation or start from one of the pages below.
+    </p>
+    <p>
+      <label class="md-button md-button--primary" for="__search">Search the documentation</label>
+    </p>
+    <ul>
+      <li><a href="{{ base_url.rstrip('/') }}/">Home</a></li>
+      <li><a href="{{ base_url.rstrip('/') }}/user/getting_started/">Getting Started</a></li>
+      <li><a href="{{ base_url.rstrip('/') }}/explorer/">API Explorer</a>: every function, searchable by name or by vendor intrinsic</li>
+      <li><a href="{{ base_url.rstrip('/') }}/funcs_support/">Function Support</a>: specification of each function</li>
+      <li><a href="{{ base_url.rstrip('/') }}/developer/">Developer Guide</a></li>
+    </ul>
+  </div>
+{% endblock %}

@@ -813,6 +813,36 @@ function updateModals(modalsContainerEl) {
   }
 }
 
+// Default view of the Explorer (search, filters, opened cards, modals), before
+// the URL hash is applied. Needed at each visit of the page, not only on a
+// hash change: the state module survives the instant navigation of Material,
+// so the search of a previous visit would still filter the cards targeted by a
+// link such as "explorer/#focus=cast". The comparison selection is kept.
+function resetViewState() {
+  state.selectedSimdExts = [...ALL_SIMD_EXTS];
+  state.selectedCategories = [...ALL_CATEGORIES];
+  state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
+  state.maskVariant = "unmasked";
+  state.selectedLevels = [0, 1, 2, 3];
+  state.query = "";
+  state.searchField = "all";
+  state.flavor = "cpp";
+  state.lmul = "1";
+  state.intersectionMode = false;
+  state.focusedCard = null;
+  state.expandedCards.clear();
+  state.openedCardsOrder = [];
+  state.cardTabs = {};
+  state.cardScalarTypes = {};
+  state.cardScalarVariants = {};
+  state.cardTestVariants = {};
+  state.cardFlatState = {};
+  state.cardHwMask = {};
+  state.algoModalOpen = false;
+  state.algoModalData = null;
+  state.compareModalOpen = false;
+}
+
 let globalListenersBound = false;
 
 export async function initExplorer() {
@@ -838,14 +868,8 @@ export async function initExplorer() {
   try {
     await loadApiData();
 
-    // Initialize all filters as active by default
-    state.selectedSimdExts = [...ALL_SIMD_EXTS];
-    state.selectedCategories = [...ALL_CATEGORIES];
-    state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-    state.maskVariant = "unmasked";
-    state.selectedLevels = [0, 1, 2, 3];
-
-    // Read URL hash overrides
+    // Default view, then the URL hash overrides
+    resetViewState();
     readUrlHash(ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES);
     if (state.algoModalOpen && state.algoModalData && state.algoModalData.funcName) {
       const entry = apiData.find((x) => x.name === state.algoModalData.funcName);
@@ -878,26 +902,7 @@ export async function initExplorer() {
       globalListenersBound = true;
       window.addEventListener("hashchange", () => {
         if (!document.getElementById("mipp-explorer-app")) return;
-        state.selectedSimdExts = [...ALL_SIMD_EXTS];
-        state.selectedCategories = [...ALL_CATEGORIES];
-        state.selectedTypes = ALL_DATATYPES.map((d) => d.id);
-        state.maskVariant = "unmasked";
-        state.selectedLevels = [0, 1, 2, 3];
-        state.query = "";
-        state.searchField = "all";
-        state.flavor = "cpp";
-        state.lmul = "1";
-        state.intersectionMode = false;
-        state.focusedCard = null;
-        state.expandedCards.clear();
-        state.openedCardsOrder = [];
-        state.cardTabs = {};
-        state.cardScalarTypes = {};
-        state.cardScalarVariants = {};
-        state.cardTestVariants = {};
-        state.cardFlatState = {};
-        state.cardHwMask = {};
-
+        resetViewState();
         readUrlHash(ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES);
         if (state.algoModalOpen && state.algoModalData && state.algoModalData.funcName) {
           const entry = apiData.find((x) => x.name === state.algoModalData.funcName);

@@ -2626,19 +2626,6 @@ html:not(.js) .mipp-explorer-loading {
   border-color: rgba(255, 255, 255, 0.16);
 }
 
-/* Discreet link to the runnable version of the Flat C Code (main + scalar reference) */
-.mipp-godbolt-run-link {
-  font-size: 0.72rem;
-  color: var(--md-default-fg-color--lighter, #94a3b8);
-  text-decoration: none;
-  padding: 0.25rem 0.2rem;
-}
-
-.mipp-godbolt-run-link:hover {
-  color: var(--mipp-accent, #0ea5e9);
-  text-decoration: underline;
-}
-
 [data-md-color-scheme="slate"] .mipp-godbolt-btn:hover {
   color: var(--mipp-accent, #0ea5e9) !important;
   border-color: var(--mipp-accent, #0ea5e9);
@@ -3383,4 +3370,47 @@ html:not(.js) .mipp-explorer-loading {
 
 .mipp-algo-compare .mipp-code-box pre code {
   white-space: pre;
+}
+
+/* Column header on one line: ISA and level fixed, the compiler flags scroll
+   horizontally when they do not fit */
+.mipp-algo-compare .mipp-code-box-header-left {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+}
+
+.mipp-algo-compare .mipp-code-box-header-left > * {
+  flex-shrink: 0;
+}
+
+.mipp-algo-compare .mipp-code-box-header-left > .mipp-algo-compare-flags {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  padding-bottom: 1px; /* room for an overlay scrollbar */
+}
+
+/* Link from an expanded card to the Function Support page of the function */
+.mipp-card-spec-link {
+  margin-left: auto;
+  padding: 0.3rem 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--mipp-accent, #0284c7);
+  text-decoration: none;
+}
+
+.mipp-card-spec-link:hover {
+  text-decoration: underline;
+}
+
+/* While the site search is open (Material #__search toggle), the sticky
+   search bar and the compare bar of the Explorer go below the header, so
+   that the search results and the overlay cover them */
+#__search:checked ~ .md-container .mipp-explorer-header,
+#__search:checked ~ .md-container .mipp-compare-bar {
+  z-index: 1;
 }

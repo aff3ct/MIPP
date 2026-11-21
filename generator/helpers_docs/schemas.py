@@ -232,7 +232,7 @@ def write_registries_reference(generator_dir, out_dir):
 
     path = os.path.join(out_dir, ".pages")
     with open(path, "w", encoding="utf-8") as f:
-        f.write("title: Registries\nnav:\n  - Overview: index.md\n")
+        f.write("title: Registries\nnav:\n  - Registries: index.md\n")
         for slug, title, _ in entries:
             f.write(f"  - {title}: {slug}.md\n")
     written.append(path)

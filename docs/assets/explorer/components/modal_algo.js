@@ -4,7 +4,7 @@
  * flags, taken from the generated headers (algo_source.js): the Abstract C++ view (C++ Functional
  * API) and the Flat C view (self-contained, runs on Compiler Explorer).
  */
-import { escapeHtml, ICON_COPY, ICON_GODBOLT, ICON_LINK, ICON_WARNING, ICON_INFO, ICON_CONTEXT, ICON_CLOCK } from "../explorer.config.js";
+import { escapeHtml, ICON_COPY, ICON_GODBOLT, ICON_RUN, ICON_LINK, ICON_WARNING, ICON_INFO, ICON_CONTEXT, ICON_CLOCK } from "../explorer.config.js";
 import { highlightCpp } from "../syntax.js";
 import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
@@ -242,7 +242,7 @@ export function renderAlgoModal(modalData) {
           <div class="mipp-code-box-header-left">
             <span class="mipp-code-lang">${escapeHtml(label)}</span>
             ${levelBadge(lv, lv === null ? "Not defined" : `Effective level ${lv}`)}
-            <span class="mipp-algo-tree-own">${escapeHtml(cc.options)}</span>
+            <span class="mipp-algo-tree-own mipp-algo-compare-flags" title="${escapeHtml(cc.options)}">${escapeHtml(cc.options)}</span>
           </div>
           <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(r.code)}" title="Copy ${escapeHtml(label)} code">${ICON_COPY}</button>
         </div>
@@ -455,7 +455,10 @@ export function renderAlgoModal(modalData) {
                   <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Effective implementation level: Level ${currentImplLvl} (${escapeHtml(lvlDescFinal)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
-                  <a href="${godboltRunUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-run-link" title="Open in Godbolt with a main() that runs test() once and compares the result with the scalar reference of MIPP">Run</a>
+                  <a href="${godboltRunUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-btn" title="Open in Godbolt with a main() that runs test() once and compares the result with the scalar reference of MIPP">
+                    ${ICON_RUN}
+                    <span>Run in Godbolt</span>
+                  </a>
                   <a href="${godboltUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-btn" title="Open in Godbolt and look at the assembly of test()">
                     ${ICON_GODBOLT}
                     <span>Open in Godbolt</span>

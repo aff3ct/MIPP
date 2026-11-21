@@ -105,6 +105,8 @@ export function renderCardExpandedDetails(entry) {
         <button class="mipp-card-tab-btn ${activeTab === "specs" ? "active" : ""}" data-tab="specs" data-card-tab="specs" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
           Verification Specs
         </button>
+        <a class="mipp-card-spec-link" href="../funcs_support/${encodeURIComponent(entry.category)}/${encodeURIComponent(entry.name)}/"
+           title="Specification page of ${escapeHtml(entry.name)} in the documentation">Full reference →</a>
       </nav>
 
       <div class="mipp-tab-pane" id="tab-content-${escapeHtml(entry.name)}">

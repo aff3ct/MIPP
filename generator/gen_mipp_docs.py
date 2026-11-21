@@ -278,6 +278,8 @@ def category_title(category):
 def write_isa_page_header(f, isa_name, masked):
     name = isa_display_name(isa_name)
     variants = "masked variants (`mask`, `maskz`, `masks`)" if masked else "unmasked functions"
+    # No table of contents: the wide support matrices get the full content width
+    print("---\nhide:\n  - toc\n---\n", file=f)
     print(f"# {name}{' (Masked)' if masked else ''}\n", file=f)
     if isa_name == "intersection":
         intro = (f"Worst implementation level among all the targets, for the {variants} at LMUL = 1: "
@@ -291,7 +293,8 @@ MASK_VARIANT_TITLES = {"mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": 
 
 def write_isas_support_nav(base_dir, isa_names):
     """Navigation of docs/isas_support/ (mkdocs-awesome-pages-plugin)."""
-    lines = ["nav:", "  - Overview: index.md", f"  - {INTERSECTION_TITLE}: intersection.md"]
+    # The index page is the section page (navigation.indexes): titled like the section
+    lines = ["nav:", "  - Hardware Support: index.md", f"  - {INTERSECTION_TITLE}: intersection.md"]
     for isa_name in isa_names:
         name = isa_display_name(isa_name)
         lines.append(f"  - {name}: {isa_name}.md")
@@ -300,9 +303,9 @@ def write_isas_support_nav(base_dir, isa_names):
         f.write("\n".join(lines) + "\n")
 
 def write_funcs_support_nav(base_dir):
-    """Navigation of docs/funcs_support/: overview first, then the categories."""
+    """Navigation of docs/funcs_support/: index (section page) first, then the categories."""
     with open(os.path.join(base_dir, ".pages"), "w", encoding="utf-8") as f:
-        f.write("nav:\n  - Overview: index.md\n  - ...\n")
+        f.write("nav:\n  - Function Support: index.md\n  - ...\n")
 
 def write_mipp_infos(mipp_infos, base_dir):
     for isa_info in mipp_infos.isa_infos:
@@ -311,12 +314,16 @@ def write_mipp_infos(mipp_infos, base_dir):
             write_isa_page_header(f, isa_info.isa_name, masked=False)
             for category, funcs in categories.items():
                 dttypes = all_datatypes
+                # The functions on datatype pairs (cvt, wcvt, ncvt, cast...) have
+                # their own sections below: no section for a category made only
+                # of them (e.g. convert), it would be an empty table
+                single_type_funcs = [func for func in funcs if not is_pair_function(func)]
+                if not single_type_funcs:
+                    continue
                 print(f"\n## {category_title(category)}\n", file=f)
                 print("| Function | " + " | ".join(all_datatypes_short) + " |", file=f)
                 print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
-                for func in funcs:
-                    if is_pair_function(func):
-                        continue
+                for func in single_type_funcs:
                     func_info = isa_info.get_func_info(func)
                     line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
                     for dtype in dttypes:
@@ -761,6 +768,8 @@ class SpecFuncInfo:
             doc_entry = funcs_docs.get(self.func_name, {})
             desc = doc_entry.get("description", "Vector function reference.")
             print(f"{desc}\n", file=f)
+            print(f"[Open in the API Explorer →](../../explorer/index.md#focus={self.func_name})"
+                  "{ .mipp-explorer-link }\n", file=f)
 
             print("## Headers\n", file=f)
 
