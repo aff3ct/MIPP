@@ -283,128 +283,20 @@ def extract_scalar_reference_algos(func, dtypes, mask_flags):
     return algos_by_lmul
 
 
-def format_domain_obj(d_val):
-    """
-    Formats a domain range or constraint object into a clean mathematical string.
-    """
-    if isinstance(d_val, list):
-        parts = [format_domain_obj(x) for x in d_val]
-        return " ∪ ".join(parts)
-    if not isinstance(d_val, dict):
-        return str(d_val)
-    if "min" in d_val and "max" in d_val:
-        return "[" + str(d_val.get("min")) + ", " + str(d_val.get("max")) + "]"
-    if d_val.get("strictly_negative"):
-        return "< 0 (strictly negative)"
-    if d_val.get("strictly_positive"):
-        return "> 0 (strictly positive)"
-    if d_val.get("negative"):
-        return "≤ 0 (negative)"
-    if d_val.get("positive"):
-        return "≥ 0 (positive)"
-    if "values" in d_val:
-        return "{" + ", ".join(map(str, d_val["values"])) + "}"
-    return "Custom"
-
-
-def parse_function_test_specs(func, dtypes, mask_flags, funcs_specs, default_spec):
-    """
-    Parses comprehensive test and verification specifications from tests_specs.json
-    across all mask variants (unmasked, mask, maskz, masks) and datatypes.
-    """
-    func_data = funcs_specs.get(func, {})
+def explorer_test_specs(spec):
+    """Test properties of a function for the "Verification Specs" tab (see helpers_docs/test_specs.py)."""
+    from helpers_docs.test_specs import inputs_cell
+    if spec is None:
+        return {}
     variants = {}
-
-    has_variants = any(k in func_data for k in ("unmasked", "mask", "maskz", "masks"))
-
-    for v_key in ["unmasked", "mask", "maskz", "masks"]:
-        if v_key != "unmasked" and not mask_flags.get(v_key):
-            continue
-
-        v_spec = func_data.get(v_key, {}) if has_variants else func_data
-        comp = v_spec.get("comparison", func_data.get("comparison", default_spec.get("comparison", "exact")))
-        tol = v_spec.get("tolerance", func_data.get("tolerance", default_spec.get("tolerance", {"type": "exact"})))
-        domain = v_spec.get("domain", func_data.get("domain", default_spec.get("domain", {})))
-        domain_src = v_spec.get("domain_src", func_data.get("domain_src", {}))
-        mask_pat = v_spec.get("mask_pattern", func_data.get("mask_pattern", default_spec.get("mask_pattern", "uniform_bool")))
-        overflow = v_spec.get("overflow_check", func_data.get("overflow_check", None))
-
-        by_dt_table = []
-        for dt in dtypes:
-            dt_single = dt.split(",")[0]
-
-            dom_str = None
-            if "by_datatype" in domain and dt_single in domain["by_datatype"]:
-                dom_str = format_domain_obj(domain["by_datatype"][dt_single])
-            elif "rules" in domain:
-                matching_rules = [r for r in domain["rules"] if r.get("datatype") == dt_single]
-                if matching_rules:
-                    rule_strs = []
-                    for r in matching_rules:
-                        r_prefix = "LMUL " + str(r.get("lmul")) + ": " if "lmul" in r else ""
-                        rule_strs.append(r_prefix + format_domain_obj(r))
-                    dom_str = "; ".join(rule_strs)
-            elif "min" in domain and "max" in domain:
-                dom_str = "[" + str(domain.get("min")) + ", " + str(domain.get("max")) + "]"
-            elif "default" in domain and isinstance(domain["default"], dict) and "min" in domain["default"]:
-                dom_str = format_domain_obj(domain["default"])
-
-            if not dom_str:
-                dom_str = "Full representable range"
-
-            notes = []
-            if "by_define" in domain:
-                for def_name, def_obj in domain["by_define"].items():
-                    if "by_datatype" in def_obj and dt_single in def_obj["by_datatype"]:
-                        notes.append(def_name + ": " + format_domain_obj(def_obj["by_datatype"][dt_single]))
-            if "by_lmul" in domain:
-                for lmul_tag, lmul_obj in domain["by_lmul"].items():
-                    notes.append(lmul_tag + ": " + format_domain_obj(lmul_obj))
-            if notes:
-                dom_str += " (" + ", ".join(notes) + ")"
-
-            if domain_src:
-                src_dom = None
-                if "by_datatype" in domain_src and dt_single in domain_src["by_datatype"]:
-                    src_dom = format_domain_obj(domain_src["by_datatype"][dt_single])
-                elif "default" in domain_src:
-                    src_dom = format_domain_obj(domain_src["default"])
-                if src_dom:
-                    dom_str += " | src: " + src_dom
-
-            if "by_datatype" in tol and dt_single in tol["by_datatype"]:
-                t_val = tol["by_datatype"][dt_single]
-                t_type = t_val.get("type", "max_abs_diff")
-                t_num = t_val.get("value", 0)
-                tol_str = "≤ " + str(t_num) + " (" + str(t_type) + ")"
-            elif tol.get("type") == "ulp":
-                ulp_v = tol.get("value", 1)
-                tol_str = "≤ " + str(ulp_v) + " ULP" if dt_single.startswith("float") else "Bit-exact (0 error)"
-            elif tol.get("type") == "exact":
-                tol_str = "Bit-exact (0 error)"
-            else:
-                tol_str = str(tol.get("type", "Exact"))
-
-            by_dt_table.append({
-                "datatype": dt,
-                "domain": dom_str,
-                "tolerance": tol_str,
-                "comparison": comp
-            })
-
-        variants[v_key] = {
-            "comparison": comp,
-            "mask_pattern": mask_pat,
-            "overflow_check": overflow,
-            "table": by_dt_table
+    for key, v in spec["variants"].items():
+        variants[key] = {
+            "mask_pattern": v["mask_pattern"],
+            "mask_text": v["mask_text"],
+            "rows": [{"datatype": r["datatype"], "inputs": inputs_cell(r), "comparison": r["comparison"],
+                      "exact": r["exact"], "ranges": r["ranges"]} for r in v["rows"]],
         }
-
-    return {
-        "variants": variants,
-        "comparison": func_data.get("comparison", default_spec.get("comparison", "exact")),
-        "overflow_check": func_data.get("overflow_check", default_spec.get("overflow_check", None)),
-        "table": variants.get("unmasked", {}).get("table", [])
-    }
+    return {"variants": variants, "notes": spec["notes"], "special_values": spec["special_values"]}
 
 
 def build_code_snippets(func, category, spec_info):
@@ -739,12 +631,9 @@ def generate_mipp_api_data(project_root=None):
         with open(funcs_docs_path, "r", encoding="utf-8") as f:
             funcs_docs = json.load(f)
 
-    tests_specs_path = os.path.join(base_generator_dir, "helpers_tests", "tests_specs.json")
-    tests_specs_data = {}
-    if os.path.exists(tests_specs_path):
-        with open(tests_specs_path, "r", encoding="utf-8") as f:
-            tests_specs_data = json.load(f)
-    default_test_spec = tests_specs_data.get("default", {})
+    # Test properties, resolved with the test generator (same source as the Function Support pages)
+    from helpers_docs.test_specs import resolve_all
+    resolved_specs = resolve_all(os.path.dirname(base_generator_dir), list(interfaces))
 
     # Collect ISA hardware LMUL metadata
     isa_metadata = {}
@@ -1032,9 +921,7 @@ def generate_mipp_api_data(project_root=None):
                     obj_samples[lmul_key][mvariant] = ""
 
         # Test verification specifications
-        merged_test_spec = parse_function_test_specs(
-            func, func_def["datatypes"], mask_flags, tests_specs_data.get("functions", {}), default_test_spec
-        )
+        merged_test_spec = explorer_test_specs(resolved_specs.get(func))
 
         # Reference algorithms across supported datatypes and mask variants
         ref_algos = extract_scalar_reference_algos(func, func_def["datatypes"], mask_flags)

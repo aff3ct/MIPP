@@ -24,6 +24,8 @@ All these outputs are ignored by Git and rewritten at each run. The CI generates
 
 **Function Support.** One page per function and per category, built from `registry_interfaces.json` (datatypes, mask variants), `registry_protos.json` (prototypes in the three APIs), `registry_categories.json`, `funcs_docs.json` (description and formula), the support matrix computed above and the test properties of `tests_specs.json`.
 
+**Test properties.** The "Test & Verification Specifications" section of these pages and the Verification Specs tab of the Explorer come from `helpers_docs/test_specs.py`, which does not read `tests_specs.json` on its own: it resolves, for each function, mask variant, datatype and input, the values drawn and the comparison with the scalar reference through the test generator (`TestsBuilderEngine`, `DomainResolver`), as in the generated C API tests. It rebuilds the C lines of each input and each tolerance from what it resolved and compares them with the ones the test generator writes: a difference prints a `[test_specs] warning` and means that `test_specs.py` must follow a change of the test generator.
+
 ---
 
 ## 3. API Explorer

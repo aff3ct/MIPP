@@ -2645,6 +2645,65 @@ html:not(.js) .mipp-explorer-loading {
   border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
+.mipp-specs-table td code {
+  white-space: nowrap;
+}
+
+.mipp-specs-table td.mipp-specs-dt {
+  white-space: nowrap;
+}
+
+.mipp-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  font-size: var(--mipp-fs-base, 0.72rem);
+}
+
+.mipp-specs-note {
+  margin: 0;
+  color: var(--md-default-fg-color--light, #475569);
+}
+
+.mipp-specs-chip {
+  align-self: flex-start;
+  padding: 0.3rem 0.65rem;
+  border-radius: 4px;
+  background: var(--md-default-bg-color--lighter, #f1f5f9);
+}
+
+[data-md-color-scheme="slate"] .mipp-specs-chip {
+  background: #1e293b;
+}
+
+.mipp-specs-notes {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.mipp-specs-notes li + li {
+  margin-top: 0.2rem;
+}
+
+.mipp-specs-special summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.mipp-specs-special p {
+  margin: 0.4rem 0;
+}
+
+.mipp-specs-special ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.mipp-specs-special li code {
+  white-space: normal;
+  word-break: break-word;
+}
+
 /* --------------------------------------------------------------------------
    10. Lightweight Syntax Highlighting Tokens
    -------------------------------------------------------------------------- */

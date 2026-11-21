@@ -378,18 +378,19 @@ function parseDomain(entry, dt, mask) {
   const specs = entry.test_specs && entry.test_specs.variants;
   const v = specs && (specs[mask] || specs.unmasked);
   const key = dt.replace(/\s+/g, "");
-  const row = v && Array.isArray(v.table)
-    ? (v.table.find((r) => String(r.datatype).replace(/\s+/g, "") === key)
-      || v.table.find((r) => String(r.datatype).startsWith(key.split(",")[0])))
+  const row = v && Array.isArray(v.rows)
+    ? (v.rows.find((r) => String(r.datatype).replace(/\s+/g, "") === key)
+      || v.rows.find((r) => String(r.datatype).startsWith(key.split(",")[0])))
     : null;
-  const m = row && String(row.domain || "").match(/\[\s*(-?[\d.e+-]+)\s*,\s*(-?[\d.e+-]+)\s*\]/);
-  let lo = m ? Number(m[1]) : null, hi = m ? Number(m[2]) : null;
+  // bounds of the first input in the test (default branch), null when the whole range of the type is used
+  const range = row && Array.isArray(row.ranges) ? row.ranges[0] : null;
+  let lo = range ? Number(range[0]) : null, hi = range ? Number(range[1]) : null;
   // a conversion to an unsigned type is undefined in C for negative values
   const [from, to] = key.split(",");
   if (to && to.startsWith("u") && from.startsWith("float")) { lo = Math.max(lo === null ? 0 : lo, 0); hi = hi === null ? 100 : hi; }
   return {
     lo, hi,
-    exact: !row || row.comparison !== "tolerance",
+    exact: !row || row.exact !== false,
     maskPattern: (v && v.mask_pattern) || "uniform_bool",
   };
 }

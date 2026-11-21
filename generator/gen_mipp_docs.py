@@ -47,13 +47,16 @@ if os.path.exists(funcs_docs_path):
 else:
     funcs_docs = {}
 
-# Load Centralized Test Specifications
-tests_specs_path = os.path.join(path, "helpers_tests", "tests_specs.json")
-if os.path.exists(tests_specs_path):
-    with open(tests_specs_path, "r", encoding="utf-8") as f:
-        tests_specs_data = json.load(f)
-else:
-    tests_specs_data = {}
+# Test properties of the functions, resolved with the test generator (helpers_docs/test_specs.py)
+_resolved_test_specs = None
+
+
+def resolved_test_specs():
+    global _resolved_test_specs
+    if _resolved_test_specs is None:
+        from helpers_docs.test_specs import resolve_all
+        _resolved_test_specs = resolve_all(os.path.dirname(path), list(interfaces))
+    return _resolved_test_specs
 
 dict_datatypes_short = {
     "int8": "i8",
@@ -1012,72 +1015,64 @@ class SpecFuncInfo:
             print("", file=file)
 
     def write_test_specs(self, file):
-        spec = tests_specs_data.get("functions", {}).get(self.func_name, {})
-        default_spec = tests_specs_data.get("default", {})
-        
-        comp = spec.get("comparison", default_spec.get("comparison", "exact"))
-        domain = spec.get("domain", default_spec.get("domain", {}))
-        tolerance = spec.get("tolerance", default_spec.get("tolerance", {"type": "exact"}))
-        overflow_check = spec.get("overflow_check", default_spec.get("overflow_check", None))
-        nan_inf_skip = spec.get("nan_inf_skip", default_spec.get("nan_inf_skip", False))
-        mask_pattern = spec.get("mask_pattern", default_spec.get("mask_pattern", "uniform_bool"))
-        
+        from helpers_docs.test_specs import inputs_cell, variants_alike, group_rows, datatypes_label
+        spec = resolved_test_specs().get(self.func_name)
         print("## Test & Verification Specifications\n", file=file)
-        
-        # 1. Input Domain
-        print("### Input Range\n", file=file)
-        if "min" in domain and "max" in domain:
-            print(f"- **Range**: $[{domain['min']}, {domain['max']}]$", file=file)
-        elif "by_datatype" in domain:
-            print("- **Ranges by Datatype**:", file=file)
-            for dt, d_val in domain["by_datatype"].items():
-                if "min" in d_val and "max" in d_val:
-                    print(f"    - `{dt}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
-                elif "values" in d_val:
-                    vals_str = ", ".join(map(str, d_val["values"]))
-                    print(f"    - `{dt}`: Discrete set $\\{{{vals_str}\\}}$", file=file)
-        elif "by_variable" in domain:
-            print("- **Ranges by Operand**:", file=file)
-            for var, d_val in domain["by_variable"].items():
-                if "min" in d_val and "max" in d_val:
-                    print(f"    - `{var}`: $[{d_val['min']}, {d_val['max']}]$", file=file)
-        else:
-            print("- **Range**: Full representable range of the target datatype.", file=file)
-        print("", file=file)
-
-        # 2. Precision & Verification Tolerances
-        print("### Verification Tolerance\n", file=file)
-        if is_pair_function(self.func_name):
-            print("| Datatype Pairs | Comparison Mode | Allowed Tolerance |", file=file)
-            print("| :--- | :--- | :--- |", file=file)
-            print(f"| All supported conversion pairs | `{comp}` | Bit-exact ($0$ error) |\n", file=file)
+        if spec is None:
+            print("No unit test is generated for this function.\n", file=file)
             return
+        cells = [t for v in spec["variants"].values() for r in v["rows"] for t in inputs_cell(r)]
+        legend = []
+        if any(t.startswith("in1:") for t in cells):
+            legend.append("`in1`, `in2`, `in3`: inputs in the order of the arguments")
+        if any(t.startswith("src:") for t in cells):
+            legend.append("`src`: source register of the Source-Masked variant")
+        if any("(" in t and ":" in t.split("(", 1)[1] for t in cells):
+            legend.append("in parentheses: values used when the named target is compiled")
+        print("How the unit tests draw the inputs (random values) and compare each lane of the result with "
+              "the scalar reference, as in the generated C API tests"
+              + (f" ({'; '.join(legend)})" if legend else "") + ".\n", file=file)
 
-        print("| Datatype | Comparison Mode | Allowed Tolerance |", file=file)
-        print("| :--- | :--- | :--- |", file=file)
-        
-        if "by_datatype" in tolerance:
-            for dt in self.dttypes:
-                if dt in tolerance["by_datatype"]:
-                    t_info = tolerance["by_datatype"][dt]
-                    t_type = t_info.get("type", "max_abs_diff")
-                    t_val = t_info.get("value", 0)
-                    t_type_str = "Max Absolute Difference" if t_type == "max_abs_diff" else t_type.upper()
-                    print(f"| `{dt}` | `{comp}` | $\\le {t_val}$ ({t_type_str}) |", file=file)
-                else:
-                    print(f"| `{dt}` | `exact` | Bit-exact ($0$ error) |", file=file)
-        elif tolerance.get("type") == "ulp":
-            ulp_val = tolerance.get("value", 1)
-            for dt in self.dttypes:
-                if dt.startswith("float"):
-                    print(f"| `{dt}` | `{comp}` | $\\le {ulp_val}$ ULP |", file=file)
-                else:
-                    print(f"| `{dt}` | `exact` | Bit-exact ($0$ error) |", file=file)
+        def cell(text):
+            return text.replace("|", "\\|")
+
+        def write_table(variant, indent):
+            pad = " " * indent
+            rows = variant["rows"]
+            all_dts = [r["datatype"] for r in rows]
+            print(f"{pad}| Datatypes | Inputs | Comparison with the reference |", file=file)
+            print(f"{pad}| :--- | :--- | :--- |", file=file)
+            for dts, row in group_rows(rows):
+                label = ", ".join("All" if d == "all" else f"`{d}`" for d in datatypes_label(dts, all_dts))
+                inputs = "<br>".join(cell(t) for t in inputs_cell(row))
+                print(f"{pad}| {label} | {inputs} | {cell(row['comparison'])} |", file=file)
+            print("", file=file)
+            if variant["mask_text"]:
+                print(f"{pad}**Input masks:** {variant['mask_text']}.\n", file=file)
+
+        variants = spec["variants"]
+        if variants_alike(spec):
+            first = variants["unmasked"]
+            masked = [v for k, v in variants.items() if k != "unmasked"]
+            write_table({**first, "mask_text": masked[0]["mask_text"] if masked else None}, 0)
         else:
-            comp_desc = "Bit-exact ($0$ error)" if comp in ("exact", "bitwise") else ("Logical truthiness match" if comp == "logical" else "Exact")
-            for dt in self.dttypes:
-                print(f"| `{dt}` | `{comp}` | {comp_desc} |", file=file)
-        print("", file=file)
+            # Same titles as the matrix and the Reference Algorithm (linked tabs)
+            for key, variant in variants.items():
+                title = SCALAR_VARIANT_TAB_TITLES["no_mask" if key == "unmasked" else key]
+                print(f'=== "{title}"\n', file=file)
+                write_table(variant, 4)
+
+        for note in spec["notes"]:
+            print(f"- {note}", file=file)
+        if spec["notes"]:
+            print("", file=file)
+        if spec["special_values"]:
+            print('??? note "Special values"\n', file=file)
+            print("    Every other iteration, the lanes of the inputs take these values (cycling), to cover the "
+                  "cases that random values never hit:\n", file=file)
+            for dt, vals in spec["special_values"].items():
+                print(f"    - `{dt}`: " + ", ".join(f"`{v}`" for v in vals), file=file)
+            print("", file=file)
 
 
 class SpecFuncInfos:
@@ -1185,7 +1180,7 @@ Each function reference page provides:
 3. **Supported Datatypes & Mask Execution Variants**: Supported element types and masking execution modes.
 4. **ISA & Variant Support Matrix**: Per-architecture hardware capability breakdown across masking variants.
 5. **Reference Algorithm**: Scalar C reference implementation demonstrating exact arithmetic and masking semantics.
-6. **Test & Verification Specifications**: Input value domains, validity bounds, and precision tolerances.
+6. **Test & Verification Specifications**: Values drawn by the unit tests and comparison with the scalar reference.
 
 ---
 
