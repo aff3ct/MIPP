@@ -11,6 +11,10 @@
         "format": "short",
         "code": "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%}{{ isa.prefix }}{{ instr_name }}_{{isa_dt_ret.data_ext}}_{{isa_dt_par.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}"
     },
+    "cast_cvt": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpretq_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
     "cast_k": {
         "format": "short",
         "code": "{% if isa_dt_par.data_ext_msk != isa_dt_ret.data_ext_msk -%}{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_ret.data_ext_msk }}_{{ isa_dt_par.data_ext_msk }}(m0.m);{% else -%} m0.m;{% endif %}"
@@ -75,6 +79,12 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m1.m, m0.m);"
     },
+    "none_maxv": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}maxvq_{{ isa_dt_par.data_ext_msk }}(m0.m) == 0;"
+        ]
+    },
     "notb": {
         "format": "short",
         "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext }}(r0.r);"
@@ -100,6 +110,10 @@
             "resi.m = {{ isa.prefix }}mvnq_u32(m0i.m);",
             "return %cast_k<c:uint|b:32,tp>%(resi);"
         ]
+    },
+    "round_away": {
+        "format": "short",
+        "code": "{{ isa.prefix }}rndaq_{{ isa_dt_par.data_ext }}(r0.r);"
     },
     "round_float": {
         "format": "short",
@@ -136,5 +150,9 @@
     "store": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, r0.r);"
+    },
+    "trunc_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}rndq_{{ isa_dt_par.data_ext }}(r0.r);"
     }
 }

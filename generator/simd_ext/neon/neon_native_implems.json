@@ -45,6 +45,14 @@
                 "uint8"
             ],
             "template": "arith_2args"
+        },
+        {
+            "instr_name": "qaddq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "arith_2args"
         }
     ],
     "andb": [
@@ -237,6 +245,20 @@
                 "uint32,float32"
             ],
             "template": "cast"
+        },
+        {
+            "instr_name": "cvt",
+            "datatypes": [
+                "int64,uint64",
+                "uint64,int64",
+                "int32,uint32",
+                "uint32,int32",
+                "int16,uint16",
+                "uint16,int16",
+                "int8,uint8",
+                "uint8,int8"
+            ],
+            "template": "cast_cvt"
         }
     ],
     "div": [
@@ -408,6 +430,14 @@
                 "uint8"
             ],
             "template": "getfirst"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "getfirst"
         }
     ],
     "hadd": [
@@ -503,6 +533,14 @@
                 "uint8"
             ],
             "template": "load"
+        },
+        {
+            "instr_name": "ld1q",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "load"
         }
     ],
     "loadu": [
@@ -522,6 +560,14 @@
                 "uint16",
                 "int8",
                 "uint8"
+            ],
+            "template": "load"
+        },
+        {
+            "instr_name": "ld1q",
+            "datatypes": [
+                "int64",
+                "uint64"
             ],
             "template": "load"
         }
@@ -607,6 +653,22 @@
             "template": "arith_2args"
         }
     ],
+    "none": [
+        {
+            "instr_name": "none",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "none_maxv",
+            "if": "defined(__aarch64__)"
+        }
+    ],
     "notb": [
         {
             "instr_name": "mvnq",
@@ -635,12 +697,6 @@
         }
     ],
     "notb_k": [
-        {
-            "instr_name": "mvnq",
-            "datatypes": "all_64bit",
-            "template": "notb_k_fxx",
-            "if": "defined(__aarch64__)"
-        },
         {
             "instr_name": "mvnq",
             "datatypes": [
@@ -680,7 +736,7 @@
             "datatypes": [
                 "float64"
             ],
-            "template": "round_float",
+            "template": "round_away",
             "if": "defined(__aarch64__)"
         },
         {
@@ -688,7 +744,7 @@
             "datatypes": [
                 "float32"
             ],
-            "template": "round_float",
+            "template": "round_away",
             "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
         }
     ],
@@ -753,6 +809,14 @@
                 "uint8"
             ],
             "template": "set0"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set0"
         }
     ],
     "set0_k": [
@@ -772,6 +836,14 @@
                 "uint16",
                 "int8",
                 "uint8"
+            ],
+            "template": "set0_k"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "int64",
+                "uint64"
             ],
             "template": "set0_k"
         }
@@ -795,6 +867,14 @@
                 "uint8"
             ],
             "template": "set1"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "set1"
         }
     ],
     "set1_k": [
@@ -814,6 +894,14 @@
                 "uint16",
                 "int8",
                 "uint8"
+            ],
+            "template": "set1_k"
+        },
+        {
+            "instr_name": "dupq_n",
+            "datatypes": [
+                "int64",
+                "uint64"
             ],
             "template": "set1_k"
         }
@@ -855,6 +943,14 @@
                 "uint8"
             ],
             "template": "store"
+        },
+        {
+            "instr_name": "st1q",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "store"
         }
     ],
     "storeu": [
@@ -874,6 +970,14 @@
                 "uint16",
                 "int8",
                 "uint8"
+            ],
+            "template": "store"
+        },
+        {
+            "instr_name": "st1q",
+            "datatypes": [
+                "int64",
+                "uint64"
             ],
             "template": "store"
         }
@@ -924,6 +1028,32 @@
                 "uint8"
             ],
             "template": "arith_2args"
+        },
+        {
+            "instr_name": "qsubq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "arith_2args"
+        }
+    ],
+    "trunc": [
+        {
+            "instr_name": "trunc",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "trunc_float",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "trunc",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "trunc_float",
+            "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
         }
     ],
     "xorb": [

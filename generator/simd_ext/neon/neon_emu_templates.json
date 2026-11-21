@@ -14,6 +14,23 @@
         "format": "short",
         "code": "{{ isa.prefix }}negq_{{ isa_dt_par.data_ext }}({{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r));"
     },
+    "cmpeq_64": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "uint32x4_t c = vceqq_u32(vreinterpretq_u32_{{ isa_dt_par.data_ext }}(r0.r), vreinterpretq_u32_{{ isa_dt_par.data_ext }}(r1.r));",
+            "res.m = vreinterpretq_u64_u32(vandq_u32(c, vrev64q_u32(c)));",
+            "return res;"
+        ]
+    },
+    "cmpgt_s64": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "res.m = vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(r1.r, r0.r), 63));",
+            "return res;"
+        ]
+    },
     "hreduc_emu": {
         "format": "long",
         "code": [
@@ -58,8 +75,98 @@
             "{% endif -%}"
         ]
     },
+    "mul_64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "{% if isa_dt_par.data_ext == 'u64' %}uint64x2_t a = r0.r, b = r1.r;{% else %}uint64x2_t a = vreinterpretq_u64_s64(r0.r), b = vreinterpretq_u64_s64(r1.r);{% endif %}",
+            "uint32x4_t cross = vmulq_u32(vrev64q_u32(vreinterpretq_u32_u64(b)), vreinterpretq_u32_u64(a));",
+            "uint64x2_t hi = vshlq_n_u64(vpaddlq_u32(cross), 32);",
+            "uint64x2_t p = vmlal_u32(hi, vmovn_u64(a), vmovn_u64(b));",
+            "res.r = {% if isa_dt_par.data_ext == 'u64' %}p{% else %}vreinterpretq_s64_u64(p){% endif %};",
+            "return res;"
+        ]
+    },
+    "none_maxv64": {
+        "format": "long",
+        "code": [
+            "return vmaxvq_u32(vreinterpretq_u32_u64(m0.m)) == 0;"
+        ]
+    },
+    "none_pmax": {
+        "format": "long",
+        "code": [
+            "uint32x4_t x = {% if isa_dt_par.data_ext_msk == 'u32' %}m0.m{% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(m0.m){% endif %};",
+            "uint32x2_t t = vorr_u32(vget_low_u32(x), vget_high_u32(x));",
+            "t = vpmax_u32(t, t);",
+            "return vget_lane_u32(t, 0) == 0;"
+        ]
+    },
+    "notb_k_64": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "res.m = vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(m0.m)));",
+            "return res;"
+        ]
+    },
+    "pow2_shl": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = vshlq_{{ isa_dt_par.data_ext }}(vdupq_n_{{ isa_dt_par.data_ext }}(1), vreinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r));",
+            "return res;"
+        ]
+    },
+    "reduce_64": {
+        "format": "long",
+        "code": [
+            "%r<tp>% v = r0;",
+            "%r<tp>% s;",
+            "s.r = vextq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 1);",
+            "v = %{{ instr_name }}<tp>%(v, s);",
+            "return %getfirst<tp>%(v);"
+        ]
+    },
     "shift_var": {
         "format": "short",
         "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(s0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-s0));{% endif %}"
+    },
+    "sqrt_nr": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "float32x4_t e = vrsqrteq_f32(r0.r);",
+            "e = vmulq_f32(e, vrsqrtsq_f32(vmulq_f32(r0.r, e), e));",
+            "e = vmulq_f32(e, vrsqrtsq_f32(vmulq_f32(r0.r, e), e));",
+            "uint32x4_t zero = vceqq_f32(r0.r, vdupq_n_f32(0.0f));",
+            "res.r = vbslq_f32(zero, r0.r, vmulq_f32(r0.r, e));",
+            "return res;"
+        ]
+    },
+    "testz_maxv": {
+        "format": "long",
+        "code": [
+            "return vmaxvq_u32({% if isa_dt_par.data_ext_msk == 'u32' %}vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m){% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m)){% endif %}) == 0;"
+        ]
+    },
+    "testz_pmax": {
+        "format": "long",
+        "code": [
+            "uint32x4_t x = {% if isa_dt_par.data_ext_msk == 'u32' %}vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m){% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m)){% endif %};",
+            "uint32x2_t t = vorr_u32(vget_low_u32(x), vget_high_u32(x));",
+            "t = vpmax_u32(t, t);",
+            "return vget_lane_u32(t, 0) == 0;"
+        ]
+    },
+    "torvm_64": {
+        "format": "long",
+        "code": [
+            "%m<tr>% res;",
+            "uint32x4_t x = vreinterpretq_u32_{{ isa_dt_par.data_ext }}(r0.r);",
+            "uint32x4_t t = vtstq_u32(x, x);",
+            "res.m = vreinterpretq_u64_u32(vorrq_u32(t, vrev64q_u32(t)));",
+            "return res;"
+        ]
     }
 }

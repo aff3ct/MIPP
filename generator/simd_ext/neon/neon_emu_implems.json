@@ -1,4 +1,25 @@
 {
+    "cmpeq": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "cmpeq_64",
+            "if": "!defined(__aarch64__)"
+        }
+    ],
+    "cmpgt": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": [
+                "int64"
+            ],
+            "template": "cmpgt_s64",
+            "if": "!defined(__aarch64__)"
+        }
+    ],
     "div": [
         {
             "instr_name": "recpeq",
@@ -91,6 +112,15 @@
             ],
             "template": "hreduc_emu",
             "if": "!defined(__aarch64__)"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "reduce_64",
+            "if": "!defined(__aarch64__)"
         }
     ],
     "hmax": [
@@ -109,6 +139,14 @@
             ],
             "template": "hreduc_emu",
             "if": "!defined(__aarch64__)"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "reduce_64"
         }
     ],
     "hmin": [
@@ -127,6 +165,14 @@
             ],
             "template": "hreduc_emu",
             "if": "!defined(__aarch64__)"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "reduce_64"
         }
     ],
     "hmul": [
@@ -152,6 +198,14 @@
                 "uint8"
             ],
             "template": "hreduc_emu"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "reduce_64"
         }
     ],
     "lshift": [
@@ -161,8 +215,7 @@
                 "int64",
                 "uint64"
             ],
-            "template": "shift_var",
-            "if": "defined(__aarch64__)"
+            "template": "shift_var"
         },
         {
             "instr_name": "shlq",
@@ -177,6 +230,44 @@
             "template": "shift_var"
         }
     ],
+    "mul": [
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "mul_64"
+        }
+    ],
+    "none": [
+        {
+            "instr_name": "none",
+            "datatypes": "all_64bit",
+            "template": "none_maxv64",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "none",
+            "datatypes": "all_datatypes",
+            "template": "none_pmax",
+            "if": "!defined(__aarch64__)"
+        }
+    ],
+    "notb_k": [
+        {
+            "instr_name": "notb_k",
+            "datatypes": "all_64bit",
+            "template": "notb_k_64"
+        }
+    ],
+    "pow2": [
+        {
+            "instr_name": "pow2",
+            "datatypes": "all_uint",
+            "template": "pow2_shl"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "shrq",
@@ -184,8 +275,7 @@
                 "int64",
                 "uint64"
             ],
-            "template": "shift_var",
-            "if": "defined(__aarch64__)"
+            "template": "shift_var"
         },
         {
             "instr_name": "shrq",
@@ -198,6 +288,37 @@
                 "uint8"
             ],
             "template": "shift_var"
+        }
+    ],
+    "sqrt": [
+        {
+            "instr_name": "sqrt",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "sqrt_nr",
+            "if": "!(defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8))"
+        }
+    ],
+    "testz": [
+        {
+            "instr_name": "testz",
+            "datatypes": "all_datatypes",
+            "template": "testz_maxv",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "testz",
+            "datatypes": "all_datatypes",
+            "template": "testz_pmax",
+            "if": "!defined(__aarch64__)"
+        }
+    ],
+    "torvm": [
+        {
+            "instr_name": "torvm",
+            "datatypes": "all_64bit",
+            "template": "torvm_64"
         }
     ]
 }

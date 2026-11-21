@@ -1780,6 +1780,18 @@
             "return res;"
         ]
     },
+    "trunc_magic": {
+        "format": "long",
+        "code": [
+            "%r<tp>% sign = %andb<tp>%(r0, %set1<tp>%(-0.0));",
+            "%r<tp>% ax = %xorb<tp>%(r0, sign);",
+            "%r<tp>% magic = %set1<tp>%({{ '4503599627370496.0' if dt_par.n_bits == 64 else '8388608.0f' }});",
+            "%r<tp>% t = %sub<tp>%(%add<tp>%(ax, magic), magic);",
+            "t = %sub<tp>%(t, %andb<tp>%(%torvd<tp>%(%cmpgt<tp>%(t, ax)), %set1<tp>%(1.0)));",
+            "t = %select<tp>%(%cmplt<tp>%(ax, magic), t, ax);",
+            "return %orb<tp>%(t, sign);"
+        ]
+    },
     "xorb_k_emu": {
         "format": "long",
         "code": [

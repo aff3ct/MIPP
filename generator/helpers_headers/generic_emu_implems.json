@@ -1482,6 +1482,10 @@
         {
             "datatypes": "all_int_uint",
             "template_ref": "tpl_generic_emu.round_int"
+        },
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.trunc_magic"
         }
     ],
     "xorb": [
