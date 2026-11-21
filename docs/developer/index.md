@@ -121,4 +121,4 @@ generator/
     └── rvv/                         # RISC-V Vector 1.0
 ```
 
-Each ISA directory holds `<isa>_isa.json`, `<isa>_native_templates.json` and `<isa>_native_implems.json`, plus the optional `<isa>_emu_*.json` (<span class="mipp-isa-badge lvl-1">L1</span>), `<isa>_ldiv_mask.json` (half-vectors and functions that change the LMUL) and `<isa>_explorer.json` (API Explorer metadata). See [Add an ISA](tutorials/add_isa.md).
+Each ISA directory holds `<isa>_isa.json`, `<isa>_native_templates.json` and `<isa>_native_implems.json`, plus the optional `<isa>_emu_*.json` (<span class="mipp-isa-badge lvl-1">L1</span>), `<isa>_ldiv_mask.json` (half-vectors and functions that change the LMUL), `<isa>_sw_lmul.json` (`wcvt` / `ncvt` of the software LMUL written by the ISA) and `<isa>_explorer.json` (API Explorer metadata). See [Add an ISA](tutorials/add_isa.md).

@@ -23,7 +23,7 @@ from tools import build_func_name_internal
 from input_validation import validate_ldiv_mask_config, make_level_detector
 from codegen.emit_helpers import emit_panic_stub
 from codegen.candidate_resolver import BASE_LEVELS, BASE_LEVEL_BRANCHES
-from codegen.lmul_orchestrator import maybe_emit_ldiv_separator, record_lmul1_definition
+from codegen.lmul_orchestrator import maybe_emit_ldiv_separator, record_lmul1_definition, emit_lmul_banner
 
 _HELPERS_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _VARIANT_OF = {None: "u", "mask": "m", "maskz": "z", "masks": "s"}
@@ -322,7 +322,11 @@ def _auto_level(isa, code, calls):
     return level
 
 
-def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_in=-2):
+def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_in=-2, sw_lmul=False):
+    """
+    Writes one function from its templates. `sw_lmul`: the templates are those of `<isa>_sw_lmul.json`
+    (wcvt m1 -> m2, ncvt m2 -> m1 of a software LMUL, see codegen/sw_lmul.py).
+    """
     dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
     changing = changes_lmul(funcs[f]["proto"])
     if not changing:
@@ -403,15 +407,21 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
             body += (f"#if {cond}\n" if k == 0 else (f"#elif {cond}\n" if cond else "#else\n")) + e_body + "\n"
         if len(parts) > 1 or parts[0][0] is not None:
             body += "#endif"
-        level = _LEVEL_TEXT[lvl] + ": half-vector specific, the upper lanes are not read"
+        if sw_lmul:
+            level = _LEVEL_TEXT[lvl] + ": software LMUL specific, written by the ISA for the registers of the result"
+        else:
+            level = _LEVEL_TEXT[lvl] + ": half-vector specific, the upper lanes are not read"
         if len(parts) > 1:
             level += " (with fallback if the native condition does not hold)"
-    if changing:
+    if changing and not sw_lmul:
+        # the documented level is the one of the half-vector function (m1 <-> d2)
         CHANGING_LEVELS[(isa["name"], f, dt_par + "," + dt_ret)] = lvl
 
     # the guards of the datatype of the argument and, for the conversions, of the result
     guards = [isa["datatypes"].get(d, {}).get("if", None) for d in dict.fromkeys((dt_par, dt_ret))]
     guard = " && ".join(f"({g})" if len(guards) > 1 else g for g in guards if g) or None
+    if sw_lmul:
+        emit_lmul_banner(isa["name"], f, file, "emulated")
     print("", file=file)
     if guard:
         print(f"#if {guard}", file=file)

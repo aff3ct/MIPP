@@ -212,8 +212,12 @@ def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
     """
     wcvt from LMUL 1 or a software LMUL (a struct of two halves) to the next one: each half of the
     result is the conversion of one half of the argument (`low` / `high` then the d2 -> m1
-    conversion for m1 -> m2, the conversion of the halves of one LMUL below otherwise).
+    conversion for m1 -> m2, the conversion of the halves of one LMUL below otherwise). An ISA may write
+    the m1 -> m2 body itself (`<isa>_sw_lmul.json`): nothing is written here then.
     """
+    if lmul == 1 and has_sw_lmul_entry(isa, f, 1, dt_par):
+        # written by the ISA (`<isa>_sw_lmul.json`, see codegen/sw_lmul.py)
+        return
     proto = funcs[f]["proto"]
     res_type = build_type("reg", datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
     emit_lmul_banner(isa["name"], f, file, "emulated")
@@ -246,8 +250,12 @@ def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
 def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager):
     """
     ncvt from a software LMUL (a struct of two halves) to the LMUL below: the conversions of the two
-    halves joined by `combine` for m2 -> m1, the conversion of each half otherwise.
+    halves joined by `combine` for m2 -> m1, the conversion of each half otherwise. An ISA may write the
+    m2 -> m1 body itself (`<isa>_sw_lmul.json`): nothing is written here then.
     """
+    if lmul == 2 and has_sw_lmul_entry(isa, f, 2, dt_par):
+        # written by the ISA (`<isa>_sw_lmul.json`, see codegen/sw_lmul.py)
+        return
     proto = funcs[f]["proto"]
     res_type = build_type("reg", datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
     conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=lmul // 2)

@@ -917,6 +917,9 @@ export function sourceOf(code, table, mask) {
     return { kind: "fallback", path: "generator/helpers_headers/codegen/emit_helpers.py", what: "scalar fallback: copies the registers and calls the scalar reference" };
   }
   const intrinsics = INTRINSIC_RE.test(body);
+  if (/software LMUL specific/.test(text)) {
+    return { kind: "dedicated", path: `generator/simd_ext/${table}/${table}_sw_lmul.json`, what: "software LMUL template of the ISA" };
+  }
   if (/half-vector specific/.test(text)) {
     return intrinsics
       ? { kind: "dedicated", path: `generator/simd_ext/${table}/${table}_ldiv_mask.json`, what: "half-vector template of the ISA" }

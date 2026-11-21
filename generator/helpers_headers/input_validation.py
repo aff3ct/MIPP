@@ -125,6 +125,9 @@ def validate_explorer_isa_config(explorer_dict, file_name):
 def validate_ldiv_mask_config(ldiv_mask_dict, file_name):
     validate_json_data(ldiv_mask_dict, "ldiv_mask_schema.json", label=file_name)
 
+def validate_sw_lmul_config(sw_lmul_dict, file_name):
+    validate_json_data(sw_lmul_dict, "sw_lmul_schema.json", label=file_name)
+
 def validate_templates_config(templates_dict, file_name):
     validate_json_data(templates_dict, "templates_schema.json", label=os.path.basename(file_name))
 

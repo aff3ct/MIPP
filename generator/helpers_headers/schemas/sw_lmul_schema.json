@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Software LMUL Templates",
+    "description": "Bodies of the functions that change a software LMUL, written by one ISA (`simd_ext/<isa>/<isa>_sw_lmul.json`, optional): `wcvt` from `m1` to `m2` and `ncvt` from `m2` to `m1`, for an ISA whose LMUL > 1 registers are software ones (`sw_lmul` in the [ISA Descriptor](isa.md), a struct of two LMUL 1 registers `r1` and `r2`). Without this file, the generator writes generic bodies (`codegen/lmul_orchestrator.py`): `wcvt` converts each half of the argument (`low` / `high`, then the `d2` -> `m1` conversion of [Half-Vector Templates](ldiv_mask.md)) and `ncvt` joins the conversions of the two registers with `combine`. An ISA gives its own body when it has better instructions (SVE: `svunpklo` / `svunpkhi`, `svuzp1`); the higher LMULs (`m2` -> `m4`, ...) call these functions on each half. The code is Jinja2 and [templating DSL](../templating_dsl.md), rendered for the LMUL of the arguments (`m1` for `wcvt`, `m2` for `ncvt`): `%r<tr>%` is the type of the result. Each key is a function name. See [Code Generation](../../internals/code_generation.md#2-one-isa-layer) and [Add an ISA](../../tutorials/add_isa.md#half-vectors-and-functions-that-change-the-lmul).",
+    "examples": [
+        {
+            "wcvt": [
+                {
+                    "datatypes": [
+                        "int8",
+                        "int16",
+                        "int32"
+                    ],
+                    "code": [
+                        "%r<tr>% res;",
+                        "res.r1.r = svunpklo_{{ isa.datatypes[ctx.dt_ret].data_ext }}(r0.r);",
+                        "res.r2.r = svunpkhi_{{ isa.datatypes[ctx.dt_ret].data_ext }}(r0.r);",
+                        "return res;"
+                    ]
+                }
+            ]
+        }
+    ],
+    "type": "object",
+    "propertyNames": {
+        "enum": [
+            "wcvt",
+            "ncvt"
+        ],
+        "title": "function"
+    },
+    "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+            "type": "object",
+            "required": [
+                "code"
+            ],
+            "additionalProperties": false,
+            "properties": {
+                "level": {
+                    "description": "Implementation level shown in the generated `// Level` comment. Optional. Without it, the level is detected from the code with the rules of the level audit (0: a single intrinsic; 1: several intrinsics, or intrinsics and MIPP functions; 2: only MIPP functions).",
+                    "enum": [
+                        0,
+                        1,
+                        2,
+                        3
+                    ]
+                },
+                "datatypes": {
+                    "oneOf": [
+                        {
+                            "const": "all_datatypes"
+                        },
+                        {
+                            "type": "array",
+                            "minItems": 1,
+                            "uniqueItems": true,
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    ],
+                    "description": "Datatypes of the argument the entry applies to, or `all_datatypes` (the default). The first matching entry is used; a datatype without an entry keeps the generic body."
+                },
+                "code": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Body of the function, one line per item: Jinja2 (variables `isa`, `isa_dt` for the datatype entry of the argument in the ISA descriptor, `ctx` with `ctx.dt_par` / `ctx.dt_ret`, ...) and templating DSL (`%r<tr>%` for the result). The result has the registers `res.r1` / `res.r2` for `wcvt`, the argument has `r0.r1` / `r0.r2` for `ncvt`."
+                }
+            },
+            "description": "One candidate implementation."
+        },
+        "description": "Entries of the function, tried in order."
+    }
+}

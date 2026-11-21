@@ -7,7 +7,7 @@ This tutorial creates a new target, `myisa`, a fictional 128-bit instruction set
 | [1. Create the directory](#step-1-create-the-directory) | | Yes |
 | [2. Describe the ISA](#step-2-describe-the-isa) | `myisa_isa.json` | Yes |
 | [3. Generate](#step-3-generate) | none | Yes |
-| [4. Implement the functions](#step-4-implement-the-functions) | `myisa_native_*.json`, `myisa_emu_*.json`, `myisa_ldiv_mask.json` | Yes / No |
+| [4. Implement the functions](#step-4-implement-the-functions) | `myisa_native_*.json`, `myisa_emu_*.json`, `myisa_ldiv_mask.json`, `myisa_sw_lmul.json` | Yes / No |
 | [5. Describe the ISA for the API Explorer](#step-5-describe-the-isa-for-the-api-explorer) | `myisa_explorer.json` | No |
 | [6. Test and add to the CI](#step-6-test-and-add-to-the-ci) | `.gitlab-ci.yml`, `.github/workflows/ci.yml` | Yes |
 
@@ -24,6 +24,7 @@ Create `simd_ext/myisa/`. The directory name is the ISA name. It holds:
 | `myisa_native_implems.json` | Yes | <span class="mipp-isa-badge lvl-0">L0</span> entries (may be `{}` at first). |
 | `myisa_emu_templates.json`, `myisa_emu_implems.json` | No | <span class="mipp-isa-badge lvl-1">L1</span> templates and entries. |
 | `myisa_ldiv_mask.json` | No | Half-vector (`d2`) specializations and the functions that change the LMUL ([step 4](#half-vectors-and-functions-that-change-the-lmul)). |
+| `myisa_sw_lmul.json` | No | `wcvt` (`m1` → `m2`) and `ncvt` (`m2` → `m1`) written by the ISA for its software LMUL registers ([step 4](#half-vectors-and-functions-that-change-the-lmul)). |
 | `myisa_explorer.json` | No | Metadata for the API Explorer ([step 5](#step-5-describe-the-isa-for-the-api-explorer)). |
 
 Without one of the three mandatory files, the generator stops with `FileNotFoundError: Missing mandatory configuration files`.
@@ -125,7 +126,7 @@ Watch the audits at each generation: they report entries placed at the wrong lev
 
 `low`, `high`, `combine`, `wcvt` and `ncvt` return a register of another LMUL than their arguments (`ret.lmul` in `registry_protos.json`). Their templates, and the half-vector specializations, go to `<isa>_ldiv_mask.json` ([Half-Vector Templates](../reference/registries/ldiv_mask.md)). What an ISA must provide depends on its descriptor:
 
-- **LMUL ≥ 2** (`sw_lmul` without a hardware group): nothing to write. `low` and `high` return one half of the register group, `combine` joins two registers, and `wcvt` / `ncvt` apply the conversion to each half.
+- **LMUL ≥ 2** (`sw_lmul` without a hardware group): nothing to write. `low` and `high` return one half of the register group, `combine` joins two registers, and `wcvt` / `ncvt` apply the conversion to each half. When the ISA converts a whole register into two (or two into one) better than through `low` / `high` and `combine`, write `wcvt` (`m1` → `m2`, the result has the registers `res.r1` and `res.r2`) and `ncvt` (`m2` → `m1`, the argument has `r0.r1` and `r0.r2`) in `<isa>_sw_lmul.json` ([Software LMUL Templates](../reference/registries/sw_lmul.md)); see `simd_ext/sve/sve_sw_lmul.json`.
 - **Between `m1` and `d2`** with `"sw_ldiv_type": "mask"`: add `low` and `high` (`m1` to `d2`) and `combine` (`d2` to `m1`) to `<isa>_ldiv_mask.json`, with the intrinsics of the ISA and, if needed, an `if` condition (`defined(__SSE4_1__)`). Without an entry, or when the condition does not hold, the generic version of `generic_ldiv_mask.json` is used (level L3, through a buffer). `wcvt` (`d2` to `m1`) and `ncvt` (`m1` to `d2`) are templates of the generic file that an ISA can override the same way.
 - **Between `m1` and `d2`** with `"sw_ldiv_type": "sub_isa"` (the `d2` is a register of the parent ISA, e.g. an SSE register for AVX): the generic file does not apply, since the two registers have different types. Write all of `low`, `high`, `combine`, `low_k`, `high_k`, `combine_k`, `wcvt` and `ncvt` in `<isa>_ldiv_mask.json` (see `simd_ext/avx/avx_ldiv_mask.json`); the generator reports an error if a template is missing. The fallbacks of `wcvt` / `ncvt` go through a buffer (level L3). Without a `<isa>_ldiv_mask.json`, nothing is provided between `m1` and `d2`.
 - **Hardware groups** (RVV: `-2` and several LMULs in `hw_lmul`): one template per function in `<isa>_ldiv_mask.json` (see `simd_ext/rvv/rvv_ldiv_mask.json`) is rendered for every pair of consecutive hardware LMULs (`d2` to `m1`, `m1` to `m2`, ...). The template reads `ctx.lmul_in`, `ctx.lmul_out` and `ctx.ext(dt, lmul)` (the `data_ext` of the datatype at that LMUL, such as `i32mf2`) and branches on them. The masks (`low_k`, `high_k`, `combine_k`) go through a vector: the mask is turned into a vector of `-1` / `0` (`vmerge`), the data operation is applied, and the result is turned back into a mask (`vmsne`); the 64-bit `d2` masks, which are C arrays, are filled or read with `vse64` / `vle64`. The tests are not generated for the functions that are not provided (see [Test Generator](../internals/test_generator.md)).

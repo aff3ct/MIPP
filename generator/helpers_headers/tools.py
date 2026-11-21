@@ -157,6 +157,45 @@ def ldiv_mask_functions(isa):
         _ldiv_mask_functions_cache[name] = names
     return _ldiv_mask_functions_cache[name]
 
+# Functions whose body for a software LMUL can be written by an ISA in `<isa>_sw_lmul.json`, and the LMUL
+# of their arguments: wcvt m1 -> m2, ncvt m2 -> m1
+SW_LMUL_FUNCS = {"wcvt": 1, "ncvt": 2}
+
+_sw_lmul_entries_cache = {}
+
+def sw_lmul_path(isa):
+    import os
+    name = isa["name"]
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "simd_ext", name, name + "_sw_lmul.json")
+
+def sw_lmul_entries(isa):
+    """
+    The bodies that the ISA writes itself, in `simd_ext/<isa>/<isa>_sw_lmul.json`, for the functions that
+    change a software LMUL (wcvt m1 -> m2, ncvt m2 -> m1) instead of the generic ones of lmul_orchestrator:
+    {function: [entries]} (empty without the file).
+    """
+    import json
+    import os
+    name = isa["name"]
+    if name not in _sw_lmul_entries_cache:
+        path = sw_lmul_path(isa)
+        entries = {}
+        if os.path.exists(path):
+            with open(path, "r", encoding="utf-8") as fd:
+                entries = json.load(fd)
+        _sw_lmul_entries_cache[name] = entries
+    return _sw_lmul_entries_cache[name]
+
+def has_sw_lmul_entry(isa, f, lmul, dt_par):
+    """Whether the ISA writes itself the body of `f` for the software LMUL `lmul` of its arguments (see sw_lmul_entries)."""
+    if SW_LMUL_FUNCS.get(f) != lmul:
+        return False
+    for entry in sw_lmul_entries(isa).get(f, []):
+        dts = entry.get("datatypes", "all_datatypes")
+        if dts == "all_datatypes" or dt_par in dts:
+            return True
+    return False
+
 def isa_provides_lmul(isa, proto, lmul):
     """
     Whether `isa` provides a function with this prototype for the arguments' LMUL `lmul`.
@@ -199,7 +238,8 @@ def isa_provides_lmul(isa, proto, lmul):
         return isa_provides_lmul(isa, proto, lmul // 2)
     if is_widening(proto):
         # wcvt: d2 -> m1 is a template (generic_ldiv_mask.json, then the ISA), m1 -> m2 is made of
-        # low / high on the argument and of two d2 -> m1, m2 -> m4... of two m1 -> m2, etc.
+        # low / high on the argument and of two d2 -> m1 (or written by the ISA in <isa>_sw_lmul.json),
+        # m2 -> m4... of two m1 -> m2, etc.
         if lmul == -2:
             return uses_ldiv_templates(isa)
         if ret not in sw or ret in hw:

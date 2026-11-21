@@ -31,6 +31,7 @@ from codegen.emit_helpers import (
 from codegen.candidate_resolver import resolve_and_emit_missing_functions
 from codegen.lmul_orchestrator import gen_c_lmul, gen_c_lmul1_aliases, gen_c_ldiv, record_lmul1_definition
 from codegen.ldiv_mask import gen_c_ldiv_mask
+from codegen.sw_lmul import gen_c_sw_lmul
 
 
 def gen_c_defines(isa, file, vla_size=None):
@@ -601,8 +602,10 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         gen_c_ldiv_mask(isa, include_manager, copy_interfaces, only_changing=True)
 
     # 5. The LMUL 1 of the functions that build a software LMUL 2 register (wcvt, combine), then the functions without
-    # suffix, aliases of the `_m1` ones just written (all of them are known now)
+    # suffix, aliases of the `_m1` ones just written (all of them are known now). The bodies of wcvt m1 -> m2 and
+    # ncvt m2 -> m1 given by the ISA (`<isa>_sw_lmul.json`) come first: lmul_orchestrator skips them.
     if sw_lmuls:
+        gen_c_sw_lmul(isa, include_manager, copy_interfaces)
         gen_c_lmul(isa, include_manager, copy_interfaces, sw_lmuls, lmul1=True)
     if m1_is_hw or sw_lmuls:
         gen_c_lmul1_aliases(isa, include_manager, copy_interfaces)
