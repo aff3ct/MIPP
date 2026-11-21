@@ -3,7 +3,7 @@
  * Displays a streamlined support matrix per SIMD extension & datatype groups,
  * featuring intelligent family grouping and direct links to the View Algorithm modal.
  */
-import { escapeHtml } from "../explorer.config.js";
+import { escapeHtml, ICON_INSPECT } from "../explorer.config.js";
 import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
@@ -175,9 +175,7 @@ export function renderTabHw(entry) {
                   : `<span class="mipp-isa-badge lvl-${group.level}">L${group.level}</span>`;
 
                 const algoBtn = `
-                  <button type="button" class="mipp-icon-btn mipp-hw-algo-btn" data-algo-card="${escapeHtml(entry.name)}" data-algo-isa="${isa}" data-algo-dt="${defaultGroupDt}" data-algo-mask="${currentMask}" data-algo-feature="${escapeHtml(reqFeatureAttr)}" title="View algorithm for ${isaLabel} (${escapeHtml(group.dts.join(', '))})">
-                    🔍
-                  </button>
+                  <button type="button" class="mipp-icon-btn mipp-hw-algo-btn" data-algo-card="${escapeHtml(entry.name)}" data-algo-isa="${isa}" data-algo-dt="${defaultGroupDt}" data-algo-mask="${currentMask}" data-algo-feature="${escapeHtml(reqFeatureAttr)}" title="View algorithm for ${isaLabel} (${escapeHtml(group.dts.join(', '))})">${ICON_INSPECT}</button>
                 `;
 
                 return `

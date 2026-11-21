@@ -67,7 +67,7 @@ export function renderCompareModal(apiData) {
       <div class="mipp-modal-content mipp-compare-modal-content" style="max-width: 95vw; width: 1200px;">
         <div class="mipp-modal-header">
           <h2 class="mipp-modal-title" style="margin: 0; font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem;">
-            <span>⚖️ Side-by-Side Primitive Comparison</span>
+            <span>Side-by-Side Primitive Comparison</span>
           </h2>
           <button id="mipp-close-compare-btn" class="mipp-icon-btn mipp-modal-close-btn" style="font-size: 1.2rem;" title="Close comparison modal">✕</button>
         </div>

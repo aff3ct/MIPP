@@ -1,7 +1,7 @@
 /**
  * MIPP API Explorer - Main Orchestrator & Lifecycle
  */
-import { escapeHtml, ICON_CHECK, VALID_CARD_TABS, copyToClipboard } from "./explorer.config.js";
+import { escapeHtml, ICON_CHECK, ICON_NO_RESULTS, VALID_CARD_TABS, copyToClipboard } from "./explorer.config.js";
 import {
   apiData,
   apiMetadata,
@@ -68,10 +68,25 @@ export function renderApp() {
 
   updateHeaderHeight(headerEl);
   updateSidebarUI(sidebarEl);
+  updateFiltersToggle(appEl);
   updateSearchBarUI(headerEl);
   renderCards(cardsContainerEl);
   updateCompareBar(compareBarEl);
   updateModals(modalsContainerEl);
+}
+
+// Number of restricted filter groups, shown on the (collapsed) filters toggle
+function updateFiltersToggle(appEl) {
+  const countEl = appEl.querySelector(".mipp-filters-toggle-count");
+  if (!countEl) return;
+  const restricted = [
+    state.selectedCategories.length < ALL_CATEGORIES.length,
+    state.selectedTypes.length < ALL_DATATYPES.length,
+    state.selectedSimdExts.length < ALL_SIMD_EXTS.length,
+    state.selectedLevels.length < 4,
+  ].filter(Boolean).length;
+  countEl.textContent = restricted ? `${restricted} active` : "";
+  countEl.hidden = restricted === 0;
 }
 
 function mountAppShell(appEl) {
@@ -88,6 +103,19 @@ function mountAppShell(appEl) {
     ${renderSearchBar()}
 
     <div class="mipp-explorer-body">
+      <!-- Filters toggle (single-column layout only, see explorer.css) -->
+      <button type="button" class="mipp-filters-toggle" aria-controls="mipp-sidebar-filters"
+              aria-expanded="${appEl.classList.contains("mipp-filters-open") ? "true" : "false"}">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+          <path d="M14 12v7.88c.04.3-.06.62-.29.83a.996.996 0 0 1-1.41 0l-2.01-2.01a.989.989 0 0 1-.29-.83V12h-.03L4.21 4.62a1 1 0 0 1 .17-1.4c.19-.14.4-.22.62-.22h14c.22 0 .43.08.62.22a1 1 0 0 1 .17 1.4L14.03 12H14z"/>
+        </svg>
+        <span>Filters</span>
+        <span class="mipp-filters-toggle-count" hidden></span>
+        <svg class="mipp-filters-toggle-chevron" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+          <path d="M7.41 8.58 12 13.17l4.59-4.59L18 10l-6 6-6-6 1.41-1.42z"/>
+        </svg>
+      </button>
+
       ${renderSidebar(catCounts, renderApp)}
 
       <!-- Cards Main Area -->
@@ -97,7 +125,7 @@ function mountAppShell(appEl) {
     <!-- Side-by-side Compare Floating Bar -->
     <div class="mipp-compare-bar ${state.compareSet.size >= 1 ? "visible" : ""}">
       <span class="mipp-compare-bar-text" style="font-weight: 600; font-size: 0.88rem;">
-        ⚖️ Compare (${state.compareSet.size}/3): <span style="color: var(--mipp-accent);">${Array.from(state.compareSet).join(", ")}</span>
+        Compare (${state.compareSet.size}/3): <span style="color: var(--mipp-accent);">${Array.from(state.compareSet).join(", ")}</span>
       </span>
       <div style="display: flex; gap: 0.5rem;">
         <button id="mipp-open-compare-btn" class="mipp-godbolt-btn" ${state.compareSet.size < 2 ? "disabled style='opacity:0.6;'" : ""}>
@@ -122,6 +150,16 @@ function mountAppShell(appEl) {
   // Dynamically observe header height for sticky positioning
   observeHeaderHeight(headerEl);
 
+  // Filters toggle: the open state lives on the mount element, which survives
+  // the re-renders of its content (closed again after a page navigation)
+  const filtersToggleEl = appEl.querySelector(".mipp-filters-toggle");
+  if (filtersToggleEl) {
+    filtersToggleEl.addEventListener("click", () => {
+      const open = appEl.classList.toggle("mipp-filters-open");
+      filtersToggleEl.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+  }
+
   // Bind shell events (once!)
   bindSidebarEvents(sidebarEl, renderApp);
   bindSearchBarEvents(headerEl, renderApp);
@@ -129,6 +167,7 @@ function mountAppShell(appEl) {
 
   // Initial render of contents
   updateSidebarUI(sidebarEl);
+  updateFiltersToggle(appEl);
   updateSearchBarUI(headerEl);
   renderCards(cardsContainerEl);
   updateCompareBar(compareBarEl);
@@ -153,7 +192,7 @@ function renderCards(cardsContainerEl) {
     ${filtered.length === 0
       ? `
         <div class="mipp-no-results" style="text-align: center; padding: 3rem 1rem; background: var(--mipp-card-bg, #ffffff); border-radius: var(--mipp-border-radius-lg); border: 1px dashed var(--mipp-card-border, #cbd5e1);">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+          <div style="margin-bottom: 0.5rem; color: var(--md-default-fg-color--lighter, #94a3b8);">${ICON_NO_RESULTS}</div>
           <h3 style="margin: 0 0 0.5rem 0;">No matching MIPP primitives found</h3>
           <p style="color: var(--md-default-fg-color--lighter, #94a3b8); margin: 0 0 1rem 0; font-size: 0.88rem;">
             Try adjusting your search terms or checking options in the sidebar filter.
@@ -440,7 +479,7 @@ function updateCompareBar(compareBarEl) {
 
   const textEl = compareBarEl.querySelector(".mipp-compare-bar-text");
   if (textEl) {
-    textEl.innerHTML = `⚖️ Compare (${state.compareSet.size}/3): <span style="color: var(--mipp-accent);">${Array.from(state.compareSet).join(", ")}</span>`;
+    textEl.innerHTML = `Compare (${state.compareSet.size}/3): <span style="color: var(--mipp-accent);">${Array.from(state.compareSet).join(", ")}</span>`;
   }
 
   const openBtn = compareBarEl.querySelector("#mipp-open-compare-btn");
@@ -792,16 +831,13 @@ export async function initExplorer() {
   document.body.classList.add("mipp-has-explorer");
 
   mountEl.innerHTML = `
-    <div style="text-align: center; padding: 4rem 1rem; color: var(--md-default-fg-color--lighter, #94a3b8); max-width: 480px; margin: 0 auto;">
-      <div style="font-size: 2.2rem; margin-bottom: 0.75rem;">🔍</div>
-      <div style="font-weight: 600; font-size: 1.15rem; color: var(--md-default-fg-color);">Loading MIPP API Explorer...</div>
-      <p style="font-size: 0.85rem; margin: 0.4rem 0 1.2rem 0;">Preparing interactive catalog of SIMD primitives and hardware architectures</p>
+    <div class="mipp-explorer-loading" role="status">
+      <div class="mipp-explorer-loading-title">Loading the MIPP API Explorer…</div>
+      <p>Preparing the catalog of SIMD primitives and hardware targets</p>
       <div class="mipp-loading-bar-wrapper">
         <div class="mipp-loading-bar-fill" id="mipp-load-progress-fill" style="width: 0%;"></div>
       </div>
-      <div id="mipp-load-progress-text" style="font-size: 0.78rem; margin-top: 0.5rem; font-family: var(--md-code-font, monospace);">
-        Connecting...
-      </div>
+      <div id="mipp-load-progress-text">Connecting...</div>
     </div>
   `;
 

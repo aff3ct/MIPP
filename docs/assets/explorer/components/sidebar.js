@@ -19,7 +19,7 @@ export function renderSidebar(catCounts, renderApp) {
   const noTypesChecked = state.selectedTypes.length === 0;
 
   return `
-    <aside class="mipp-sidebar">
+    <aside class="mipp-sidebar" id="mipp-sidebar-filters">
       <!-- 1. Categories Filter -->
       <div class="mipp-filter-section">
         <div class="mipp-filter-header">

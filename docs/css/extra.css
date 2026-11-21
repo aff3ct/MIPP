@@ -155,6 +155,15 @@
   box-sizing: border-box;
 }
 
+/* Glossary abbreviations (docs/includes/abbreviations.md, appended to every
+   page): dotted underline in running text only. In headings, tables and
+   tab labels, where the same terms come back on every line, the underline is
+   noise; the tooltip (title) stays */
+.md-typeset :is(h1, h2, h3, h4, h5, h6, th, td, .tabbed-labels) abbr {
+  border-bottom: none;
+  text-decoration: none;
+}
+
 .md-typeset p:not(.admonition-title),
 .md-typeset h1,
 .md-typeset h2,
@@ -287,9 +296,14 @@ pre,
   color: #475569;
 }
 
+/* Hover only changes the color: a bolder weight is wider and would shift the
+   following tabs */
 [data-md-color-scheme="default"] .md-tabs__item--active .md-tabs__link,
 [data-md-color-scheme="default"] .md-tabs__link:hover {
   color: #0284c7 !important;
+}
+
+[data-md-color-scheme="default"] .md-tabs__item--active .md-tabs__link {
   font-weight: 600;
 }
 
@@ -357,6 +371,9 @@ pre,
 [data-md-color-scheme="slate"] .md-tabs__item--active .md-tabs__link,
 [data-md-color-scheme="slate"] .md-tabs__link:hover {
   color: #38bdf8 !important;
+}
+
+[data-md-color-scheme="slate"] .md-tabs__item--active .md-tabs__link {
   font-weight: 600;
 }
 
@@ -442,6 +459,22 @@ pre,
   background: var(--mipp-lvl-na-bg);
   color: var(--mipp-lvl-na);
   border: 1px solid var(--mipp-lvl-na-border);
+}
+
+/* Level badges in running text, headings and legends (outside the API
+   Explorer and the support matrices): sized relative to the surrounding text
+   and kept on the baseline, so they read as a discreet inline tag */
+.md-typeset :is(.mipp-isa-badge, .mipp-badge):not(#mipp-explorer-app *, td *) {
+  display: inline-block;
+  min-width: 0;
+  height: auto;
+  padding: 0 0.4em;
+  font-size: 0.78em;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0;
+  vertical-align: 0.08em;
+  border-radius: 9999px;
 }
 
 /* --------------------------------------------------------------------------
@@ -566,7 +599,7 @@ body[data-toc-hidden="true"] .md-content {
 /* Floating Restore Button when TOC is hidden */
 .mipp-toc-restore-btn {
   position: fixed;
-  top: 4.8rem;
+  top: calc(var(--mipp-md-header-height, 4.8rem) + 0.6rem);
   right: 1.5rem;
   z-index: 25;
   display: none;
@@ -791,6 +824,45 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   background-color: rgba(14, 165, 233, 0.05);
 }
 
+/* Sticky first column: a wide table scrolls horizontally inside its frame
+   (phones, comparison and support matrices), the row labels stay visible.
+   Opaque backgrounds, stacked like the frame (card over page background, plus
+   the header tint), so that the scrolled cells do not show through */
+.md-typeset table:not([class]) th:first-child,
+.md-typeset table:not([class]) td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+.md-typeset table:not([class]) td:first-child {
+  background:
+    linear-gradient(var(--mipp-card-bg), var(--mipp-card-bg)),
+    var(--md-default-bg-color);
+}
+
+.md-typeset table:not([class]) tr:hover td:first-child {
+  background:
+    linear-gradient(rgba(14, 165, 233, 0.05), rgba(14, 165, 233, 0.05)),
+    linear-gradient(var(--mipp-card-bg), var(--mipp-card-bg)),
+    var(--md-default-bg-color);
+}
+
+.md-typeset table:not([class]) th:first-child {
+  background:
+    linear-gradient(rgba(14, 165, 233, 0.08), rgba(14, 165, 233, 0.08)),
+    linear-gradient(var(--mipp-card-bg), var(--mipp-card-bg)),
+    var(--md-default-bg-color);
+}
+
+/* Below the desktop layout, most wide tables scroll: show the column edge */
+@media screen and (max-width: 76.1875em) {
+  .md-typeset table:not([class]) th:first-child,
+  .md-typeset table:not([class]) td:first-child {
+    box-shadow: inset -1px 0 0 var(--mipp-card-border);
+  }
+}
+
 /* Level badges in the support matrices */
 .md-typeset table td:has(.mipp-badge),
 .md-typeset table td:has(.twemoji) {
@@ -802,11 +874,11 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  height: 20px;
-  padding: 0 6px;
-  font-size: 0.68rem;
-  font-weight: 700;
+  min-width: 26px;
+  height: 18px;
+  padding: 0 5px;
+  font-size: 0.64rem;
+  font-weight: 600;
   line-height: 1;
   border-radius: 9999px;
   font-family: var(--md-code-font, monospace);
@@ -846,6 +918,155 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   display: block;
 }
 
+/* Comparison tables of "Why MIPPv2": neutral palette, a single accent for
+   supported features and a light tint on the MIPPv2 column / row */
+.mipp-compare {
+  --mipp-compare-tint: rgba(14, 165, 233, 0.06);
+  --mipp-compare-yes: #059669;
+}
+
+[data-md-color-scheme="slate"] .mipp-compare {
+  --mipp-compare-tint: rgba(56, 189, 248, 0.08);
+  --mipp-compare-yes: #34d399;
+}
+
+.md-typeset .mipp-compare table:not([class]) {
+  font-size: 0.72rem;
+}
+
+/* Header row: blue background and bottom rule of the other tables */
+.md-typeset .mipp-compare table:not([class]) th {
+  font-weight: 600;
+  font-size: 0.72rem;
+  letter-spacing: 0;
+  padding: 0.6rem 0.6rem;
+  vertical-align: bottom;
+}
+
+.md-typeset .mipp-compare table:not([class]) th a,
+.md-typeset .mipp-compare table:not([class]) td:first-child a {
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset .mipp-compare table:not([class]) th a:hover,
+.md-typeset .mipp-compare table:not([class]) td:first-child a:hover {
+  color: var(--md-accent-fg-color);
+}
+
+.md-typeset .mipp-compare table:not([class]) td {
+  padding: 0.45rem 0.6rem;
+  font-size: 0.72rem;
+  color: var(--md-default-fg-color);
+}
+
+.md-typeset .mipp-compare table:not([class]) td:first-child {
+  font-weight: 500;
+}
+
+.md-typeset .mipp-compare table:not([class]) tr:hover td {
+  background-color: transparent;
+}
+
+/* Highlighted MIPPv2 column (features, below the header row) and row
+   (project status) */
+.md-typeset .mipp-compare:not(.mipp-compare--status) table:not([class]) td:nth-child(2),
+.md-typeset .mipp-compare--status table:not([class]) tbody tr:first-child td {
+  background-color: var(--mipp-compare-tint);
+}
+
+/* Sticky first column (see the generic table rules): no hover tint, MIPPv2
+   row tint kept, and a divider showing where the scrolled cells go under */
+.md-typeset .mipp-compare table:not([class]) th:first-child,
+.md-typeset .mipp-compare table:not([class]) td:first-child {
+  box-shadow: inset -1px 0 0 var(--mipp-card-border);
+}
+
+.md-typeset .mipp-compare table:not([class]) tr:hover td:first-child {
+  background:
+    linear-gradient(var(--mipp-card-bg), var(--mipp-card-bg)),
+    var(--md-default-bg-color);
+}
+
+.md-typeset .mipp-compare--status table:not([class]) tbody tr:first-child td:first-child {
+  background:
+    linear-gradient(var(--mipp-compare-tint), var(--mipp-compare-tint)),
+    linear-gradient(var(--mipp-card-bg), var(--mipp-card-bg)),
+    var(--md-default-bg-color);
+}
+
+/* Phones: wrap the row labels instead of a wide sticky column */
+@media screen and (max-width: 44.9375em) {
+  .md-typeset .mipp-compare table:not([class]) td:first-child {
+    white-space: normal;
+    min-width: 6.5rem;
+    max-width: 8rem;
+  }
+}
+
+/* Secondary detail under a value */
+.md-typeset .mipp-compare small,
+.md-typeset .mipp-compare th small {
+  display: block;
+  margin-top: 0.1rem;
+  font-size: 0.64rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .mipp-compare small code {
+  font-size: 0.95em;
+  padding: 0 0.25em;
+  color: inherit;
+  white-space: nowrap;
+}
+
+/* Status markers */
+.md-typeset .mipp-compare .y,
+.md-typeset .mipp-compare .p,
+.md-typeset .mipp-compare .n,
+.md-typeset .mipp-compare-legend .y,
+.md-typeset .mipp-compare-legend .p,
+.md-typeset .mipp-compare-legend .n {
+  font-weight: 600;
+}
+
+.md-typeset .mipp-compare .y,
+.md-typeset .mipp-compare-legend .y {
+  color: var(--mipp-compare-yes, #059669);
+}
+
+.md-typeset .mipp-compare .p,
+.md-typeset .mipp-compare-legend .p {
+  color: var(--md-default-fg-color--light);
+}
+
+.md-typeset .mipp-compare .n,
+.md-typeset .mipp-compare .na,
+.md-typeset .mipp-compare-legend .n {
+  color: var(--md-default-fg-color--lighter);
+}
+
+.md-typeset .mipp-compare .na {
+  font-size: 0.66rem;
+}
+
+.md-typeset .mipp-compare-legend {
+  margin-top: -0.6rem;
+  font-size: 0.66rem;
+  color: var(--md-default-fg-color--light);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .mipp-compare-legend .y {
+  color: #34d399;
+}
+
+/* Value-only grey badges (live GitHub metrics) */
+.md-typeset .mipp-compare table:not([class]) img {
+  max-height: 18px;
+  border-radius: 3px;
+}
+
 /* --------------------------------------------------------------------------
    7. Home page (hero, buttons, cards)
    -------------------------------------------------------------------------- */
@@ -863,12 +1084,18 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   font-weight: 800;
   letter-spacing: -0.035em;
   margin-bottom: 1rem !important;
+}
+
+/* Gradient on the text only: background-clip on the <h1> would also clip
+   the box-shadow of the MIPPv2 badge to the heading box */
+.mipp-hero-title-text {
   background: linear-gradient(135deg, #0284c7 0%, #6366f1 50%, #9333ea 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-[data-md-color-scheme="slate"] .mipp-hero-title {
+[data-md-color-scheme="slate"] .mipp-hero-title-text {
   background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -958,6 +1185,8 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
 
 .mipp-btn svg {
   flex-shrink: 0;
+  width: 1.15em;
+  height: 1.15em;
   vertical-align: middle;
 }
 
@@ -1103,23 +1332,38 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
      preventing sticky sidebar collapse and keeping footer at bottom on short pages */
   .md-main__inner {
     margin-top: 0;
-    min-height: calc(100vh - 4.8rem);
+    min-height: calc(100vh - var(--mipp-md-header-height, 4.8rem));
   }
 
-  /* Fixed/sticky sidebar bounded cleanly between tabs header and footer */
+  /* Fixed/sticky sidebar bounded cleanly between tabs header and footer.
+     --mipp-md-header-height is the measured header height (header-height.js):
+     a fixed value lets the sidebar slide under the header when scrolling */
+  /* The sidebar is as tall as its menu, at most the viewport height under the
+     header: a short menu is then never pushed under the header by the footer
+     at the bottom of the page, a long one scrolls inside the sidebar */
   .md-sidebar {
     position: sticky;
-    top: 4.8rem !important;
-    height: calc(100vh - 4.8rem);
-    max-height: calc(100vh - 4.8rem);
+    top: var(--mipp-md-header-height, 4.8rem) !important;
+    flex-direction: column;
+    height: auto;
+    max-height: calc(100vh - var(--mipp-md-header-height, 4.8rem));
     padding: 0;
     overflow: hidden;
   }
 
-  /* Full-height scroll container with independent scrollbar ("ascenseur")
-     preventing scroll chaining and strictly stopping before footer */
+  /* Flex only on visible sidebars: Material hides them with the [hidden]
+     attribute (front matter "hide: navigation / toc"), whose display: none
+     comes from the user-agent style sheet and would be overridden */
+  .md-sidebar:not([hidden]) {
+    display: flex;
+  }
+
+  /* Scroll container with independent scrollbar ("ascenseur"), shrunk to
+     the sidebar max height, preventing scroll chaining */
   .md-sidebar__scrollwrap {
-    height: 100% !important;
+    flex: 0 1 auto;
+    min-height: 0;
+    height: auto !important;
     max-height: 100%;
     padding: 1.2rem 0;
     overflow-y: auto;

@@ -5,17 +5,22 @@ hide:
 ---
 
 <div class="mipp-hero">
-  <h1 class="mipp-hero-title">My Intrinsics Plus Plus <span class="mippv2">MIPPv2</span></h1>
+  <h1 class="mipp-hero-title"><span class="mipp-hero-title-text">My Intrinsics Plus Plus</span> <span class="mippv2">MIPPv2</span></h1>
   <p class="mipp-hero-subtitle">
     Portable, zero-overhead SIMD computing for modern C and C++. Write once, vectorize everywhere across x86, ARM, and RISC-V targets with a guaranteed 4-level fallback engine.
   </p>
 
   <div class="mipp-hero-actions">
     <a href="user/getting_started/" class="mipp-btn mipp-btn-primary">
-      <span>🚀</span> Get Started (5 min)
+      Get Started (5 min)
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+        <path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/>
+      </svg>
     </a>
     <a href="explorer/" class="mipp-btn mipp-btn-secondary">
-      <span>🔍</span> API Explorer
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
+        <path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/>
+      </svg> API Explorer
     </a>
     <a href="https://github.com/aff3ct/MIPP/tree/develop" class="mipp-btn mipp-btn-secondary" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true">
@@ -36,7 +41,7 @@ hide:
 <div class="mipp-home-grid">
   <div class="mipp-home-card">
     <div class="mipp-home-card-header">
-      <div class="mipp-home-card-icon">🚀</div>
+      <div class="mipp-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg></div>
       <h3 class="mipp-home-card-title">Next-Gen ISAs & Scalable Vectors</h3>
     </div>
     <p class="mipp-home-card-desc">
@@ -45,7 +50,7 @@ hide:
   </div>
   <div class="mipp-home-card">
     <div class="mipp-home-card-header">
-      <div class="mipp-home-card-icon">🎯</div>
+      <div class="mipp-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div>
       <h3 class="mipp-home-card-title">Three APIs, One Engine</h3>
     </div>
     <p class="mipp-home-card-desc">
@@ -54,7 +59,7 @@ hide:
   </div>
   <div class="mipp-home-card">
     <div class="mipp-home-card-header">
-      <div class="mipp-home-card-icon">🛡️</div>
+      <div class="mipp-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
       <h3 class="mipp-home-card-title">Fallback Guarantee</h3>
     </div>
     <p class="mipp-home-card-desc">
@@ -63,7 +68,7 @@ hide:
   </div>
   <div class="mipp-home-card">
     <div class="mipp-home-card-header">
-      <div class="mipp-home-card-icon">⚡</div>
+      <div class="mipp-home-card-icon"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
       <h3 class="mipp-home-card-title">Zero-Overhead & Header-Only</h3>
     </div>
     <p class="mipp-home-card-desc">
@@ -73,7 +78,7 @@ hide:
 </div>
 
 <p style="text-align: center; margin-top: 1.5rem; margin-bottom: 2rem;">
-  👉 <b><a href="why_mippv2/#simd-wrappers-comparison">See how MIPP compares to Google Highway, xsimd, Eve, and auto-vectorization</a></b>
+  <b><a href="why_mippv2/#simd-wrappers-comparison">See how MIPP compares to Google Highway, xsimd, Eve, and auto-vectorization&nbsp;→</a></b>
 </p>
 
 ---

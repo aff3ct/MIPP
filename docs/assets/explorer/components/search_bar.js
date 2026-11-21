@@ -1,7 +1,7 @@
 /**
  * MIPP API Explorer - Search Bar & Top Controls Component
  */
-import { escapeHtml, ICON_SEARCH, copyToClipboard } from "../explorer.config.js";
+import { escapeHtml, ICON_SEARCH, ICON_SETTINGS, ICON_LINK, copyToClipboard } from "../explorer.config.js";
 import { state, syncUrlHash } from "../state.js";
 import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES } from "../data.js";
 
@@ -93,7 +93,7 @@ export function renderSearchBar() {
           <div class="mipp-actions-buttons">
             <div class="mipp-header-options-wrapper">
               <button id="mipp-options-btn" class="mipp-action-icon-btn mipp-options-btn" title="Explorer display settings (UI Size)" aria-label="Display settings" aria-expanded="false">
-                ⚙️
+                ${ICON_SETTINGS}
               </button>
               <div id="mipp-options-popover" class="mipp-options-popover" style="display: none;">
                 <div class="mipp-options-popover-title">Display Settings</div>
@@ -108,7 +108,7 @@ export function renderSearchBar() {
               </div>
             </div>
             <button id="mipp-share-btn" class="mipp-action-icon-btn" title="Copy direct link to this view" aria-label="Share">
-              🔗
+              ${ICON_LINK}
             </button>
             <button
               id="mipp-reset-btn"

@@ -133,6 +133,11 @@ export async function loadApiData() {
   const fillEl = document.getElementById("mipp-load-progress-fill");
   const textEl = document.getElementById("mipp-load-progress-text");
   const mb = (n) => (n / (1024 * 1024)).toFixed(1);
+  // Unknown total size: animated bar instead of a bar stuck at 0%
+  if (totalBytes === 0 && fillEl) {
+    fillEl.style.width = "";
+    fillEl.classList.add("mipp-loading-bar-fill--indeterminate");
+  }
 
   let rawObj;
   if (resp.body && window.ReadableStream) {

@@ -3,6 +3,7 @@ title: API Explorer
 description: Interactive MIPP SIMD instruction catalog inspired by Intel Intrinsics Guide and ARM Neon Search Engine. Instant multi-criteria search, reverse vendor intrinsic lookup (AVX, NEON, RVV, SVE), faceted capability filtering, and switching between the C, C++ Functional and C++ Object APIs.
 hide:
   - toc
+  - footer
 ---
 
 <div id="mipp-explorer-app">
@@ -12,4 +13,10 @@ hide:
       <p>The MIPP Interactive API Explorer requires JavaScript to provide instant search, reverse intrinsic lookup, and dynamic architecture filtering. Please enable JavaScript or browse the static <a href="../funcs_support/">Function Directory</a>.</p>
     </div>
   </noscript>
+  <div class="mipp-explorer-loading" role="status">
+    <div class="mipp-explorer-loading-title">Loading the MIPP API Explorer…</div>
+    <div class="mipp-loading-bar-wrapper">
+      <div class="mipp-loading-bar-fill mipp-loading-bar-fill--indeterminate"></div>
+    </div>
+  </div>
 </div>

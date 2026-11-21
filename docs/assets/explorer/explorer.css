@@ -33,9 +33,17 @@
   width: 100%;
   max-width: 84rem;
   box-sizing: border-box;
-  margin: 0.65rem auto 3rem auto;
+  /* Bottom margin of the other pages (.md-typeset bottom margin, reset to 0
+     on this page by the .md-content__inner override below) */
+  margin: 0.65rem auto 1.2rem auto;
   font-family: var(--md-text-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   color: var(--md-default-fg-color);
+}
+
+/* The modals are fixed overlays: no box for their container, so that it does
+   not add a flex gap under the last row of the explorer */
+#mipp-modals-container {
+  display: contents;
 }
 
 /* Layout override on explorer page: align width with .md-grid (84rem) exactly */
@@ -916,6 +924,55 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   }
 }
 
+/* Filters toggle: in the single-column layout, the filters are collapsed by
+   default so that the results come first (main.js, .mipp-filters-open) */
+.mipp-filters-toggle {
+  display: none;
+}
+
+.mipp-filters-toggle-count {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--mipp-accent, #0ea5e9);
+}
+
+@media (max-width: 960px) {
+  .mipp-filters-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--md-default-fg-color);
+    background: var(--mipp-card-bg, #ffffff);
+    border: 1px solid var(--mipp-card-border, #e2e8f0);
+    border-radius: var(--mipp-border-radius-lg);
+    cursor: pointer;
+  }
+
+  .mipp-filters-toggle-chevron {
+    margin-left: auto;
+    transition: transform 0.2s ease;
+  }
+
+  #mipp-explorer-app.mipp-filters-open .mipp-filters-toggle-chevron {
+    transform: rotate(180deg);
+  }
+
+  #mipp-explorer-app:not(.mipp-filters-open) .mipp-sidebar {
+    display: none;
+  }
+
+  /* Opened filters scroll with the page */
+  .mipp-sidebar {
+    position: static;
+    max-height: none;
+  }
+}
+
 /* --------------------------------------------------------------------------
    5. Sidebar Filters (Aligned Spacing)
    -------------------------------------------------------------------------- */
@@ -1059,19 +1116,6 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   border-color: var(--mipp-accent);
 }
 
-/* Datatype Badges Hover Border Color Matching Badge Color */
-.mipp-filter-chip.dt-float64:hover { border-color: #0284c7 !important; }
-.mipp-filter-chip.dt-float32:hover { border-color: #0ea5e9 !important; }
-.mipp-filter-chip.dt-int64:hover   { border-color: #7c3aed !important; }
-.mipp-filter-chip.dt-int32:hover   { border-color: #8b5cf6 !important; }
-.mipp-filter-chip.dt-int16:hover   { border-color: #a78bfa !important; }
-.mipp-filter-chip.dt-int8:hover    { border-color: #c4b5fd !important; }
-.mipp-filter-chip.dt-uint64:hover  { border-color: #047857 !important; }
-.mipp-filter-chip.dt-uint32:hover  { border-color: #059669 !important; }
-.mipp-filter-chip.dt-uint16:hover  { border-color: #10b981 !important; }
-.mipp-filter-chip.dt-uint8:hover   { border-color: #34d399 !important; }
-.mipp-filter-chip.dt-mixed:hover   { border-color: #64748b !important; }
-[data-md-color-scheme="slate"] .mipp-filter-chip.dt-mixed:hover { border-color: #94a3b8 !important; }
 
 /* Masking Modes Hover Border Matching Badge Color */
 .mipp-checkbox-item.disabled {
@@ -1114,7 +1158,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 /* --------------------------------------------------------------------------
-   6. Datatype Badges with Bit-Width Density Shading
+   6. Datatype Badges (neutral)
    -------------------------------------------------------------------------- */
 .mipp-dt-badge {
   font-family: var(--md-code-font, monospace);
@@ -1129,127 +1173,36 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   transition: all 0.15s ease;
 }
 
-/* Floats: Sky / Cyan (64-bit deep -> 32-bit medium) */
-.dt-float64 {
-  background: rgba(2, 132, 199, 0.22);
-  color: #0369a1;
-  border-color: rgba(2, 132, 199, 0.5);
-}
-
-.dt-float32 {
-  background: rgba(14, 165, 233, 0.12);
-  color: #0284c7;
-  border-color: rgba(14, 165, 233, 0.3);
-}
-
-[data-md-color-scheme="slate"] .dt-float64 {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.25);
-  border-color: rgba(56, 189, 248, 0.55);
-}
-
-[data-md-color-scheme="slate"] .dt-float32 {
-  color: #7dd3fc;
-  background: rgba(56, 189, 248, 0.14);
-  border-color: rgba(56, 189, 248, 0.35);
-}
-
-/* Signed Ints: Purple / Indigo (64 deep -> 8 light) */
-.dt-int64 {
-  background: rgba(109, 40, 217, 0.22);
-  color: #5b21b6;
-  border-color: rgba(109, 40, 217, 0.5);
-}
-
-.dt-int32 {
-  background: rgba(124, 58, 237, 0.15);
-  color: #7c3aed;
-  border-color: rgba(124, 58, 237, 0.35);
-}
-
-.dt-int16 {
-  background: rgba(139, 92, 246, 0.10);
-  color: #8b5cf6;
-  border-color: rgba(139, 92, 246, 0.25);
-}
-
-.dt-int8 {
-  background: rgba(167, 139, 250, 0.07);
-  color: #a78bfa;
-  border-color: rgba(167, 139, 250, 0.2);
-}
-
-[data-md-color-scheme="slate"] .dt-int64 {
-  color: #c084fc;
-  background: rgba(192, 132, 252, 0.26);
-  border-color: rgba(192, 132, 252, 0.55);
-}
-
-[data-md-color-scheme="slate"] .dt-int32 {
-  color: #d8b4fe;
-  background: rgba(192, 132, 252, 0.16);
-  border-color: rgba(192, 132, 252, 0.38);
-}
-
-[data-md-color-scheme="slate"] .dt-int16 {
-  color: #e9d5ff;
-  background: rgba(192, 132, 252, 0.11);
-  border-color: rgba(192, 132, 252, 0.26);
-}
-
-[data-md-color-scheme="slate"] .dt-int8 {
-  color: #f3e8ff;
-  background: rgba(192, 132, 252, 0.07);
-  border-color: rgba(192, 132, 252, 0.18);
-}
-
-/* Unsigned Ints: Emerald / Green (64 deep -> 8 light) */
-.dt-uint64 {
-  background: rgba(4, 120, 87, 0.22);
-  color: #047857;
-  border-color: rgba(4, 120, 87, 0.5);
-}
-
-.dt-uint32 {
-  background: rgba(16, 185, 129, 0.15);
-  color: #059669;
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-.dt-uint16 {
-  background: rgba(52, 211, 153, 0.10);
-  color: #10b981;
-  border-color: rgba(52, 211, 153, 0.25);
-}
-
+/* Datatype badges: neutral, the text names the type. Saturated colors are
+   kept for what carries a meaning (implementation levels, mask variants) */
+.dt-float64,
+.dt-float32,
+.dt-int64,
+.dt-int32,
+.dt-int16,
+.dt-int8,
+.dt-uint64,
+.dt-uint32,
+.dt-uint16,
 .dt-uint8 {
-  background: rgba(110, 231, 183, 0.07);
-  color: #34d399;
-  border-color: rgba(110, 231, 183, 0.2);
+  background: rgba(100, 116, 139, 0.08);
+  color: #475569;
+  border-color: rgba(100, 116, 139, 0.25);
 }
 
-[data-md-color-scheme="slate"] .dt-uint64 {
-  color: #34d399;
-  background: rgba(52, 211, 153, 0.26);
-  border-color: rgba(52, 211, 153, 0.55);
-}
-
-[data-md-color-scheme="slate"] .dt-uint32 {
-  color: #6ee7b7;
-  background: rgba(52, 211, 153, 0.16);
-  border-color: rgba(52, 211, 153, 0.38);
-}
-
-[data-md-color-scheme="slate"] .dt-uint16 {
-  color: #a7f3d0;
-  background: rgba(52, 211, 153, 0.11);
-  border-color: rgba(52, 211, 153, 0.26);
-}
-
+[data-md-color-scheme="slate"] .dt-float64,
+[data-md-color-scheme="slate"] .dt-float32,
+[data-md-color-scheme="slate"] .dt-int64,
+[data-md-color-scheme="slate"] .dt-int32,
+[data-md-color-scheme="slate"] .dt-int16,
+[data-md-color-scheme="slate"] .dt-int8,
+[data-md-color-scheme="slate"] .dt-uint64,
+[data-md-color-scheme="slate"] .dt-uint32,
+[data-md-color-scheme="slate"] .dt-uint16,
 [data-md-color-scheme="slate"] .dt-uint8 {
-  color: #d1fae5;
-  background: rgba(52, 211, 153, 0.07);
-  border-color: rgba(52, 211, 153, 0.18);
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
 /* --------------------------------------------------------------------------
@@ -1269,52 +1222,23 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   white-space: nowrap;
 }
 
-/* all float: Blue */
-.dt-group-float {
-  background: rgba(14, 165, 233, 0.15);
-  color: #0284c7;
-  border-color: rgba(14, 165, 233, 0.35);
-}
-[data-md-color-scheme="slate"] .dt-group-float {
-  background: rgba(56, 189, 248, 0.2);
-  color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.45);
-}
-
-/* all int: Purple / Violet */
-.dt-group-int {
-  background: rgba(139, 92, 246, 0.15);
-  color: #7c3aed;
-  border-color: rgba(139, 92, 246, 0.35);
-}
-[data-md-color-scheme="slate"] .dt-group-int {
-  background: rgba(167, 139, 250, 0.2);
-  color: #c4b5fd;
-  border-color: rgba(167, 139, 250, 0.45);
-}
-
-/* all uint: Green / Emerald */
-.dt-group-uint {
-  background: rgba(16, 185, 129, 0.15);
-  color: #059669;
-  border-color: rgba(16, 185, 129, 0.35);
-}
-[data-md-color-scheme="slate"] .dt-group-uint {
-  background: rgba(52, 211, 153, 0.2);
-  color: #6ee7b7;
-  border-color: rgba(52, 211, 153, 0.45);
-}
-
-/* all datatypes: Neutral Slate */
+/* Group badges (all float / int / uint / datatypes): same neutral style */
+.dt-group-float,
+.dt-group-int,
+.dt-group-uint,
 .dt-group-all {
-  background: rgba(100, 116, 139, 0.12);
+  background: rgba(100, 116, 139, 0.08);
   color: #475569;
-  border-color: rgba(100, 116, 139, 0.28);
+  border-color: rgba(100, 116, 139, 0.25);
 }
+
+[data-md-color-scheme="slate"] .dt-group-float,
+[data-md-color-scheme="slate"] .dt-group-int,
+[data-md-color-scheme="slate"] .dt-group-uint,
 [data-md-color-scheme="slate"] .dt-group-all {
-  background: rgba(148, 163, 184, 0.18);
+  background: rgba(148, 163, 184, 0.12);
   color: #cbd5e1;
-  border-color: rgba(148, 163, 184, 0.35);
+  border-color: rgba(148, 163, 184, 0.28);
 }
 
 /* Sub-extension required tag in parenthesis and italics */
@@ -1340,185 +1264,61 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   font-weight: 700;
 }
 
-/* Floats Active */
+/* Selected datatype filters: the accent of the other active controls */
 .mipp-dt-badge.active.dt-float64,
-.mipp-filter-chip.active.dt-float64 {
-  background: #0284c7;
-  color: #ffffff;
-  border-color: #0369a1;
-  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.35);
-}
-
+.mipp-filter-chip.active.dt-float64,
 .mipp-dt-badge.active.dt-float32,
-.mipp-filter-chip.active.dt-float32 {
-  background: #0ea5e9;
-  color: #ffffff;
-  border-color: #0284c7;
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.35);
-}
-
-/* Signed Ints Active */
+.mipp-filter-chip.active.dt-float32,
 .mipp-dt-badge.active.dt-int64,
-.mipp-filter-chip.active.dt-int64 {
-  background: #6d28d9;
-  color: #ffffff;
-  border-color: #5b21b6;
-  box-shadow: 0 0 0 2px rgba(109, 40, 217, 0.35);
-}
-
+.mipp-filter-chip.active.dt-int64,
 .mipp-dt-badge.active.dt-int32,
-.mipp-filter-chip.active.dt-int32 {
-  background: #7c3aed;
-  color: #ffffff;
-  border-color: #6d28d9;
-  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.35);
-}
-
+.mipp-filter-chip.active.dt-int32,
 .mipp-dt-badge.active.dt-int16,
-.mipp-filter-chip.active.dt-int16 {
-  background: #8b5cf6;
-  color: #ffffff;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.35);
-}
-
+.mipp-filter-chip.active.dt-int16,
 .mipp-dt-badge.active.dt-int8,
-.mipp-filter-chip.active.dt-int8 {
-  background: #9333ea;
-  color: #ffffff;
-  border-color: #7e22ce;
-  box-shadow: 0 0 0 2px rgba(167, 139, 250, 0.35);
-}
-
-/* Unsigned Ints Active */
+.mipp-filter-chip.active.dt-int8,
 .mipp-dt-badge.active.dt-uint64,
-.mipp-filter-chip.active.dt-uint64 {
-  background: #047857;
-  color: #ffffff;
-  border-color: #065f46;
-  box-shadow: 0 0 0 2px rgba(4, 120, 87, 0.35);
-}
-
+.mipp-filter-chip.active.dt-uint64,
 .mipp-dt-badge.active.dt-uint32,
-.mipp-filter-chip.active.dt-uint32 {
-  background: #059669;
-  color: #ffffff;
-  border-color: #047857;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.35);
-}
-
+.mipp-filter-chip.active.dt-uint32,
 .mipp-dt-badge.active.dt-uint16,
-.mipp-filter-chip.active.dt-uint16 {
-  background: #10b981;
-  color: #ffffff;
-  border-color: #059669;
-  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.35);
-}
-
+.mipp-filter-chip.active.dt-uint16,
 .mipp-dt-badge.active.dt-uint8,
-.mipp-filter-chip.active.dt-uint8 {
-  background: #10b981;
-  color: #ffffff;
-  border-color: #047857;
-  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.35);
-}
-
-/* Mixed / Multi-types Active */
+.mipp-filter-chip.active.dt-uint8,
 .mipp-dt-badge.active.dt-mixed,
 .mipp-filter-chip.active.dt-mixed {
-  background: #475569 !important;
-  color: #ffffff !important;
-  border-color: #334155 !important;
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.35);
+  background: rgba(14, 165, 233, 0.14) !important;
+  color: #0369a1 !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: none;
 }
 
-/* Dark Mode (Slate) Densified Palette */
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-float64,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-float64 {
-  background: #0284c7;
-  color: #ffffff;
-  border-color: #38bdf8 !important;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-float64,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-float32,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-float32 {
-  background: #0369a1 !important;
-  color: #ffffff;
-  border-color: #7dd3fc !important;
-  box-shadow: 0 0 0 2px rgba(125, 211, 252, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-float32,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-int64,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int64 {
-  background: #7c3aed !important;
-  color: #ffffff;
-  border-color: #c084fc !important;
-  box-shadow: 0 0 0 2px rgba(192, 132, 252, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int64,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-int32,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int32 {
-  background: #6d28d9 !important;
-  color: #ffffff;
-  border-color: #d8b4fe !important;
-  box-shadow: 0 0 0 2px rgba(216, 180, 254, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int32,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-int16,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int16 {
-  background: #5b21b6 !important;
-  color: #ffffff;
-  border-color: #e9d5ff !important;
-  box-shadow: 0 0 0 2px rgba(233, 213, 255, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int16,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-int8,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int8 {
-  background: #7e22ce !important;
-  color: #ffffff;
-  border-color: #f3e8ff !important;
-  box-shadow: 0 0 0 2px rgba(243, 232, 255, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-int8,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-uint64,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint64 {
-  background: #047857;
-  color: #ffffff;
-  border-color: #34d399 !important;
-  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint64,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-uint32,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint32 {
-  background: #059669;
-  color: #ffffff;
-  border-color: #6ee7b7 !important;
-  box-shadow: 0 0 0 2px rgba(110, 231, 183, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint32,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-uint16,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint16 {
-  background: #065f46 !important;
-  color: #ffffff;
-  border-color: #a7f3d0 !important;
-  box-shadow: 0 0 0 2px rgba(167, 243, 208, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint16,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-uint8,
-[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint8 {
-  background: #047857 !important;
-  color: #ffffff;
-  border-color: #d1fae5 !important;
-  box-shadow: 0 0 0 2px rgba(209, 250, 229, 0.4);
-}
-
+[data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-uint8,
 [data-md-color-scheme="slate"] .mipp-dt-badge.active.dt-mixed,
 [data-md-color-scheme="slate"] .mipp-filter-chip.active.dt-mixed {
-  background: #64748b !important;
-  color: #ffffff !important;
-  border-color: #cbd5e1 !important;
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.4);
+  background: rgba(56, 189, 248, 0.18) !important;
+  color: #7dd3fc !important;
+  border-color: #38bdf8 !important;
+  box-shadow: none;
 }
 
 /* --------------------------------------------------------------------------
@@ -2225,9 +2025,15 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 }
 
 .mipp-unsupported-icon {
+  display: inline-flex;
   font-size: 1.1rem;
   line-height: 1;
   flex-shrink: 0;
+}
+
+.mipp-warning-chip .mipp-ui-icon {
+  vertical-align: -1px;
+  margin-right: 0.15rem;
 }
 
 .mipp-unsupported-text strong {
@@ -2280,19 +2086,74 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 }
 
 /* Disabled Checkbox Row (C++ Object mask disabling) */
+/* Loading screen: static in docs/explorer/index.md (shown as soon as the page
+   is displayed, while the ES modules load), then replaced by the one of
+   main.js, which reports the data download progress */
+.mipp-explorer-loading {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 4rem 1rem;
+  text-align: center;
+  color: var(--md-default-fg-color--light, #64748b);
+}
+
+.mipp-explorer-loading-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--md-default-fg-color);
+}
+
+.mipp-explorer-loading p {
+  margin: 0.4rem 0 0 0;
+  font-size: 0.8rem;
+}
+
+/* Without JavaScript, only the <noscript> message is shown */
+html:not(.js) .mipp-explorer-loading {
+  display: none;
+}
+
 /* Loading Progress Bar */
 .mipp-loading-bar-wrapper {
   max-width: 320px;
+  height: 4px;
   margin: 1.25rem auto 0 auto;
   width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.25);
 }
 
+.mipp-loading-bar-fill,
 #mipp-load-progress-fill {
   background: var(--mipp-accent, #0ea5e9);
   height: 100%;
   width: 0%;
   transition: width 0.15s ease;
   border-radius: 4px;
+}
+
+/* Indeterminate bar of the static loading screen (no progress known yet) */
+.mipp-loading-bar-fill--indeterminate {
+  width: 35%;
+  animation: mipp-loading-slide 1.2s ease-in-out infinite;
+}
+
+@keyframes mipp-loading-slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(290%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mipp-loading-bar-fill--indeterminate {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
 }
 
 #mipp-load-progress-text {
@@ -3102,9 +2963,11 @@ button.mipp-variant-sq-badge:hover:not(.active) {
 }
 
 .mipp-algo-note-icon {
+  display: inline-flex;
   font-size: 1rem;
   line-height: 1;
   flex-shrink: 0;
+  color: var(--mipp-accent, #0ea5e9);
 }
 
 .mipp-algo-note code {

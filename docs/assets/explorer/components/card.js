@@ -2,7 +2,7 @@
  * MIPP API Explorer - Card Component
  * Manages primitive card rendering and structural tab transitions.
  */
-import { escapeHtml, ICON_CHEVRON } from "../explorer.config.js";
+import { escapeHtml, ICON_CHEVRON, ICON_WARNING, ICON_WARNING_SM } from "../explorer.config.js";
 import { formatCppObjProto } from "../syntax.js";
 import { ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
@@ -79,7 +79,7 @@ export function renderCardExpandedDetails(entry) {
   const warningBanner = isUnsupported
     ? `
       <div class="mipp-unsupported-variant-banner" role="alert">
-        <span class="mipp-unsupported-icon">⚠️</span>
+        <span class="mipp-unsupported-icon">${ICON_WARNING}</span>
         <span class="mipp-unsupported-text">
           This primitive does not support the selected variant "<strong>${escapeHtml(state.maskVariant)}</strong>". Available variants: <strong>${escapeHtml(availableVariants.join(", "))}</strong>.
         </span>
@@ -214,7 +214,7 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
               : ""
             }
             ${isUnsupported
-              ? `<span class="mipp-matched-chip mipp-warning-chip" title="Selected variant '${escapeHtml(state.maskVariant)}' is not supported by this primitive (pinned view)">⚠️ ${escapeHtml(state.maskVariant)} unsupported</span>`
+              ? `<span class="mipp-matched-chip mipp-warning-chip" title="Selected variant '${escapeHtml(state.maskVariant)}' is not supported by this primitive (pinned view)">${ICON_WARNING_SM} ${escapeHtml(state.maskVariant)} unsupported</span>`
               : ""
             }
           </div>

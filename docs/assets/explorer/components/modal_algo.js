@@ -4,7 +4,7 @@
  * flags, taken from the generated headers (algo_source.js): the Abstract C++ view (C++ Functional
  * API) and the Flat C view (self-contained, runs on Compiler Explorer).
  */
-import { escapeHtml, ICON_COPY, ICON_GODBOLT } from "../explorer.config.js";
+import { escapeHtml, ICON_COPY, ICON_GODBOLT, ICON_LINK, ICON_WARNING, ICON_INFO, ICON_CONTEXT, ICON_CLOCK } from "../explorer.config.js";
 import { highlightCpp } from "../syntax.js";
 import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
@@ -192,9 +192,9 @@ export function renderAlgoModal(modalData) {
   let callTreeRoot = null;
   let loadingHtml = "";
   if (modalData.loadError) {
-    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">⚠️</span><span>Unable to load the MIPP source code: ${escapeHtml(modalData.loadError)}</span></div>`;
+    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">${ICON_WARNING}</span><span>Unable to load the MIPP source code: ${escapeHtml(modalData.loadError)}</span></div>`;
   } else if (!sources) {
-    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">⏳</span><span>Loading the MIPP source code of ${escapeHtml(isaLabel)}…</span></div>`;
+    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">${ICON_CLOCK}</span><span>Loading the MIPP source code of ${escapeHtml(isaLabel)}…</span></div>`;
   } else if (!lmulUndefined) {
     const abs = buildAbstractCode(entry, sources, algoCfg);
     abstractCalls = abs.calls || [];
@@ -261,7 +261,7 @@ export function renderAlgoModal(modalData) {
   const treeHas = (n, f) => Boolean(n) && (f(n) || n.children.some((c) => treeHas(c, f)));
   const maskBySelect = treeHas(callTreeRoot, (n) => { const p = parseCName(n.cName); return Boolean(p) && p.func === "select"; });
   const notes = contextNotes(currentIsa, effectiveLmul, currentMask, maskBySelect);
-  const notesHtml = notes.length ? `<div class="mipp-algo-note mipp-algo-context"><span class="mipp-algo-note-icon">📐</span><span>${notes.join("<br>")}</span></div>` : "";
+  const notesHtml = notes.length ? `<div class="mipp-algo-note mipp-algo-context"><span class="mipp-algo-note-icon">${ICON_CONTEXT}</span><span>${notes.join("<br>")}</span></div>` : "";
   const treeHtml = callTreeRoot ? `
     <div class="mipp-algo-tree">
       <div class="mipp-algo-tree-title">How it is built <span class="mipp-algo-tree-own">— each function with what its body is and its level: the highest level of everything it uses (<a href="${DOCS}implementation_levels/" target="_blank">implementation levels</a>)</span></div>
@@ -350,7 +350,7 @@ export function renderAlgoModal(modalData) {
           </div>
           <div style="display: flex; gap: 0.45rem; align-items: center;">
             ${(modalData.history && modalData.history.length) ? `<button class="mipp-modal-share-btn" id="mipp-algo-modal-back" title="Back to ${escapeHtml(modalData.history[modalData.history.length - 1].entry.name)}" aria-label="Back">←</button>` : ""}
-            <button class="mipp-modal-share-btn" id="mipp-algo-modal-share" title="Copy direct link to this algorithm" aria-label="Share direct link">🔗</button>
+            <button class="mipp-modal-share-btn" id="mipp-algo-modal-share" title="Copy direct link to this algorithm" aria-label="Share direct link">${ICON_LINK}</button>
             <button class="mipp-modal-close-btn" id="mipp-algo-modal-close" title="Close modal" aria-label="Close modal">×</button>
           </div>
         </div>
@@ -423,7 +423,7 @@ export function renderAlgoModal(modalData) {
           ${lmulUndefined ? undefinedLmulNotice(entry, effectiveLmul) : currentView === 'compare' ? `${notesHtml}${compareHtml}` : loadingHtml ? loadingHtml : currentView === 'abstract' ? `
             ${notesHtml}
             <div class="mipp-algo-note">
-              <span class="mipp-algo-note-icon">💡</span>
+              <span class="mipp-algo-note-icon">${ICON_INFO}</span>
               <span>The code of the MIPP headers for these flags, written with the C++ Functional API: <code>rvd&lt;T, LMUL&gt;</code> is a <strong>data</strong> register, <code>rvm&lt;T, LMUL&gt;</code> a <strong>mask</strong> register. Each <code>mipp::</code> call is another MIPP function, with its own level.</span>
             </div>
 
@@ -443,7 +443,7 @@ export function renderAlgoModal(modalData) {
             ${treeHtml}
           ` : `
             <div class="mipp-algo-note">
-              <span class="mipp-algo-note-icon">💡</span>
+              <span class="mipp-algo-note-icon">${ICON_INFO}</span>
               <span>Self-contained C: the function and everything it uses, as in the MIPP headers. Open it in Godbolt and look at the assembly of <code>test</code>: the MIPP calls are inlined, only the instructions of the operation remain in the loop.</span>
             </div>
             ${notesHtml}
