@@ -71,15 +71,14 @@
             "template": "reduce_32"
         },
         {
-            "instr_name": "adds",
-            "datatypes": "all_16bit",
-            "template": "reduce_16",
-            "if": "defined(__AVX512BW__)"
-        },
-        {
-            "instr_name": "adds",
-            "datatypes": "all_8bit",
-            "template": "reduce_8",
+            "instr_name": "add",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "reduce_shift",
             "if": "defined(__AVX512BW__)"
         }
     ],

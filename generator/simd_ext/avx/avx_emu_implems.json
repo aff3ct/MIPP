@@ -174,25 +174,9 @@
             "if": "defined(__AVX2__)"
         },
         {
-            "instr_name": "adds",
-            "datatypes": [
-                "uint16"
-            ],
-            "template": "reduce_16",
-            "if": "defined(__AVX2__)"
-        },
-        {
             "instr_name": "add",
             "datatypes": [
                 "int8"
-            ],
-            "template": "reduce_8",
-            "if": "defined(__AVX2__)"
-        },
-        {
-            "instr_name": "adds",
-            "datatypes": [
-                "uint8"
             ],
             "template": "reduce_8",
             "if": "defined(__AVX2__)"
@@ -218,6 +202,15 @@
             "datatypes": "all_int_uint",
             "template": "split_reduce",
             "if": "!defined(__AVX2__)"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": [
+                "uint16",
+                "uint8"
+            ],
+            "template": "reduce_shift",
+            "if": "defined(__AVX2__)"
         }
     ],
     "hmax": [

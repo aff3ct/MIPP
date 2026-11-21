@@ -199,6 +199,12 @@
             "return *({{isa_dt_ret.to_ptr}}*)tmp2;"
         ]
     },
+    "getfirst_si_low": {
+        "format": "long",
+        "code": [
+            "return ({{ cstdint_ret }})_mm_cvtsi128_si32(_mm512_castsi512_si128(r0.r));"
+        ]
+    },
     "load": {
         "format": "short",
         "code": [
