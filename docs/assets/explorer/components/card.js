@@ -3,7 +3,7 @@
  * Manages primitive card rendering and structural tab transitions.
  */
 import { escapeHtml, ICON_CHEVRON, ICON_WARNING, ICON_WARNING_SM } from "../explorer.config.js";
-import { formatCppObjProto } from "../syntax.js";
+import { formatCppObjProto, typesetMath } from "../syntax.js";
 import { ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
 import { renderTabHw } from "./tab_hw.js";
@@ -272,11 +272,8 @@ export function switchCardTab(cardEl, entry, targetTab) {
   const tabContent = cardEl.querySelector(`#tab-content-${entry.name}`);
   if (tabContent) {
     tabContent.innerHTML = renderTabContent(entry, targetTab);
-    if (targetTab === "scalar" && window.MathJax && window.MathJax.typesetPromise) {
-      const mathEl = tabContent.querySelector(".arithmatex");
-      if (mathEl) {
-        window.MathJax.typesetPromise([mathEl]).catch(() => {});
-      }
+    if (targetTab === "scalar") {
+      typesetMath(tabContent.querySelector(".arithmatex"));
     }
   }
 }

@@ -20,7 +20,7 @@ import { renderCard, switchCardTab, renderCardExpandedDetails } from "./componen
 import { renderAlgoModal, algoModalIsa } from "./components/modal_algo.js";
 import { getLoadedSources, loadAlgoSources } from "./algo_source.js";
 import { renderCompareModal } from "./components/modal_compare.js";
-import { showMacroTooltip, hideMacroTooltip, toggleMacroTooltip } from "./syntax.js";
+import { showMacroTooltip, hideMacroTooltip, toggleMacroTooltip, typesetMath } from "./syntax.js";
 import { toggleIntrinsicTooltip, hideIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
 
 let headerResizeObserver = null;
@@ -267,9 +267,7 @@ function bindCardEvents(cardsContainerEl) {
     const entry = apiData.find((x) => x.name === cardName);
     if (entry) {
       attachCardInternalListeners(cardEl, entry);
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([cardEl]).catch(() => {});
-      }
+      typesetMath(cardEl);
     }
   });
 
@@ -343,9 +341,7 @@ function toggleCard(cardName) {
       }
       void expandable.offsetHeight;
       expandable.classList.add("open");
-      if (window.MathJax && window.MathJax.typesetPromise) {
-        window.MathJax.typesetPromise([cardEl]).catch(() => {});
-      }
+      typesetMath(cardEl);
     }
   } else {
     closeCard(cardName);
@@ -793,9 +789,7 @@ function updateModals(modalsContainerEl) {
       });
     });
 
-    if (window.MathJax && window.MathJax.typesetPromise) {
-      window.MathJax.typesetPromise([modalsContainerEl]).catch(() => {});
-    }
+    typesetMath(modalsContainerEl);
 
     // Copy buttons inside modals
     modalsContainerEl.querySelectorAll(".copy-proto-btn, .copy-code-btn, [data-copy]").forEach((btn) => {

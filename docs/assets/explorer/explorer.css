@@ -2072,6 +2072,17 @@ button.mipp-variant-sq-badge:hover:not(.active) {
   font-style: italic;
 }
 
+/* Typeset by MathJax (renderMathFormula): its own fonts and spacing, may
+   scroll on narrow screens instead of overflowing */
+.mipp-math-formula.mipp-math-tex {
+  font-family: inherit;
+  font-style: normal;
+  letter-spacing: normal;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: middle;
+}
+
 /* Multi-type Mixed Badge */
 .mipp-dt-badge.dt-mixed {
   background: rgba(148, 163, 184, 0.18);

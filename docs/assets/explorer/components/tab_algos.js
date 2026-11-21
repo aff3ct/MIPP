@@ -2,7 +2,7 @@
  * MIPP API Explorer - Tab 3: Scalar C Reference
  */
 import { escapeHtml, ICON_COPY } from "../explorer.config.js";
-import { highlightCpp, formatMathHtml, getDtBadgeClass } from "../syntax.js";
+import { highlightCpp, renderMathFormula, getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
 import { ALL_MASK_MODES, MASK_MODES_INFO, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 
@@ -41,11 +41,11 @@ export function renderTabAlgos(entry) {
 
   return `
     <div>
-      ${entry.math_semantics
+      ${(entry.latex || entry.math_semantics)
         ? `
           <div class="mipp-math-semantics" style="font-size: 0.88rem; padding: 0.5rem 0.8rem; background: var(--md-default-bg-color--lighter, #f1f5f9); border-radius: 6px; margin-bottom: 0.6rem;">
             <strong>Mathematical Semantics:</strong>
-            <span class="arithmatex mipp-math-formula">${formatMathHtml(entry.math_semantics)}</span>
+            ${renderMathFormula(entry)}
           </div>
         `
         : ""

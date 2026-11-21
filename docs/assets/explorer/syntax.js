@@ -28,6 +28,34 @@ export function getDtBadgeClass(dt) {
   return `dt-${dt}`;
 }
 
+/**
+ * "Mathematical Semantics" formula: the LaTeX of the function registry
+ * (generator/helpers_headers/funcs_docs.json), typeset by MathJax like the
+ * formulas of the other pages (span.arithmatex, see javascripts/mathjax.js).
+ * formatMathHtml() is only the fallback of an entry without LaTeX: its
+ * regex-based conversion does not handle environments such as cases.
+ */
+export function renderMathFormula(entry) {
+  if (entry && entry.latex) {
+    return `<span class="arithmatex mipp-math-formula mipp-math-tex">\\(${escapeHtml(entry.latex)}\\)</span>`;
+  }
+  return `<span class="mipp-math-formula">${formatMathHtml(entry && entry.math_semantics)}</span>`;
+}
+
+/** Typesets the formulas of `el` once MathJax has started (CDN script loaded). */
+export function typesetMath(el) {
+  const mj = typeof window !== "undefined" ? window.MathJax : null;
+  if (!mj || !el) return;
+  const run = () => {
+    if (mj.typesetPromise) mj.typesetPromise([el]).catch(() => {});
+  };
+  if (mj.startup && mj.startup.promise) {
+    mj.startup.promise.then(run).catch(() => {});
+  } else {
+    run();
+  }
+}
+
 export function formatMathHtml(expr) {
   if (!expr) return "";
   let clean = String(expr)
