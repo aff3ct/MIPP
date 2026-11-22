@@ -301,9 +301,23 @@
         "format": "short",
         "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r, r2.r);"
     },
+    "rea_count": {
+        "format": "long",
+        "code": [
+            "return (int32_t)(__builtin_popcountll((unsigned long long)m0.m));"
+        ]
+    },
     "rea_dup_f": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+    },
+    "rea_expandloadu": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_expandloadu_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(m0.m, p0);"
+    },
+    "rea_maskz_op": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(m0.m, r0.r);"
     },
     "rea_permute_b128": {
         "format": "short",
@@ -313,6 +327,22 @@
         "format": "short",
         "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(r0.r, {{ instr_name }});"
     },
+    "rea_permutevar_b128_f": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutevar_ps(r0.r, r1.r);"
+    },
+    "rea_permutevar_b128_ps": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_castps_si512({{ isa.prefix }}_permutevar_ps({{ isa.prefix }}_castsi512_ps(r0.r), r1.r));"
+    },
+    "rea_permutex2var": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r2.r, r1.r);"
+    },
+    "rea_permutexvar": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r1.r, r0.r);"
+    },
     "rea_shuffle_epi32": {
         "format": "short",
         "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, (_MM_PERM_ENUM){{ instr_name }});"
@@ -320,6 +350,10 @@
     "rea_shuffle_epi32_b128": {
         "format": "short",
         "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, (_MM_PERM_ENUM){{ instr_name }});"
+    },
+    "rea_shuffle_epi8_b128": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, r1.r);"
     },
     "rea_shufps2": {
         "format": "short",

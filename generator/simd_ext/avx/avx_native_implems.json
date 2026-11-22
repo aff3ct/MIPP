@@ -605,6 +605,44 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "permute": [
+        {
+            "instr_name": "permutevar8x32",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_permutevar8x32",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "permute_b128": [
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permutevar_b128"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_permutevar_b128_i"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_shuffle_epi8_b128",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "reverse": [
         {
             "instr_name": "0x1B",

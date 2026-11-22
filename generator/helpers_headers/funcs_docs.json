@@ -115,6 +115,18 @@
     "description": "Joins two mask registers into a mask of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
     "latex": "m_{\\text{res}, i} = \\begin{cases} m_{0, i} & \\text{if } i < N \\\\ m_{1, i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
   },
+  "compress": {
+    "description": "The active lanes of r0 (mask m0), in order, packed at the beginning of the register; the other lanes are zero.",
+    "latex": "\\text{res} = (r0_i)_{m0_i \\neq 0},\\ 0, \\ldots"
+  },
+  "compress_store": {
+    "description": "Stores the active lanes of r0 (mask m0), in order, at p0 (no alignment required) and returns their number. Exactly this number of elements is written.",
+    "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
+  },
+  "compress_store_full": {
+    "description": "`compress_store` that may write a whole register: the active lanes of r0 at p0, then up to N - count unspecified elements (the memory of N elements from p0 must be writable). Faster than `compress_store` without a native masked store: a filter loop overwrites the unspecified elements with the next call (keep N elements of margin at the end of the output).",
+    "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
+  },
   "copysign": {
     "description": "Builds each element with the magnitude of the first register and the sign of the second one (IEEE copysign).",
     "latex": "\\text{res}_i = \\text{sign}(r1_i) \\cdot |r0_i|"
@@ -126,6 +138,10 @@
   "cosh": {
     "description": "Computes the hyperbolic cosine of each floating-point element.",
     "latex": "\\text{res}_i = \\cosh(r0_i)"
+  },
+  "count": {
+    "description": "Number of active lanes of a mask register.",
+    "latex": "\\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
   },
   "cvt": {
     "description": "Converts elements of a vector register to another datatype with numerical casting.",
@@ -158,6 +174,14 @@
   "exp": {
     "description": "Computes the base-e exponential of each floating-point element.",
     "latex": "\\text{res}_i = e^{r0_i}"
+  },
+  "expand": {
+    "description": "The inverse of `compress`: the first lanes of r0, in order, go to the active lanes (mask m0); the inactive lanes are zero.",
+    "latex": "\\text{res}_i = m0_i\\ ?\\ r0_{\\#\\{j < i \\mid m0_j\\}} : 0"
+  },
+  "expand_load": {
+    "description": "Loads as many elements from p0 (no alignment required) as there are active lanes (mask m0) and puts them in the active lanes, in order; the inactive lanes are zero. Only these elements are read.",
+    "latex": "\\text{res}_i = m0_i\\ ?\\ p0_{\\#\\{j < i \\mid m0_j\\}} : 0"
   },
   "fmadd": {
     "description": "Computes the fused multiply-add of three vector registers ((a * b) + c).",
@@ -302,6 +326,18 @@
   "orb_k": {
     "description": "Computes the bitwise OR of two mask registers.",
     "latex": "m_{\\text{res}, i} = m_{0, i} \\mid m_{1, i}"
+  },
+  "permute": {
+    "description": "Lane i receives the lane `r1[i]` of r0 (`r1`: unsigned indices of the width of the elements, each below N, the number of lanes of the LMUL group; other values are undefined behavior).",
+    "latex": "\\text{res}_i = r0_{r1_i}"
+  },
+  "permute2": {
+    "description": "Lane i receives the lane `r2[i]` of the concatenation of r0 and r1 (indices below 2N; other values are undefined behavior).",
+    "latex": "\\text{res}_i = (r0 \\| r1)_{r2_i}"
+  },
+  "permute_b128": {
+    "description": "`permute` in each block of 128 bits: lane i receives the lane `r1[i]` of its block (indices below the number of lanes of a block; x86 `vpermilps`, `pshufb`).",
+    "latex": "\\text{res}_{b+l} = r0_{b + r1_{b+l}}"
   },
   "pow": {
     "description": "Computes the first vector register raised to the power of the second element-wise.",

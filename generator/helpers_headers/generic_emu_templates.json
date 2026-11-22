@@ -691,6 +691,25 @@
         "format": "long",
         "code": "return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));"
     },
+    "compress_store_buf": {
+        "format": "long",
+        "code": [
+            "// compress in a register, then exactly the active lanes copied to p0",
+            "%s<tp>% tmp[%N<tp>%];",
+            "%storeu<tp>%(tmp, %compress<tp>%(r0, m0));",
+            "const %s<c:int|b:32>% n = %count<tp>%(m0);",
+            "memcpy(p0, tmp, (size_t)n * sizeof(%s<tp>%));",
+            "return n;"
+        ]
+    },
+    "compress_store_full": {
+        "format": "long",
+        "code": [
+            "// the whole register (the lanes after the count are zero), then the count",
+            "%storeu<tp>%(p0, %compress<tp>%(r0, m0));",
+            "return %count<tp>%(m0);"
+        ]
+    },
     "copysign": {
         "format": "long",
         "code": [
@@ -987,6 +1006,15 @@
             "%r<tp>% pow2n = %cast<c:int|b:64,tp>%(ni2);",
             "%r<tp>% res = %mul<tp>%(y2, pow2n);",
             "return res;"
+        ]
+    },
+    "expand_load_buf": {
+        "format": "long",
+        "code": [
+            "// exactly the count of active lanes read from p0, then expand",
+            "%s<tp>% tmp[%N<tp>%] = {0};",
+            "memcpy(tmp, p0, (size_t)%count<tp>%(m0) * sizeof(%s<tp>%));",
+            "return %expand<tp>%(%loadu<tp>%(tmp), m0);"
         ]
     },
     "fmadd": {
@@ -1311,6 +1339,25 @@
             "%r<tp>% tmp2 = %torvd<tp>%(m1);",
             "%r<tp>% res = %orb<tp>%(tmp1, tmp2);",
             "return %torvm<tp>%(res);"
+        ]
+    },
+    "permute2_gather": {
+        "format": "long",
+        "code": [
+            "// the two registers one after the other in memory, then a gather with the indices",
+            "%s<tp>% buf[2 * %N<tp>%];",
+            "%storeu<tp>%(buf, r0);",
+            "%storeu<tp>%(buf + %N<tp>%, r1);",
+            "return %gather<tp,c:uint|b:tp>%(buf, r2);"
+        ]
+    },
+    "permute_gather": {
+        "format": "long",
+        "code": [
+            "// the register in memory, then a gather with the indices",
+            "%s<tp>% buf[%N<tp>%];",
+            "%storeu<tp>%(buf, r0);",
+            "return %gather<tp,c:uint|b:tp>%(buf, r1);"
         ]
     },
     "pow2_f32": {

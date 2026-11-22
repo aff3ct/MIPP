@@ -39,6 +39,10 @@
                 "items": {
                     "$ref": "#/definitions/param"
                 }
+            },
+            "ldiv": {
+                "description": "`false`: the functions of this prototype have no half-vector (`d2`) version (compress, expand...: a function that takes a mask and moves the lanes, whose half-vector by mask would need a mask conversion for little use). Default `true`.",
+                "type": "boolean"
             }
         },
         "required": [

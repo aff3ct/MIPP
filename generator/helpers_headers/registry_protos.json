@@ -32,6 +32,31 @@
             }
         ]
     },
+    "ret_i32_3args_ptr_reg_msk_noldiv": {
+        "ret": {
+            "type": "val",
+            "fixeddatatype": "int32",
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "ptr",
+                "fixeddatatype": false,
+                "charac": "WO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ],
+        "ldiv": false
+    },
     "ret_msk_0arg": {
         "ret": {
             "type": "msk",
@@ -322,6 +347,26 @@
             }
         ]
     },
+    "ret_reg_2args_ptr_msk_noldiv": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "ptr",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ],
+        "ldiv": false
+    },
     "ret_reg_2args_ptr_reg": {
         "ret": {
             "type": "reg",
@@ -358,6 +403,25 @@
             {
                 "type": "reg",
                 "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_reg_2args_reg_idx": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": "uint",
                 "charac": "RO"
             }
         ]
@@ -400,6 +464,26 @@
                 "charac": "RO"
             }
         ]
+    },
+    "ret_reg_2args_reg_msk_noldiv": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ],
+        "ldiv": false
     },
     "ret_reg_2args_reg_val": {
         "ret": {
@@ -493,6 +577,30 @@
             {
                 "type": "reg",
                 "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ]
+    },
+    "ret_reg_3args_2reg_idx": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": "uint",
                 "charac": "RO"
             }
         ]

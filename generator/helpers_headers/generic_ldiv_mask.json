@@ -51,6 +51,15 @@
             ]
         }
     ],
+    "count": [
+        {
+            "code": [
+                "{{ lanemask() }}",
+                "{{ wrap('m0') }}",
+                "return {{ call1('count', call1('andb_k', 'w_m0', 'lm')) }};"
+            ]
+        }
+    ],
     "gather": [
         {
             "level": 3,

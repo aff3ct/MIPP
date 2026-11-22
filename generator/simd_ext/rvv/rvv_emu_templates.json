@@ -619,6 +619,24 @@
             "return res;"
         ]
     },
+    "rea_compress": {
+        "format": "long",
+        "code": [
+            "%r<tp>% z = %set0<tp>%();",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vcompress_vm_{{ isa_dt_par.data_ext }}_tu(z.r, r0.r, m0.m, %N<tp>%);",
+            "return res;"
+        ]
+    },
+    "rea_compress_store": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "const size_t c = {{ isa.prefix }}_vcpop_m_{{isa_dt_par.data_ext_logi}}(m0.m, n);",
+            "{{ isa.prefix }}_vse{{ dt_par.n_bits }}_v_{{ isa_dt_par.data_ext }}(p0, {{ isa.prefix }}_vcompress_vm_{{ isa_dt_par.data_ext }}(r0.r, m0.m, n), c);",
+            "return (int32_t)c;"
+        ]
+    },
     "rea_dup_even": {
         "format": "long",
         "code": [
@@ -640,6 +658,50 @@
             "idx.r = {{ isa.prefix }}_vor_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n);",
             "%r<tp>% res;",
             "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_expand": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "// active lane i: the lane of r0 numbered by the count of the active lanes before i",
+            "%r<c:uint|b:tp>% idx;",
+            "idx.r = {{ isa.prefix }}_viota_m_{{ isa_dt_par.uint_data_ext }}(m0.m, n);",
+            "%r<tp>% z = %set0<tp>%();",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, z.r, r0.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_expand_load": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "// exactly the count of active lanes read, then expanded",
+            "const size_t c = {{ isa.prefix }}_vcpop_m_{{isa_dt_par.data_ext_logi}}(m0.m, n);",
+            "%r<tp>% v;",
+            "v.r = {{ isa.prefix }}_vle{{ dt_par.n_bits }}_v_{{ isa_dt_par.data_ext }}(p0, c);",
+            "%r<c:uint|b:tp>% idx;",
+            "idx.r = {{ isa.prefix }}_viota_m_{{ isa_dt_par.uint_data_ext }}(m0.m, n);",
+            "%r<tp>% z = %set0<tp>%();",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, z.r, v.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_permute2": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "// the indices below N select r0, the others r1 (index - N); compared with N - 1, which fits in the index type (8-bit indices and N = 256: no index reaches r1)",
+            "%m<tp>% hi;",
+            "hi.m = {{ isa.prefix }}_vmsgtu_vx_{{ isa_dt_par.uint_data_ext }}_{{isa_dt_par.data_ext_logi}}(r2.r, (uint{{ dt_par.n_bits }}_t)(n - 1), n);",
+            "%r<tp>% a, b;",
+            "a.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, r2.r, n);",
+            "b.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r1.r, {{ isa.prefix }}_vsub_vx_{{ isa_dt_par.uint_data_ext }}(r2.r, (uint{{ dt_par.n_bits }}_t)n, n), n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(a.r, b.r, hi.m, n);",
             "return res;"
         ]
     },

@@ -937,6 +937,40 @@
             "variant": "z"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_maskz_op"
+        },
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_maskz_op",
+            "if": "defined(__AVX512VBMI2__)"
+        }
+    ],
+    "count": [
+        {
+            "instr_name": "count",
+            "datatypes": "all_datatypes",
+            "template": "rea_count",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "The mask is an integer: one popcnt instruction (a builtin, not an intrinsic of the ISA)."
+        }
+    ],
     "cvt": [
         {
             "instr_name": "cvttps_epi32",
@@ -1100,6 +1134,56 @@
                 "uint64"
             ],
             "template": "rea_unpack_self"
+        }
+    ],
+    "expand": [
+        {
+            "instr_name": "expand",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_maskz_op"
+        },
+        {
+            "instr_name": "expand",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_maskz_op",
+            "if": "defined(__AVX512VBMI2__)"
+        }
+    ],
+    "expand_load": [
+        {
+            "instr_name": "expandloadu",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_expandloadu"
+        },
+        {
+            "instr_name": "expandloadu",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_expandloadu",
+            "if": "defined(__AVX512VBMI2__)"
         }
     ],
     "fmadd": [
@@ -2255,6 +2339,96 @@
             "instr_name": "kor",
             "datatypes": "all_8bit",
             "template": "bitwise_2args",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "permute": [
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutexvar"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutexvar",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutexvar",
+            "if": "defined(__AVX512VBMI__)"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutex2var"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutex2var",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutex2var",
+            "if": "defined(__AVX512VBMI__)"
+        }
+    ],
+    "permute_b128": [
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permutevar_b128_f"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_permutevar_b128_ps"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_shuffle_epi8_b128",
             "if": "defined(__AVX512BW__)"
         }
     ],

@@ -1,4 +1,29 @@
 {
+    "compress_store": [
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_compress_store"
+        },
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_compress_store",
+            "if": "defined(__AVX512VBMI2__)"
+        }
+    ],
     "fmadd": [
         {
             "instr_name": "fmadd",

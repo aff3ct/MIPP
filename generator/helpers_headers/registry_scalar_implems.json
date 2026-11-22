@@ -448,6 +448,51 @@
             ]
         }
     ],
+    "compress": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "size_t k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tif (m0.m[i])",
+                "\t\tres.r[k++] = r0.r[i];",
+                "for (; k < %N<tp>%; k++)",
+                "\tres.r[k] = (%s<tr>%)0;",
+                "return res;"
+            ]
+        }
+    ],
+    "compress_store": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tif (m0.m[i])",
+                "\t\tp0[k++] = r0.r[i];",
+                "return k;"
+            ]
+        }
+    ],
+    "compress_store_full": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tif (m0.m[i])",
+                "\t\tp0[k++] = r0.r[i];",
+                "return k;"
+            ]
+        }
+    ],
     "copysign": [
         {
             "type": "element-wide",
@@ -498,6 +543,19 @@
           "implem": [
             "res.r[i] = %!pred_cond!% COSHD(r0.r[i]) %!pred_alt!%;"
           ]
+        }
+    ],
+    "count": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% res = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres += m0.m[i] != 0;",
+                "return res;"
+            ]
         }
     ],
     "cvt": [
@@ -618,6 +676,34 @@
             "variants": [],
             "implem": [
                 "res.r[i] = %!pred_cond!% EXPD(r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "expand": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "size_t k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres.r[i] = m0.m[i] ? r0.r[k++] : (%s<tr>%)0;",
+                "return res;"
+            ]
+        }
+    ],
+    "expand_load": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "size_t k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres.r[i] = m0.m[i] ? p0[k++] : (%s<tr>%)0;",
+                "return res;"
             ]
         }
     ],
@@ -1331,6 +1417,48 @@
             ]
         }
     ],
+    "permute": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[r1.r[i]] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "permute2": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array (see the references of slide: GCC 13 and a choice between two registers)",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres.r[i] = %!pred_cond!% c[r2.r[i]] %!pred_alt!%;",
+                "return res;"
+            ]
+        }
+    ],
+    "permute_b128": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "const size_t b0 = (i / nb) * nb;",
+                "res.r[i] = %!pred_cond!% r0.r[b0 + r1.r[i]] %!pred_alt!%;"
+            ]
+        }
+    ],
     "pow": [
         {
             "type": "element-wide",
@@ -1762,14 +1890,22 @@
     ],
       "slide_up_b128": [
         {
-            "type": "element-wide",
+            "type": "vector-wide",
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
+                "// by block, then the zeros and the lanes of r0: the form res.r[i] = l >= n ? r0.r[i - n] : 0 (l = i mod nb) is",
+                "// compiled by riscv64 GCC 14 -O3, inlined in a caller, as a wrong code (zeros in lanes that receive a lane of r0)",
+                "%r<tr>% res;",
                 "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
-                "const size_t b0 = (i / nb) * nb;",
-                "const size_t l = i - b0;",
-                "res.r[i] = %!pred_cond!% (l >= (size_t)s0 ? r0.r[b0 + l - (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+                "for (size_t b0 = 0; b0 < %N<tp>%; b0 += nb)",
+                "{",
+                "\tfor (size_t i = b0; i < b0 + (size_t)s0; i++)",
+                "\t\tres.r[i] = %!pred_cond!% (%s<tr>%)0 %!pred_alt!%;",
+                "\tfor (size_t i = b0 + (size_t)s0; i < b0 + nb; i++)",
+                "\t\tres.r[i] = %!pred_cond!% r0.r[i - (size_t)s0] %!pred_alt!%;",
+                "}",
+                "return res;"
             ]
         }
     ],

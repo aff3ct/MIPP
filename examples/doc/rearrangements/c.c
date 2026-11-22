@@ -8,6 +8,8 @@ DOC_ALIGNED static float B[DOC_BUF];
 DOC_ALIGNED static float X[DOC_BUF];
 DOC_ALIGNED static float O1[DOC_BUF];
 DOC_ALIGNED static float O2[DOC_BUF];
+DOC_ALIGNED static uint32_t IDX[DOC_BUF];
+DOC_ALIGNED static float OUT[DOC_BUF + 64]; /* the filter of §6 writes up to one register past the count */
 
 static void fill(void)
 {
@@ -15,6 +17,7 @@ static void fill(void)
         A[i] = (float)i;
         B[i] = 100.f + (float)i;
         X[i] = (float)(i % 7) - 3.f;
+        IDX[i] = (uint32_t)((i * 3 + 1) % (int)MIPP_N_FLOAT32);
     }
 }
 
@@ -73,11 +76,45 @@ static void interleaved(void)
     for (int i = 0; i < n; i++) DOC_CHECK(O1[i] == X[2 * i] * X[2 * i] + X[2 * i + 1] * X[2 * i + 1]);
 }
 
+/* §5: permutations */
+static void permutations(void)
+{
+    // --8<-- [start:permute]
+    rvd_float32_t a = mipp_load_float32(A);
+    rvd_uint32_t idx = mipp_load_uint32(IDX);           // indices < N
+    rvd_float32_t p = mipp_permute_float32(a, idx);     // a[idx[0]], a[idx[1]], ...
+    // --8<-- [end:permute]
+    const int n = (int)MIPP_N_FLOAT32;
+    mipp_store_float32(O1, p);
+    for (int i = 0; i < n; i++) DOC_CHECK(O1[i] == A[IDX[i]]);
+}
+
+/* §6: compress */
+static void filter(void)
+{
+    const size_t n = DOC_BUF;
+    // --8<-- [start:filter]
+    // keeps the positive elements of X: OUT needs one register of margin (compress_store_full)
+    float* out = OUT;
+    for (size_t i = 0; i < n; i += MIPP_N_FLOAT32) {
+        rvd_float32_t v = mipp_loadu_float32(X + i);
+        rvm_float32_t m = mipp_cmpgt_float32(v, mipp_set0_float32());
+        out += mipp_compress_store_full_float32(out, v, m);
+    }
+    // --8<-- [end:filter]
+    size_t k = 0;
+    for (size_t i = 0; i < n; i++)
+        if (X[i] > 0.f) DOC_CHECK(OUT[k++] == X[i]);
+    DOC_CHECK(out == OUT + k);
+}
+
 int main(void)
 {
     fill();
     named();
     slide();
     interleaved();
+    permutations();
+    filter();
     return doc_status();
 }

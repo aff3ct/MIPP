@@ -137,6 +137,13 @@
             "return %broadcast_lane<tp>%(r0, s0);"
         ]
     },
+    "rea_b128_permute": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %permute<tp>%(r0, r1);"
+        ]
+    },
     "rea_b128_reverse": {
         "format": "long",
         "code": [
@@ -198,6 +205,59 @@
         "code": [
             "// one block of 128 bits: the function on the whole register",
             "return %zip_lo<tp>%(r0, r1);"
+        ]
+    },
+    "rea_compress_32": {
+        "format": "long",
+        "code": [
+            "// bytes of the active lanes, then 0xFF (zero), indexed by the bits of the mask",
+            "static const uint8_t lut[16][16] = { {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, {4, 5, 6, 7, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 4, 5, 6, 7, 255, 255, 255, 255, 255, 255, 255, 255}, {8, 9, 10, 11, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 8, 9, 10, 11, 255, 255, 255, 255, 255, 255, 255, 255}, {4, 5, 6, 7, 8, 9, 10, 11, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 255, 255, 255, 255}, {12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255}, {4, 5, 6, 7, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 255, 255, 255, 255}, {8, 9, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 8, 9, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255}, {4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255}, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} };",
+            "static const uint32_t w[4] = {1, 2, 4, 8};",
+            "const unsigned mm = (unsigned){{ isa.prefix }}addvq_u32({{ isa.prefix }}andq_u32(m0.m, {{ isa.prefix }}ld1q_u32(w)));",
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'uint' and dt_par.n_bits == 8 %}{% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u8{% endif %}({{ isa.prefix }}qtbl1q_u8({{ isa.prefix }}reinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r), {{ isa.prefix }}ld1q_u8(lut[mm])));",
+            "return res;"
+        ]
+    },
+    "rea_compress_64": {
+        "format": "long",
+        "code": [
+            "// bytes of the active lanes, then 0xFF (zero), indexed by the bits of the mask",
+            "static const uint8_t lut[4][16] = { {255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 4, 5, 6, 7, 255, 255, 255, 255, 255, 255, 255, 255}, {8, 9, 10, 11, 12, 13, 14, 15, 255, 255, 255, 255, 255, 255, 255, 255}, {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15} };",
+            "static const uint64_t w[2] = {1, 2};",
+            "const unsigned mm = (unsigned){{ isa.prefix }}addvq_u64({{ isa.prefix }}andq_u64(m0.m, {{ isa.prefix }}ld1q_u64(w)));",
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'uint' and dt_par.n_bits == 8 %}{% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u8{% endif %}({{ isa.prefix }}qtbl1q_u8({{ isa.prefix }}reinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r), {{ isa.prefix }}ld1q_u8(lut[mm])));",
+            "return res;"
+        ]
+    },
+    "rea_count": {
+        "format": "long",
+        "code": [
+            "return (int32_t)((int32_t){{ isa.prefix }}addvq_{{ isa_dt_par.data_ext_msk }}({{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext_msk }}(m0.m, {{ dt_par.n_bits - 1 }})));"
+        ]
+    },
+    "rea_permute2_tbl": {
+        "format": "long",
+        "code": [
+            "// byte indices of the lanes in the 32 bytes of the two registers, then a table lookup on two registers",
+            "{% if dt_par.n_bits == 8 %}uint8x16_t ib = r2.r;{% elif dt_par.n_bits == 16 %}uint8x16_t ib = vreinterpretq_u8_u16(vmlaq_n_u16(vdupq_n_u16(0x0100), r2.r, 0x0202));{% elif dt_par.n_bits == 32 %}uint8x16_t ib = vreinterpretq_u8_u32(vmlaq_n_u32(vdupq_n_u32(0x03020100), r2.r, 0x04040404));{% else %}const uint8_t rep[16] = {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}, ofs[16] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}; uint8x16_t ib = vaddq_u8(vqtbl1q_u8(vreinterpretq_u8_u64(vshlq_n_u64(r2.r, 3)), vld1q_u8(rep)), vld1q_u8(ofs));{% endif %}",
+            "uint8x16x2_t t;",
+            "t.val[0] = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r0.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r){% endif %};",
+            "t.val[1] = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r1.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r1.r){% endif %};",
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vqtbl2q_u8(t, ib){% else %}vreinterpretq_{{ isa_dt_par.data_ext }}_u8(vqtbl2q_u8(t, ib)){% endif %};",
+            "return res;"
+        ]
+    },
+    "rea_permute_tbl": {
+        "format": "long",
+        "code": [
+            "// byte indices of the lanes (k * size + 0 .. size - 1), then a table lookup on the bytes",
+            "{% if dt_par.n_bits == 8 %}uint8x16_t ib = r1.r;{% elif dt_par.n_bits == 16 %}uint8x16_t ib = vreinterpretq_u8_u16(vmlaq_n_u16(vdupq_n_u16(0x0100), r1.r, 0x0202));{% elif dt_par.n_bits == 32 %}uint8x16_t ib = vreinterpretq_u8_u32(vmlaq_n_u32(vdupq_n_u32(0x03020100), r1.r, 0x04040404));{% else %}const uint8_t rep[16] = {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}, ofs[16] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}; uint8x16_t ib = vaddq_u8(vqtbl1q_u8(vreinterpretq_u8_u64(vshlq_n_u64(r1.r, 3)), vld1q_u8(rep)), vld1q_u8(ofs));{% endif %}",
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vqtbl1q_u8({% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r0.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r){% endif %}, ib){% else %}vreinterpretq_{{ isa_dt_par.data_ext }}_u8(vqtbl1q_u8({% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r0.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r){% endif %}, ib)){% endif %};",
+            "return res;"
         ]
     },
     "rea_reverse": {

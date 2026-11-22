@@ -30,6 +30,49 @@
             "{% endif %}"
         ]
     },
+    "compress": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// the active lanes of the m1 registers one after the other in memory, then zeros",
+            "%s<tp>% buf[%N<tp>%] = {0};",
+            "%s<c:int|b:32>% n = 0;",
+            "{% for j in range(lmul) %}n += %compress_store<c:tp|b:tp|m:tp/{{ lmul }}>%(buf + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "return %loadu<tp>%(buf);"
+        ]
+    },
+    "compress_store": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// the active lanes of each m1 register, one after the other",
+            "%s<c:int|b:32>% n = 0;",
+            "{% for j in range(lmul) %}n += %compress_store<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "return n;"
+        ]
+    },
+    "compress_store_full": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// each m1 register written in full after the previous active lanes (overwritten by the next one)",
+            "%s<c:int|b:32>% n = 0;",
+            "{% for j in range(lmul) %}n += %compress_store_full<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "return n;"
+        ]
+    },
+    "count": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// the counts of the m1 masks of the group",
+            "return 0{% for j in range(lmul) %} + %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }}){% endfor %};"
+        ]
+    },
     "deinterleave": {
         "format": "long",
         "code": [
@@ -83,6 +126,34 @@
             "{% for j in range(lmul) %}{{ piece('res', j) }} = %dup_odd<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
+        ]
+    },
+    "expand": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// the lanes of r0 in memory, read by each m1 register from the count of the previous masks",
+            "%s<tp>% buf[%N<tp>%];",
+            "%storeu<tp>%(buf, r0);",
+            "%s<c:int|b:32>% n = 0;",
+            "%r<tp>% res;",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %expand_load<c:tp|b:tp|m:tp/{{ lmul }}>%(buf + n, {{ piece('m0', j, 'm') }});\nn += %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "(void)n;",
+            "return res;"
+        ]
+    },
+    "expand_load": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// each m1 register reads from the count of the previous masks",
+            "%s<c:int|b:32>% n = 0;",
+            "%r<tp>% res;",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %expand_load<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('m0', j, 'm') }});\nn += %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "(void)n;",
+            "return res;"
         ]
     },
     "hadd": {
@@ -204,6 +275,61 @@
         "format": "long",
         "code": [
             "return %deinterleave<tp>%(%loadu<tp>%(p0));"
+        ]
+    },
+    "permute": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "{% if mask_kind %}",
+            "%r<tp>% t = %permute<tp>%(r0, r1);",
+            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
+            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
+            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
+            "{% else %}",
+            "// the register in memory, then a gather with the indices",
+            "%s<tp>% buf[%N<tp>%];",
+            "%storeu<tp>%(buf, r0);",
+            "return %gather<tp,c:uint|b:tp>%(buf, r1);",
+            "{% endif %}"
+        ]
+    },
+    "permute2": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "{% if mask_kind %}",
+            "%r<tp>% t = %permute2<tp>%(r0, r1, r2);",
+            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
+            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
+            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
+            "{% else %}",
+            "// the two registers one after the other in memory, then a gather with the indices",
+            "%s<tp>% buf[2 * %N<tp>%];",
+            "%storeu<tp>%(buf, r0);",
+            "%storeu<tp>%(buf + %N<tp>%, r1);",
+            "return %gather<tp,c:uint|b:tp>%(buf, r2);",
+            "{% endif %}"
+        ]
+    },
+    "permute_b128": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "{% if mask_kind %}",
+            "%r<tp>% t = %permute_b128<tp>%(r0, r1);",
+            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
+            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
+            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
+            "{% else %}",
+            "// blocks of 128 bits: one m1 register after the other",
+            "%r<tp>% res;",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %permute_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
+            "return res;",
+            "{% endif %}"
         ]
     },
     "reverse": {

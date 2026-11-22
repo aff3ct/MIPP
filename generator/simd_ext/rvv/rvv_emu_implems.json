@@ -171,6 +171,20 @@
             "variant": "z"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "vcompress",
+            "datatypes": "all_datatypes",
+            "template": "rea_compress"
+        }
+    ],
+    "compress_store": [
+        {
+            "instr_name": "vcompress",
+            "datatypes": "all_datatypes",
+            "template": "rea_compress_store"
+        }
+    ],
     "div": [
         {
             "instr_name": "fdiv",
@@ -249,6 +263,20 @@
                 "uint16"
             ],
             "template": "rea_dup_odd"
+        }
+    ],
+    "expand": [
+        {
+            "instr_name": "viota",
+            "datatypes": "all_datatypes",
+            "template": "rea_expand"
+        }
+    ],
+    "expand_load": [
+        {
+            "instr_name": "viota",
+            "datatypes": "all_datatypes",
+            "template": "rea_expand_load"
         }
     ],
     "fmsub": [
@@ -725,6 +753,13 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_permute2"
         }
     ],
     "pow2": [

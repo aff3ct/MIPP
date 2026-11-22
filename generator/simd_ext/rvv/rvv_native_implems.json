@@ -447,6 +447,13 @@
             "template": "form_vf_cmp"
         }
     ],
+    "count": [
+        {
+            "instr_name": "cpop",
+            "datatypes": "all_datatypes",
+            "template": "rea_count"
+        }
+    ],
     "cvt": [
         {
             "instr_name": "vfcvt_rtz_x_f",
@@ -1148,6 +1155,13 @@
             "datatypes": "all_int_uint",
             "template": "form_vx_msk",
             "variant": "m"
+        }
+    ],
+    "permute": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vv"
         }
     ],
     "round": [

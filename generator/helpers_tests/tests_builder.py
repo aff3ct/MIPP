@@ -15,6 +15,7 @@ from typing import Dict, List, Any, Optional, Set
 from .dialect_adapters import DialectAdapter, CppDialectAdapter, CDialectAdapter, CppObjDialectAdapter
 from .domain_resolver import DomainResolver
 from . import indexed_tests
+from . import perm_tests
 from tools import DATATYPES_MAP, resolve_ret_lmul, is_defined_for_lmul, changes_lmul, isa_provides_lmul
 from include_gen import _match_category
 import copy
@@ -900,6 +901,9 @@ class TestsBuilderEngine:
         if func_name in indexed_tests.INDEXED_FUNCS:
             return self._build_indexed_test_file(dialect_name, func_name, lmul_suffix, mkind, lmul, N,
                                                  lmul_list, ldiv_list, mask_list)
+        if func_name in perm_tests.PERM_FUNCS:
+            return self._build_perm_test_file(dialect_name, func_name, lmul_suffix, mkind, lmul, N,
+                                              lmul_list, ldiv_list, mask_list)
         builder = self.get_builder(dialect_name)
         return builder.build_test_file_content(
             func_name,
@@ -911,6 +915,21 @@ class TestsBuilderEngine:
             ldiv_list=ldiv_list,
             mask_list=mask_list,
         )
+
+    def _build_perm_test_file(self, dialect_name, func_name, lmul_suffix, mkind, lmul, N,
+                              lmul_list, ldiv_list, mask_list) -> str:
+        """permute, compress... (a register of indices, a mask that moves the lanes): see helpers_tests/perm_tests.py."""
+        dts = [str(dt).split(",")[0].strip() for dt in self._resolve_datatypes(func_name)]
+        if dialect_name == "c":
+            return perm_tests.build_c(func_name, dts, lmul_suffix, mkind, lmul, N)
+        func_variants = self.interfaces[func_name].get("variants", ["u", "m", "z", "s"])
+        mkinds = []
+        for m in ["unmasked", "mask", "maskz", "masks"]:
+            if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
+                if m == "unmasked" or self._is_mask_kind_supported(func_variants, m):
+                    mkinds.append("" if m == "unmasked" else m)
+        return perm_tests.build_cpp(dialect_name, func_name, dts, mkinds, lmul_list, ldiv_list, N,
+                                    cpp_type=self._format_cpp_type)
 
     def _build_indexed_test_file(self, dialect_name, func_name, lmul_suffix, mkind, lmul, N,
                                  lmul_list, ldiv_list, mask_list) -> str:

@@ -154,7 +154,10 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
 
 # Important changes here!!
 def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0, include_manager=None):
-    if not is_defined_for_lmul(funcs[f]["proto"], lmul):
+    # the scalar ISA keeps the d2 version of the prototypes without half-vector ("ldiv": false): the Level 3
+    # fallback of a sub-ISA (SSE as the half-vectors of AVX) calls it
+    proto = {k: v for k, v in funcs[f]["proto"].items() if k != "ldiv"}
+    if not is_defined_for_lmul(proto, lmul):
         return
         
     if ff["variants"]:

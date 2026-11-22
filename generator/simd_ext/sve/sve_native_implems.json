@@ -254,6 +254,20 @@
             "template": "form_n_cmp_z"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "compact",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_compact"
+        }
+    ],
     "cvt": [
         {
             "instr_name": "cvt",
@@ -618,6 +632,23 @@
             "datatypes": "all_int_uint",
             "variant": "z",
             "template": "form_n_z"
+        }
+    ],
+    "permute": [
+        {
+            "instr_name": "tbl",
+            "datatypes": "all_datatypes",
+            "template": "rea_tbl"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "tbl2",
+            "datatypes": "all_datatypes",
+            "template": "rea_tbl2",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "svcreate2 only gathers the two registers in a tuple (no instruction): a single tbl.",
+            "if": "defined(__ARM_FEATURE_SVE2)"
         }
     ],
     "reverse": [

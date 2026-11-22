@@ -31,6 +31,38 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.broadcast_lane_b128"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "compress",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.compress"
+        }
+    ],
+    "compress_store": [
+        {
+            "instr_name": "compress_store",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.compress_store"
+        }
+    ],
+    "compress_store_full": [
+        {
+            "instr_name": "compress_store_full",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.compress_store_full"
+        }
+    ],
+    "count": [
+        {
+            "instr_name": "count",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.count"
+        }
+    ],
     "deinterleave": [
         {
             "instr_name": "deinterleave",
@@ -53,6 +85,22 @@
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.dup_odd"
+        }
+    ],
+    "expand": [
+        {
+            "instr_name": "expand",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.expand"
+        }
+    ],
+    "expand_load": [
+        {
+            "instr_name": "expand_load",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.expand_load"
         }
     ],
     "get": [
@@ -141,6 +189,30 @@
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_none"
+        }
+    ],
+    "permute": [
+        {
+            "instr_name": "permute",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.permute"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "permute2",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.permute2"
+        }
+    ],
+    "permute_b128": [
+        {
+            "instr_name": "permute_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.permute_b128"
         }
     ],
     "reverse": [

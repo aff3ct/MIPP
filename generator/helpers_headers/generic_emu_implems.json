@@ -605,6 +605,18 @@
             "template_ref": "tpl_generic_emu.cmpneq"
         }
     ],
+    "compress_store": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.compress_store_buf"
+        }
+    ],
+    "compress_store_full": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.compress_store_full"
+        }
+    ],
     "copysign": [
         {
             "datatypes": "all_float",
@@ -700,6 +712,12 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.exp_f64"
+        }
+    ],
+    "expand_load": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.expand_load_buf"
         }
     ],
     "fmadd": [
@@ -1056,6 +1074,18 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.logi_m_2args_e"
+        }
+    ],
+    "permute": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.permute_gather"
+        }
+    ],
+    "permute2": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.permute2_gather"
         }
     ],
     "pow": [

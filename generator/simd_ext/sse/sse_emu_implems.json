@@ -30,6 +30,53 @@
             "if": "defined(__SSE2__) && !defined(__SSE4_2__)"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_compress_32",
+            "if": "defined(__SSSE3__)"
+        },
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_compress_64",
+            "if": "defined(__SSSE3__)"
+        }
+    ],
+    "count": [
+        {
+            "instr_name": "count",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_count"
+        },
+        {
+            "instr_name": "count",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_count",
+            "if": "defined(__SSE2__)"
+        }
+    ],
     "cvt": [
         {
             "instr_name": "cvt",
@@ -198,6 +245,32 @@
             "datatypes": "all_datatypes",
             "template": "notb_k_xor",
             "if": "defined(__SSE2__)"
+        }
+    ],
+    "permute": [
+        {
+            "instr_name": "pshufb",
+            "datatypes": "all_datatypes",
+            "template": "rea_permute_pshufb",
+            "if": "defined(__SSSE3__)"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "pshufb",
+            "datatypes": "all_datatypes",
+            "template": "rea_permute2_pshufb",
+            "if": "defined(__SSSE3__)"
+        }
+    ],
+    "permute_b128": [
+        {
+            "instr_name": "permute",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_permute",
+            "derived_form": "permute",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
     "reverse": [

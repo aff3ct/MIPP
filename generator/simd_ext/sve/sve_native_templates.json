@@ -55,6 +55,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
     },
+    "rea_compact": {
+        "format": "short",
+        "code": "{{ isa.prefix }}compact_{{ isa_dt_par.data_ext }}(m0.m, r0.r);"
+    },
     "rea_dup_lane": {
         "format": "short",
         "code": "{{ isa.prefix }}dup_lane_{{ isa_dt_par.data_ext }}(r0.r, (uint{{ dt_par.n_bits }}_t)s0);"
@@ -62,6 +66,14 @@
     "rea_self2": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r0.r);"
+    },
+    "rea_tbl": {
+        "format": "short",
+        "code": "{{ isa.prefix }}tbl_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    },
+    "rea_tbl2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}tbl2_{{ isa_dt_par.data_ext }}({{ isa.prefix }}create2_{{ isa_dt_par.data_ext }}(r0.r, r1.r), r2.r);"
     },
     "reduce_z": {
         "format": "long",

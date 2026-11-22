@@ -57,6 +57,7 @@ namespace mipp
     file_common_enum = open(f"{common_enum_dir}/common.hpp", "w")
     print("#pragma once\n", file=file_common_enum)
     print("#include <cstdint>", file=file_common_enum)
+    print("#include <type_traits>", file=file_common_enum)
     print("#include \"mipp/internal/interfaces/c/common.h\" // ISA detection (MIPP_NEON, MIPP_RVV, ...): makes this header self-contained\n", file=file_common_enum)
     print("namespace mipp {\n", file=file_common_enum)
     # The enum lists every ISA discovered in simd_ext/ (not only the generated
@@ -75,6 +76,8 @@ namespace mipp
     print("{ return lmul > 0 ? idx_lmul_frac(lmul * (int)sizeof(U), (int)sizeof(T)) : idx_lmul_frac((int)sizeof(U), -lmul * (int)sizeof(T)); }", file=file_common_enum)
     print("template <typename T, typename U> constexpr int data_lmul(int lmul_idx)", file=file_common_enum)
     print("{ return lmul_idx > 0 ? idx_lmul_frac(lmul_idx * (int)sizeof(T), (int)sizeof(U)) : idx_lmul_frac((int)sizeof(T), -lmul_idx * (int)sizeof(U)); }", file=file_common_enum)
+    # unsigned type of the width of T: indices of permute (`"fixeddatatype": "uint"`)
+    print("template <typename T> struct uint_of { typedef typename std::conditional<sizeof(T) == 1, uint8_t, typename std::conditional<sizeof(T) == 2, uint16_t, typename std::conditional<sizeof(T) == 4, uint32_t, uint64_t>::type>::type>::type type; };", file=file_common_enum)
     print("} // namespace details", file=file_common_enum)
 
     isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
@@ -147,6 +150,10 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
 
             for v in func_variants:
                 for l in func_lmuls:
+                    if l == "d2" and not is_defined_for_lmul(funcs[f]["proto"], -2):
+                        # no half-vector version ("ldiv": false in the prototype): no wrapper, which would include
+                        # ISA headers that are not generated
+                        continue
                     valid_isas = [
                         isa for isa in isa_list
                         if l != "d2" or (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", [])))
@@ -269,6 +276,9 @@ def _tpl_scalar_for_arg(arg):
         if arg["fixeddatatype"] == "ret":
             # index of gather / scatter: the second type of the pair
             return "U"
+        if arg["fixeddatatype"] == "uint":
+            # unsigned integers of the width of T (indices of permute)
+            return "typename details::uint_of<T>::type"
         if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
                 return "U"
         elif arg["fixeddatatype"] in datatypes:

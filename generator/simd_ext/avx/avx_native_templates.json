@@ -187,6 +187,18 @@
         "format": "short",
         "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(r0.r, {{ instr_name }});"
     },
+    "rea_permutevar8x32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutevar8x32_{{ 'ps' if dt_par.category == 'float' else 'epi32' }}(r0.r, r1.r);"
+    },
+    "rea_permutevar_b128": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutevar_ps(r0.r, r1.r);"
+    },
+    "rea_permutevar_b128_i": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_castps_si256({{ isa.prefix }}_permutevar_ps({{ isa.prefix }}_castsi256_ps(r0.r), r1.r));"
+    },
     "rea_shuffle_epi32": {
         "format": "short",
         "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, {{ instr_name }});"
@@ -194,6 +206,10 @@
     "rea_shuffle_epi32_b128": {
         "format": "short",
         "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, {{ instr_name }});"
+    },
+    "rea_shuffle_epi8_b128": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, r1.r);"
     },
     "rea_shufps2": {
         "format": "short",

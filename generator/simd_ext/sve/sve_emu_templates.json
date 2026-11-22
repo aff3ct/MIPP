@@ -140,9 +140,33 @@
             "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
         ]
     },
+    "rea_compact_store": {
+        "format": "long",
+        "code": [
+            "const uint64_t n = {{ isa.prefix }}cntp_{{ isa_dt_par.data_ext_logi }}(m0.m, m0.m);",
+            "{{ isa.prefix }}st1_{{ isa_dt_par.data_ext }}({{ isa.prefix }}whilelt_{{ isa_dt_par.data_ext_logi }}_u64(0, n), p0, {{ isa.prefix }}compact_{{ isa_dt_par.data_ext }}(m0.m, r0.r));",
+            "return (int32_t)n;"
+        ]
+    },
+    "rea_count": {
+        "format": "long",
+        "code": [
+            "return (int32_t)((int32_t){{ isa.prefix }}cntp_{{ isa_dt_par.data_ext_logi }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m));"
+        ]
+    },
     "rea_splice": {
         "format": "short",
         "code": "{{ isa.prefix }}splice_{{ isa_dt_par.data_ext }}({{ isa.prefix }}not_b_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {{ isa.prefix }}whilelt_{{ isa_dt_par.data_ext_logi }}_s32(0, s0)), r0.r, r1.r);"
+    },
+    "rea_tbl2_sel": {
+        "format": "long",
+        "code": [
+            "// the indices below N select r0, the others r1 (svtbl gives 0 for an index out of the register); compared with N - 1, which fits in the index type (8-bit indices and N = 256)",
+            "const svbool_t pg = svptrue_{{ isa_dt_par.data_ext_logi }}();",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}({{ isa.prefix }}cmple_n_u{{ dt_par.n_bits }}(pg, r2.r, (uint{{ dt_par.n_bits }}_t)(%N<tp>% - 1)), {{ isa.prefix }}tbl_{{ isa_dt_par.data_ext }}(r0.r, r2.r), {{ isa.prefix }}tbl_{{ isa_dt_par.data_ext }}(r1.r, {{ isa.prefix }}sub_n_u{{ dt_par.n_bits }}_x(pg, r2.r, (uint{{ dt_par.n_bits }}_t)%N<tp>%)));",
+            "return res;"
+        ]
     },
     "reduce": {
         "format": "long",

@@ -23,6 +23,11 @@ Most functions also have a variant **by block of 128 bits**, suffix `_b128`: the
 | `rotate(a, n)` | lane i receives `a[(i + n) mod N]` (0 ≤ n < N) | yes |
 | `broadcast_lane(a, k)` | `a[k]` in every lane (0 ≤ k < N) | yes |
 | `load_interleaved2(p)` / `store_interleaved2(p, a)` | `deinterleave(loadu(p))` / `storeu(p, interleave(a))` | — |
+| `permute(a, idx)` | `a[idx[0]], a[idx[1]], ...` (indices < N) | yes |
+| `permute2(a, b, idx)` | the same in `a` then `b` (indices < 2N) | — |
+| `compress(a, m)` / `expand(a, m)` | active lanes packed first, zeros after / the inverse | — |
+| `compress_store(p, a, m)` / `compress_store_full(p, a, m)` | active lanes stored, their count returned | — |
+| `expand_load(p, m)` | `count(m)` elements loaded into the active lanes | — |
 
 `swap_pairs`, `dup_even` and `dup_odd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments, not immediates: a constant or a variable.
 
@@ -102,8 +107,61 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ---
 
-## 5. Implementation Levels
+## 5. Permutations
 
-The rearrangements are native on most ISAs: `svrev`, `svzip1`, `svuzp1`, `svsplice`, `svdup_lane` on SVE; `vzip1q`, `vuzp1q`, `vtrn1q`, `vrev64q` on NEON (AArch64); `unpcklps`, `shufps`, `vpermps`, `vpermt2ps` on x86; `vrgather`, `vcompress`, `vslideup` / `vslidedown` on RVV. The others are generic (a slide through memory, `get` and `set1` for a broadcast) or, for some types and ISAs, written lane by lane (Level 3); the levels of each function are in its [reference page](../funcs_support/index.md).
+`permute(a, idx)` gives `a[idx[i]]` in the lane i. The indices are a register of unsigned integers of the width of the elements (`uint32_t` for `float32`), below N, the number of lanes of the whole group (2N for `permute2`, the number of lanes of a block for `permute_b128`); other values are undefined behavior. The indices of the 8-bit types cannot reach the lanes from 256.
+
+=== "C API"
+
+    ```c
+    --8<-- "examples/doc/rearrangements/c.c:permute"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/fun.cpp:permute"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/obj.cpp:permute"
+    ```
+
+---
+
+## 6. Compress and Expand
+
+`compress(a, m)` packs the active lanes of `a` at the beginning of the register, in order, and zeroes the other lanes; `expand(a, m)` is the inverse. `count(m)` is the number of active lanes. To store the result:
+
+- `compress_store(p, a, m)` writes **exactly** the `count(m)` active lanes and returns this count;
+- `compress_store_full(p, a, m)` writes a **whole register** (the lanes after the count are unspecified) and returns the count: faster on the ISAs without a native masked store (SSE, AVX2, NEON). The memory of N elements from `p` must be writable: in a filter loop, each call overwrites the extra elements of the previous one, and the output needs N elements of margin.
+
+`expand_load(p, m)` reads exactly `count(m)` elements. These functions have no half-vector (`d2`) version.
+
+=== "C API"
+
+    ```c
+    --8<-- "examples/doc/rearrangements/c.c:filter"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/fun.cpp:filter"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/obj.cpp:filter"
+    ```
+
+---
+
+## 7. Implementation Levels
+
+The rearrangements are native on most ISAs: `svrev`, `svzip1`, `svuzp1`, `svsplice`, `svdup_lane`, `svtbl`, `svcompact` on SVE; `vzip1q`, `vuzp1q`, `vtrn1q`, `vrev64q`, `vqtbl1q` on NEON (AArch64); `unpcklps`, `shufps`, `vpermps`, `vpermt2ps`, `pshufb`, `vcompressps` on x86; `vrgather`, `vcompress`, `viota`, `vslideup` / `vslidedown` on RVV. `permute` of SSE and NEON computes the byte indices of the lanes for `pshufb` / `vqtbl1q`, and `compress` of SSE, AVX2 and NEON (32 and 64-bit elements) reads the shuffle of the mask in a small table of the headers. The others are generic (a slide through memory, `get` and `set1` for a broadcast) or, for some types and ISAs, written lane by lane (Level 3); the levels of each function are in its [reference page](../funcs_support/index.md).
 
 With a software LMUL (every ISA but RVV), the LMUL > 1 versions combine the LMUL 1 functions on the registers of the group (`reverse` of LMUL 2: the two registers swapped and reversed). The half-vectors of SSE, NEON and SVE (a register of which only the lower half is used) go through the scalar functions.

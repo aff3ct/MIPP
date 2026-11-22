@@ -427,6 +427,10 @@
         "cast_k": {
             "comparison": "logical"
         },
+        "count": {
+            "support_obj": true,
+            "mask_pattern": "reduction_cycle"
+        },
         "cvt": {
             "domain": {
                 "rules": [
@@ -528,6 +532,15 @@
                 "torvd",
                 "get_k"
             ]
+        },
+        "compress": {
+            "support_obj": true
+        },
+        "compress_store": {
+            "support_obj": true
+        },
+        "compress_store_full": {
+            "support_obj": true
         },
         "cos": {
             "domain": {
@@ -632,6 +645,12 @@
                 }
             },
             "comparison": "tolerance"
+        },
+        "expand": {
+            "support_obj": true
+        },
+        "expand_load": {
+            "support_obj": true
         },
         "fmadd": {
             "comparison": "tolerance",
@@ -917,6 +936,15 @@
         },
         "orb": {
             "comparison": "bitwise",
+            "support_obj": true
+        },
+        "permute": {
+            "support_obj": true
+        },
+        "permute2": {
+            "support_obj": true
+        },
+        "permute_b128": {
             "support_obj": true
         },
         "pow": {

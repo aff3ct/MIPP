@@ -207,6 +207,10 @@ def isa_provides_lmul(isa, proto, lmul):
     half-vectors that give them in their `<isa>_ldiv_mask.json` (low and high for m1 -> d2, combine
     for d2 -> m1).
     """
+    if int(lmul) == -2 and proto.get("ldiv", True) is False and not isa.get("is_scalar", False):
+        # prototype without half-vector version (the scalar ISA keeps it: the Level 3 fallback of the registers of
+        # a sub-ISA, the half-vectors of the ISA above it, calls the d2 scalar functions)
+        return False
     if not changes_lmul(proto):
         return True
     if not is_defined_for_lmul(proto, lmul):

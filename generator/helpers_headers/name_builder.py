@@ -188,6 +188,9 @@ def is_defined_for_lmul(proto, lmul):
     False if the prototype changes the LMUL and is not defined for `lmul` (the resulting LMUL
     does not exist, or there is no LMUL at all: lmul=0 is the base level of an ISA).
     """
+    if int(lmul) == -2 and proto.get("ldiv", True) is False:
+        # prototype without half-vector version
+        return False
     if not changes_lmul(proto):
         return True
     return bool(lmul) and resolve_ret_lmul(proto["ret"], lmul) is not None
@@ -244,6 +247,8 @@ def is_defined_for_dt_lmul(proto, dt, lmul):
     LMUL must exist (no d4, no m16), and which is not generated for the half-vectors (the d2 of the data is a register
     of the sub-ISA or of the ISA itself, whose functions take an index of the same width).
     """
+    if int(lmul) == -2 and proto.get("ldiv", True) is False:
+        return False
     parts = [x.strip() for x in str(dt).split(",")]
     dt_par, dt_ret = (parts[0], parts[1]) if len(parts) > 1 else (parts[0], parts[0])
     for arg in proto["args"]:

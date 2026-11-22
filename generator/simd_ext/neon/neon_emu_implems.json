@@ -46,6 +46,36 @@
             "if": "!defined(__aarch64__)"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_compress_32",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_compress_64",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "count": [
+        {
+            "instr_name": "count",
+            "datatypes": "all_datatypes",
+            "template": "rea_count",
+            "if": "defined(__aarch64__)"
+        }
+    ],
     "div": [
         {
             "instr_name": "recpeq",
@@ -282,6 +312,32 @@
             "instr_name": "notb_k",
             "datatypes": "all_64bit",
             "template": "notb_k_64"
+        }
+    ],
+    "permute": [
+        {
+            "instr_name": "tbl",
+            "datatypes": "all_datatypes",
+            "template": "rea_permute_tbl",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "tbl",
+            "datatypes": "all_datatypes",
+            "template": "rea_permute2_tbl",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "permute_b128": [
+        {
+            "instr_name": "permute",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_permute",
+            "derived_form": "permute",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
     "pow2": [

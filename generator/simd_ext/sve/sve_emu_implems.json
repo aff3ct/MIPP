@@ -200,6 +200,27 @@
             "template": "form_n_cmp"
         }
     ],
+    "compress_store": [
+        {
+            "instr_name": "compact",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_compact_store"
+        }
+    ],
+    "count": [
+        {
+            "instr_name": "count",
+            "datatypes": "all_datatypes",
+            "template": "rea_count"
+        }
+    ],
     "cvt": [
         {
             "instr_name": "cvt",
@@ -637,6 +658,14 @@
             "instr_name": "orr",
             "datatypes": "all_int_uint",
             "template": "form_n_x"
+        }
+    ],
+    "permute2": [
+        {
+            "instr_name": "tbl",
+            "datatypes": "all_datatypes",
+            "template": "rea_tbl2_sel",
+            "if": "!defined(__ARM_FEATURE_SVE2)"
         }
     ],
     "round": [

@@ -45,7 +45,8 @@
         "set1_k",
         "set0",
         "set0_k",
-        "gather"
+        "gather",
+        "expand_load"
     ],
     "logic": [
         "andb",
@@ -118,7 +119,12 @@
         "interleave",
         "deinterleave",
         "load_interleaved2",
-        "store_interleaved2"
+        "store_interleaved2",
+        "permute",
+        "permute2",
+        "permute_b128",
+        "compress",
+        "expand"
     ],
     "reduction": [
         "hadd",
@@ -129,7 +135,8 @@
         "testz",
         "none",
         "any",
-        "all"
+        "all",
+        "count"
     ],
     "reinterpret": [
         "cast",
@@ -149,6 +156,8 @@
         "get",
         "get_k",
         "getfirst",
-        "scatter"
+        "scatter",
+        "compress_store",
+        "compress_store_full"
     ]
 }

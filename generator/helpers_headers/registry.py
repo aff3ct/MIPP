@@ -114,6 +114,9 @@ def _load_funcs_registry():
         if "changes_type" in v["ret"]:
             cleaned_proto["ret"]["changes_type"] = v["ret"]["changes_type"]
             
+        if "ldiv" in v:
+            # false: no half-vector version (see name_builder.is_defined_for_lmul)
+            cleaned_proto["ldiv"] = v["ldiv"]
         cleaned_proto["args"] = []
         for arg in v["args"]:
             c_arg = {

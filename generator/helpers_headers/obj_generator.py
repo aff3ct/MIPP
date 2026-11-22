@@ -135,6 +135,41 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, p0)); }}")
             lines.append("")
 
+    # Category 1c: lanes moved by a register of indices (unsigned, of the width of T) and by a mask (compress...)
+    elif fn in ("permute", "permute_b128", "permute2"):
+        idx_t = "Rvd<typename details::uint_of<T>::type, LMUL>"
+        regs = ["r0"] if fn != "permute2" else ["r0", "r1"]
+        idx = "r1" if fn != "permute2" else "r2"
+        typed = ", ".join([f"const Rvd<T, LMUL>& {r}" for r in regs] + [f"const {idx_t}& {idx}"])
+        raw = ", ".join([f"{r}.r" for r in regs] + [f"{idx}.r"])
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline Rvd<T, LMUL> {fn}({typed})")
+        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}({raw})); }}")
+        lines.append("")
+        lines.append("template <VARIANT V = M, typename T, int LMUL = 1>")
+        lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, {typed})")
+        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, {raw})); }}")
+        lines.append("")
+        lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
+        lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, {typed})")
+        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, {raw})); }}")
+        lines.append("")
+    elif fn in ("compress", "expand"):
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvd<T, LMUL>& r0, const Rvm<T, LMUL>& m0)")
+        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}(r0.r, m0.m)); }}")
+        lines.append("")
+    elif fn in ("compress_store", "compress_store_full"):
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline int32_t {fn}(T* p0, const Rvd<T, LMUL>& r0, const Rvm<T, LMUL>& m0)")
+        lines.append(f"{{ return mipp::{fn}(p0, r0.r, m0.m); }}")
+        lines.append("")
+    elif fn == "expand_load":
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline Rvd<T, LMUL> {fn}(const T* p0, const Rvm<T, LMUL>& m0)")
+        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}(p0, m0.m)); }}")
+        lines.append("")
+
     # Category 1a: scalar forms (`sub_vs`, `sub_sv`, `fmadd_vsv`, `cmplt_vs`, `select_vs`... see forms.py): overloads
     # of the base function (`mipp::sub(r, s)`), the scalars of type T exactly (no promotion: `Rvd<int8_t> - 300`
     # does not compile, as T is deduced from both the register and the scalar).
@@ -330,9 +365,9 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ m0 = m0 {op} Rvm<T, LMUL>(val); return m0; }}")
             lines.append("")
 
-    elif args == ["msk"] and fn in ("notb_k", "none", "any", "all"):
+    elif args == ["msk"] and fn in ("notb_k", "none", "any", "all", "count"):
         lines.append("template <typename T, int LMUL = 1>")
-        ret_t = "int32_t" if fn in ("none", "any", "all") else "Rvm<T, LMUL>"
+        ret_t = "int32_t" if fn in ("none", "any", "all", "count") else "Rvm<T, LMUL>"
         lines.append(f"inline {ret_t} {cpp_fn}(const Rvm<T, LMUL>& m0)")
         lines.append(f"{{ return {ret_t if ret_t == 'int32_t' else 'Rvm<T, LMUL>'}(mipp::{cpp_fn}(m0.m)); }}")
         lines.append("")
@@ -736,7 +771,7 @@ def _write_fine_granules(fn, cat, body, output_dir):
     inc = "mipp/internal/interfaces"
     # low / high / combine / wcvt: no function (so no header) for an LMUL whose resulting LMUL does not exist
     fine_lmuls = {l: val for l, val in _FINE_LMULS.items()
-                  if is_defined_for_lmul(interfaces[fn]["proto"], val) or not changes_lmul(interfaces[fn]["proto"])}
+                  if is_defined_for_lmul(interfaces[fn]["proto"], val)}
     for v in variants:
         v_units = units_for(v)
         for l, val in fine_lmuls.items():
