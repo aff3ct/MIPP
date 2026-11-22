@@ -112,20 +112,20 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
                 guard = isa["datatypes"].get(msk_dt_name, {}).get("if", None)
                 
             if guard == "0" or is_guard_dead_under_cond(guard, cond):
-                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
+                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, MIPP_MIN_SIZEOF(s_{arg_name}, {arg_name}));")
             else:
                 if guard:
                     pre_statements.append(f"#if {guard}")
                 pre_statements.append(f"\t{reg_vector_type} r_{arg_name} = {torvd_func}({arg_name});")
                 pre_statements.append(f"\t{reg_scalar_type} s_r_{arg_name} = {{0}};")
-                pre_statements.append(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, sizeof(r_{arg_name}));")
+                pre_statements.append(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, MIPP_MIN_SIZEOF(s_r_{arg_name}, r_{arg_name}));")
                 pre_statements.append(f"\ts_{arg_name} = {scalar_torvm_func}(s_r_{arg_name});")
                 if guard:
                     pre_statements.append(f"#else")
-                    pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
+                    pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, MIPP_MIN_SIZEOF(s_{arg_name}, {arg_name}));")
                     pre_statements.append(f"#endif")
     else:
-        pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
+        pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, MIPP_MIN_SIZEOF(s_{arg_name}, {arg_name}));")
 
 def _resolve_arg_datatype(arg, dt_par, dt_ret):
     return resolve_param_datatype(arg, dt_par, dt_ret)
@@ -150,7 +150,7 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
 
             if ret_guard == "0" or is_guard_dead_under_cond(ret_guard, cond):
                 post_statements.append(f"\t{vector_ret_type} res;")
-                post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
+                post_statements.append(f"\tmemcpy(&res, &sres, MIPP_MIN_SIZEOF(res, sres));")
             else:
                 if ret_guard:
                     post_statements.append(f"\t#if {ret_guard}")
@@ -158,16 +158,16 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
                 reg_vector_type = build_reg(dt_ret, isa, lmul, True, False)
                 post_statements.append(f"\t{reg_scalar_type} s_r_res = {torvd_scalar_func}(sres);")
                 post_statements.append(f"\t{reg_vector_type} r_res;")
-                post_statements.append(f"\tmemcpy(&r_res, &s_r_res, sizeof(r_res));")
+                post_statements.append(f"\tmemcpy(&r_res, &s_r_res, MIPP_MIN_SIZEOF(r_res, s_r_res));")
                 post_statements.append(f"\t{vector_ret_type} res = {torvm_func}(r_res);")
                 if ret_guard:
                     post_statements.append(f"\t#else")
                     post_statements.append(f"\t{vector_ret_type} res;")
-                    post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
+                    post_statements.append(f"\tmemcpy(&res, &sres, MIPP_MIN_SIZEOF(res, sres));")
                     post_statements.append(f"\t#endif")
     else:
         post_statements.append(f"\t{vector_ret_type} res;")
-        post_statements.append(f"\tmemcpy(&res, &sres, sizeof(res));")
+        post_statements.append(f"\tmemcpy(&res, &sres, MIPP_MIN_SIZEOF(res, sres));")
 
 def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_scalar_lmul):
     dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
@@ -194,7 +194,7 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
         if mask_kind == "masks":
             rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, target_scalar_lmul, True, False)
             pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc = {{0}};")
-            pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, sizeof(rsrc));")
+            pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, MIPP_MIN_SIZEOF(s_rsrc, rsrc));")
             call_args.append("s_rsrc")
 
     for arg in proto["args"]:
@@ -207,12 +207,9 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
             arg_lmul = resolve_arg_lmul(arg, target_scalar_lmul, dt_par, dt_ret)
             scalar_type = build_type("reg", realdatatype, scalar_isa, arg_lmul, True, False)
             pre_statements.append(f"\t{scalar_type} s_{arg_name} = {{0}};")
-            if arg_lmul != target_scalar_lmul:
-                # index of gather / scatter at another LMUL: a d2 register of the ISA (a full register on SSE, NEON,
-                # SVE) can be larger than the scalar d2 array, only its lanes are copied
-                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}) < sizeof({arg_name}) ? sizeof(s_{arg_name}) : sizeof({arg_name}));")
-            else:
-                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
+            # the register of the ISA can be larger than the scalar array (only its lanes are copied): a d2 register
+            # that is a full register (index of gather / scatter on SSE, NEON, SVE; RVV half-vectors "by vl")
+            pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, MIPP_MIN_SIZEOF(s_{arg_name}, {arg_name}));")
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
