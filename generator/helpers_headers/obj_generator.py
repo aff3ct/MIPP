@@ -788,4 +788,6 @@ def generate_obj(include_manager=None, output_dir="../include"):
         f.write('#include "mipp/internal/interfaces/obj/common.hpp"\n\n')
         for cat in sorted(categories.keys()):
             f.write(f'#include "mipp/obj/cat/{cat}.hpp"\n')
+        # hand-written utilities (operator<<, pack, reduce): utils_generator.py
+        f.write('#include "mipp/obj/utils.hpp"\n')
 

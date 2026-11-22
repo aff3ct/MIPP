@@ -25,6 +25,8 @@ def _generate_mipp_hpp(include_manager=None):
     for func in interfaces:
         category = _match_category(func)
         content += f'#include "mipp/internal/interfaces/cpp/functions/{category}/{func}.hpp"\n'
+    # hand-written utilities (allocator, printing, sum, pack): utils_generator.py
+    content += '#include "mipp/cpp/utils.hpp"\n'
     print(content, file=file)
 
 def generate_cpp(include_manager=None, isa_list=None, all_isa_names=None):

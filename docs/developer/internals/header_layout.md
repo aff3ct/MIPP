@@ -10,9 +10,9 @@ This page describes the tree that `gen_mipp_headers.py` writes in `include/`, an
 include/
 ├── mipp.h, mipp.hpp, mipp_obj.hpp     # Global headers: C, C++ Functional, C++ Object
 └── mipp/
-    ├── c/   {cat,fun}/                 # Public headers of the C API
-    ├── cpp/ {cat,fun}/                 # Public headers of the C++ Functional API
-    ├── obj/ {cat,fun}/                 # Public headers of the C++ Object API
+    ├── c/   {cat,fun}/, utils.h        # Public headers of the C API
+    ├── cpp/ {cat,fun}/, utils.hpp      # Public headers of the C++ Functional API
+    ├── obj/ {cat,fun}/, utils.hpp      # Public headers of the C++ Object API
     └── internal/
         ├── interfaces/
         │   ├── c/                      # C API: dispatch to the selected ISA
@@ -27,7 +27,7 @@ include/
             └── cpp/                    # C++ overloads of one ISA (mipp::rvd<T,LMUL,ISA>)
 ```
 
-The public headers contain nothing but `#include` lines to `mipp/internal/`: `mipp/cpp/fun/add.hpp` includes `mipp/internal/interfaces/cpp/functions/arithmetic/add.hpp`. Users never include `mipp/internal/` directly.
+The public headers contain nothing but `#include` lines to `mipp/internal/`: `mipp/cpp/fun/add.hpp` includes `mipp/internal/interfaces/cpp/functions/arithmetic/add.hpp`. Users never include `mipp/internal/` directly. The `utils.h(pp)` headers are the exception: they hold the hand-written utilities of each API (aligned allocation, printing, `sum`, `pack`, `reduce`), rendered by `utils_generator.py` from `generator/helpers_headers/templates/mipp_utils.tpl.h`, `mipp_utils.tpl.hpp` and `mipp_obj_utils.tpl.hpp`, on top of the generated functions; the global headers include them.
 
 ---
 

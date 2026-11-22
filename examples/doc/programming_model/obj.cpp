@@ -4,6 +4,7 @@
 #include <mipp_obj.hpp>
 // --8<-- [end:includes]
 #include <cmath>
+#include <sstream>
 
 #include "doc_check.h"
 
@@ -65,6 +66,32 @@ static void masked()
         DOC_CHECK(c[i] == (A[i] > B[i] ? A[i] + B[i] : A[i]));
 }
 
+// §4.5: printing, packing, generic reductions
+static void utilities()
+{
+    std::ostringstream out;
+    // --8<-- [start:utilities]
+    const mipp::Rvd<float> v(A);
+    out << v << "\n";                                     // [-3, -2, -1, 0 | 1, 2, 3, -3 | ...]
+    out << (v > mipp::Rvd<float>(0.f)) << "\n";           // [0, 0, 0, 0 | 1, 1, 1, 0 | ...]
+
+    float vmax = mipp::reduce(v, mipp::op::max());        // largest lane of v
+    float total = mipp::reduce(B, 100, mipp::op::add());  // sum of the 100 elements of B
+
+    const mipp::Rvd<int16_t> a(int16_t(300)), b(int16_t(-5));
+    mipp::Rvd<int8_t> p = mipp::pack<int8_t>(a, b);       // [127, 127, ... (lanes of a), -5, -5, ... (lanes of b)]
+    // --8<-- [end:utilities]
+    float ref_max = A[0], ref_total = 0.f;
+    for (int i = 1; i < mipp::Rvd<float>::N(); i++)
+        ref_max = A[i] > ref_max ? A[i] : ref_max;
+    for (int i = 0; i < 100; i++)
+        ref_total += B[i];
+    DOC_CHECK(vmax == ref_max);
+    DOC_CHECK(total == ref_total);
+    DOC_CHECK(p[0] == 127 && p[mipp::Rvd<int16_t>::N()] == -5);
+    DOC_CHECK(out.str().compare(0, 4, "[-3,") == 0);
+}
+
 // §5: remainder handled with masked memory accesses
 // --8<-- [start:masked_tail]
 // y[i] = x[i] > 0 ? x[i] : alpha * x[i]
@@ -111,6 +138,7 @@ int main()
     fill();
     free_functions();
     masked();
+    utilities();
     masked_tail();
     return doc_status();
 }

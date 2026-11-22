@@ -24,13 +24,13 @@ MIPP provides the `mipp::req_alignment<ISA>()` compile-time helper (and architec
 
 ### 1.2. Allocating Aligned Memory
 
-When allocating buffers for aligned MIPP operations, use standard aligned memory allocators:
+MIPP allocates memory aligned for its aligned loads and stores (on the register size of the target, `MIPP_REQUIRED_ALIGNMENT` bytes):
 
 ```cpp
 --8<-- "examples/doc/memory_and_alignment/alloc.cpp:alloc"
 ```
 
-In C, the equivalent constant is `MIPP_RVD_SIZE_BYTE`.
+In C: `mipp_malloc(bytes)` (the size is rounded up to a multiple of the alignment, `NULL` on failure), `mipp_free(p)` and `mipp_is_aligned(p)`. `MIPP_REQUIRED_ALIGNMENT` is `MIPP_RVD_SIZE_BYTE`.
 
 ---
 

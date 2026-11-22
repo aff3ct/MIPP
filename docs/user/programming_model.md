@@ -171,6 +171,7 @@ struct Rvd {
     Rvd(rvd<T, LMUL> r0); // Wraps a low-level rvd register
     Rvd(const T val);     // Broadcasts a scalar (mipp::set1)
     Rvd(const T* p0);     // Loads from memory, no alignment requirement (mipp::loadu)
+    Rvd(std::initializer_list<T> l); // {l0, l1, ...}: the N() lanes in order; {val}: broadcast, as Rvd(val)
 
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator rvd<T, LMUL>() const;
@@ -199,6 +200,7 @@ struct Rvm {
     Rvm(rvm<T, LMUL> m0);                         // Wraps a low-level rvm register
     Rvm(const bool val);                          // All lanes active or inactive (mipp::set1_k)
     Rvm(const int32_t vals[mipp::N<T, LMUL>()]);  // Lane i active iff vals[i] != 0 (mipp::set_k)
+    Rvm(std::initializer_list<bool> l);           // {b0, b1, ...}: the N() lanes in order; {b}: broadcast
 
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator rvm<T, LMUL>() const;
@@ -260,8 +262,20 @@ With `Rvm` and `Rvd` objects, the compiler deduces `T` and `LMUL`: only the vari
 
 See [Masking Semantics](masking_semantics.md) for the four variants.
 
+### 4.5. Printing, Packing and Generic Reductions
 
-### 4.5. Idiomatic Coding Guidelines
+- `std::cout << v` prints the lanes of an `Rvd` or of an `Rvm` (`1` for an active lane): `[0, 1, 2, 3 | 4, 5, 6, 7]`, with a `|` between the 128-bit blocks. The C API has `mipp_dump_[type]_[lmul](v)` and `mipp_fdump_[type]_[lmul](FILE*, v)` (`_k` for the masks), the C++ Functional API `mipp::dump<T, LMUL>(v)` and `mipp::dump_k<T, LMUL>(m)`.
+- `mipp::pack<T_DST>(a, b)` narrows the lanes of `a`, then the lanes of `b`, into one register of the type twice as narrow, with saturation (see [Vector Types & LMUL §5.4](vector_types_and_lmul.md#54-ncvt-narrowing-value-conversion)).
+- `mipp::reduce(v, op)` reduces the lanes of a register, and `mipp::reduce<T, LMUL>(ptr, n, op)` the `n` elements of an array (`n` $\geq 1$), with an associative and commutative operation `op(Rvd, Rvd) -> Rvd` that accepts every `LMUL`: one of `mipp::op::add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`, or a functor with a template `operator()`. `mipp::sum(v)` is `mipp::hadd(v)`.
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/programming_model/obj.cpp:utilities"
+    ```
+
+
+### 4.6. Idiomatic Coding Guidelines
 
 1. **Prefer Operator Overloads**: When an operator exists (`a + b`, `a * b`, `a == b`, `m1 & m2`), use it over named function calls for maximum readability.
 2. **Use Free Functions**: For non-operator routines (e.g. `mipp::fmadd`, `mipp::sqrt`, `mipp::min`, `mipp::store`), use free functions under `namespace mipp::`.

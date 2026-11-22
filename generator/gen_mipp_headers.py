@@ -18,6 +18,7 @@ from registry import scalar_implems
 from registry import interfaces, categories
 
 from include_gen import generate_mipp_h, _match_category
+from utils_generator import generate_utils
 from ci_generator import generate_c_interface
 from cpp_generator import generate_cpp
 from obj_generator import generate_obj
@@ -635,6 +636,7 @@ def main(argv=None):
         generate_cpp(include_manager, isa_list, all_isa_names=available_isas)
         generate_obj(include_manager, output_dir=include_gen_path)
         generate_public_headers(output_dir=include_gen_path, granularity=args.granularity)
+        generate_utils(output_dir=include_gen_path)
         print(f" Done (elapsed time: {time.perf_counter() - t0:.3f} sec)!")
 
     # Print summary table at the end

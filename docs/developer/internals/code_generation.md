@@ -14,7 +14,7 @@ The options of the script are in the [Command-Line Reference](../reference/cli.m
 | 2. Check | Cross-file validation checks (blocking) and the audits selected with `--audit` (warnings). | `helpers_headers/input_validation.py`, [Audits & Validation](../reference/audits.md) |
 | 3. Discover the ISAs | Each directory of `simd_ext/` is an ISA. `--simd-ext` keeps the selected ISAs, their `sub_isa` chain and `scalar`. The ISAs are sorted so that a `sub_isa` comes before the ISAs built on it. | `discover_and_sort_isas()` in `gen_mipp_headers.py` |
 | 4. ISA layers | One layer per ISA: `scalar` is emitted directly from `registry_scalar_implems.json`, the other ISAs go through the candidate resolution ([§2](#2-one-isa-layer)). | `simd_ext/scalar/scalar_gen.py`, `helpers_headers/c_generator.py` |
-| 5. Wrappers | The C dispatch headers, the C++ Functional and C++ Object APIs, and the public headers. | `ci_generator.py`, `cpp_generator.py`, `obj_generator.py`, `generate_public_headers()` |
+| 5. Wrappers | The C dispatch headers, the C++ Functional and C++ Object APIs, the public headers, and the hand-written utilities of the three APIs (`mipp/{c,cpp,obj}/utils.h(pp)`). | `ci_generator.py`, `cpp_generator.py`, `obj_generator.py`, `generate_public_headers()`, `utils_generator.py` |
 | 6. Summary | The table of the implementation levels per ISA ([§6](#6-summary-table)). | `print_summary_table()` in `gen_mipp_headers.py` |
 
 `--layers` selects the layers of steps 4 and 5; the other steps always run.
@@ -162,3 +162,4 @@ At the end of a run, `print_summary_table()` reads the generated `simd_ext/<isa>
 | `codegen/implem_tracker.py` | Implementation status per function, datatype and mask variant (read by the dependency and include resolution). |
 | `include_gen.py` | `IncludeManager`: files, includes and umbrella headers ([Header Layout](header_layout.md)). |
 | `ci_generator.py`, `cpp_generator.py`, `obj_generator.py` | C dispatch headers, C++ Functional API, C++ Object API. |
+| `utils_generator.py` | Utilities written by hand in `templates/` (aligned allocation, printing, `sum`, `pack`, `reduce`): `include/mipp/{c,cpp,obj}/utils.h(pp)`, one `dump` function per datatype and LMUL in C. |

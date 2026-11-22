@@ -35,7 +35,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `transpose`, `transpose8x8`, `transpose2`, `transpose28x8`: Register-block transposes (a few datatypes and ISAs only in MIPPv1). Postponed with the register tuples.
 - [ ] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`).
 - [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation, done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
-- [x] `pack`: Saturating register narrowing: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs.
+- [x] `pack`: Saturating register narrowing from two inputs: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs, and `mipp::pack<T_DST>(a, b)` = `ncvts(combine(a, b))` in the C++ APIs.
   > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`low`/`high`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
@@ -43,17 +43,17 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `lshiftr`, `rshiftr`: Variable element-wise vector-by-vector left and right logical/arithmetic bit shifts (where shift counts vary per lane, e.g., `_mm256_sllv_epi32`).
 
 ### 1.5. Memory Management & Dynamic Buffers
-- [ ] `isAligned`: Pointer alignment verification against target ISA alignment constraints (`MIPP_REQUIRED_ALIGNMENT`).
+- [x] `isAligned`: `mipp_is_aligned(p)` / `mipp::is_aligned(p)` against `MIPP_REQUIRED_ALIGNMENT` (the register size).
 - [x] `oloadu`: The unaligned load that returns a register object (`Reg<T>`), not a load with an offset: covered by the Object API (`mipp::Rvd<T>` constructors and `mipp::loadu`).
-- [ ] `malloc`, `free`: Alignment-aware heap allocation wrappers ensuring memory conforms to target ISA alignment constraints (`MIPP_REQUIRED_ALIGNMENT`).
-- [ ] `mipp::allocator<T>`: STL-compliant allocator ensuring aligned dynamic allocations for `std::vector`.
-- [ ] `mipp::vector<T>`: Type alias for `std::vector<T, mipp::allocator<T>>`.
+- [x] `malloc`, `free`: `mipp_malloc` / `mipp_free` (C), `mipp::malloc<T>` / `mipp::free` (C++).
+- [x] `mipp::allocator<T>`: STL-compliant allocator ensuring aligned dynamic allocations for `std::vector`.
+- [x] `mipp::vector<T>`: Type alias for `std::vector<T, mipp::allocator<T>>`.
 
 ### 1.6. Reductions, Aliases & Diagnostics
-- [ ] `reduction<T, OP>`: Higher-order template reduction engine evaluating arbitrary associative binary operators (`OP`) across vectors and raw array buffers.
-- [ ] `sum`: Reduction alias for horizontal addition (`hadd`).
+- [x] `reduction<T, OP>`: `mipp::reduce(v, op)` and `mipp::reduce<T, LMUL>(ptr, n, op)` in the Object API, with the operations of `mipp::op` (`add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`) or any functor.
+- [x] `sum`: Reduction alias for horizontal addition (`hadd`), C++ APIs.
 - [ ] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation. Planned as `clamp(v, lo, hi)`.
-- [ ] `dump`: Formatted debug printing of vector and mask register contents to standard output streams.
+- [x] `dump`: `mipp_dump_<type>[_<lmul>]` / `mipp_fdump_...` (C, `_k` for the masks), `mipp::dump<T, LMUL>` / `mipp::dump_k` (C++ Functional), `operator<<` on `Rvd` and `Rvm` (C++ Object).
 - [x] `neg(r, s)`, `copysign(r, s)`, `sign(r)`: `xorsign(a, b)` (negates `a` where `b` is negative: the MIPPv1 `neg` / `copysign`), `copysign(a, b)` (IEEE: magnitude of `a`, sign of `b`) and `signbit(v)` (mask of the negative lanes, including -0.0).
 - [x] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`, native on every ISA (movemask, testz/testc, kortest, maxv/minv, ptest, vcpop).
 

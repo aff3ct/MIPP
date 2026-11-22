@@ -1221,6 +1221,8 @@ def generate_mipp_h(include_manager=None):
     for func in interfaces:
         category = _match_category(func)
         include_list += f'#include "mipp/internal/interfaces/c/functions/{category}/{func}.h"\n'
+    # hand-written utilities (aligned allocation, printing): utils_generator.py
+    include_list += '#include "mipp/c/utils.h"\n'
     postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
 
     template_file += include_list + "\n" + postfix

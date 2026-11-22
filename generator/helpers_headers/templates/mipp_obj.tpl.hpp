@@ -2,6 +2,8 @@
 
 #include <cstring>
 #include <type_traits>
+#include <initializer_list>
+#include <stdexcept>
 #include "mipp/internal/interfaces/cpp/common.hpp"
 #include "mipp/internal/interfaces/cpp/functions/load/loadu.hpp"
 #include "mipp/internal/interfaces/cpp/functions/load/set1.hpp"
@@ -55,10 +57,25 @@ struct Rvd
 
 	static constexpr int N() { return mipp::N<T, LMUL>(); }
 
+	static inline rvd<T, LMUL> from_list(std::initializer_list<T> l)
+	{
+		if (l.size() == 1)
+			return mipp::set1<T, LMUL>(*l.begin());
+		if (l.size() != (size_t)N())
+			throw std::invalid_argument("mipp::Rvd: the initializer list must have 1 or N() values");
+		T buf[N()];
+		size_t i = 0;
+		for (const T v : l)
+			buf[i++] = v;
+		return mipp::loadu<T, LMUL>(buf);
+	}
+
 	inline Rvd() = default;
 	inline Rvd(rvd<T, LMUL> r0) : r(r0) {}
 	inline Rvd(const T val) : r(mipp::set1<T, LMUL>(val)) {}
 	inline Rvd(const T *p0) : r(mipp::loadu<T, LMUL>(p0)) {}
+	// The lanes in order, {l0, l1, ...} (N() values), or a single value broadcast to every lane ({val}, as Rvd(val))
+	inline Rvd(std::initializer_list<T> l) : r(from_list(l)) {}
 
 	// Implicit conversion to underlying functional SIMD register (C++ Func interop)
 	inline operator rvd<T, LMUL>() const { return this->r; }
@@ -83,10 +100,25 @@ struct Rvm
 
 	static constexpr int N() { return mipp::N<T, LMUL>(); }
 
+	static inline rvm<T, LMUL> from_list(std::initializer_list<bool> l)
+	{
+		if (l.size() == 1)
+			return mipp::set1_k<T, LMUL>(*l.begin() ? 1 : 0);
+		if (l.size() != (size_t)N())
+			throw std::invalid_argument("mipp::Rvm: the initializer list must have 1 or N() values");
+		int32_t vals[N()];
+		size_t i = 0;
+		for (const bool b : l)
+			vals[i++] = b ? -1 : 0;
+		return mipp::set_k<T, LMUL>(vals);
+	}
+
 	inline Rvm() = default;
 	inline Rvm(rvm<T, LMUL> m0) : m(m0) {}
 	inline Rvm(const bool val) : m(mipp::set1_k<T, LMUL>(val ? 1 : 0)) {}
 	inline Rvm(const int32_t vals[mipp::N<T, LMUL>()]) : m(mipp::set_k<T, LMUL>(vals)) {}
+	// The lanes in order, {b0, b1, ...} (N() values), or a single value broadcast to every lane ({b}, as Rvm(b))
+	inline Rvm(std::initializer_list<bool> l) : m(from_list(l)) {}
 	// A bool array would decay to bool* then silently convert to `true` through Rvm(bool): forbid it
 	Rvm(const bool*) = delete;
 
