@@ -148,6 +148,13 @@
             "template": "any_cpop"
         }
     ],
+    "broadcast_lane": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vx"
+        }
+    ],
     "cast": [
         {
             "instr_name": "vreinterpret",

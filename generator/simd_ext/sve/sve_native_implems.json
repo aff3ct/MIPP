@@ -103,6 +103,13 @@
             "template": "form_n_z"
         }
     ],
+    "broadcast_lane": [
+        {
+            "instr_name": "dup_lane",
+            "datatypes": "all_datatypes",
+            "template": "rea_dup_lane"
+        }
+    ],
     "cast": [
         {
             "instr_name": "reinterpret",
@@ -289,6 +296,20 @@
             "datatypes": "all_float",
             "variant": "z",
             "template": "form_n_z"
+        }
+    ],
+    "dup_even": [
+        {
+            "instr_name": "trn1",
+            "datatypes": "all_datatypes",
+            "template": "rea_self2"
+        }
+    ],
+    "dup_odd": [
+        {
+            "instr_name": "trn2",
+            "datatypes": "all_datatypes",
+            "template": "rea_self2"
         }
     ],
     "fmadd": [
@@ -599,6 +620,13 @@
             "template": "form_n_z"
         }
     ],
+    "reverse": [
+        {
+            "instr_name": "rev",
+            "datatypes": "all_datatypes",
+            "template": "rea_1"
+        }
+    ],
     "round": [
         {
             "instr_name": "rinta",
@@ -807,6 +835,20 @@
             "template": "un_s"
         }
     ],
+    "unzip_even": [
+        {
+            "instr_name": "uzp1",
+            "datatypes": "all_datatypes",
+            "template": "rea_2"
+        }
+    ],
+    "unzip_odd": [
+        {
+            "instr_name": "uzp2",
+            "datatypes": "all_datatypes",
+            "template": "rea_2"
+        }
+    ],
     "xorb": [
         {
             "instr_name": "eor",
@@ -833,6 +875,20 @@
             "datatypes": "all_int_uint",
             "variant": "z",
             "template": "form_n_z"
+        }
+    ],
+    "zip_hi": [
+        {
+            "instr_name": "zip2",
+            "datatypes": "all_datatypes",
+            "template": "rea_2"
+        }
+    ],
+    "zip_lo": [
+        {
+            "instr_name": "zip1",
+            "datatypes": "all_datatypes",
+            "template": "rea_2"
         }
     ]
 }

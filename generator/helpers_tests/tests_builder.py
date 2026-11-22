@@ -25,7 +25,7 @@ _AUX_HEADERS = ["load", "get", "get_k", "torvd", "torvm", "set_k"]
 
 # Functions whose vector call gets a pointer shifted by one element: never aligned on the
 # register size (the scalar reference keeps the aligned buffers).
-_UNALIGNED_PTR_FUNCS = ("loadu", "storeu")
+_UNALIGNED_PTR_FUNCS = ("loadu", "storeu", "load_interleaved2", "store_interleaved2")
 
 _RE_TEST_PLACEHOLDER = re.compile(r'%([\w]+)(?:<([^>]*)>)?(?:\(([^)]*)\))?%')
 
@@ -128,6 +128,31 @@ class TestsBuilderEngine:
                 return True
         return False
 
+    def lane_index_kind(self, func_name: str) -> Optional[str]:
+        """
+        `lane_index` of the spec of the function: its scalar is a number of lanes, valid in [0, N) ("lt_n":
+        broadcast_lane, rotate) or [0, N] ("le_n": slide, slide_up, slide_down), N the number of lanes of the
+        tested register (it depends on the ISA and on the LMUL: drawn when the test runs); "lt_nb" / "le_nb": the
+        same in a block of 128 bits (the `_b128` functions).
+        """
+        return self.specs["functions"].get(func_name, {}).get("lane_index")
+
+    def lane_index_decl(self, func_name: str, size_expr: str, elem_type: str, indent: str = "\t\t") -> List[str]:
+        """
+        Declaration of `lane_k`, the lane index of the call (see lane_index_kind), from the size of the inputs (and,
+        for the blocks of 128 bits, the size of the element type `elem_type`).
+        """
+        kind = self.lane_index_kind(func_name)
+        if not kind:
+            return []
+        n = f"static_cast<int32_t>({size_expr})"
+        if kind.endswith("nb"):
+            # lanes of a block of 128 bits, or of the whole register when it is smaller
+            nb = f"static_cast<int32_t>(16 / sizeof({elem_type}))"
+            n = f"({nb} < {n} ? {nb} : {n})"
+        top = n + (" - 1" if kind.startswith("lt") else "")
+        return [f"{indent}const int32_t lane_k = rnd::uniform<int32_t>(seed, 0, {top});"]
+
     def _build_form_call_args(self, func_name: str, is_scalar: bool) -> List[str]:
         """
         Arguments of a scalar form (`sub_sv(s, r)`): the operands keep the inputs of their position in the base
@@ -176,7 +201,10 @@ class TestsBuilderEngine:
                 args.append(f"sm{msk_i}" if is_scalar else f"m{msk_i}")
                 msk_i += 1
             elif atype == "val":
-                if arg.get("fixeddatatype") in ("uint32", "uint"):
+                if self.lane_index_kind(func_name):
+                    # index of a lane (broadcast_lane, slide...): drawn at run time, see lane_index_decl
+                    args.append("lane_k")
+                elif arg.get("fixeddatatype") in ("uint32", "uint"):
                     args.append("0")
                 elif self.scalar_arg_from_inputs2(func_name):
                     args.append("inputs2[0]")
@@ -970,6 +998,7 @@ class TestsBuilderEngine:
         obj_name_map = {
             "load": "load_obj",
             "loadu": "loadu_obj",
+            "load_interleaved2": "load_interleaved2_obj",
             "set": "set_obj",
             "set0": "set0_obj",
             "set1": "set1_obj",
@@ -1291,6 +1320,7 @@ class TestsBuilderEngineC:
         body_lines.append("\t\t}")
         body_lines.append("")
         body_lines.extend(self.engine.render_unaligned_input(func_name, dt_cstd, size_var))
+        body_lines.extend(self.engine.lane_index_decl(func_name, size_var, dt_cstd))
 
         # Loads
         reg_type1 = adapter.format_reg_type(dt1_raw, lmul_suffix)
@@ -1681,6 +1711,7 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
             has_m2=True,
         ))
         lines.extend(self.engine.render_unaligned_input(func_name, "T", "size"))
+        lines.extend(self.engine.lane_index_decl(func_name, "size", "T"))
 
         lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
         lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")
@@ -1768,6 +1799,7 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
             has_m2=True,
         ))
         lines.extend(self.engine.render_unaligned_input(func_name, "T", "size"))
+        lines.extend(self.engine.lane_index_decl(func_name, "size", "T"))
 
         lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
         lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")

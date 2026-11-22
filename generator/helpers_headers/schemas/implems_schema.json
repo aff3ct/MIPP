@@ -96,6 +96,10 @@
                     "description": "`true` disables the `levels` audit for this entry.",
                     "type": "boolean"
                 },
+                "derived_form": {
+                    "description": "Name of a function: the level of the entry is the level of that function for the same datatype and mask variant (a call of the function that costs nothing more: the generic bodies of the scalar forms, `forms.py`, and the `_b128` functions of the ISAs whose register is one block of 128 bits). Set by the generator for the scalar forms.",
+                    "type": "string"
+                },
                 "skip_audit_level_reason": {
                     "description": "Why the `levels` audit is disabled (requires `skip_audit_level: true`).",
                     "type": "string"

@@ -280,6 +280,28 @@
             "return res;"
         ]
     },
+    "slide_mask_all_datatypes": {
+        "format": "long",
+        "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
+            "return %select<tp>%(m0, op, r0);"
+        ]
+    },
+    "slide_masks_all_datatypes": {
+        "format": "long",
+        "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
+            "return %select<tp>%(m0, op, rsrc);"
+        ]
+    },
+    "slide_maskz_all_datatypes": {
+        "format": "long",
+        "code": [
+            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
+            "%r<tp>% tmp = %torvd<tp>%(m0);",
+            "return %andb<tp>%(op, tmp);"
+        ]
+    },
     "store_msk": {
         "format": "long",
         "code": [

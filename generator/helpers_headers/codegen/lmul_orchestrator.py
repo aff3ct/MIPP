@@ -180,7 +180,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
         print("Panic: '" + f + "' function does not exist.")
         exit(-1)
 
-    if not funcs[f].get("horizontal", False):
+    if not (funcs[f].get("horizontal", False) or funcs[f].get("lane_crossing", False)):
         return
 
     if mask_type is not None:
@@ -190,6 +190,10 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
             exit(-1)
 
     if f not in implems_horiz_lmul_generic_emu:
+        if funcs[f].get("lane_crossing", False):
+            # the wrapper "one half after the other" would be wrong: a body is required (no silent stub)
+            print(f"Error: '{f}' is lane_crossing but has no LMUL > 1 body in generic_emu_implems_lmulh.json.")
+            exit(-1)
         name = func_name_for_panic or f
         emit_panic_stub(f"{name}_m{int(lmul)}", file=file)
         return
@@ -373,7 +377,8 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         return
 
     emit_lmul_banner(isa["name"], f, file, "emulated")
-    if not funcs[f]["horizontal"]:
+    if not (funcs[f]["horizontal"] or funcs[f].get("lane_crossing", False)):
+        # lane-wise function: each half of the result from the same half of the arguments
         print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
         print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_half_lmul, lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
         print("}", file=file)

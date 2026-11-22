@@ -190,6 +190,74 @@
             "template": "arith_2args"
         }
     ],
+    "dup_even": [
+        {
+            "instr_name": "moveldup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f"
+        },
+        {
+            "instr_name": "movedup_pd",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_dup_f"
+        },
+        {
+            "instr_name": "0xA0",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "dup_odd": [
+        {
+            "instr_name": "movehdup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f"
+        },
+        {
+            "instr_name": "0xF",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self"
+        },
+        {
+            "instr_name": "0xF5",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "fmadd": [
         {
             "instr_name": "fmadd",
@@ -537,6 +605,52 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "reverse": [
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permute4x64",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "reverse_b128": [
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_b128"
+        },
+        {
+            "instr_name": "0x5",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_b128"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_b128",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "0x4E",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_shuffle_epi32_b128",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "srlv",
@@ -809,6 +923,40 @@
             "if": "defined(__AVX2__)"
         }
     ],
+    "swap_pairs": [
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_self"
+        },
+        {
+            "instr_name": "0x5",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "0x4E",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_shuffle_epi32",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "testz": [
         {
             "instr_name": "testz",
@@ -836,6 +984,72 @@
             "template": "trunc_float"
         }
     ],
+    "unzip_even_b128": [
+        {
+            "instr_name": "0x88",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_shufps2"
+        },
+        {
+            "instr_name": "0x88",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shufps2_i"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_unpack_b128"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_b128",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "unzip_odd_b128": [
+        {
+            "instr_name": "0xDD",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_shufps2"
+        },
+        {
+            "instr_name": "0xDD",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shufps2_i"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_unpack_b128"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_b128",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "xorb": [
         {
             "instr_name": "xor",
@@ -861,6 +1075,70 @@
             "datatypes": "all_int_uint",
             "template": "logi_m_2args_ps",
             "if": "!defined(__AVX2__)"
+        }
+    ],
+    "zip_hi_b128": [
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "float64",
+                "float32"
+            ],
+            "template": "rea_unpack_b128"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int64",
+                "uint64",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_unpack_b128",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_unpack_b128",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "zip_lo_b128": [
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "float64",
+                "float32"
+            ],
+            "template": "rea_unpack_b128"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int64",
+                "uint64",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_unpack_b128",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_unpack_b128",
+            "if": "defined(__AVX2__)"
         }
     ]
 }

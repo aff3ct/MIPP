@@ -219,6 +219,38 @@
             "variant": "z"
         }
     ],
+    "dup_even": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "rea_dup_even"
+        }
+    ],
+    "dup_odd": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "rea_dup_odd"
+        }
+    ],
     "fmsub": [
         {
             "instr_name": "madd",
@@ -702,6 +734,22 @@
             "template": "pow2_sll"
         }
     ],
+    "reverse": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "rea_reverse"
+        }
+    ],
     "round": [
         {
             "instr_name": "round",
@@ -925,6 +973,20 @@
             "template": "set_k"
         }
     ],
+    "slide": [
+        {
+            "instr_name": "vslide",
+            "datatypes": "all_datatypes",
+            "template": "rea_slide"
+        }
+    ],
+    "slide_up": [
+        {
+            "instr_name": "vslideup",
+            "datatypes": "all_datatypes",
+            "template": "rea_slide_up"
+        }
+    ],
     "sqrt": [
         {
             "instr_name": "fsqrt",
@@ -977,11 +1039,41 @@
             "variant": "z"
         }
     ],
+    "swap_pairs": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "rea_swap_pairs"
+        }
+    ],
     "trunc": [
         {
             "instr_name": "trunc",
             "datatypes": "all_float",
             "template": "trunc_float_rtz"
+        }
+    ],
+    "unzip_even": [
+        {
+            "instr_name": "0",
+            "datatypes": "all_datatypes",
+            "template": "rea_unzip"
+        }
+    ],
+    "unzip_odd": [
+        {
+            "instr_name": "1",
+            "datatypes": "all_datatypes",
+            "template": "rea_unzip"
         }
     ],
     "xorb": [
@@ -995,6 +1087,38 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        }
+    ],
+    "zip_hi": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "rea_zip_hi"
+        }
+    ],
+    "zip_lo": [
+        {
+            "instr_name": "vrgather",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "int16",
+                "uint64",
+                "uint32",
+                "uint16"
+            ],
+            "template": "rea_zip_lo"
         }
     ]
 }

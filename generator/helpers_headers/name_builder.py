@@ -9,6 +9,11 @@ import os
 # Import tools module to avoid circular dependency at load-time
 import tools
 
+# Functions that only take a pointer and return a register: the C++ functions are specializations of a template
+# <T, LMUL, ISA> (the LMUL cannot be deduced from the arguments), like the set functions.
+LOAD_FUNCS = ("load", "loadu", "load_interleaved2")
+
+
 def lmul_suffix(lmul, isa_name=True):
     """
     Suffix of the name of a type or of a function for a given LMUL (`_m2`, `_d2`...).
@@ -441,7 +446,7 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
     isa_type = "DEFAULT_ISA"
     if isa_name:
         isa_type = isa["name"].upper()
-    if func_name == "load" or func_name == "loadu":
+    if func_name in LOAD_FUNCS:
         dt_par = f"{dt_ret}_t"
         template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
         if masked_version:
@@ -522,7 +527,7 @@ def gen_set_func_error(func_name, file):
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}();", file=file)
     if func_name == "set1_k":
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t s0);", file=file)
-    if func_name == "load" or func_name == "loadu":
+    if func_name in LOAD_FUNCS:
         print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0);", file=file)
 
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
@@ -533,7 +538,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
         return  build_proto_set(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if func_name =="set1_k" or func_name =="set1":
         return  build_proto_set1(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
-    if func_name =="load" or func_name =="loadu":
+    if func_name in LOAD_FUNCS:
         return  build_proto_load(dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
     if "gather" in func_name and masked_version and cpp:
         return  build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'

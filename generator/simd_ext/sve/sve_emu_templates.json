@@ -140,6 +140,10 @@
             "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
         ]
     },
+    "rea_splice": {
+        "format": "short",
+        "code": "{{ isa.prefix }}splice_{{ isa_dt_par.data_ext }}({{ isa.prefix }}not_b_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {{ isa.prefix }}whilelt_{{ isa_dt_par.data_ext_logi }}_s32(0, s0)), r0.r, r1.r);"
+    },
     "reduce": {
         "format": "long",
         "code": [

@@ -15,6 +15,16 @@
             "if": "defined(__aarch64__)"
         }
     ],
+    "broadcast_lane_b128": [
+        {
+            "instr_name": "broadcast_lane",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_broadcast_lane",
+            "derived_form": "broadcast_lane",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",
@@ -281,6 +291,41 @@
             "template": "pow2_shl"
         }
     ],
+    "reverse": [
+        {
+            "instr_name": "rev",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_reverse"
+        }
+    ],
+    "reverse_b128": [
+        {
+            "instr_name": "reverse",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_reverse",
+            "derived_form": "reverse",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
+    "rotate_b128": [
+        {
+            "instr_name": "rotate",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_rotate",
+            "derived_form": "rotate",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "shlq",
@@ -325,6 +370,36 @@
             "template": "shift_var"
         }
     ],
+    "slide_b128": [
+        {
+            "instr_name": "slide",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_slide",
+            "derived_form": "slide",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
+    "slide_down_b128": [
+        {
+            "instr_name": "slide_down",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_slide_down",
+            "derived_form": "slide_down",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
+    "slide_up_b128": [
+        {
+            "instr_name": "slide_up",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_slide_up",
+            "derived_form": "slide_up",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
     "sqrt": [
         {
             "instr_name": "sqrt",
@@ -354,6 +429,46 @@
             "instr_name": "torvm",
             "datatypes": "all_64bit",
             "template": "torvm_64"
+        }
+    ],
+    "unzip_even_b128": [
+        {
+            "instr_name": "unzip_even",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_unzip_even",
+            "derived_form": "unzip_even",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
+    "unzip_odd_b128": [
+        {
+            "instr_name": "unzip_odd",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_unzip_odd",
+            "derived_form": "unzip_odd",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
+    "zip_hi_b128": [
+        {
+            "instr_name": "zip_hi",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_zip_hi",
+            "derived_form": "zip_hi",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
+        }
+    ],
+    "zip_lo_b128": [
+        {
+            "instr_name": "zip_lo",
+            "datatypes": "all_datatypes",
+            "template": "rea_b128_zip_lo",
+            "derived_form": "zip_lo",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ]
 }

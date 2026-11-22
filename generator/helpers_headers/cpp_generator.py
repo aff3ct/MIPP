@@ -183,7 +183,7 @@ def _cpp_base_name(funcs, f):
     return funcs[f].get("cpp_name", f)
 
 
-set_functions = ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]
+set_functions = ["set0", "set0_k", "set", "set_k", "set1", "set1_k"] + list(LOAD_FUNCS)
 
 
 # duplicate of c_generator ...

@@ -171,6 +171,46 @@
         "format": "short",
         "code": "_mm256_maskstore_{% if dt_par.category == 'float' %}{{ isa_dt_par.data_ext }}{% else %}epi{{ dt_par.n_bits }}{% endif %}(({% if dt_par.n_bits == 64 and dt_par.category != 'float' %}long long{% elif dt_par.category != 'float' %}int{% else %}{{ isa_dt_par.to_ptr }}{% endif %}*)p0, {% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(m0.m){% else %}m0.m{% endif %}, r0.r);"
     },
+    "rea_dup_f": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+    },
+    "rea_permute4x64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permute4x64_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(r0.r, {{ instr_name }});"
+    },
+    "rea_permute_b128": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(r0.r, {{ instr_name }});"
+    },
+    "rea_permute_self": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(r0.r, {{ instr_name }});"
+    },
+    "rea_shuffle_epi32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, {{ instr_name }});"
+    },
+    "rea_shuffle_epi32_b128": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, {{ instr_name }});"
+    },
+    "rea_shufps2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_ps(r0.r, r1.r, {{ instr_name }});"
+    },
+    "rea_shufps2_i": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_castps_si256({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi256_ps(r0.r), {{ isa.prefix }}_castsi256_ps(r1.r), {{ instr_name }}));"
+    },
+    "rea_unpack_b128": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r1.r);"
+    },
+    "rea_unpack_self": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi64(r0.r, r0.r);"
+    },
     "select_float": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r, r0.r, m0.m);"

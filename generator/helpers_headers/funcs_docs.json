@@ -63,6 +63,14 @@
     "description": "Computes the inverse hyperbolic tangent of each floating-point element.",
     "latex": "\\text{res}_i = \\operatorname{artanh}(r0_i)"
   },
+  "broadcast_lane": {
+    "description": "Copies the lane `s0` to every lane (0 <= s0 < N, the number of lanes of the LMUL group; other values are undefined behavior).",
+    "latex": "\\text{res}_i = r0_{s0}"
+  },
+  "broadcast_lane_b128": {
+    "description": "Copies the lane `s0` of each block of 128 bits to the lanes of the block (0 <= s0 < number of lanes of a block).",
+    "latex": "\\text{res}_{b+l} = r0_{b + s0}"
+  },
   "cast": {
     "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",
     "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{rvd}\\langle T_{\\text{dst}}\\rangle \\rangle(r0)"
@@ -123,6 +131,10 @@
     "description": "Converts elements of a vector register to another datatype with numerical casting.",
     "latex": "\\text{res}_i = (T_{\\text{dst}}) r0_i"
   },
+  "deinterleave": {
+    "description": "Separates the even and the odd lanes: the even lanes in the lower half, the odd lanes in the upper half (interleaved to planar layout, MIPPv1 `deinterleave`).",
+    "latex": "\\text{res}_k = r0_{2k},\\ \\text{res}_{N/2+k} = r0_{2k+1}"
+  },
   "div": {
     "description": "Divides the first vector register by the second element-wise.",
     "latex": "\\text{res}_i = \\frac{r0_i}{r1_i}"
@@ -134,6 +146,14 @@
   "div4": {
     "description": "Divides each element of a vector register by 4 (via arithmetic shift for integers or multiplication/division for floats).",
     "latex": "\\text{res}_i = \\frac{r0_i}{4}"
+  },
+  "dup_even": {
+    "description": "Copies each even lane to the next odd lane: lanes 2k and 2k+1 both receive the lane 2k.",
+    "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = r0_{2k}"
+  },
+  "dup_odd": {
+    "description": "Copies each odd lane to the previous even lane: lanes 2k and 2k+1 both receive the lane 2k+1. A register of a single lane is unchanged.",
+    "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = r0_{2k+1}"
   },
   "exp": {
     "description": "Computes the base-e exponential of each floating-point element.",
@@ -199,9 +219,17 @@
     "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register.",
     "latex": "\\text{res} = \\prod_{i=0}^{N-1} r0_i"
   },
+  "interleave": {
+    "description": "Interleaves the two halves of the register: the lane 2k receives the lane k, the lane 2k+1 the lane N/2 + k (planar to interleaved layout, MIPPv1 `interleave`; the inverse of `deinterleave`).",
+    "latex": "\\text{res}_{2k} = r0_k,\\ \\text{res}_{2k+1} = r0_{N/2+k}"
+  },
   "load": {
     "description": "Loads elements from an aligned memory address into a vector register.",
     "latex": "\\text{res}_i = \\text{p0}[i]"
+  },
+  "load_interleaved2": {
+    "description": "Loads N elements (no alignment required) and separates the even and the odd ones: the even elements in the lower half of the register, the odd ones in the upper half (`deinterleave(loadu(p))`; with LMUL 2, the two LMUL 1 halves are the even and the odd elements of 2N elements, as ARM `vld2`).",
+    "latex": "\\text{res}_k = p_{2k},\\ \\text{res}_{N/2+k} = p_{2k+1}"
   },
   "loadu": {
     "description": "Loads elements from an unaligned memory address into a vector register.",
@@ -283,6 +311,22 @@
     "description": "Computes 2 raised to the power of each vector element.",
     "latex": "\\text{res}_i = 2^{r0_i}"
   },
+  "reverse": {
+    "description": "Reverses the order of the lanes of the register (of the whole LMUL group).",
+    "latex": "\\text{res}_i = r0_{N-1-i}"
+  },
+  "reverse_b128": {
+    "description": "Reverses the order of the lanes in each block of 128 bits (the whole register when it is smaller).",
+    "latex": "\\text{res}_{b+l} = r0_{b + n_b - 1 - l}"
+  },
+  "rotate": {
+    "description": "Rotates the lanes down by `s0` (0 <= s0 < N): the lane i receives the lane (i + s0) mod N.",
+    "latex": "\\text{res}_i = r0_{(i + s0) \\bmod N}"
+  },
+  "rotate_b128": {
+    "description": "`rotate` in each block of 128 bits (0 <= s0 < number of lanes of a block).",
+    "latex": "\\text{res}_{b+l} = r0_{b + (l + s0) \\bmod n_b}"
+  },
   "round": {
     "description": "Rounds each floating-point element to the nearest integer.",
     "latex": "\\text{res}_i = \\operatorname{round}(r0_i)"
@@ -343,6 +387,30 @@
     "description": "Computes the hyperbolic sine of each floating-point element.",
     "latex": "\\text{res}_i = \\sinh(r0_i)"
   },
+  "slide": {
+    "description": "Window of N lanes at the position `s0` (0 <= s0 <= N) of the concatenation of the two registers: the lanes s0 to N-1 of r0, then the lanes 0 to s0-1 of r1 (MIPPv1 `combine<S>`; x86 `alignr`, ARM `ext`).",
+    "latex": "\\text{res}_i = (r0 \\| r1)_{i + s0}"
+  },
+  "slide_b128": {
+    "description": "`slide` in each block of 128 bits: the window at `s0` of the concatenation of the blocks of r0 and r1 (0 <= s0 <= number of lanes of a block; x86 `alignr`).",
+    "latex": "\\text{res}_{b+l} = (r0_b \\| r1_b)_{l + s0}"
+  },
+  "slide_down": {
+    "description": "Moves the lanes down by `s0` (0 <= s0 <= N): the lane i receives the lane i + s0, the lanes from N - s0 are zero.",
+    "latex": "\\text{res}_i = i + s0 < N\\ ?\\ r0_{i + s0} : 0"
+  },
+  "slide_down_b128": {
+    "description": "`slide_down` in each block of 128 bits, zeros entering at the top of each block (x86 `psrldq`).",
+    "latex": "\\text{res}_{b+l} = l + s0 < n_b\\ ?\\ r0_{b+l+s0} : 0"
+  },
+  "slide_up": {
+    "description": "Moves the lanes up by `s0` (0 <= s0 <= N): the lane i receives the lane i - s0, the lanes below s0 are zero.",
+    "latex": "\\text{res}_i = i \\ge s0\\ ?\\ r0_{i - s0} : 0"
+  },
+  "slide_up_b128": {
+    "description": "`slide_up` in each block of 128 bits, zeros entering at the bottom of each block (x86 `pslldq`).",
+    "latex": "\\text{res}_{b+l} = l \\ge s0\\ ?\\ r0_{b+l-s0} : 0"
+  },
   "sqrt": {
     "description": "Computes the square root of each element in a vector register.",
     "latex": "\\text{res}_i = \\sqrt{r0_i}"
@@ -350,6 +418,10 @@
   "store": {
     "description": "Stores vector elements into an aligned memory address.",
     "latex": "\\text{p0}[i] = r0_i"
+  },
+  "store_interleaved2": {
+    "description": "Interleaves the two halves of the register and stores the N elements (no alignment required): `storeu(p, interleave(r))`, the inverse of `load_interleaved2` (ARM `vst2`).",
+    "latex": "p_{2k} = r0_k,\\ p_{2k+1} = r0_{N/2+k}"
   },
   "storeu": {
     "description": "Stores vector elements into an unaligned memory address.",
@@ -362,6 +434,10 @@
   "subs": {
     "description": "Subtracts two integer vector registers element-wise with saturation to [MIN, MAX] on underflow/overflow.",
     "latex": "\\text{res}_i = \\operatorname{saturate}(r0_i - r1_i)"
+  },
+  "swap_pairs": {
+    "description": "Swaps the lanes of each pair (lanes 2k and 2k+1). A register of a single lane is unchanged.",
+    "latex": "\\text{res}_i = r0_{i \\oplus 1}"
   },
   "tan": {
     "description": "Computes the trigonometric tangent of each floating-point element in radians.",
@@ -387,6 +463,22 @@
     "description": "Truncates each floating-point element toward zero.",
     "latex": "\\text{res}_i = \\operatorname{trunc}(r0_i)"
   },
+  "unzip_even": {
+    "description": "Even lanes of the concatenation of the two registers: r0[0], r0[2]... then r1[0], r1[2]... (with `low` / `high`, the even lanes of a register of twice the LMUL; ARM `uzp1`).",
+    "latex": "\\text{res}_i = (r0 \\| r1)_{2i}"
+  },
+  "unzip_even_b128": {
+    "description": "`unzip_even` in each block of 128 bits (x86 `shufps` with the even lanes).",
+    "latex": "\\text{res}_{b+l} = (r0_b \\| r1_b)_{2l}"
+  },
+  "unzip_odd": {
+    "description": "Odd lanes of the concatenation of the two registers: r0[1], r0[3]... then r1[1], r1[3]... (ARM `uzp2`).",
+    "latex": "\\text{res}_i = (r0 \\| r1)_{2i+1}"
+  },
+  "unzip_odd_b128": {
+    "description": "`unzip_odd` in each block of 128 bits.",
+    "latex": "\\text{res}_{b+l} = (r0_b \\| r1_b)_{2l+1}"
+  },
   "wcvt": {
     "description": "Widening conversion: converts vector elements to a wider datatype.",
     "latex": "\\text{res}_i = (T_{\\text{wide}}) r0_i"
@@ -402,5 +494,21 @@
   "xorsign": {
     "description": "Negates each element of the first register where the element of the second register is negative (sign bit set).",
     "latex": "\\text{res}_i = \\begin{cases} -r0_i & \\text{if } r1_i < 0 \\\\ r0_i & \\text{otherwise} \\end{cases}"
+  },
+  "zip_hi": {
+    "description": "Interleaves the lanes of the upper halves of the two registers: r0[N/2], r1[N/2], r0[N/2+1]... (the second half of `zip`).",
+    "latex": "\\text{res}_{2k} = r0_{N/2+k},\\ \\text{res}_{2k+1} = r1_{N/2+k}"
+  },
+  "zip_hi_b128": {
+    "description": "`zip_hi` in each block of 128 bits: interleaves the lanes of the upper halves of the blocks (x86 `unpackhi`).",
+    "latex": "\\text{res}_{b+2k} = r0_{b+n_b/2+k},\\ \\text{res}_{b+2k+1} = r1_{b+n_b/2+k}"
+  },
+  "zip_lo": {
+    "description": "Interleaves the lanes of the lower halves of the two registers: r0[0], r1[0], r0[1], r1[1]... (the first half of `zip`).",
+    "latex": "\\text{res}_{2k} = r0_k,\\ \\text{res}_{2k+1} = r1_k"
+  },
+  "zip_lo_b128": {
+    "description": "`zip_lo` in each block of 128 bits: interleaves the lanes of the lower halves of the blocks (x86 `unpacklo`).",
+    "latex": "\\text{res}_{b+2k} = r0_{b+k},\\ \\text{res}_{b+2k+1} = r1_{b+k}"
   }
 }

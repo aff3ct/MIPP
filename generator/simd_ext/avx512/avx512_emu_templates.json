@@ -68,6 +68,30 @@
             "return res;"
         ]
     },
+    "rea_perm2_32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(r0.r, {{ isa.prefix }}_set_epi32({{ instr_name }}), r1.r);"
+    },
+    "rea_perm2_64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(r0.r, {{ isa.prefix }}_set_epi64({{ instr_name }}), r1.r);"
+    },
+    "rea_perm_32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}({{ isa.prefix }}_set_epi32({{ instr_name }}), r0.r);"
+    },
+    "rea_perm_64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}({{ isa.prefix }}_set_epi64({{ instr_name }}), r0.r);"
+    },
+    "rea_reverse_b128_epi16": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm512_set_epi8(1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14, 1, 0, 3, 2, 5, 4, 7, 6, 9, 8, 11, 10, 13, 12, 15, 14));"
+    },
+    "rea_reverse_b128_epi8": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm512_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));"
+    },
     "reduce_16": {
         "format": "long",
         "code": [

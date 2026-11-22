@@ -130,6 +130,87 @@
             "return res;"
         ]
     },
+    "rea_b128_broadcast_lane": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %broadcast_lane<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_reverse": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %reverse<tp>%(r0);"
+        ]
+    },
+    "rea_b128_rotate": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %rotate<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_slide": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %slide<tp>%(r0, r1, s0);"
+        ]
+    },
+    "rea_b128_slide_down": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %slide_down<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_slide_up": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %slide_up<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_unzip_even": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %unzip_even<tp>%(r0, r1);"
+        ]
+    },
+    "rea_b128_unzip_odd": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %unzip_odd<tp>%(r0, r1);"
+        ]
+    },
+    "rea_b128_zip_hi": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %zip_hi<tp>%(r0, r1);"
+        ]
+    },
+    "rea_b128_zip_lo": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %zip_lo<tp>%(r0, r1);"
+        ]
+    },
+    "rea_reverse": {
+        "format": "long",
+        "code": [
+            "// the lanes reversed in each 64-bit half, then the halves swapped",
+            "%r<tp>% t;",
+            "t.r = {{ isa.prefix }}rev64q_{{ isa_dt_par.data_ext }}(r0.r);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}extq_{{ isa_dt_par.data_ext }}(t.r, t.r, {{ 64 // dt_par.n_bits }});",
+            "return res;"
+        ]
+    },
     "reduce_64": {
         "format": "long",
         "code": [

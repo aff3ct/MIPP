@@ -83,6 +83,34 @@
             "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m) == 0;"
         ]
     },
+    "rea_shuf_epi32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, {{ instr_name }});"
+    },
+    "rea_shuf_pd": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_pd(r0.r, r0.r, {{ instr_name }});"
+    },
+    "rea_shuf_ps": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_ps(r0.r, r0.r, {{ instr_name }});"
+    },
+    "rea_shufps2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_ps(r0.r, r1.r, {{ instr_name }});"
+    },
+    "rea_shufps2_i": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_castps_si128({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi128_ps(r0.r), {{ isa.prefix }}_castsi128_ps(r1.r), {{ instr_name }}));"
+    },
+    "rea_unpack": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r1.r);"
+    },
+    "rea_unpack_self": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r0.r);"
+    },
     "select_blendv": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(r1.r, r0.r, m0.m);"

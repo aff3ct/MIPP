@@ -516,6 +516,11 @@
                     "description": "`false`: the function has no C++ Object API overload, the Object test is commented out.",
                     "type": "boolean"
                 },
+                "lane_index": {
+                    "description": "The scalar argument is a number of lanes (index of a lane, offset of a slide): drawn at run time in [0, N) (`lt_n`: `broadcast_lane`, `rotate`) or [0, N] (`le_n`: `slide`, `slide_up`, `slide_down`), N being the number of lanes of the tested register (it depends on the ISA and on the LMUL); `lt_nb` / `le_nb`: the same with the number of lanes of a block of 128 bits (the `_b128` functions). Overrides `input_domain` for this argument.",
+                    "type": "string",
+                    "enum": ["lt_n", "le_n", "lt_nb", "le_nb"]
+                },
                 "mask_pattern": {
                     "description": "Values of the input masks: `uniform_bool` (random), `alternating` (even lanes), `sparse` (one lane in four), `dense` (three lanes in four), `all_true`, `all_false`, or `reduction_cycle` (a different case at each iteration: all true, all false, all true but one lane, only one lane true, random; for the mask reductions such as `any` and `all`).",
                     "type": "string",

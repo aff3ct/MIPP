@@ -413,6 +413,14 @@
             },
             "comparison": "tolerance"
         },
+        "broadcast_lane": {
+            "support_obj": true,
+            "lane_index": "lt_n"
+        },
+        "broadcast_lane_b128": {
+            "support_obj": true,
+            "lane_index": "lt_nb"
+        },
         "cast": {
             "comparison": "bitwise"
         },
@@ -561,6 +569,9 @@
             },
             "comparison": "tolerance"
         },
+        "deinterleave": {
+            "support_obj": true
+        },
         "div": {
             "support_obj": true,
             "input_domain": [
@@ -600,6 +611,12 @@
                 }
             },
             "comparison": "tolerance"
+        },
+        "dup_even": {
+            "support_obj": true
+        },
+        "dup_odd": {
+            "support_obj": true
         },
         "exp": {
             "domain": {
@@ -769,6 +786,12 @@
                     }
                 }
             }
+        },
+        "interleave": {
+            "support_obj": true
+        },
+        "load_interleaved2": {
+            "support_obj": true
         },
         "log": {
             "domain": {
@@ -954,6 +977,20 @@
                 }
             },
             "comparison": "tolerance"
+        },
+        "reverse": {
+            "support_obj": true
+        },
+        "reverse_b128": {
+            "support_obj": true
+        },
+        "rotate": {
+            "support_obj": true,
+            "lane_index": "lt_n"
+        },
+        "rotate_b128": {
+            "support_obj": true,
+            "lane_index": "lt_nb"
         },
         "round": {
             "special_values": {
@@ -1153,6 +1190,30 @@
             },
             "comparison": "tolerance"
         },
+        "slide": {
+            "support_obj": true,
+            "lane_index": "le_n"
+        },
+        "slide_b128": {
+            "support_obj": true,
+            "lane_index": "le_nb"
+        },
+        "slide_down": {
+            "support_obj": true,
+            "lane_index": "le_n"
+        },
+        "slide_down_b128": {
+            "support_obj": true,
+            "lane_index": "le_nb"
+        },
+        "slide_up": {
+            "support_obj": true,
+            "lane_index": "le_n"
+        },
+        "slide_up_b128": {
+            "support_obj": true,
+            "lane_index": "le_nb"
+        },
         "sqrt": {
             "domain": {
                 "strictly_positive": true
@@ -1163,6 +1224,9 @@
             },
             "comparison": "tolerance",
             "nan_inf_skip": true
+        },
+        "store_interleaved2": {
+            "support_obj": true
         },
         "sub": {
             "overflow_check": "sub",
@@ -1341,6 +1405,9 @@
                 }
             }
         },
+        "swap_pairs": {
+            "support_obj": true
+        },
         "tan": {
             "domain": {
                 "min": -1.4,
@@ -1384,6 +1451,18 @@
         },
         "torvd": {
             "comparison": "bitwise"
+        },
+        "unzip_even": {
+            "support_obj": true
+        },
+        "unzip_even_b128": {
+            "support_obj": true
+        },
+        "unzip_odd": {
+            "support_obj": true
+        },
+        "unzip_odd_b128": {
+            "support_obj": true
         },
         "xorb": {
             "comparison": "bitwise",
@@ -1432,6 +1511,18 @@
                     ]
                 }
             }
+        },
+        "zip_hi": {
+            "support_obj": true
+        },
+        "zip_hi_b128": {
+            "support_obj": true
+        },
+        "zip_lo": {
+            "support_obj": true
+        },
+        "zip_lo_b128": {
+            "support_obj": true
         }
     }
 }

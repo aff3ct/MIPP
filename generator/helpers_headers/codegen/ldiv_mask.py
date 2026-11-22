@@ -283,6 +283,55 @@ def _wrapper_body_memcpy(ctx, params):
     return "\n".join(lines)
 
 
+def _lane_crossing_body(ctx, params):
+    """
+    d2 body of a function that moves lanes across the register (`lane_crossing`: reverse, slide, zip_lo...): the
+    LMUL 1 function would read the upper lanes, which hold garbage. Unmasked: Level 3, through the d2 function of the
+    scalar ISA (the lanes of the d2 register are copied to its array, and back). Masked: the unmasked d2 function,
+    then the d2 `select` (lane-wise) of the mask variant.
+    """
+    from registry import scalar_isa
+    lines = []
+    d2 = lambda name, dt=None: build_func_name_internal(ctx.isa, ctx.dt, dt or ctx.dt_par, dt or ctx.dt_ret, name,
+                                                         lmul=-2)
+    if ctx.mask_kind:
+        args = [p["name"] for p in params if p["name"] not in ("m0", "rsrc")]
+        unmasked = build_func_name_internal(ctx.isa, ctx.dt, ctx.dt_par, ctx.dt_ret, ctx.f, lmul=-2)
+        ctx.calls.add((ctx.f, "u"))
+        ctx.calls.add(("select", "u"))
+        lines.append(f"{ctx.ret_type()} t = {unmasked}({', '.join(args)});")
+        other = {"mask": "r0", "masks": "rsrc"}.get(ctx.mask_kind)
+        if other is None:
+            ctx.calls.add(("set0", "u"))
+            other = f"{d2('set0')}()"
+        lines.append(f"return {d2('select')}(m0, t, {other});")
+        return "\n".join(lines)
+    args = []
+    for p in params:
+        n = p["name"]
+        if p["kind"] == "reg":
+            s_type = build_reg(p["dt"], scalar_isa, -2, True, False)
+            lines.append(f"{s_type} s_{n}; memset(&s_{n}, 0, sizeof(s_{n})); "
+                         f"memcpy(&s_{n}, &{n}, MIPP_MIN_SIZEOF(s_{n}, {n}));")
+            args.append("s_" + n)
+        elif p["kind"] in ("val", "ptr"):
+            args.append(n)
+        else:
+            print(f"in ldiv_mask : error : '{ctx.f}' (lane_crossing): argument kind '{p['kind']}' not supported")
+            sys.exit(1)
+    scalar_f = build_func_name_internal(scalar_isa, ctx.dt, ctx.dt_par, ctx.dt_ret, ctx.f, lmul=-2)
+    if ctx.proto["ret"]["type"] != "reg":
+        # store-like function: the scalar function writes the memory
+        lines.append(f"{scalar_f}({', '.join(args)});")
+        return "\n".join(lines)
+    s_ret = build_reg(datatypes[ctx.dt_ret], scalar_isa, -2, True, False)
+    lines.append(f"{s_ret} sres = {scalar_f}({', '.join(args)});")
+    lines.append(f"{ctx.ret_type()} res; memset(&res, 0, sizeof(res));")
+    lines.append("memcpy(&res, &sres, MIPP_MIN_SIZEOF(res, sres));")
+    lines.append("return res;")
+    return "\n".join(lines)
+
+
 _level_detectors = {}
 
 # Level of the templates of the functions that change the LMUL (low, high, combine, wcvt, ncvt), per
@@ -361,7 +410,13 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
               f"a fallback without \"if\" is needed (generic_ldiv_mask.json)")
         sys.exit(1)
     level_lines = None
-    if not chain:
+    if not chain and funcs[f].get("lane_crossing", False):
+        body = _lane_crossing_body(ctx, params)
+        lvl = 3 if not mask_kind else 2
+        level = _LEVEL_TEXT[lvl] + (": lanes moved across the register, through the scalar d2 function"
+                                    if not mask_kind else ": the unmasked d2 function, then select")
+        chain = None
+    elif not chain:
         body = _wrapper_body(ctx, params)
         key = (isa["name"], f, dt_par + "," + dt_ret, mask_kind)
         lvl = BASE_LEVELS.get(key, 2)
@@ -431,7 +486,13 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
     if guard:
         print("#else", file=file)
         print(f"static {proto} {{", file=file)
-        if not chain and not changing:
+        if funcs[f].get("lane_crossing", False) and not changing:
+            # the scalar d2 function does not depend on the guard of the datatype
+            print(f"\t// {level}", file=file)
+            for line in body.split("\n"):
+                if line.strip():
+                    print("\t" + line, file=file)
+        elif not chain and not changing:
             # lane-wise function: Level 3 fallback through the LMUL 1 function
             print(f"\t// {_LEVEL_TEXT[3]}: lane-wise, through the LMUL 1 function (memcpy of the registers)", file=file)
             for line in _wrapper_body_memcpy(ctx, params).split("\n"):

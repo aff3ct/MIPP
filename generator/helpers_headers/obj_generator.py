@@ -119,7 +119,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
     body_start = len(lines)
 
     # Category 1: Load / initializers (free functions with _obj suffix)
-    if fn in ("load", "loadu"):
+    if fn in ("load", "loadu", "load_interleaved2"):
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline Rvd<T, LMUL> {fn}_obj(const T* p0)")
         lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<T, LMUL>(p0)); }}")
@@ -228,7 +228,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("")
 
     # Category 2: Store / Memory operations
-    elif fn in ("store", "storeu"):
+    elif fn in ("store", "storeu", "store_interleaved2"):
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline void {fn}(T* p0, const Rvd<T, LMUL>& r0)")
         lines.append(f"{{ mipp::{fn}(p0, r0.r); }}")

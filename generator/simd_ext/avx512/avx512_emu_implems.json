@@ -321,6 +321,46 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "reverse": [
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm_32"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm_64"
+        }
+    ],
+    "reverse_b128": [
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_reverse_b128_epi16",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_reverse_b128_epi8",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
     "rshift_vs": [
         {
             "instr_name": "rshift_vs",
@@ -370,6 +410,86 @@
             "template": "scatter_i32_64_maskz_i",
             "variant": "z",
             "if": "defined(__AVX512F__)"
+        }
+    ],
+    "unzip_even": [
+        {
+            "instr_name": "30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32"
+        },
+        {
+            "instr_name": "14, 12, 10, 8, 6, 4, 2, 0",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64"
+        }
+    ],
+    "unzip_odd": [
+        {
+            "instr_name": "31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32"
+        },
+        {
+            "instr_name": "15, 13, 11, 9, 7, 5, 3, 1",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64"
+        }
+    ],
+    "zip_hi": [
+        {
+            "instr_name": "31, 15, 30, 14, 29, 13, 28, 12, 27, 11, 26, 10, 25, 9, 24, 8",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32"
+        },
+        {
+            "instr_name": "15, 7, 14, 6, 13, 5, 12, 4",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64"
+        }
+    ],
+    "zip_lo": [
+        {
+            "instr_name": "23, 7, 22, 6, 21, 5, 20, 4, 19, 3, 18, 2, 17, 1, 16, 0",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32"
+        },
+        {
+            "instr_name": "11, 3, 10, 2, 9, 1, 8, 0",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64"
         }
     ]
 }

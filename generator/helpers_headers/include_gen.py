@@ -3,6 +3,7 @@ Include Generator Module
 Manages output directories and file creation, tracking preprocessor wrappers,
 headers formatting, and dependency generation structures.
 """
+from name_builder import LOAD_FUNCS
 import os, re, tempfile, shutil, io
 
 # mipp_<isa>_<fn>_<datatype>[_mask|_maskz|_masks]_<lmul>( : call to another C atom in an emitted body
@@ -855,7 +856,7 @@ class IncludeManager:
                     if v in ("m", "z", "s"):
                         item["dependencies"].add(f"mipp/internal/simd_ext/{isa}/c/functions/{category}/u/{l}/{func}.h")
                     # Generic template if masked or set
-                    if v in ("m", "z", "s") or func in ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]:
+                    if v in ("m", "z", "s") or func in ["set0", "set0_k", "set", "set_k", "set1", "set1_k"] + list(LOAD_FUNCS):
                         item["dependencies"].add(f"mipp/internal/templates/cpp/functions/{category}/{func}.hpp")
                 elif layer_name not in ("c", "cpp"):
                     # C SIMD / Scalar ISA layer
@@ -896,6 +897,11 @@ class IncludeManager:
                     # d2 functions built on the masks of the register: the LMUL 1 functions they call
                     for (c_func, c_v, c_l) in self.call_deps.get((layer_name, func, v, l), ()):
                         item["dependencies"].add(f"mipp/internal/simd_ext/{layer_name}/c/functions/{_match_category(c_func)}/{c_v}/{c_l}/{c_func}{ext}")
+                    # ... and the d2 function of the scalar ISA, for the functions that move lanes across the register
+                    # (ldiv_mask._lane_crossing_body)
+                    if (l == "d2" and uses_mask_ldiv(isa_cfg) and not isa_cfg.get("is_scalar", False) and funcs
+                            and func in funcs and funcs[func].get("lane_crossing", False)):
+                        item["dependencies"].add(f"mipp/internal/simd_ext/scalar/c/functions/{category}/u/d2/{func}.h")
 
                     if not is_sw_wrapper:
                         # Rule 2: Mask dependencies (derived generically from JSON templates via candidate resolver)

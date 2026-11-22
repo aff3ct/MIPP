@@ -619,6 +619,127 @@
             "return res;"
         ]
     },
+    "rea_dup_even": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v, idx;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "idx.r = {{ isa.prefix }}_vand_vx_{{ isa_dt_par.uint_data_ext }}(v.r, ~(%s<c:uint|b:tp>%)1, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_dup_odd": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v, idx;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "idx.r = {{ isa.prefix }}_vor_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_reverse": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v, idx;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "idx.r = {{ isa.prefix }}_vrsub_vx_{{ isa_dt_par.uint_data_ext }}(v.r, n - 1, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_slide": {
+        "format": "long",
+        "code": [
+            "// lanes s0.. of r0 moved down, then the lanes of r1 slid up into the last s0 lanes (the lanes read past the",
+            "// end of r0 by the slide down are overwritten: correct when the vector length is smaller than the register)",
+            "const size_t n = %N<tp>%;",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vslideup_vx_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_vslidedown_vx_{{ isa_dt_par.data_ext }}(r0.r, (size_t)s0, n), r1.r, n - (size_t)s0, n);",
+            "return res;"
+        ]
+    },
+    "rea_slide_up": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<tp>% z = %set0<tp>%();",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vslideup_vx_{{ isa_dt_par.data_ext }}(z.r, r0.r, (size_t)s0, n);",
+            "return res;"
+        ]
+    },
+    "rea_swap_pairs": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v, idx;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "idx.r = {{ isa.prefix }}_vxor_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "return res;"
+        ]
+    },
+    "rea_unzip": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "%m<tp>% sel; // the lanes of parity instr_name",
+            "sel.m = {{ isa.prefix }}_vmseq_vx_{{ isa_dt_par.uint_data_ext }}_{{isa_dt_par.data_ext_logi}}({{ isa.prefix }}_vand_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n), {{ instr_name }}, n);",
+            "%r<tp>% a, b;",
+            "a.r = {{ isa.prefix }}_vcompress_vm_{{ isa_dt_par.data_ext }}(r0.r, sel.m, n);",
+            "b.r = {{ isa.prefix }}_vcompress_vm_{{ isa_dt_par.data_ext }}(r1.r, sel.m, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vslideup_vx_{{ isa_dt_par.data_ext }}(a.r, b.r, (n + 1) / 2, n);",
+            "return res;"
+        ]
+    },
+    "rea_zip_hi": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v, idx;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "idx.r = {{ isa.prefix }}_vadd_vx_{{ isa_dt_par.uint_data_ext }}({{ isa.prefix }}_vsrl_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n), n / 2, n);",
+            "// even lanes from r0, odd lanes from r1",
+            "%m<tp>% odd;",
+            "odd.m = {{ isa.prefix }}_vmsne_vx_{{ isa_dt_par.uint_data_ext }}_{{isa_dt_par.data_ext_logi}}({{ isa.prefix }}_vand_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n), 0, n);",
+            "%r<tp>% a, b;",
+            "a.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "b.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r1.r, idx.r, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(a.r, b.r, odd.m, n);",
+            "return res;"
+        ]
+    },
+    "rea_zip_lo": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "%r<c:uint|b:tp>% v, idx;",
+            "v.r = {{ isa.prefix }}_vid_v_{{ isa_dt_par.uint_data_ext }}(n);",
+            "idx.r = {{ isa.prefix }}_vsrl_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n);",
+            "// even lanes from r0, odd lanes from r1",
+            "%m<tp>% odd;",
+            "odd.m = {{ isa.prefix }}_vmsne_vx_{{ isa_dt_par.uint_data_ext }}_{{isa_dt_par.data_ext_logi}}({{ isa.prefix }}_vand_vx_{{ isa_dt_par.uint_data_ext }}(v.r, 1, n), 0, n);",
+            "%r<tp>% a, b;",
+            "a.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r0.r, idx.r, n);",
+            "b.r = {{ isa.prefix }}_vrgather_vv_{{ isa_dt_par.data_ext }}(r1.r, idx.r, n);",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(a.r, b.r, odd.m, n);",
+            "return res;"
+        ]
+    },
     "round_float_rmm": {
         "format": "long",
         "code": [

@@ -214,6 +214,12 @@
             "template_ref": "tpl_generic_emu.atanh_f64"
         }
     ],
+    "broadcast_lane": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.broadcast_lane"
+        }
+    ],
     "cast": [
         {
             "instr_name": "cast",
@@ -654,6 +660,12 @@
             "template_ref": "tpl_generic_emu.round_int"
         }
     ],
+    "deinterleave": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.deinterleave"
+        }
+    ],
     "div2": [
         {
             "instr_name": "div2",
@@ -876,6 +888,18 @@
             "template_ref": "tpl_generic_emu.getfirst"
         }
     ],
+    "interleave": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.interleave"
+        }
+    ],
+    "load_interleaved2": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.load_interleaved2"
+        }
+    ],
     "log": [
         {
             "datatypes": [
@@ -1060,6 +1084,12 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.pow2_f64"
+        }
+    ],
+    "rotate": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.rotate"
         }
     ],
     "round": [
@@ -1425,6 +1455,30 @@
                 "float32"
             ],
             "template_ref": "tpl_generic_emu.sinh_f32"
+        }
+    ],
+    "slide": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.slide_mem"
+        }
+    ],
+    "slide_down": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.slide_down"
+        }
+    ],
+    "slide_up": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.slide_up"
+        }
+    ],
+    "store_interleaved2": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.store_interleaved2"
         }
     ],
     "sub": [

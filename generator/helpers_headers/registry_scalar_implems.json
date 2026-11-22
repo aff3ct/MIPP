@@ -299,6 +299,30 @@
           ]
         }
     ],
+    "broadcast_lane": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[s0] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "broadcast_lane_b128": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "const size_t b0 = (i / nb) * nb;",
+                "const size_t l = i - b0;",
+                "(void)l; // every lane of the block receives the same one",
+                "res.r[i] = %!pred_cond!% r0.r[b0 + (size_t)s0] %!pred_alt!%;"
+            ]
+        }
+    ],
     "cast": [
         {
             "type": "vector-wide",
@@ -486,6 +510,17 @@
             ]
         }
     ],
+    "deinterleave": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
+                "res.r[i] = %!pred_cond!% (i < h ? r0.r[2 * i] : r0.r[2 * (i - h) + 1]) %!pred_alt!%;"
+            ]
+        }
+    ],
     "div": [
         {
             "type": "element-wide",
@@ -545,6 +580,26 @@
             "variants": [],
             "implem": [
                 "res.r[i] = %!pred_cond!% r0.r[i] / 4.f %!pred_alt!%;"
+            ]
+        }
+    ],
+    "dup_even": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[i & ~(size_t)1] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "dup_odd": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[%N<tp>% == 1 ? 0 : (i | 1)] %!pred_alt!%;"
             ]
         }
     ],
@@ -865,6 +920,17 @@
             ]
         }
     ],
+    "interleave": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
+                "res.r[i] = %!pred_cond!% ((i & 1) ? r0.r[h + (i >> 1)] : r0.r[i >> 1]) %!pred_alt!%;"
+            ]
+        }
+    ],
     "load": [
         {
             "type": "element-wide",
@@ -872,6 +938,17 @@
             "variants": [],
             "implem": [
                 "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "load_interleaved2": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t h = (%N<tp>% + 1) / 2;",
+                "res.r[i] = i < h ? p0[2 * i] : p0[2 * (i - h) + 1];"
             ]
         }
     ],
@@ -1315,6 +1392,54 @@
             ]
         }
     ],
+    "reverse": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[%N<tp>% - 1 - i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "reverse_b128": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "const size_t b0 = (i / nb) * nb;",
+                "const size_t l = i - b0;",
+                "res.r[i] = %!pred_cond!% r0.r[b0 + nb - 1 - l] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "rotate": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t j = i + (size_t)s0; // < 2 N (no modulo: the percent sign delimits the DSL)",
+                "res.r[i] = %!pred_cond!% r0.r[j < %N<tp>% ? j : j - %N<tp>%] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "rotate_b128": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "const size_t b0 = (i / nb) * nb;",
+                "const size_t l = i - b0;",
+                "const size_t j = l + (size_t)s0;",
+                "res.r[i] = %!pred_cond!% r0.r[b0 + (j < nb ? j : j - nb)] %!pred_alt!%;"
+            ]
+        }
+    ],
     "round": [
         {
             "type": "element-wide",
@@ -1552,6 +1677,102 @@
             ]
           }
       ],
+      "slide": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tres.r[i] = %!pred_cond!% c[i + (size_t)s0] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+      "slide_b128": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "\tconst size_t b0 = (i / nb) * nb;",
+                "\tconst size_t l = i - b0;",
+                "\tconst size_t j = l + (size_t)s0;",
+                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+      "slide_down": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% (i + (size_t)s0 < %N<tp>% ? r0.r[i + (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+            ]
+        }
+    ],
+      "slide_down_b128": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "const size_t b0 = (i / nb) * nb;",
+                "const size_t l = i - b0;",
+                "res.r[i] = %!pred_cond!% (l + (size_t)s0 < nb ? r0.r[b0 + l + (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+            ]
+        }
+    ],
+      "slide_up": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% (i >= (size_t)s0 ? r0.r[i - (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+            ]
+        }
+    ],
+      "slide_up_b128": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "const size_t b0 = (i / nb) * nb;",
+                "const size_t l = i - b0;",
+                "res.r[i] = %!pred_cond!% (l >= (size_t)s0 ? r0.r[b0 + l - (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+            ]
+        }
+    ],
       "sqrt": [
           {
               "type": "element-wide",
@@ -1595,6 +1816,17 @@
               ]
           }
       ],
+      "store_interleaved2": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t h = (%N<tp>% + 1) / 2;",
+                "p0[i] = (i & 1) ? r0.r[h + (i >> 1)] : r0.r[i >> 1];"
+            ]
+        }
+    ],
       "storeu": [
           {
               "type": "element-wide",
@@ -1661,6 +1893,16 @@
               ]
           }
       ],
+      "swap_pairs": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% r0.r[%N<tp>% == 1 ? 0 : (i ^ 1)] %!pred_alt!%;"
+            ]
+        }
+    ],
       "tan": [
           {
             "type": "element-wide",
@@ -1765,6 +2007,106 @@
         ]
       }
     ],
+    "unzip_even": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tres.r[i] = %!pred_cond!% c[2 * i] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "unzip_even_b128": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "\tconst size_t b0 = (i / nb) * nb;",
+                "\tconst size_t l = i - b0;",
+                "\tconst size_t j = 2 * l;",
+                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "unzip_odd": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tres.r[i] = %!pred_cond!% c[2 * i + 1] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "unzip_odd_b128": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "\tconst size_t b0 = (i / nb) * nb;",
+                "\tconst size_t l = i - b0;",
+                "\tconst size_t j = 2 * l + 1;",
+                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
     "wcvt": [
         {
             "type": "vector-wide",
@@ -1837,6 +2179,107 @@
                 "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)r0.r[i];",
                 "%s<tp>% neg0 = (%s<tp>%)(%s<c:uint|b:tp>%)(0u - u0);",
                 "res.r[i] = %!pred_cond!% (r1.r[i] < 0 ? neg0 : r0.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "zip_hi": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t j = %N<tp>% + i;",
+                "\tres.r[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + (j >> 1)] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "zip_hi_b128": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "\tconst size_t b0 = (i / nb) * nb;",
+                "\tconst size_t l = i - b0;",
+                "\tconst size_t j = nb + l;",
+                "\tres.r[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + b0 + (j >> 1)] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "zip_lo": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tres.r[i] = %!pred_cond!% c[(i & 1) * %N<tp>% + (i >> 1)] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "zip_lo_b128": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "\tconst size_t b0 = (i / nb) * nb;",
+                "\tconst size_t l = i - b0;",
+                "\tconst size_t j = l;",
+                "\tres.r[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + b0 + (j >> 1)] %!pred_alt!%;",
+                "}",
+                "return res;"
             ]
         }
     ]

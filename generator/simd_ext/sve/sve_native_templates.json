@@ -47,6 +47,22 @@
         "format": "short",
         "code": "{{ isa.prefix }}ld1_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
     },
+    "rea_1": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
+    "rea_2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    },
+    "rea_dup_lane": {
+        "format": "short",
+        "code": "{{ isa.prefix }}dup_lane_{{ isa_dt_par.data_ext }}(r0.r, (uint{{ dt_par.n_bits }}_t)s0);"
+    },
+    "rea_self2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r0.r);"
+    },
     "reduce_z": {
         "format": "long",
         "code": [

@@ -323,6 +323,54 @@
             "return res;"
         ]
     },
+    "rea_reverse_b128_epi16": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm256_setr_epi8(14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1, 14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1));"
+    },
+    "rea_reverse_b128_epi8": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm256_setr_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));"
+    },
+    "rea_reverse_epi32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutevar8x32_epi32(r0.r, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
+    },
+    "rea_reverse_ps": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permutevar8x32_ps(r0.r, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
+    },
+    "rea_unzip_epi32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_castps_si256({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi256_ps(r0.r), {{ isa.prefix }}_castsi256_ps(r1.r), {{ instr_name }})), 0xD8);"
+    },
+    "rea_unzip_epi64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_{{ instr_name }}_epi64(r0.r, r1.r), 0xD8);"
+    },
+    "rea_unzip_pd": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_permute4x64_pd({{ isa.prefix }}_{{ instr_name }}_pd(r0.r, r1.r), 0xD8);"
+    },
+    "rea_unzip_ps": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_castpd_ps({{ isa.prefix }}_permute4x64_pd({{ isa.prefix }}_castps_pd({{ isa.prefix }}_shuffle_ps(r0.r, r1.r, {{ instr_name }})), 0xD8));"
+    },
+    "rea_zip_f": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_permute2f128_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_unpacklo_{{ isa_dt_par.data_ext }}(r0.r, r1.r), {{ isa.prefix }}_unpackhi_{{ isa_dt_par.data_ext }}(r0.r, r1.r), {{ instr_name }});",
+            "return res;"
+        ]
+    },
+    "rea_zip_i": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_permute2x128_si256({{ isa.prefix }}_unpacklo_epi{{ dt_par.n_bits }}(r0.r, r1.r), {{ isa.prefix }}_unpackhi_epi{{ dt_par.n_bits }}(r0.r, r1.r), {{ instr_name }});",
+            "return res;"
+        ]
+    },
     "reduce_16": {
         "format": "long",
         "code": [

@@ -151,6 +151,110 @@
             "return res;"
         ]
     },
+    "rea_b128_broadcast_lane": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %broadcast_lane<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_reverse": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %reverse<tp>%(r0);"
+        ]
+    },
+    "rea_b128_rotate": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %rotate<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_slide": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %slide<tp>%(r0, r1, s0);"
+        ]
+    },
+    "rea_b128_slide_down": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %slide_down<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_slide_up": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %slide_up<tp>%(r0, s0);"
+        ]
+    },
+    "rea_b128_unzip_even": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %unzip_even<tp>%(r0, r1);"
+        ]
+    },
+    "rea_b128_unzip_odd": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %unzip_odd<tp>%(r0, r1);"
+        ]
+    },
+    "rea_b128_zip_hi": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %zip_hi<tp>%(r0, r1);"
+        ]
+    },
+    "rea_b128_zip_lo": {
+        "format": "long",
+        "code": [
+            "// one block of 128 bits: the function on the whole register",
+            "return %zip_lo<tp>%(r0, r1);"
+        ]
+    },
+    "rea_dup_even_epi8": {
+        "format": "long",
+        "code": [
+            "__m128i x = {{ isa.prefix }}_and_si128(r0.r, {{ isa.prefix }}_set1_epi16(0x00FF));",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_or_si128(x, {{ isa.prefix }}_slli_epi16(x, 8));",
+            "return res;"
+        ]
+    },
+    "rea_dup_odd_epi8": {
+        "format": "long",
+        "code": [
+            "__m128i x = {{ isa.prefix }}_and_si128(r0.r, {{ isa.prefix }}_set1_epi16((short)0xFF00));",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_or_si128(x, {{ isa.prefix }}_srli_epi16(x, 8));",
+            "return res;"
+        ]
+    },
+    "rea_reverse_epi16": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shufflehi_epi16({{ isa.prefix }}_shufflelo_epi16({{ isa.prefix }}_shuffle_epi32(r0.r, 0x4E), 0x1B), 0x1B);"
+    },
+    "rea_reverse_epi8": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, {{ isa.prefix }}_setr_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));"
+    },
+    "rea_shuf_epi16": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_shufflehi_epi16({{ isa.prefix }}_shufflelo_epi16(r0.r, {{ instr_name }}), {{ instr_name }});"
+    },
+    "rea_swap_epi8": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_or_si128({{ isa.prefix }}_slli_epi16(r0.r, 8), {{ isa.prefix }}_srli_epi16(r0.r, 8));"
+    },
     "reduce_shift": {
         "format": "long",
         "code": [

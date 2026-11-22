@@ -497,6 +497,30 @@
             }
         ]
     },
+    "ret_reg_3args_2reg_val": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "val",
+                "fixeddatatype": "int32",
+                "charac": "RO"
+            }
+        ]
+    },
     "ret_reg_3args_reg": {
         "ret": {
             "type": "reg",

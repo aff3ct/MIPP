@@ -253,6 +253,12 @@
             "   int32_t res = !({{isa.prefix}}_v{{instr_name}}_m_{{isa_dt_par.data_ext_logi}}(m0.m, %N<tp>%));"
         ]
     },
+    "rea_gather_vx": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_vrgather_vx_{{ isa_dt_par.data_ext }}(r0.r, (size_t)s0, %N<tp>%);"
+        ]
+    },
     "round_int_msks": {
         "format": "short",
         "code": [

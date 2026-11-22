@@ -15,6 +15,46 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_any"
         }
     ],
+    "broadcast_lane": [
+        {
+            "instr_name": "broadcast_lane",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.broadcast_lane"
+        }
+    ],
+    "broadcast_lane_b128": [
+        {
+            "instr_name": "broadcast_lane_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.broadcast_lane_b128"
+        }
+    ],
+    "deinterleave": [
+        {
+            "instr_name": "deinterleave",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.deinterleave"
+        }
+    ],
+    "dup_even": [
+        {
+            "instr_name": "dup_even",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.dup_even"
+        }
+    ],
+    "dup_odd": [
+        {
+            "instr_name": "dup_odd",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.dup_odd"
+        }
+    ],
     "get": [
         {
             "instr_name": "get",
@@ -79,12 +119,60 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.hmul"
         }
     ],
+    "interleave": [
+        {
+            "instr_name": "interleave",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.interleave"
+        }
+    ],
+    "load_interleaved2": [
+        {
+            "instr_name": "load_interleaved2",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.load_interleaved2"
+        }
+    ],
     "none": [
         {
             "instr_name": "none",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_none"
+        }
+    ],
+    "reverse": [
+        {
+            "instr_name": "reverse",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.reverse"
+        }
+    ],
+    "reverse_b128": [
+        {
+            "instr_name": "reverse_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.reverse_b128"
+        }
+    ],
+    "rotate": [
+        {
+            "instr_name": "rotate",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.rotate"
+        }
+    ],
+    "rotate_b128": [
+        {
+            "instr_name": "rotate_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.rotate_b128"
         }
     ],
     "set": [
@@ -103,12 +191,140 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.set_k"
         }
     ],
+    "slide": [
+        {
+            "instr_name": "slide",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.slide"
+        }
+    ],
+    "slide_b128": [
+        {
+            "instr_name": "slide_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.slide_b128"
+        }
+    ],
+    "slide_down": [
+        {
+            "instr_name": "slide_down",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.slide_down"
+        }
+    ],
+    "slide_down_b128": [
+        {
+            "instr_name": "slide_down_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.slide_down_b128"
+        }
+    ],
+    "slide_up": [
+        {
+            "instr_name": "slide_up",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.slide_up"
+        }
+    ],
+    "slide_up_b128": [
+        {
+            "instr_name": "slide_up_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.slide_up_b128"
+        }
+    ],
+    "store_interleaved2": [
+        {
+            "instr_name": "store_interleaved2",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.store_interleaved2"
+        }
+    ],
+    "swap_pairs": [
+        {
+            "instr_name": "swap_pairs",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.swap_pairs"
+        }
+    ],
     "testz": [
         {
             "instr_name": "testz",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz"
+        }
+    ],
+    "unzip_even": [
+        {
+            "instr_name": "unzip_even",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_even"
+        }
+    ],
+    "unzip_even_b128": [
+        {
+            "instr_name": "unzip_even_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_even_b128"
+        }
+    ],
+    "unzip_odd": [
+        {
+            "instr_name": "unzip_odd",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_odd"
+        }
+    ],
+    "unzip_odd_b128": [
+        {
+            "instr_name": "unzip_odd_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_odd_b128"
+        }
+    ],
+    "zip_hi": [
+        {
+            "instr_name": "zip_hi",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.zip_hi"
+        }
+    ],
+    "zip_hi_b128": [
+        {
+            "instr_name": "zip_hi_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.zip_hi_b128"
+        }
+    ],
+    "zip_lo": [
+        {
+            "instr_name": "zip_lo",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.zip_lo"
+        }
+    ],
+    "zip_lo_b128": [
+        {
+            "instr_name": "zip_lo_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.zip_lo_b128"
         }
     ]
 }

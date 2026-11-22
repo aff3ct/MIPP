@@ -103,6 +103,20 @@
       "horizontal": false,
       "variants": ["u", "m", "z", "s"]
     },
+    "broadcast_lane": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "broadcast_lane_b128": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
     "cast": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes_cart_prod",
@@ -203,6 +217,13 @@
         "horizontal": false,
         "variants": ["u"]
     },
+    "deinterleave": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
     "div": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_float",
@@ -220,6 +241,20 @@
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "dup_even": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "dup_odd": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
     "exp": {
@@ -336,11 +371,25 @@
         "horizontal": true,
         "variants": ["u", "z"]
     },
+    "interleave": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
     "load": {
         "proto_ref": "ret_reg_1arg_ptr",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "variants": ["u", "z", "s"]
+    },
+    "load_interleaved2": {
+        "proto_ref": "ret_reg_1arg_ptr",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u"]
     },
     "loadu": {
         "proto_ref": "ret_reg_1arg_ptr",
@@ -480,6 +529,34 @@
         "horizontal": false,
         "variants": ["u", "m", "z", "s"]
     },
+    "reverse": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "reverse_b128": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "rotate": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "rotate_b128": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
     "round": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
@@ -572,6 +649,48 @@
       "horizontal": false,
       "variants": ["u", "m", "z", "s"]
     },
+    "slide": {
+        "proto_ref": "ret_reg_3args_2reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "slide_b128": {
+        "proto_ref": "ret_reg_3args_2reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "slide_down": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "slide_down_b128": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "slide_up": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "slide_up_b128": {
+        "proto_ref": "ret_reg_2args_reg_val",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
     "sqrt": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_float",
@@ -583,6 +702,13 @@
         "datatypes": "all_datatypes",
         "horizontal": false,
         "variants": ["u", "m", "z"]
+    },
+    "store_interleaved2": {
+        "proto_ref": "ret_void_2args_ptr_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u"]
     },
     "storeu": {
         "proto_ref": "ret_void_2args_ptr_reg",
@@ -603,6 +729,13 @@
         "horizontal": false,
         "variants": ["u", "m", "z", "s"],
         "forms": ["vs", "sv"]
+    },
+    "swap_pairs": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
     },
     "tan": {
       "proto_ref": "ret_reg_1arg_reg",
@@ -640,6 +773,34 @@
       "horizontal": false,
       "variants": ["u", "m", "z", "s"]
     },
+    "unzip_even": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "unzip_even_b128": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "unzip_odd": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "unzip_odd_b128": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
     "wcvt": {
         "proto_ref": "ret_reg_1arg_reg_lmul_up",
         "datatypes": "all_datatypes_widenning",
@@ -666,5 +827,33 @@
         "horizontal": false,
         "variants": ["u", "m", "z", "s"],
         "forms": ["vs"]
+    },
+    "zip_hi": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "zip_hi_b128": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "zip_lo": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "zip_lo_b128": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
     }
 }

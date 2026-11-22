@@ -368,6 +368,22 @@
             "template": "div4_int"
         }
     ],
+    "dup_even": [
+        {
+            "instr_name": "trn1q",
+            "datatypes": "all_datatypes",
+            "template": "rea_self2",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "dup_odd": [
+        {
+            "instr_name": "trn2q",
+            "datatypes": "all_datatypes",
+            "template": "rea_self2",
+            "if": "defined(__aarch64__)"
+        }
+    ],
     "fmadd": [
         {
             "instr_name": "fmaq",
@@ -771,6 +787,17 @@
             "template": "logi_m_2args"
         }
     ],
+    "reverse": [
+        {
+            "instr_name": "ext",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_ext1"
+        }
+    ],
     "round": [
         {
             "instr_name": "",
@@ -1082,6 +1109,30 @@
             "template": "arith_2args"
         }
     ],
+    "swap_pairs": [
+        {
+            "instr_name": "rev",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_rev"
+        },
+        {
+            "instr_name": "ext",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_ext1"
+        }
+    ],
     "trunc": [
         {
             "instr_name": "trunc",
@@ -1098,6 +1149,22 @@
             ],
             "template": "trunc_float",
             "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
+        }
+    ],
+    "unzip_even": [
+        {
+            "instr_name": "uzp1q",
+            "datatypes": "all_datatypes",
+            "template": "rea_2",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "unzip_odd": [
+        {
+            "instr_name": "uzp2q",
+            "datatypes": "all_datatypes",
+            "template": "rea_2",
+            "if": "defined(__aarch64__)"
         }
     ],
     "xorb": [
@@ -1117,6 +1184,22 @@
             "instr_name": "eorq",
             "datatypes": "all_datatypes",
             "template": "logi_m_2args"
+        }
+    ],
+    "zip_hi": [
+        {
+            "instr_name": "zip2q",
+            "datatypes": "all_datatypes",
+            "template": "rea_2",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "zip_lo": [
+        {
+            "instr_name": "zip1q",
+            "datatypes": "all_datatypes",
+            "template": "rea_2",
+            "if": "defined(__aarch64__)"
         }
     ]
 }

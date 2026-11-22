@@ -114,6 +114,22 @@
         "format": "short",
         "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext_msk }}(m0.m);"
     },
+    "rea_2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    },
+    "rea_ext1": {
+        "format": "short",
+        "code": "{{ isa.prefix }}extq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 1);"
+    },
+    "rea_rev": {
+        "format": "short",
+        "code": "{{ isa.prefix }}rev{{ 2 * dt_par.n_bits }}q_{{ isa_dt_par.data_ext }}(r0.r);"
+    },
+    "rea_self2": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r0.r);"
+    },
     "round_away": {
         "format": "short",
         "code": "{{ isa.prefix }}rndaq_{{ isa_dt_par.data_ext }}(r0.r);"

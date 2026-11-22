@@ -48,6 +48,10 @@
                 },
                 "contains": { "const": "u" }
             },
+            "lane_crossing": {
+                "description": "`true` for the functions that move lanes across the register (reverse, slide, zip_lo...), on the whole register and the whole LMUL group: the LMUL > 1 versions of the ISAs with a software LMUL are not two calls on the halves but the templates of `generic_emu_implems_lmulh.json` (a missing one is an error), and the half-vector of the ISAs whose d2 is a masked register goes through the scalar d2 function. Default `false`.",
+                "type": "boolean"
+            },
             "cpp_name": {
                 "description": "Name of the function in the C++ APIs when it differs from the C name: `get_k` is `mipp::get`.",
                 "type": "string"

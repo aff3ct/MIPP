@@ -191,7 +191,7 @@ class CppDialectAdapter(DialectAdapter):
             base_fname = "cast" if fname == "cast_k" else fname
             dt_dst = dt_ext.split(",")[-1].split("_")[-1]
             return f"mipp::{base_fname}_{dt_dst}({args_str})"
-        if fname in ("set", "set_k", "set1", "set1_k", "set0", "set0_k", "load", "loadu"):
+        if fname in ("set", "set_k", "set1", "set1_k", "set0", "set0_k", "load", "loadu", "load_interleaved2"):
             if coeff != "1":
                 return f"mipp::{fname}<T, {coeff}>({args_str})"
             return f"mipp::{fname}<T>({args_str})"
@@ -212,7 +212,7 @@ class CppDialectAdapter(DialectAdapter):
             base_fname = "cast" if fname == "cast_k" else fname
             dt_dst = dt_ext.split(",")[-1].split("_")[-1]
             return f"mipp::{base_fname}_{dt_dst}({args_str})"
-        if fname in ("set", "set_k", "set1", "set1_k", "set0", "set0_k", "load", "loadu"):
+        if fname in ("set", "set_k", "set1", "set1_k", "set0", "set0_k", "load", "loadu", "load_interleaved2"):
             return f"mipp::{fname}<T, {coeff}, mipp::ISA::SCALAR>({args_str})"
         return f"mipp::{fname}({args_str})"
 
@@ -377,6 +377,7 @@ class CppObjDialectAdapter(DialectAdapter):
         obj_name_map = {
             "load": "load_obj",
             "loadu": "loadu_obj",
+            "load_interleaved2": "load_interleaved2_obj",
             "set": "set_obj",
             "set0": "set0_obj",
             "set1": "set1_obj",

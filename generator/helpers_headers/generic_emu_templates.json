@@ -589,6 +589,12 @@
             "return %xorb<tp>%(result, sign_bit);"
         ]
     },
+    "broadcast_lane": {
+        "format": "long",
+        "code": [
+            "return %set1<tp>%(%get<tp>%(r0, (uint32_t)s0));"
+        ]
+    },
     "cast_float_other": {
         "format": "long",
         "code": [
@@ -823,6 +829,13 @@
             "return %select<tp>%(overflow_mask, inf_val, result);"
         ]
     },
+    "deinterleave": {
+        "format": "long",
+        "code": [
+            "// [even lanes | even lanes] and [odd lanes | odd lanes]: the second half of the first, then the first half of the second",
+            "return %slide<tp>%(%unzip_even<tp>%(r0, r0), %unzip_odd<tp>%(r0, r0), (int32_t)(%N<tp>% / 2));"
+        ]
+    },
     "div2": {
         "format": "long",
         "code": [
@@ -1027,6 +1040,19 @@
     "getfirst": {
         "format": "long",
         "code": "return %get<tp>%(r0, 0);"
+    },
+    "interleave": {
+        "format": "long",
+        "code": [
+            "// lower halves of r0 and of r0 slid down by N/2 (its upper half), interleaved",
+            "return %zip_lo<tp>%(r0, %slide_down<tp>%(r0, (int32_t)(%N<tp>% / 2)));"
+        ]
+    },
+    "load_interleaved2": {
+        "format": "long",
+        "code": [
+            "return %deinterleave<tp>%(%loadu<tp>%(p0));"
+        ]
     },
     "log_f32": {
         "format": "long",
@@ -1317,6 +1343,12 @@
             "%r<tp>% logx = %log<tp>%(r0);",
             "%r<tp>% arg = %mul<tp>%(r1, logx);",
             "return %exp<tp>%(arg);"
+        ]
+    },
+    "rotate": {
+        "format": "long",
+        "code": [
+            "return %slide<tp>%(r0, r0, s0);"
         ]
     },
     "round_float": {
@@ -1636,6 +1668,34 @@
             "/* 4. Sign Restoration & Return */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %set1<tp>%(-0.0));",
             "return %xorb<tp>%(result, sign_bit);"
+        ]
+    },
+    "slide_down": {
+        "format": "long",
+        "code": [
+            "return %slide<tp>%(r0, %set0<tp>%(), s0);"
+        ]
+    },
+    "slide_mem": {
+        "format": "long",
+        "code": [
+            "// the two registers one after the other in memory, the window of N lanes at s0",
+            "%s<tp>% buf[2 * %N<tp>%];",
+            "%storeu<tp>%(buf, r0);",
+            "%storeu<tp>%(buf + %N<tp>%, r1);",
+            "return %loadu<tp>%(buf + s0);"
+        ]
+    },
+    "slide_up": {
+        "format": "long",
+        "code": [
+            "return %slide<tp>%(%set0<tp>%(), r0, (int32_t)%N<tp>% - s0);"
+        ]
+    },
+    "store_interleaved2": {
+        "format": "long",
+        "code": [
+            "%storeu<tp>%(p0, %interleave<tp>%(r0));"
         ]
     },
     "subs_int": {

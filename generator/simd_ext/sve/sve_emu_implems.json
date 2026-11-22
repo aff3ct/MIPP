@@ -750,6 +750,13 @@
             "variant": "z"
         }
     ],
+    "slide": [
+        {
+            "instr_name": "splice",
+            "datatypes": "all_datatypes",
+            "template": "rea_splice"
+        }
+    ],
     "sqrt": [
         {
             "instr_name": "sqrt",
