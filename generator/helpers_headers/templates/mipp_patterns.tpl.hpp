@@ -133,11 +133,14 @@ namespace mipp
 namespace details
 {
 // element type and LMUL of a register type R (rvd<T, LMUL> is an alias of a C type, not deducible): lmul = 0 when R
-// is not a register of LMUL 1, 2, 4 or 8
+// is not a register of LMUL 1, 2, 4, 8 or -2 (half-vector)
+template <typename T, int L, typename = void> struct rvd_or_void { using type = void; }; // no such register
+template <typename T, int L> struct rvd_or_void<T, L, std::void_t<typename rvd_type<T, L>::type>>
+{ using type = typename rvd_type<T, L>::type; };
 template <typename R, int L, typename... Ts> struct rvd_find { using type = void; };
 template <typename R, int L, typename T, typename... Ts> struct rvd_find<R, L, T, Ts...>
 {
-	using type = typename std::conditional<std::is_same<R, rvd<T, L>>::value, T,
+	using type = typename std::conditional<std::is_same<R, typename rvd_or_void<T, L>::type>::value, T,
 	                                       typename rvd_find<R, L, Ts...>::type>::type;
 };
 template <typename R, int L> using rvd_find_t = typename rvd_find<R, L, float32_t, float64_t, int8_t, int16_t, int32_t,
@@ -145,9 +148,14 @@ template <typename R, int L> using rvd_find_t = typename rvd_find<R, L, float32_
 template <typename R> struct rvd_info
 {
 	static constexpr int lmul = !std::is_void<rvd_find_t<R, 1>>::value ? 1 : !std::is_void<rvd_find_t<R, 2>>::value ? 2 :
-	                            !std::is_void<rvd_find_t<R, 4>>::value ? 4 : !std::is_void<rvd_find_t<R, 8>>::value ? 8 : 0;
+	                            !std::is_void<rvd_find_t<R, 4>>::value ? 4 : !std::is_void<rvd_find_t<R, 8>>::value ? 8 :
+	                            !std::is_void<rvd_find_t<R, -2>>::value ? -2 : 0;
 	using type = rvd_find_t<R, lmul == 0 ? 1 : lmul>;
 };
+
+// not constexpr: called by the constant evaluation of a pattern with an index out of [-1, n) ([-1, 2n) for permute2),
+// it makes the compilation fail (a `throw` would not compile with -fno-exceptions)
+inline void pattern_index_out_of_range() {}
 
 // indices of the pattern P for n lanes: { P::get(0, n), ..., P::get(n - 1, n) }
 template <typename P, int N_, std::size_t... I>
@@ -162,7 +170,7 @@ constexpr std::array<int, N_> pattern_checked()
 	constexpr std::array<int, N_> a = pattern_indices<P, N_>(std::make_index_sequence<N_>());
 	for (int i = 0; i < N_; i++)
 		if (a[i] < -1 || a[i] >= TOP)
-			throw "mipp::permute<P>: index of the pattern out of [-1, n) (permute2: [-1, 2n))";
+			pattern_index_out_of_range();
 	return a;
 }
 

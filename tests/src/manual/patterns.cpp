@@ -21,9 +21,9 @@ struct p_rotate    { static constexpr int get(int i, int n) { return (i + 1) % n
 struct p_broadcast { static constexpr int get(int, int n) { return n - 1; } };
 struct p_down      { static constexpr int get(int i, int n) { return i + 1 < n ? i + 1 : -1; } };
 struct p_up        { static constexpr int get(int i, int) { return i >= 1 ? i - 1 : -1; } };
-struct p_swap      { static constexpr int get(int i, int) { return i ^ 1; } };
+struct p_swap      { static constexpr int get(int i, int n) { return (i ^ 1) < n ? i ^ 1 : i; } }; // n = 1: d2 of float64 on NEON
 struct p_even      { static constexpr int get(int i, int) { return i & ~1; } };
-struct p_odd       { static constexpr int get(int i, int) { return i | 1; } };
+struct p_odd       { static constexpr int get(int i, int n) { return (i | 1) < n ? i | 1 : i; } };
 struct p_table     { static constexpr int get(int i, int n) { return (3 * i + 1) % n; } };
 struct p_table0    { static constexpr int get(int i, int n) { return i % 3 == 0 ? -1 : (5 * i + 2) % n; } };
 // two registers
@@ -100,6 +100,9 @@ TEMPLATE_TEST_CASE("patterns - permute<P> and permute2<P>", "[patterns]", float,
 	check_all<TestType, 1>();
 	check_all<TestType, 2>();
 	check_all<TestType, 8>();
+#if defined(MIPP_LDIV_2)
+	check_all<TestType, -2>();
+#endif
 }
 
 // the recognized patterns are the named functions themselves

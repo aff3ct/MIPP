@@ -320,6 +320,10 @@ def _lane_crossing_body(ctx, params):
             print(f"in ldiv_mask : error : '{ctx.f}' (lane_crossing): argument kind '{p['kind']}' not supported")
             sys.exit(1)
     scalar_f = build_func_name_internal(scalar_isa, ctx.dt, ctx.dt_par, ctx.dt_ret, ctx.f, lmul=-2)
+    if ctx.proto["ret"]["type"] == "val":
+        # a value (count of compress_store): the one of the scalar function
+        lines.append(f"return {scalar_f}({', '.join(args)});")
+        return "\n".join(lines)
     if ctx.proto["ret"]["type"] != "reg":
         # store-like function: the scalar function writes the memory
         lines.append(f"{scalar_f}({', '.join(args)});")

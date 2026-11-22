@@ -694,11 +694,11 @@
     "complex_cabs": {
         "format": "long",
         "code": [
-            "// m sqrt((ar / m)^2 + (ai / m)^2), m the largest absolute value of the parts (1 when it is 0: the result is 0)",
+            "// m sqrt((ar / m)^2 + (ai / m)^2), m the largest absolute value of the parts; divided by 1 when m is 0 or +inf (m == m + m): the result is 0, or +inf as hypot",
             "%r<tp>% m;",
             "m = %max<tp>%(%abs<tp>%(%dup_even<tp>%(r0)), %abs<tp>%(%dup_odd<tp>%(r0)));",
             "%r<tp>% d;",
-            "d = %select<tp>%(%cmpeq<tp>%(m, %set0<tp>%()), %set1<tp>%(1), m);",
+            "d = %select<tp>%(%cmpeq<tp>%(m, %add<tp>%(m, m)), %set1<tp>%(1), m);",
             "return %mul<tp>%(m, %sqrt<tp>%(%cnorm<tp>%(%div<tp>%(r0, d))));"
         ]
     },

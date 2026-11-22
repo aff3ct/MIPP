@@ -162,7 +162,7 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ## 7. Patterns Known at Compile Time (C++17)
 
-With C++17, `mipp::permute<P>(a)` and `mipp::permute2<P>(a, b)` take the indices from a **pattern** `P`: a type with a function `static constexpr int get(int i, int n)` that gives the source lane of the lane `i` of the result, `n` being the number of lanes of the whole group (`[0, n)` for `permute`, `[0, 2n)` for `permute2`), or `-1` for a zero. The number of lanes is a constant of the compilation on every ISA (SVE and RVV with a fixed register size), so the indices are known by the compiler:
+With C++17, `mipp::permute<P>(a)` and `mipp::permute2<P>(a, b)` take the indices from a **pattern** `P`: a type with a function `static constexpr int get(int i, int n)` that gives the source lane of the lane `i` of the result, `n` being the number of lanes of the whole group (`[0, n)` for `permute`, `[0, 2n)` for `permute2`), or `-1` for a zero. The registers can be of any LMUL, half-vectors included. The number of lanes is a constant of the compilation on every ISA (SVE and RVV with a fixed register size), so the indices are known by the compiler:
 
 - a pattern of a named rearrangement is replaced by its function: `reverse`, `rotate`, `broadcast_lane`, `slide_up`, `slide_down`, `swap_pairs`, `dup_even`, `dup_odd` for one register; `slide`, `zip_lo`, `zip_hi`, `unzip_even`, `unzip_odd` for two registers (and `permute` when all the indices of `permute2` are in one register);
 - the other patterns are a `permute` / `permute2` with a constant table of indices, then a `select` for the zeros; with 8-bit elements and more than 256 lanes (or 128 for `permute2`), through memory.

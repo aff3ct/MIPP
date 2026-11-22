@@ -333,7 +333,8 @@
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
                 "const %s<tp>% ar = r0.r[j] < 0 ? -r0.r[j] : r0.r[j], ai = r0.r[k] < 0 ? -r0.r[k] : r0.r[k];",
                 "const %s<tp>% m = ar > ai ? ar : ai;",
-                "const %s<tp>% x = m == 0 ? 0 : ar / m, y = m == 0 ? 0 : ai / m;",
+                "const %s<tp>% one = 1, d = m == m + m ? one : m; // 0 or +inf: divided by 1 (the result is 0, or +inf as hypot)",
+                "const %s<tp>% x = ar / d, y = ai / d;",
                 "res.r[i] = %!pred_cond!% (m * (%s<tp>%)sqrt((double)(x * x + y * y))) %!pred_alt!%;"
             ]
         }

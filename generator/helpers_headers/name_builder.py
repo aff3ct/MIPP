@@ -496,6 +496,7 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
     letters = {"mask": "M", "maskz": "Z", "masks": "S"}
     if masked_version not in letters:
         print("error: Unmasked gather proto should be built by build_proto, masked_version should be mask, maskz or masks.")
+        sys.exit(1)
         exit(-1)
     template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
     p = f"inline rvd<{t}, {lmul}, {isa_type}> {func_name}{template}(const rvm<{t},{lmul}, {isa_type}> m0"
@@ -511,6 +512,7 @@ def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, 
     letters = {"mask": "M", "maskz": "Z", "masks": "S"}
     if masked_version not in letters:
         print("error: Unmasked scatter proto should be built by build_proto, masked_version should be mask, maskz or masks.")
+        sys.exit(1)
         exit(-1)
     template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
     p = f"inline void {func_name}{template}(const rvm<{t},{lmul}, {isa_type}> m0"

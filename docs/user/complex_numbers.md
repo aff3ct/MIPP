@@ -16,7 +16,7 @@ MIPP has no complex type: a register of `float32` or `float64` holds complex num
 | `cnorm(a)` | $\lvert a \rvert^2 = a_r^2 + a_i^2$, in both lanes |
 | `cabs(a)` | $\lvert a \rvert$, in both lanes |
 
-- `cabs` does not overflow when $a_r^2 + a_i^2$ does: it divides the two parts by the larger one before squaring them (as `hypot`).
+- `cabs` does not overflow when $a_r^2 + a_i^2$ does: it divides the two parts by the larger one before squaring them (as `hypot`). It is $+\infty$ when a part is infinite, and $0$ for $0$.
 - `cdiv` uses the algorithm of Smith: it divides by the part of $b$ of the larger absolute value, which avoids the overflows and most of the losses of $b_r^2 + b_i^2$. A division by $0$ gives infinities or NaNs, as the scalar division.
 - `cnorm` and `cabs` write the result in the two lanes of each pair, so that it can divide or scale the complex numbers directly (`div(a, cabs(a))` normalizes them).
 
