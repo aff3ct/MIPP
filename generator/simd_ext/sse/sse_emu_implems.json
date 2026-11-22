@@ -30,6 +30,20 @@
             "if": "defined(__SSE2__) && !defined(__SSE4_2__)"
         }
     ],
+    "cmul": [
+        {
+            "instr_name": "cmul",
+            "datatypes": "all_float",
+            "template": "complex_cmul",
+            "if": "defined(__SSE3__) && defined(__FMA__)"
+        },
+        {
+            "instr_name": "cmul",
+            "datatypes": "all_float",
+            "template": "complex_cmul_nofma",
+            "if": "defined(__SSE3__) && !defined(__FMA__)"
+        }
+    ],
     "compress": [
         {
             "instr_name": "compress",

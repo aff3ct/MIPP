@@ -88,6 +88,12 @@ The separator between prefix and name belongs to the template: SSE templates wri
 
 An entry can also hold its template inline (`"template": { "format": ..., "code": ... }`) instead of a name.
 
+A template shared by functions that differ by more than an intrinsic name can take several fields in `instr_name`, separated by `|` (a comma would cut the arguments of a call), and read them with Jinja `set`, on a line of its own: the `%...%` markers of the [templating DSL](../reference/templating_dsl.md) must not share a line with a Jinja tag. For example, `complex_cmla` of NEON and SVE writes `cmul`, `cmulconj` and `cfmadd` as two `cmla` instructions, from `"ZERO|90|r0.r|r1.r"` (the accumulator, `ZERO` for a zero register; the rotation of the second instruction; the two operands):
+
+```jinja
+{% set f = instr_name.split('|') -%}{%- set acc = f[0] if f[0] != 'ZERO' else (...) -%}{%- set rot, x, y = f[1], f[2], f[3] -%}
+```
+
 ---
 
 ## Step 2: Generic Implementation <span class="mipp-isa-badge lvl-2">L2</span> { #step-2-generic-implementation-l2 }

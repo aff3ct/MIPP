@@ -1,4 +1,13 @@
 {
+    "complex_cmul": {
+        "format": "long",
+        "code": [
+            "// (re, re) * b -/+ (im, im) * swapped b",
+            "%r<tp>% res;",
+            "res.r = _mm512_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm512_moveldup_ps(r0.r){% else %}_mm512_movedup_pd(r0.r){% endif %}, r1.r, _mm512_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm512_movehdup_ps(r0.r){% else %}_mm512_permute_pd(r0.r, 0xFF){% endif %}, {% if dt_par.n_bits == 32 %}_mm512_permute_ps(r1.r, 0xB1){% else %}_mm512_permute_pd(r1.r, 0x55){% endif %}));",
+            "return res;"
+        ]
+    },
     "gather_i32_64_maskz_f": {
         "format": "short",
         "code": [

@@ -421,11 +421,156 @@
             "support_obj": true,
             "lane_index": "lt_nb"
         },
+        "cabs": {
+            "support_obj": true,
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "comparison": "tolerance",
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "hybrid",
+                        "abs_value": 1e-06,
+                        "rel_value": 1e-06
+                    },
+                    "float64": {
+                        "type": "hybrid",
+                        "abs_value": 1e-14,
+                        "rel_value": 1e-14
+                    }
+                }
+            }
+        },
         "cast": {
             "comparison": "bitwise"
         },
         "cast_k": {
             "comparison": "logical"
+        },
+        "cdiv": {
+            "support_obj": true,
+            "input_domain": [
+                {
+                    "min": -10.0,
+                    "max": 10.0
+                },
+                {
+                    "min": 0.5,
+                    "max": 10.0
+                }
+            ],
+            "comparison": "tolerance",
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "hybrid",
+                        "abs_value": 0.0001,
+                        "rel_value": 1e-05
+                    },
+                    "float64": {
+                        "type": "hybrid",
+                        "abs_value": 1e-12,
+                        "rel_value": 1e-13
+                    }
+                }
+            }
+        },
+        "cfmadd": {
+            "support_obj": true,
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "comparison": "tolerance",
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "hybrid",
+                        "abs_value": 0.0001,
+                        "rel_value": 1e-06
+                    },
+                    "float64": {
+                        "type": "hybrid",
+                        "abs_value": 1e-12,
+                        "rel_value": 1e-14
+                    }
+                }
+            }
+        },
+        "cmul": {
+            "support_obj": true,
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "comparison": "tolerance",
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "hybrid",
+                        "abs_value": 0.0001,
+                        "rel_value": 1e-06
+                    },
+                    "float64": {
+                        "type": "hybrid",
+                        "abs_value": 1e-12,
+                        "rel_value": 1e-14
+                    }
+                }
+            }
+        },
+        "cmulconj": {
+            "support_obj": true,
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "comparison": "tolerance",
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "hybrid",
+                        "abs_value": 0.0001,
+                        "rel_value": 1e-06
+                    },
+                    "float64": {
+                        "type": "hybrid",
+                        "abs_value": 1e-12,
+                        "rel_value": 1e-14
+                    }
+                }
+            }
+        },
+        "cnorm": {
+            "support_obj": true,
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            },
+            "comparison": "tolerance",
+            "tolerance": {
+                "by_datatype": {
+                    "float32": {
+                        "type": "hybrid",
+                        "abs_value": 1e-05,
+                        "rel_value": 1e-06
+                    },
+                    "float64": {
+                        "type": "hybrid",
+                        "abs_value": 1e-13,
+                        "rel_value": 1e-14
+                    }
+                }
+            }
+        },
+        "conj": {
+            "support_obj": true,
+            "domain": {
+                "min": -10.0,
+                "max": 10.0
+            }
         },
         "count": {
             "support_obj": true,

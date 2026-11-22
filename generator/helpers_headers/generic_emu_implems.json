@@ -220,6 +220,12 @@
             "template_ref": "tpl_generic_emu.broadcast_lane"
         }
     ],
+    "cabs": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_cabs"
+        }
+    ],
     "cast": [
         {
             "instr_name": "cast",
@@ -325,6 +331,18 @@
                 "rvv"
             ],
             "template_ref": "tpl_generic_emu.cast_k_same_size"
+        }
+    ],
+    "cdiv": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_cdiv"
+        }
+    ],
+    "cfmadd": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_cfmadd"
         }
     ],
     "clamp": [
@@ -605,6 +623,24 @@
             "template_ref": "tpl_generic_emu.cmpneq"
         }
     ],
+    "cmul": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_cmul"
+        }
+    ],
+    "cmulconj": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_cmulconj"
+        }
+    ],
+    "cnorm": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_cnorm"
+        }
+    ],
     "compress_store": [
         {
             "datatypes": "all_datatypes",
@@ -615,6 +651,12 @@
         {
             "datatypes": "all_datatypes",
             "template_ref": "tpl_generic_emu.compress_store_full"
+        }
+    ],
+    "conj": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.complex_conj"
         }
     ],
     "copysign": [

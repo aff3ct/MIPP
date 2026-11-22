@@ -7,6 +7,7 @@ nav:
   - Masking Semantics: masking_semantics.md
   - Scalar Forms: scalar_forms.md
   - Rearrangements: rearrangements.md
+  - Complex Numbers: complex_numbers.md
   - Headers & Compile Time: headers_and_compile_time.md
   - Implementation Levels: implementation_levels.md
   - ...

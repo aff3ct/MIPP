@@ -32,6 +32,16 @@
             "return res;"
         ]
     },
+    "complex_cmla": {
+        "format": "long",
+        "code": [
+            "{% set f = instr_name.split('|') -%}{%- set acc = f[0] if f[0] != 'ZERO' else ('' ~ isa.prefix ~ 'dup_n_' ~ isa_dt_par.data_ext ~ '(0)') -%}{%- set rot, x, y = f[1], f[2], f[3] -%}",
+            "const svbool_t pg = svptrue_{{ isa_dt_par.data_ext_logi }}();",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}cmla_{{ isa_dt_par.data_ext }}_x(pg, {{ isa.prefix }}cmla_{{ isa_dt_par.data_ext }}_x(pg, {{ acc }}, {{ x }}, {{ y }}, 0), {{ x }}, {{ y }}, {{ rot }});",
+            "return res;"
+        ]
+    },
     "cvt_z": {
         "format": "short",
         "code": "{{ isa.prefix }}cvt_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}_z({% if dt_par.n_bits >= dt_ret.n_bits %}svptrue_{{ isa_dt_par.data_ext_logi }}(){% else %}svptrue_{{ isa_dt_ret.data_ext_logi }}(){% endif %}, r0.r);"

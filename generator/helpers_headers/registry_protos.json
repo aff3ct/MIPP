@@ -333,6 +333,21 @@
             }
         ]
     },
+    "ret_reg_1arg_reg_noldiv": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ],
+        "ldiv": false
+    },
     "ret_reg_1arg_val": {
         "ret": {
             "type": "reg",
@@ -479,6 +494,26 @@
             },
             {
                 "type": "msk",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ],
+        "ldiv": false
+    },
+    "ret_reg_2args_reg_noldiv": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
                 "fixeddatatype": false,
                 "charac": "RO"
             }
@@ -652,6 +687,31 @@
                 "charac": "RO"
             }
         ]
+    },
+    "ret_reg_3args_reg_noldiv": {
+        "ret": {
+            "type": "reg",
+            "fixeddatatype": false,
+            "charac": "WO"
+        },
+        "args": [
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            },
+            {
+                "type": "reg",
+                "fixeddatatype": false,
+                "charac": "RO"
+            }
+        ],
+        "ldiv": false
     },
     "ret_val_1arg_reg": {
         "ret": {

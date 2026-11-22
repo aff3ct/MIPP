@@ -43,6 +43,15 @@
             "return res;"
         ]
     },
+    "complex_cmla": {
+        "format": "long",
+        "code": [
+            "{% set f = instr_name.split('|') -%}{%- set acc = f[0] if f[0] != 'ZERO' else ('' ~ isa.prefix ~ 'dupq_n_' ~ isa_dt_par.data_ext ~ '(0)') -%}{%- set rot, x, y = f[1], f[2], f[3] -%}",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}cmlaq_rot{{ rot }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}cmlaq_{{ isa_dt_par.data_ext }}({{ acc }}, {{ x }}, {{ y }}), {{ x }}, {{ y }});",
+            "return res;"
+        ]
+    },
     "hreduc_emu": {
         "format": "long",
         "code": [

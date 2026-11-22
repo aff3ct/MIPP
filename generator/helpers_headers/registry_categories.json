@@ -30,6 +30,15 @@
         "cmpgt",
         "signbit"
     ],
+    "complex": [
+        "cmul",
+        "cmulconj",
+        "cfmadd",
+        "conj",
+        "cnorm",
+        "cabs",
+        "cdiv"
+    ],
     "convert": [
         "cvt",
         "ncvt",

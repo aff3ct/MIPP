@@ -1,4 +1,11 @@
 {
+    "cmul": [
+        {
+            "instr_name": "cmul",
+            "datatypes": "all_float",
+            "template": "complex_cmul"
+        }
+    ],
     "compress_store": [
         {
             "instr_name": "compress",

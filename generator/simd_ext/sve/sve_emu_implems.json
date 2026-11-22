@@ -88,6 +88,13 @@
             "template": "any_ptest"
         }
     ],
+    "cfmadd": [
+        {
+            "instr_name": "r2.r|90|r0.r|r1.r",
+            "datatypes": "all_float",
+            "template": "complex_cmla"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",
@@ -198,6 +205,20 @@
             "instr_name": "cmpne",
             "datatypes": "all_datatypes",
             "template": "form_n_cmp"
+        }
+    ],
+    "cmul": [
+        {
+            "instr_name": "ZERO|90|r0.r|r1.r",
+            "datatypes": "all_float",
+            "template": "complex_cmla"
+        }
+    ],
+    "cmulconj": [
+        {
+            "instr_name": "ZERO|270|r1.r|r0.r",
+            "datatypes": "all_float",
+            "template": "complex_cmla"
         }
     ],
     "compress_store": [

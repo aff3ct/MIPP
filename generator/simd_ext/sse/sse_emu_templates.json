@@ -22,6 +22,24 @@
             "return res;"
         ]
     },
+    "complex_cmul": {
+        "format": "long",
+        "code": [
+            "// (re, re) * b -/+ (im, im) * swapped b",
+            "%r<tp>% res;",
+            "res.r = _mm_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_moveldup_ps(r0.r){% else %}_mm_movedup_pd(r0.r){% endif %}, r1.r, _mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_movehdup_ps(r0.r){% else %}_mm_unpackhi_pd(r0.r, r0.r){% endif %}, {% if dt_par.n_bits == 32 %}_mm_shuffle_ps(r1.r, r1.r, 0xB1){% else %}_mm_shuffle_pd(r1.r, r1.r, 1){% endif %}));",
+            "return res;"
+        ]
+    },
+    "complex_cmul_nofma": {
+        "format": "long",
+        "code": [
+            "// (re, re) * b -/+ (im, im) * swapped b",
+            "%r<tp>% res;",
+            "res.r = _mm_addsub_{{ isa_dt_par.data_ext }}(_mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_moveldup_ps(r0.r){% else %}_mm_movedup_pd(r0.r){% endif %}, r1.r), _mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_movehdup_ps(r0.r){% else %}_mm_unpackhi_pd(r0.r, r0.r){% endif %}, {% if dt_par.n_bits == 32 %}_mm_shuffle_ps(r1.r, r1.r, 0xB1){% else %}_mm_shuffle_pd(r1.r, r1.r, 1){% endif %}));",
+            "return res;"
+        ]
+    },
     "cvt_f32_u32": {
         "format": "long",
         "code": [

@@ -691,6 +691,97 @@
         "format": "long",
         "code": "return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));"
     },
+    "complex_cabs": {
+        "format": "long",
+        "code": [
+            "// m sqrt((ar / m)^2 + (ai / m)^2), m the largest absolute value of the parts (1 when it is 0: the result is 0)",
+            "%r<tp>% m;",
+            "m = %max<tp>%(%abs<tp>%(%dup_even<tp>%(r0)), %abs<tp>%(%dup_odd<tp>%(r0)));",
+            "%r<tp>% d;",
+            "d = %select<tp>%(%cmpeq<tp>%(m, %set0<tp>%()), %set1<tp>%(1), m);",
+            "return %mul<tp>%(m, %sqrt<tp>%(%cnorm<tp>%(%div<tp>%(r0, d))));"
+        ]
+    },
+    "complex_cdiv": {
+        "format": "long",
+        "code": [
+            "// Smith: q = s / p with p the part of b of the largest absolute value, s the other one, den = p + s q",
+            "%r<tp>% c;",
+            "c = %dup_even<tp>%(r1);",
+            "%r<tp>% d;",
+            "d = %dup_odd<tp>%(r1);",
+            "%r<tp>% ar;",
+            "ar = %dup_even<tp>%(r0);",
+            "%r<tp>% ai;",
+            "ai = %dup_odd<tp>%(r0);",
+            "%m<tp>% big; // |br| >= |bi|",
+            "big = %cmpge<tp>%(%abs<tp>%(c), %abs<tp>%(d));",
+            "%r<tp>% p;",
+            "p = %select<tp>%(big, c, d);",
+            "%r<tp>% s;",
+            "s = %select<tp>%(big, d, c);",
+            "%r<tp>% q;",
+            "q = %div<tp>%(s, p);",
+            "%r<tp>% den;",
+            "den = %fmadd<tp>%(s, q, p);",
+            "%r<tp>% re; // |br| >= |bi|: (ar + ai q) / den, else (ar q + ai) / den",
+            "re = %select<tp>%(big, %fmadd<tp>%(ai, q, ar), %fmadd<tp>%(ar, q, ai));",
+            "%r<tp>% im; // |br| >= |bi|: (ai - ar q) / den, else (ai q - ar) / den",
+            "im = %select<tp>%(big, %fnmadd<tp>%(ar, q, ai), %fmsub<tp>%(ai, q, ar));",
+            "%m<tp>% odd; // the odd lanes (imaginary parts)",
+            "odd = %cmpneq<tp>%(%zip_lo<tp>%(%set0<tp>%(), %set1<tp>%(1)), %set0<tp>%());",
+            "return %select<tp>%(odd, %div<tp>%(im, den), %div<tp>%(re, den));"
+        ]
+    },
+    "complex_cfmadd": {
+        "format": "long",
+        "code": [
+            "// (ar, ar) * (br, bi) + (ai, ai) * (-bi, br) + c",
+            "%r<tp>% sgn; // -0, +0, -0, +0...: the sign of the even lanes",
+            "sgn = %zip_lo<tp>%(%set1<tp>%(-0.0), %set0<tp>%());",
+            "%r<tp>% bs;",
+            "bs = %xorb<tp>%(%swap_pairs<tp>%(r1), sgn);",
+            "return %fmadd<tp>%(%dup_odd<tp>%(r0), bs, %fmadd<tp>%(%dup_even<tp>%(r0), r1, r2));"
+        ]
+    },
+    "complex_cmul": {
+        "format": "long",
+        "code": [
+            "// (ar, ar) * (br, bi) + (ai, ai) * (-bi, br)",
+            "%r<tp>% sgn; // -0, +0, -0, +0...: the sign of the even lanes",
+            "sgn = %zip_lo<tp>%(%set1<tp>%(-0.0), %set0<tp>%());",
+            "%r<tp>% bs;",
+            "bs = %xorb<tp>%(%swap_pairs<tp>%(r1), sgn);",
+            "return %fmadd<tp>%(%dup_odd<tp>%(r0), bs, %mul<tp>%(%dup_even<tp>%(r0), r1));"
+        ]
+    },
+    "complex_cmulconj": {
+        "format": "long",
+        "code": [
+            "// (ar, ar) * (br, -bi) + (ai, ai) * (bi, br)",
+            "%r<tp>% sgn; // +0, -0, +0, -0...: the sign of the odd lanes",
+            "sgn = %zip_lo<tp>%(%set0<tp>%(), %set1<tp>%(-0.0));",
+            "%r<tp>% w;",
+            "w = %xorb<tp>%(r1, sgn);",
+            "return %fmadd<tp>%(%dup_odd<tp>%(r0), %swap_pairs<tp>%(r1), %mul<tp>%(%dup_even<tp>%(r0), w));"
+        ]
+    },
+    "complex_cnorm": {
+        "format": "long",
+        "code": [
+            "%r<tp>% sq;",
+            "sq = %mul<tp>%(r0, r0);",
+            "return %add<tp>%(sq, %swap_pairs<tp>%(sq));"
+        ]
+    },
+    "complex_conj": {
+        "format": "long",
+        "code": [
+            "%r<tp>% sgn; // +0, -0, +0, -0...: the sign of the odd lanes",
+            "sgn = %zip_lo<tp>%(%set0<tp>%(), %set1<tp>%(-0.0));",
+            "return %xorb<tp>%(r0, sgn);"
+        ]
+    },
     "compress_store_buf": {
         "format": "long",
         "code": [

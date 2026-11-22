@@ -7,6 +7,24 @@
             "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, {{ ones }});"
         ]
     },
+    "complex_cmul": {
+        "format": "long",
+        "code": [
+            "// (re, re) * b -/+ (im, im) * swapped b",
+            "%r<tp>% res;",
+            "res.r = _mm256_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_moveldup_ps(r0.r){% else %}_mm256_movedup_pd(r0.r){% endif %}, r1.r, _mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_movehdup_ps(r0.r){% else %}_mm256_permute_pd(r0.r, 0xF){% endif %}, {% if dt_par.n_bits == 32 %}_mm256_permute_ps(r1.r, 0xB1){% else %}_mm256_permute_pd(r1.r, 0x5){% endif %}));",
+            "return res;"
+        ]
+    },
+    "complex_cmul_nofma": {
+        "format": "long",
+        "code": [
+            "// (re, re) * b -/+ (im, im) * swapped b",
+            "%r<tp>% res;",
+            "res.r = _mm256_addsub_{{ isa_dt_par.data_ext }}(_mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_moveldup_ps(r0.r){% else %}_mm256_movedup_pd(r0.r){% endif %}, r1.r), _mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_movehdup_ps(r0.r){% else %}_mm256_permute_pd(r0.r, 0xF){% endif %}, {% if dt_par.n_bits == 32 %}_mm256_permute_ps(r1.r, 0xB1){% else %}_mm256_permute_pd(r1.r, 0x5){% endif %}));",
+            "return res;"
+        ]
+    },
     "cvt_f32_u32": {
         "format": "long",
         "code": [

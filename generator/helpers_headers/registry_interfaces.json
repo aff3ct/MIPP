@@ -117,6 +117,12 @@
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
+    "cabs": {
+        "proto_ref": "ret_reg_1arg_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
     "cast": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes_cart_prod",
@@ -129,6 +135,18 @@
         "horizontal": false,
         "variants": ["u"],
         "cpp_name": "cast"
+    },
+    "cdiv": {
+        "proto_ref": "ret_reg_2args_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "cfmadd": {
+        "proto_ref": "ret_reg_3args_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
     },
     "clamp": {
         "proto_ref": "ret_reg_3args_reg",
@@ -179,6 +197,24 @@
         "variants": ["u", "z"],
         "forms": ["vs"]
     },
+    "cmul": {
+        "proto_ref": "ret_reg_2args_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "cmulconj": {
+        "proto_ref": "ret_reg_2args_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "cnorm": {
+        "proto_ref": "ret_reg_1arg_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
     "combine": {
         "proto_ref": "ret_reg_2args_reg_lmul_up",
         "datatypes": "all_datatypes",
@@ -212,6 +248,12 @@
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u"]
+    },
+    "conj": {
+        "proto_ref": "ret_reg_1arg_reg_noldiv",
+        "datatypes": "all_float",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
     },
     "copysign": {
         "proto_ref": "ret_reg_2args_reg",

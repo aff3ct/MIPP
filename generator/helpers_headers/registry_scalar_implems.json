@@ -323,6 +323,21 @@
             ]
         }
     ],
+    "cabs": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "const size_t j = i & ~(size_t)1;",
+                "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
+                "const %s<tp>% ar = r0.r[j] < 0 ? -r0.r[j] : r0.r[j], ai = r0.r[k] < 0 ? -r0.r[k] : r0.r[k];",
+                "const %s<tp>% m = ar > ai ? ar : ai;",
+                "const %s<tp>% x = m == 0 ? 0 : ar / m, y = m == 0 ? 0 : ai / m;",
+                "res.r[i] = %!pred_cond!% (m * (%s<tp>%)sqrt((double)(x * x + y * y))) %!pred_alt!%;"
+            ]
+        }
+    ],
     "cast": [
         {
             "type": "vector-wide",
@@ -344,6 +359,47 @@
                 "%m<tr>% res;",
                 "BIT_CAST_N(res.m, m0.m, %N<tr>%);",
                 "return res;"
+            ]
+        }
+    ],
+    "cdiv": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "const size_t j = i & ~(size_t)1;",
+                "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
+                "const int odd = (i & 1) != 0;",
+                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
+                "%s<tp>% re, im;",
+                "if ((br < 0 ? -br : br) >= (bi < 0 ? -bi : bi))",
+                "{",
+                "\tconst %s<tp>% q = bi / br, d = br + bi * q;",
+                "\tre = (ar + ai * q) / d;",
+                "\tim = (ai - ar * q) / d;",
+                "}",
+                "else",
+                "{",
+                "\tconst %s<tp>% q = br / bi, d = br * q + bi;",
+                "\tre = (ar * q + ai) / d;",
+                "\tim = (ai * q - ar) / d;",
+                "}",
+                "res.r[i] = %!pred_cond!% (odd ? im : re) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cfmadd": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "const size_t j = i & ~(size_t)1;",
+                "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
+                "const int odd = (i & 1) != 0;",
+                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
+                "res.r[i] = %!pred_cond!% (odd ? ar * bi + ai * br + r2.r[k] : ar * br - ai * bi + r2.r[j]) %!pred_alt!%;"
             ]
         }
     ],
@@ -415,6 +471,47 @@
             "variants": [],
             "implem": [
                 "res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmul": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "const size_t j = i & ~(size_t)1;",
+                "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
+                "const int odd = (i & 1) != 0;",
+                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
+                "res.r[i] = %!pred_cond!% (odd ? ar * bi + ai * br : ar * br - ai * bi) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cmulconj": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "const size_t j = i & ~(size_t)1;",
+                "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
+                "const int odd = (i & 1) != 0;",
+                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
+                "res.r[i] = %!pred_cond!% (odd ? ai * br - ar * bi : ar * br + ai * bi) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "cnorm": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "const size_t j = i & ~(size_t)1;",
+                "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
+                "const %s<tp>% ar = r0.r[j], ai = r0.r[k];",
+                "res.r[i] = %!pred_cond!% (ar * ar + ai * ai) %!pred_alt!%;"
             ]
         }
     ],
@@ -490,6 +587,16 @@
                 "\tif (m0.m[i])",
                 "\t\tp0[k++] = r0.r[i];",
                 "return k;"
+            ]
+        }
+    ],
+    "conj": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "res.r[i] = %!pred_cond!% ((i & 1) ? -r0.r[i] : r0.r[i]) %!pred_alt!%;"
             ]
         }
     ],

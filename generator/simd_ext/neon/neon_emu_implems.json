@@ -25,6 +25,14 @@
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
+    "cfmadd": [
+        {
+            "instr_name": "r2.r|90|r0.r|r1.r",
+            "datatypes": "all_float",
+            "template": "complex_cmla",
+            "if": "defined(__ARM_FEATURE_COMPLEX)"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",
@@ -44,6 +52,22 @@
             ],
             "template": "cmpgt_s64",
             "if": "!defined(__aarch64__)"
+        }
+    ],
+    "cmul": [
+        {
+            "instr_name": "ZERO|90|r0.r|r1.r",
+            "datatypes": "all_float",
+            "template": "complex_cmla",
+            "if": "defined(__ARM_FEATURE_COMPLEX)"
+        }
+    ],
+    "cmulconj": [
+        {
+            "instr_name": "ZERO|270|r1.r|r0.r",
+            "datatypes": "all_float",
+            "template": "complex_cmla",
+            "if": "defined(__ARM_FEATURE_COMPLEX)"
         }
     ],
     "compress": [

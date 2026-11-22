@@ -55,6 +55,20 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "cmul": [
+        {
+            "instr_name": "cmul",
+            "datatypes": "all_float",
+            "template": "complex_cmul",
+            "if": "defined(__FMA__)"
+        },
+        {
+            "instr_name": "cmul",
+            "datatypes": "all_float",
+            "template": "complex_cmul_nofma",
+            "if": "!defined(__FMA__)"
+        }
+    ],
     "compress": [
         {
             "instr_name": "compress",

@@ -71,6 +71,10 @@
     "description": "Copies the lane `s0` of each block of 128 bits to the lanes of the block (0 <= s0 < number of lanes of a block).",
     "latex": "\\text{res}_{b+l} = r0_{b + s0}"
   },
+  "cabs": {
+    "description": "Modulus of the complex numbers (interleaved layout), in both lanes of each pair, without intermediate overflow: computed as m sqrt((a_r/m)^2 + (a_i/m)^2) with m the largest absolute value of the two parts.",
+    "latex": "|a| = \\sqrt{a_r^2 + a_i^2}"
+  },
   "cast": {
     "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",
     "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{rvd}\\langle T_{\\text{dst}}\\rangle \\rangle(r0)"
@@ -78,6 +82,14 @@
   "cast_k": {
     "description": "In-register bitcast/reinterpretation of a mask register to another datatype of identical bitwidth with zero runtime instructions.",
     "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{rvm}\\langle T_{\\text{dst}}\\rangle \\rangle(m0)"
+  },
+  "cdiv": {
+    "description": "Complex division of the complex numbers of r0 by the ones of r1 (interleaved layout), with the algorithm of Smith: the division by the part of the largest absolute value avoids the overflows and the losses of br^2 + bi^2.",
+    "latex": "\\frac{a}{b} = \\frac{(a_r b_r + a_i b_i) + i (a_i b_r - a_r b_i)}{b_r^2 + b_i^2}"
+  },
+  "cfmadd": {
+    "description": "Complex fused multiply-add: r0 * r1 + r2, with complex numbers in the interleaved layout.",
+    "latex": "a b + c"
   },
   "clamp": {
     "description": "Clamps each element between the elements of the same lane of the second (lower bound) and third (upper bound) registers: `min(max(r0, r1), r2)`. With bounds such that lo > hi, the result is hi. The form `vss` takes scalar bounds: `clamp(r, lo, hi)`.",
@@ -107,6 +119,18 @@
     "description": "Compares two vector registers element-wise for inequality (a != b).",
     "latex": "m_i = (r0_i \\neq r1_i)"
   },
+  "cmul": {
+    "description": "Complex product of the complex numbers (re, im) of the pairs of lanes of the two registers (interleaved layout: the real part in the even lane, the imaginary part in the odd lane).",
+    "latex": "(a_r + i a_i)(b_r + i b_i) = (a_r b_r - a_i b_i) + i (a_r b_i + a_i b_r)"
+  },
+  "cmulconj": {
+    "description": "Complex product of the complex numbers of r0 by the conjugates of the complex numbers of r1 (interleaved layout).",
+    "latex": "a \\bar{b} = (a_r b_r + a_i b_i) + i (a_i b_r - a_r b_i)"
+  },
+  "cnorm": {
+    "description": "Squared modulus of the complex numbers (interleaved layout), in both lanes of each pair.",
+    "latex": "|a|^2 = a_r^2 + a_i^2"
+  },
   "combine": {
     "description": "Joins two vector registers into a register of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
     "latex": "\\text{res}_i = \\begin{cases} r0_i & \\text{if } i < N \\\\ r1_{i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
@@ -126,6 +150,10 @@
   "compress_store_full": {
     "description": "`compress_store` that may write a whole register: the active lanes of r0 at p0, then up to N - count unspecified elements (the memory of N elements from p0 must be writable). Faster than `compress_store` without a native masked store: a filter loop overwrites the unspecified elements with the next call (keep N elements of margin at the end of the output).",
     "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
+  },
+  "conj": {
+    "description": "Complex conjugate: the imaginary parts (odd lanes) negated (interleaved layout).",
+    "latex": "\\bar{a} = a_r - i a_i"
   },
   "copysign": {
     "description": "Builds each element with the magnitude of the first register and the sign of the second one (IEEE copysign).",
