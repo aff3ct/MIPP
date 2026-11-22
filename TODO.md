@@ -6,7 +6,7 @@ This document tracks pending engineering tasks, missing functionality relative t
 
 ## 1. MIPPv1 Function Parity & Missing Interfaces
 
-MIPPv2 currently defines and generates **92 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline.
+MIPPv2 currently defines and generates **92 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline. The detailed plan (API, per-ISA mapping, generator changes) is being implemented on the `feat/mippv1-parity` branch.
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
 MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components):
@@ -25,24 +25,26 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `interleavelo2`, `interleavehi2`: 2-element granular low/high interleaving.
 - [ ] `interleavelo4`, `interleavehi4`: 4-element granular low/high interleaving.
 - [ ] `interleave`, `deinterleave`: Full two-register zip and unzip operations returning `regx2`.
-- [ ] `interleave2`, `interleave4`: Multi-stride 2-way and 4-way register interleaving returning `regx2`.
+- [ ] `interleave2`, `interleave4`: Multi-stride 2-way and 4-way register interleaving returning `regx2`. In MIPPv1 the block is relative to the register (a half or a quarter, i.e. 256 bits on AVX-512): MIPPv2 uses fixed 128-bit blocks instead (`_b128` variants).
 - [ ] `interleavex2`, `interleavex4`, `interleavex16`: Cross-lane intra-register interleaving permutations.
 
 ### 1.3. Permutation, Shuffling & Packing
-- [ ] `shuff`, `shuff2`, `shuff4`: Arbitrary intra-vector element shuffling governed by control index vectors or immediate masks.
-- [ ] `cmask`, `cmask2`, `cmask4`: Constant shuffle mask generation helpers for cross-lane byte swizzling.
+- [ ] `shuff`, `shuff2`, `shuff4`: Arbitrary intra-vector element shuffling governed by **runtime index registers only** (MIPPv1 has no immediate shuffle masks). `shuff2`/`shuff4` apply the same pattern to each half/quarter of the register. Planned as `permute` / `permute2` (whole vector) and `permute_b128`.
+- [ ] `cmask`, `cmask2`, `cmask4`: Opaque, ISA-specific encoding of the shuffle indices (byte indices for `pshufb`/`vtbl`), prepared once. MIPPv2 starts with plain index registers; a prepared type will only be added if measurements require it.
+- [ ] `combine<S>(a, b)`: Lanes `S` to `S + N - 1` of the concatenation of `a` and `b` (`alignr` / `ext`). Planned as `slide(a, b, n)`, since `combine` is the concatenation of two halves in MIPPv2.
+- [ ] `transpose`, `transpose8x8`, `transpose2`, `transpose28x8`: Register-block transposes (a few datatypes and ISAs only in MIPPv1). Postponed with the register tuples.
 - [ ] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`).
 - [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation, done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
 - [ ] `pack`: Saturating register narrowing from two inputs. `ncvt` (truncating, one input) covers the non-saturating case; a saturating `pack` is postponed.
   > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`low`/`high`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
-- [ ] `lrot`, `rrot`: Left and right circular bitwise rotations of elements.
+- [ ] `lrot`, `rrot`: Rotation of the **lanes** of a register by one position (not a bitwise rotation of the elements). Planned as `rotate(v, n)`.
 - [ ] `lshiftr`, `rshiftr`: Variable element-wise vector-by-vector left and right logical/arithmetic bit shifts (where shift counts vary per lane, e.g., `_mm256_sllv_epi32`).
 
 ### 1.5. Memory Management & Dynamic Buffers
 - [ ] `isAligned`: Pointer alignment verification against target ISA alignment constraints (`MIPP_REQUIRED_ALIGNMENT`).
-- [ ] `oloadu`: Unaligned load with explicit byte or element offset.
+- [x] `oloadu`: The unaligned load that returns a register object (`Reg<T>`), not a load with an offset: covered by the Object API (`mipp::Rvd<T>` constructors and `mipp::loadu`).
 - [ ] `malloc`, `free`: Alignment-aware heap allocation wrappers ensuring memory conforms to target ISA alignment constraints (`MIPP_REQUIRED_ALIGNMENT`).
 - [ ] `mipp::allocator<T>`: STL-compliant allocator ensuring aligned dynamic allocations for `std::vector`.
 - [ ] `mipp::vector<T>`: Type alias for `std::vector<T, mipp::allocator<T>>`.
@@ -50,7 +52,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 ### 1.6. Reductions, Aliases & Diagnostics
 - [ ] `reduction<T, OP>`: Higher-order template reduction engine evaluating arbitrary associative binary operators (`OP`) across vectors and raw array buffers.
 - [ ] `sum`: Reduction alias for horizontal addition (`hadd`).
-- [ ] `sat`: Dynamic clamping of vector elements between runtime scalar bounds $[min, max]$ (distinct from MIPPv2 `adds`/`subs` type-boundary saturation).
+- [ ] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation. Planned as `clamp(v, lo, hi)`.
 - [ ] `dump`: Formatted debug printing of vector and mask register contents to standard output streams.
 - [ ] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`. `none(m)` (no active lane, ex-`testz_2`) and `testz(m0, m1)` (AND of two masks) exist; `any(m)` (at least one active lane) and `all(m)` (all lanes active) are to be added.
   - Declare them in the registry (`ret_i32_1arg_msk`, `horizontal`, variant `u`), `funcs_docs.json`, categories, scalar implementation, tests specs, and the object API (`int32_t` return).
@@ -64,7 +66,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::mask<T, fn>`, `mipp::maskz<T, fn>` | `_mask`, `_maskz`, `_masks` variants on all functions | Masking promoted to a first-class execution mode across all 4 variants rather than higher-order function pointer wrappers. |
 | `mipp::cvt<T1, T2>` (all conversions) | `cvt` (same-size), `wcvt` (widening), `ncvt` (narrowing, truncating), `cast` (reinterpreting) | Disambiguates arithmetic casting, widening/narrowing conversions, and zero-cost bit reinterpretation into dedicated primitives. |
 | `mipp::pack<T1, T2>`, `low`, `high` | `ncvt` (truncating), `low` / `high` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives; a saturating `pack` is still to be defined. |
-| `mipp::sat(r, min, max)` | `adds`, `subs` | Replaced ad-hoc clamping with hardware saturated arithmetic instructions (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
+| `mipp::sat(r, min, max)` | `clamp` (planned) | Clamping between runtime bounds. Not to be confused with `adds`/`subs`, the saturated arithmetic at the type boundaries (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
 | `mipp::toreg<N>(m)` | `torvd(m)` / `torvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
 | `mipp::blend(r1, r2, m)` | `select(m, r1, r2)` | Renamed after the operation (`m ? r1 : r2`), mask first as in every masked MIPPv2 function. |
@@ -89,7 +91,7 @@ Currently, MIPPv2 classifies mask execution into native predication (RISC-V Vect
   - Current state: `rvm<T>` is bound to native opmask types (`__mmask8` ... `__mmask64`). Native masked instructions are used for part of the functions (e.g., `_mm512_mask_add_*`, native masked `load`/`store` including unsigned types); the others are evaluated as an unmasked operation followed by `_mm512_mask_blend_*` (Level 2).
   - Target state: Route all masked operations that have a native predicated intrinsic (e.g., `_mm512_maskz_mul_epi32`) to it.
 - [ ] **ARM SVE Predicate (`svbool_t`) Integration** (partially done):
-  - Current state: `rvm<T>` is bound to native `svbool_t`, but masked operations are emulated through unmasked execution and `svsel` (Level 2); predicated forms are not used.
+  - Current state: `rvm<T>` is bound to native `svbool_t`. Predicated forms (`_m`, `_z`) are used for about 35 functions (arithmetic, FMA, comparisons, logic, shifts, reductions, loads/stores, gather/scatter); the other masked operations are emulated through unmasked execution and `svsel` (Level 2).
   - Target state: Generate predicated instruction forms governed by active predicates (`svadd_f32_m`, `svmul_s32_z`).
 
 ---
