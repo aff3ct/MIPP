@@ -53,6 +53,63 @@
     ],
     "additionalProperties": false,
     "properties": {
+        "ldiv_modes": {
+            "description": "Half-vector (`d2`) representations selected at compile time by a user macro (RVV). In each mode, the half-vector of the `vl_datatypes` is the register of LMUL 1 used with a vector length of N/2 (\"by `vl`\": lane-wise intrinsics, loads, stores and reductions process the N/2 lanes natively, with no mask), and the other datatypes keep the hardware fractional register (`mf2`). The `d2` layer is generated once per mode under `#if defined(<macro>)`; `header_template` selects the default mode. See [Code Generation](../../internals/code_generation.md#2-one-isa-layer).",
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "type": "object",
+                "required": [
+                    "name",
+                    "macro",
+                    "vl_datatypes"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Short name of the mode (`hw`, `vl`, `hybrid`)."
+                    },
+                    "macro": {
+                        "type": "string",
+                        "description": "Macro defined by the user to select the mode (e.g. `MIPP_RVV_LDIV_VL`)."
+                    },
+                    "vl_datatypes": {
+                        "description": "Datatypes whose half-vector is the LMUL 1 register used with vl = N/2: a list of datatypes or aliases (`all_64bit`, `all_datatypes`), empty for the hardware fractional registers only.",
+                        "oneOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "examples": [
+                [
+                    {
+                        "name": "hw",
+                        "macro": "MIPP_RVV_LDIV_HW",
+                        "vl_datatypes": []
+                    },
+                    {
+                        "name": "vl",
+                        "macro": "MIPP_RVV_LDIV_VL",
+                        "vl_datatypes": "all_datatypes"
+                    },
+                    {
+                        "name": "hybrid",
+                        "macro": "MIPP_RVV_LDIV_HYBRID",
+                        "vl_datatypes": "all_64bit"
+                    }
+                ]
+            ]
+        },
         "name": {
             "description": "Identifier of the ISA; it must match the directory name. The generator defines `MIPP_<NAME>` when the ISA is selected, and adds `<NAME>` to the C++ `mipp::ISA` enum.",
             "type": "string"

@@ -32,6 +32,7 @@ from codegen.candidate_resolver import resolve_and_emit_missing_functions
 from codegen.lmul_orchestrator import gen_c_lmul, gen_c_lmul1_aliases, gen_c_ldiv, record_lmul1_definition
 from codegen.ldiv_mask import gen_c_ldiv_mask
 from codegen.sw_lmul import gen_c_sw_lmul
+from codegen.ldiv_modes import ldiv_modes, apply_ldiv_mode, mode_guard
 
 
 def gen_c_defines(isa, file, vla_size=None):
@@ -57,7 +58,7 @@ def gen_c_defines(isa, file, vla_size=None):
         print(f"#endif", file=file)
 
     if layout and "size_symbol" in layout and (vla_size is None or isinstance(vla_size, str)):
-        print(f"#define MIPP_{isa_name_upper}_RVD_SIZE_BYTE {size_symbol}/8", file=file)
+        print(f"#define MIPP_{isa_name_upper}_RVD_SIZE_BYTE ({size_symbol}/8)", file=file)
         print(f"#if MIPP_{isa_name_upper}_RVD_SIZE_BYTE == 0", file=file)
         print(f"\t#error \"MIPP_{isa_name_upper}_RVD_SIZE_BYTE can't be null\"", file=file)
         print(f"#endif", file=file)
@@ -119,7 +120,12 @@ def gen_c_defines(isa, file, vla_size=None):
                 lsuffix_upper=lsuffix_upper
             ), file=file)
 
-def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
+def gen_c_structures(isa, file, is_scalar=False, vla_size=None, parts=("pos", "ldiv")):
+    """
+    Register types of the ISA. `parts` selects the LMUL >= 1 types ("pos") and / or the half-vector types ("ldiv"):
+    an ISA with several half-vector representations (`ldiv_modes`) writes its half-vector types once per mode, each
+    time from the descriptor of the mode (codegen/ldiv_modes.py), under the macro of the mode.
+    """
     layout = isa.get("layout", None)
     if not layout:
         if is_scalar:
@@ -139,7 +145,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
     # 1. Vector typedefs (VLA only)
     if "vector_typedef_template" in layout:
         j2_vector_typedef = Template(layout["vector_typedef_template"], undefined=StrictUndefined)
-        for lmul in [x for x in isa.get("hw_lmul", [1]) if x > 0]:
+        for lmul in ([x for x in isa.get("hw_lmul", [1]) if x > 0] if "pos" in parts else []):
             resolved_isa = resolve_lmul_in_isa(isa, lmul)
             lsuffix_mipp = f"m{lmul}"
             lmul_expr = f"*{lmul}" if lmul > 1 else ""
@@ -151,11 +157,11 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    lmul_expr=lmul_expr
+                    lmul_expr=("" if resolved_isa["datatypes"][dt].get("ldiv_vl") else lmul_expr)
                 ), file=file)
                 if guard:
                     print(f"#endif", file=file)
-        for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
+        for ldiv in ([abs(x) for x in isa.get("hw_lmul", []) if x < 0] if "ldiv" in parts else []):
             resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
             lsuffix_mipp = f"d{ldiv}"
             lmul_expr = f"/{ldiv}"
@@ -172,7 +178,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    lmul_expr=lmul_expr
+                    lmul_expr=("" if resolved_isa["datatypes"][dt].get("ldiv_vl") else lmul_expr)
                 ), file=file)
                 if guard:
                     print(f"#endif", file=file)
@@ -183,7 +189,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
         # A mask typedef may not depend on the datatype (SVE: fixed_m1_bool_t): emit each
         # distinct typedef once, a redefinition being a C11 feature (-Wtypedef-redefinition in C99).
         emitted_mask_typedefs = set()
-        for lmul in [x for x in isa.get("hw_lmul", [1]) if x > 0]:
+        for lmul in ([x for x in isa.get("hw_lmul", [1]) if x > 0] if "pos" in parts else []):
             resolved_isa = resolve_lmul_in_isa(isa, lmul)
             lsuffix_mipp = f"m{lmul}"
             lmul_expr = f"*{lmul}" if lmul > 1 else ""
@@ -193,7 +199,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    lmul_expr=lmul_expr,
+                    lmul_expr=("" if resolved_isa["datatypes"][dt].get("ldiv_vl") else lmul_expr),
                     n_bits=datatypes[dt]["n_bits"]
                 )
                 if (guard, mask_typedef) in emitted_mask_typedefs:
@@ -204,7 +210,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 print(mask_typedef, file=file)
                 if guard:
                     print(f"#endif", file=file)
-        for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
+        for ldiv in ([abs(x) for x in isa.get("hw_lmul", []) if x < 0] if "ldiv" in parts else []):
             resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
             lsuffix_mipp = f"d{ldiv}"
             lmul_expr = f"/{ldiv}"
@@ -219,7 +225,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     isa_datatype=resolved_isa["datatypes"][dt],
                     vla_size=size_symbol,
                     lsuffix_mipp=lsuffix_mipp,
-                    lmul_expr=lmul_expr,
+                    lmul_expr=("" if resolved_isa["datatypes"][dt].get("ldiv_vl") else lmul_expr),
                     n_bits=datatypes[dt]["n_bits"]
                 )
                 if (guard, mask_typedef) in emitted_mask_typedefs:
@@ -240,7 +246,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
     
     # Loop over all lmuls (1, 2, 4, 8)
     lmuls_to_gen = sorted(list(set([1] + all_lmul)))
-    for lmul in lmuls_to_gen:
+    for lmul in (lmuls_to_gen if "pos" in parts else []):
         lsuffix_mipp = f"m{lmul}"
         if lmul in hw_lmuls:
             # Native implementation using template
@@ -281,7 +287,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 print(f"typedef struct {{ rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul_2}_t r1, r2; }} rvd_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
 
     # Negative lmuls (ldivs, VLA only)
-    for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
+    for ldiv in ([abs(x) for x in isa.get("hw_lmul", []) if x < 0] if "ldiv" in parts else []):
         lsuffix_mipp = f"d{ldiv}"
         resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
         for dt in resolved_isa["datatypes"]:
@@ -325,7 +331,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
 
     # 4. Rvm structs (native or emulated)
     j2_rvm_struct = Template(layout["rvm_struct_template"], undefined=StrictUndefined)
-    for lmul in lmuls_to_gen:
+    for lmul in (lmuls_to_gen if "pos" in parts else []):
         lsuffix_mipp = f"m{lmul}"
         if lmul in hw_lmuls:
             # Native implementation using template
@@ -366,7 +372,7 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                 print(f"typedef struct {{ rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul_2}_t m1, m2; }} rvm_{isa['name']}_{datatypes[dt]['category']}{datatypes[dt]['n_bits']}_m{lmul}_t;", file=file)
 
     # Negative lmuls (ldivs, VLA only)
-    for ldiv in [abs(x) for x in isa.get("hw_lmul", []) if x < 0]:
+    for ldiv in ([abs(x) for x in isa.get("hw_lmul", []) if x < 0] if "ldiv" in parts else []):
         lsuffix_mipp = f"d{ldiv}"
         resolved_isa = resolve_lmul_in_isa(isa, -ldiv)
         for dt in resolved_isa["datatypes"]:
@@ -408,6 +414,8 @@ def gen_c_structures(isa, file, is_scalar=False, vla_size=None):
                     print_ldiv_fallback_typedef_rvm("\t")
                     print(f"#endif", file=file)
 
+    if "pos" not in parts:
+        return
     if uses_sub_isa_ldiv(isa):
         sub_isa = load_isa_config(isa["sub_isa"])[0]
         if sub_isa:
@@ -558,7 +566,16 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     gen_c_defines(isa, file_common)
     print("", file=file_common)
 
-    gen_c_structures(isa, file_common, is_scalar=isa.get("is_scalar", False))
+    modes = ldiv_modes(isa)
+    if modes:
+        # the half-vector types, once per representation of the half-vectors (codegen/ldiv_modes.py)
+        gen_c_structures(isa, file_common, is_scalar=isa.get("is_scalar", False), parts=("pos",))
+        for mode in modes:
+            print(f"\n#if {mode_guard(mode)} // half-vectors: '{mode['name']}' representation", file=file_common)
+            gen_c_structures(apply_ldiv_mode(isa, mode), file_common, is_scalar=isa.get("is_scalar", False), parts=("ldiv",))
+            print(f"#endif // {mode_guard(mode)}", file=file_common)
+    else:
+        gen_c_structures(isa, file_common, is_scalar=isa.get("is_scalar", False))
     print("", file=file_common)
 
     print(f"#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_ */", file=file_common)
@@ -582,10 +599,15 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     # Negative hw_lmul values (fractional LMUL/ldiv like -2, -4, -8, if present)
     hw_lmuls_neg = sorted([int(x) for x in hw_lmuls if int(x) < 0])
     for lmul_neg in hw_lmuls_neg:
-        resolved_isa = resolve_lmul_in_isa(isa, str(lmul_neg))
-        resolved_isa["candidates"] = []
-        register_all_candidates(resolved_isa, copy_interfaces, native_implems, emu_implems, lmul=lmul_neg)
-        resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=lmul_neg, emit_separators=True)
+        # several half-vector representations (`ldiv_modes`): the d2 functions are written once per mode, under the
+        # macro of the mode, from the descriptor of the mode
+        variants = [(apply_ldiv_mode(isa, m), mode_guard(m)) for m in modes] if (modes and lmul_neg == -2) else [(isa, None)]
+        for k, (misa, guard) in enumerate(variants):
+            resolved_isa = resolve_lmul_in_isa(misa, str(lmul_neg))
+            resolved_isa["candidates"] = []
+            register_all_candidates(resolved_isa, copy_interfaces, native_implems, emu_implems, lmul=lmul_neg)
+            resolve_and_emit_missing_functions(resolved_isa, include_manager, copy_interfaces, lmul=lmul_neg,
+                                               emit_separators=(k == 0), outer_guard=guard)
 
     sw_lmuls = [x for x in isa.get("sw_lmul", []) if int(x) > 0]
 
@@ -599,7 +621,14 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
     elif uses_mask_ldiv(isa):
         gen_c_ldiv_mask(isa, include_manager, copy_interfaces)
     elif uses_hw_ldiv_templates(isa):
-        gen_c_ldiv_mask(isa, include_manager, copy_interfaces, only_changing=True)
+        if modes:
+            # the functions between hardware LMULs once, those between m1 and d2 once per half-vector representation
+            gen_c_ldiv_mask(isa, include_manager, copy_interfaces, only_changing=True, ldiv_pairs=False)
+            for mode in modes:
+                gen_c_ldiv_mask(apply_ldiv_mode(isa, mode), include_manager, copy_interfaces, only_changing=True,
+                                ldiv_pairs=True, other_pairs=False, outer_guard=mode_guard(mode))
+        else:
+            gen_c_ldiv_mask(isa, include_manager, copy_interfaces, only_changing=True)
 
     # 5. The LMUL 1 of the functions that build a software LMUL 2 register (wcvt, combine), then the functions without
     # suffix, aliases of the `_m1` ones just written (all of them are known now). The bodies of wcvt m1 -> m2 and

@@ -166,7 +166,9 @@
                 "uint16,uint8",
                 "uint8,uint8"
             ],
-            "template": "cast"
+            "template": "cast",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "A single reinterpretation; with hybrid half-vectors (MIPP_RVV_LDIV_HYBRID) a 64-bit d2 is an LMUL 1 register and a narrower d2 a fractional one, so vlmul_ext / vlmul_trunc (no instruction) are added."
         }
     ],
     "cmpeq": [
@@ -306,7 +308,9 @@
                 "int8,uint8",
                 "uint8,int8"
             ],
-            "template": "cast"
+            "template": "cast",
+            "skip_audit_level": true,
+            "skip_audit_level_reason": "A single reinterpretation; with hybrid half-vectors (MIPP_RVV_LDIV_HYBRID) a 64-bit d2 is an LMUL 1 register and a narrower d2 a fractional one, so vlmul_ext / vlmul_trunc (no instruction) are added."
         }
     ],
     "div": [

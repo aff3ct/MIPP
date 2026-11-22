@@ -62,7 +62,7 @@
     "cast": {
         "format": "short",
         "code": [
-            "{% if isa_dt_par.data_ext != isa_dt_ret.data_ext -%} {{ isa.prefix }}_{{ instr_name }}_v_{{isa_dt_par.data_ext}}_{{isa_dt_ret.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}"
+            "{% set fp = isa_dt_par.data_ext.endswith('mf2') -%}{% set fr = isa_dt_ret.data_ext.endswith('mf2') -%}{% if fp and not fr -%} {{ isa.prefix }}_{{ instr_name }}_v_{{ isa_dt_par.data_ext[:-3] }}m1_{{ isa_dt_ret.data_ext }}({{ isa.prefix }}_vlmul_ext_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.data_ext[:-3] }}m1(r0.r));{% elif fr and not fp -%} {{ isa.prefix }}_vlmul_trunc_v_{{ isa_dt_ret.data_ext[:-3] }}m1_{{ isa_dt_ret.data_ext }}({{ isa.prefix }}_{{ instr_name }}_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_ret.data_ext[:-3] }}m1(r0.r));{% elif isa_dt_par.data_ext != isa_dt_ret.data_ext -%} {{ isa.prefix }}_{{ instr_name }}_v_{{isa_dt_par.data_ext}}_{{isa_dt_ret.data_ext}}(r0.r);{% else -%} r0.r;{% endif %}"
         ]
     },
     "div2_float": {

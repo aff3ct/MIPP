@@ -88,6 +88,13 @@ static inline void mipp_info(void)
 	printf(" - Support Fused Multiply–Add: %s\n", mipp_fma);
 	printf(" - Support 64-bit elements:    %s\n", mipp_64bit);
 	printf(" - Support Byte and Word (BW): %s\n", mipp_bw);
+#if defined(MIPP_RVV_LDIV_VL)
+	printf(" - Half-vectors (d2):          by vl (LMUL 1 registers, vl = N/2)\n");
+#elif defined(MIPP_RVV_LDIV_HYBRID)
+	printf(" - Half-vectors (d2):          hybrid (fractional below 64 bits, by vl for 64 bits)\n");
+#elif defined(MIPP_RVV_LDIV_HW) || defined(MIPP_RVV)
+	printf(" - Half-vectors (d2):          hardware (fractional registers, arrays for 64 bits)\n");
+#endif
 	printf("Copyright (c) 2016-2026 - MIT license.\n");
 	printf("This is free software; see the source for copying conditions.  There is NO\n");
 	printf("warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");

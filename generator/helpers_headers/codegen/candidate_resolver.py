@@ -724,7 +724,19 @@ BASE_LEVELS = {}
 # The same, per branch: [(condition of the candidate, level), ...] (the conditions split the cases)
 BASE_LEVEL_BRANCHES = {}
 
-def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False):
+def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators=False, outer_guard=None):
+    """
+    Resolves the candidates of every function of `isa` for `lmul` and writes them. `outer_guard` (a preprocessor
+    condition) wraps everything written, prototypes included: the d2 layer of an ISA with several half-vector
+    representations (`ldiv_modes`, see codegen/ldiv_modes.py) is written once per mode, under the macro of the mode
+    (the prototypes, identical in every mode, are not guarded).
+    """
+    def guarded(cond):
+        # condition of a body: its own condition within the outer guard
+        if not outer_guard:
+            return cond
+        return f"({outer_guard}) && ({cond})" if cond else outer_guard
+
     resolved = resolve_candidates(isa, funcs, lmul=lmul)
     if lmul == 0:
         for (rf, rdt_key, rmask_kind), rcands in resolved.items():
@@ -775,6 +787,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         target_file = file.get_fd(isa["name"], f, variant=mask_kind, lmul=lmul) if is_inc_mgr else file
                         func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=mask_kind, lmul=lmul)
                         proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
+                        # not guarded by `outer_guard`: the include manager gathers the prototypes at the top of
+                        # the header, and repeating an identical prototype (once per half-vector mode) is valid C
                         print("static " + proto_str + ";", file=target_file)
                         
         for dt in funcs[f]["datatypes"]:
@@ -797,7 +811,8 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                 for cand, cond in resolved[key]:
                     if cond == "0":
                         continue
-                    
+                    cond = guarded(cond)
+
                     if cand["type"] in ["native_or_emu", "generic_emu"]:
                         pre_rendering = render_template(isa, cand["ff"], dt_par, dt_ret, func_name=f, lmul=lmul)
                         ph_ret = parse_placeholders(pre_rendering, isa, funcs, f, dt_par, dt_ret, lmul=lmul)

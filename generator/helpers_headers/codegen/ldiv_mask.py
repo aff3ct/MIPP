@@ -475,7 +475,13 @@ def compute_changing_levels(isa, funcs):
     return {(f, k): lvl for (n, f, k), lvl in CHANGING_LEVELS.items() if n == isa["name"]}
 
 
-def gen_c_ldiv_mask(isa, include_manager, funcs, only_changing=False):
+def gen_c_ldiv_mask(isa, include_manager, funcs, only_changing=False, ldiv_pairs=True, other_pairs=True, outer_guard=None):
+    """
+    Half-vector functions of an ISA with half-vectors by mask, and the functions that change the LMUL. For the ISAs with
+    hardware register groups (RVV), `ldiv_pairs` / `other_pairs` select the functions between m1 and d2 / between
+    the other LMULs, and `outer_guard` wraps what is written: with several half-vector representations
+    (`ldiv_modes`), the functions between m1 and d2 are written once per mode (codegen/ldiv_modes.py).
+    """
     if not uses_ldiv_templates(isa):
         print(f"in ldiv_mask.gen_c_ldiv_mask : error : '{isa['name']}' does not declare 'sw_ldiv_type: mask' with -2 in sw_lmul")
         exit(-1)
@@ -496,9 +502,16 @@ def gen_c_ldiv_mask(isa, include_manager, funcs, only_changing=False):
             for lmul_in in lmuls_in:
                 if not isa_provides_lmul(isa, proto, lmul_in):
                     continue
+                is_ldiv_pair = -2 in (lmul_in, resolve_ret_lmul(proto["ret"], lmul_in))
+                if (is_ldiv_pair and not ldiv_pairs) or (not is_ldiv_pair and not other_pairs):
+                    continue
                 file_w = include_manager.get_fd(isa["name"], f, variant="u", lmul=lmul_in)
                 for dt in funcs[f]["datatypes"]:
+                    if outer_guard:
+                        print(f"\n#if {outer_guard}", file=file_w)
                     _emit_one(isa, file_w, funcs, templates, f, dt, None, record_call, lmul_in=lmul_in)
+                    if outer_guard:
+                        print("#endif", file=file_w)
             continue
         if only_changing:
             continue

@@ -195,7 +195,7 @@ Today, **every SIMD extension supported by MIPP provides half-vectors** ($\text{
 The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-per-target) give the targets that provide half-vectors, and their representation:
 
 - **AVX / AVX2, AVX-512**: a native register of the narrower ISA: 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`) on AVX, 256-bit AVX registers on AVX-512.
-- **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array, and most operations on it use the scalar fallback. They are implemented with the standard `V` extension; on cores without 64-bit elements or with VLEN < 128, some of them are not (see [Implementation Levels](implementation_levels.md#known-limitations)).
+- **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array, and most operations on it use the scalar fallback. They are implemented with the standard `V` extension; on cores without 64-bit elements or with VLEN < 128, some of them are not (see [Implementation Levels](implementation_levels.md#known-limitations)). The representation of the RVV half-vectors can be changed at compile time (see [§4.3](#43-rvv-half-vectors-hardware-or-by-vl)).
 - **SSE / NEON / ARM SVE**: there is no narrower register (on ARMv7, part of the `float64` half-vector operations are not implemented, see [Implementation Levels](implementation_levels.md#known-limitations)), so a `d2` value is stored in a full LMUL = 1 register (same member as the `m1` type, but a distinct type). Only the lower $N/2$ lanes are meaningful; the upper lanes are unspecified and ignored (they may hold garbage). Consequences:
     - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions, `testz`, `none`, `any` and `all` ignore the upper lanes;
     - `get(r, lane)` with `lane` outside $[0, N/2)$ is undefined behavior;
@@ -210,6 +210,20 @@ While RISC-V Vector supports $\text{LMUL} \in \{1/2, 1/4, 1/8\}$, generalizing d
 - Defining $\text{LDIV} = 4$ for a 64-bit type would result in $N = 2 / 4 = 0.5$ elements, which has no meaning.
 
 For this reason, MIPP only exposes $\text{LDIV} = 2$ (`d2`), and deeper divisions are not part of the API.
+
+### 4.3. RVV Half-Vectors: Hardware or by `vl`
+
+On RVV, a half-vector can be represented in two ways, chosen by defining **one** of these macros before including MIPP (or with `-D` on the command line):
+
+| Macro | Half-vectors of 8 to 32-bit elements | Half-vectors of 64-bit elements |
+| :--- | :--- | :--- |
+| `MIPP_RVV_LDIV_HW` (**default**) | fractional register (`vfloat32mf2_t`) | plain array, scalar fallback (Level 3) |
+| `MIPP_RVV_LDIV_VL` | register of LMUL 1 used with a vector length `vl` of $N/2$ | register of LMUL 1 with `vl` = $N/2$ (native) |
+| `MIPP_RVV_LDIV_HYBRID` | fractional register (`vfloat32mf2_t`) | register of LMUL 1 with `vl` = $N/2$ (native) |
+
+With a vector length of $N/2$, the RVV instructions only process the lower $N/2$ lanes: the lane-wise operations, the loads, the stores and the reductions of a half-vector are single instructions, with no mask and no access beyond the $N/2$ elements. This is the only native representation of the 64-bit half-vectors, for which RVV has no fractional register type. `low` is then free and `high` / `combine` are a slide of the register.
+
+The API is the same in the three modes (same type names, same functions, same results): only the content of the `d2` types and the implementation change. Since the types change, **all the files of a program must be compiled with the same mode**; passing a `d2` register between files compiled with different modes is not supported. Defining several of these macros is a compilation error. The implementation levels given by the documentation and the API Explorer are the ones of the default mode.
 
 ---
 

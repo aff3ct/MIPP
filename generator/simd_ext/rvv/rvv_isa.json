@@ -323,6 +323,15 @@
         "#include <stdint.h>",
         "#include <stdlib.h>",
         "#define MIPP_RVV_VLEN __riscv_v_fixed_vlen",
+        "// Representation of the half-vectors (d2), chosen by the user (see ldiv_modes): MIPP_RVV_LDIV_HW (default,",
+        "// fractional registers, 64-bit d2 as arrays), MIPP_RVV_LDIV_VL (LMUL 1 registers with vl = N/2) or",
+        "// MIPP_RVV_LDIV_HYBRID (fractional registers below 64 bits, LMUL 1 registers with vl = N/2 for 64 bits)",
+        "#if !defined(MIPP_RVV_LDIV_HW) && !defined(MIPP_RVV_LDIV_VL) && !defined(MIPP_RVV_LDIV_HYBRID)",
+        "#define MIPP_RVV_LDIV_HW",
+        "#endif",
+        "#if defined(MIPP_RVV_LDIV_HW) + defined(MIPP_RVV_LDIV_VL) + defined(MIPP_RVV_LDIV_HYBRID) > 1",
+        "#error \"MIPP: define at most one of MIPP_RVV_LDIV_HW, MIPP_RVV_LDIV_VL and MIPP_RVV_LDIV_HYBRID\"",
+        "#endif",
         "#ifndef MIPP_FLOAT_TYPEDEFS_",
         "#define MIPP_FLOAT_TYPEDEFS_",
         "typedef float float32_t;",
@@ -340,7 +349,9 @@
     "hw_mask_extract_via_store": true,
     "hw_mask_requires_torvd": true,
     "info_names": [
-        { "name": "RVV1.0" }
+        {
+            "name": "RVV1.0"
+        }
     ],
     "layout": {
         "size_symbol": "__riscv_v_fixed_vlen",
@@ -351,6 +362,23 @@
         "rvd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } rvd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
         "rvm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool{{datatype.n_bits}}_t m; } rvm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
     },
+    "ldiv_modes": [
+        {
+            "name": "vl",
+            "macro": "MIPP_RVV_LDIV_VL",
+            "vl_datatypes": "all_datatypes"
+        },
+        {
+            "name": "hybrid",
+            "macro": "MIPP_RVV_LDIV_HYBRID",
+            "vl_datatypes": "all_64bit"
+        },
+        {
+            "name": "hw",
+            "macro": "MIPP_RVV_LDIV_HW",
+            "vl_datatypes": []
+        }
+    ],
     "mipp_definitions": [
         "#define MIPP_64BIT",
         "#define MIPP_BW"
