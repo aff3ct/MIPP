@@ -27,7 +27,7 @@ Each API has an umbrella header (`<mipp.h>`, `<mipp.hpp>`, `<mipp_obj.hpp>`) and
 
 ## 2. C API (`<mipp.h>`)
 
-The C API provides explicit, type-safe C99 function identifiers and vector types for every `(operation, datatype, lmul, mask_variant)` combination.
+The C API provides explicit, type-safe C11 function identifiers and vector types for every `(operation, datatype, lmul, mask_variant)` combination.
 
 ### 2.1. Naming Convention
 ```text

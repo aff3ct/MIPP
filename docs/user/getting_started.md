@@ -37,7 +37,7 @@ Each API has a single umbrella header that brings every MIPP function into scope
 
 | Header File | API | Description |
 | :--- | :--- | :--- |
-| `<mipp.h>` | **C API** | C99 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
+| `<mipp.h>` | **C API** | C11 function prototypes with explicit type suffixes (e.g., `mipp_add_float32(r0, r1)`). |
 | `<mipp.hpp>` | **C++ Functional API** | Overloaded functions under namespace `mipp::` (e.g., `mipp::add(r0, r1)`). |
 | `<mipp_obj.hpp>` | **C++ Object API** | Expressive `mipp::Rvd<T, LMUL>` and `mipp::Rvm<T, LMUL>` classes with operator overloading (`+`, `-`, `*`, `==`, ...) and free functions. |
 
@@ -94,7 +94,7 @@ The three programs are also in the repository (`examples/doc/getting_started/c.c
 
     Compile and run (with the code saved as `leaky_relu.c`):
     ```bash
-    gcc -std=c99 -O3 -mavx2 -I/path/to/mipp/include leaky_relu.c -o leaky_relu
+    gcc -std=c11 -O3 -mavx2 -I/path/to/mipp/include leaky_relu.c -o leaky_relu
     ./leaky_relu
     ```
 

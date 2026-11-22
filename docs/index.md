@@ -33,7 +33,7 @@ hide:
     <span class="mipp-chip"><b>x86</b> SSE · AVX · AVX-512</span>
     <span class="mipp-chip"><b>ARM</b> NEON · SVE</span>
     <span class="mipp-chip"><b>RISC-V</b> RVV 1.0</span>
-    <span class="mipp-chip"><b>Standards</b> C99 · C++11</span>
+    <span class="mipp-chip"><b>Standards</b> C11 · C++11</span>
     <span class="mipp-chip"><b>Overhead</b> 0% Fully Inlined</span>
   </div>
 </div>
@@ -54,7 +54,7 @@ hide:
       <h3 class="mipp-home-card-title">Three APIs, One Engine</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Choose your paradigm: the <b>C API</b> (<code>mipp_add_float32</code>, C99) for <b>OS kernels and embedded targets</b>; the generic <b>C++ Functional API</b> (<code>mipp::add(va, vb)</code>) for <b>HPC algorithms</b>; or the expressive <b>C++ Object API</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
+      Choose your paradigm: the <b>C API</b> (<code>mipp_add_float32</code>, C11) for <b>OS kernels and embedded targets</b>; the generic <b>C++ Functional API</b> (<code>mipp::add(va, vb)</code>) for <b>HPC algorithms</b>; or the expressive <b>C++ Object API</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
     </p>
   </div>
   <div class="mipp-home-card">

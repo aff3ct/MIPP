@@ -49,7 +49,7 @@ while [ $# -gt 0 ]; do
 done
 
 WARN_FLAGS="-Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable -Wno-unused-but-set-variable"
-C_FLAGS="-std=c99 $WARN_FLAGS -Wno-strict-prototypes -O2"
+C_FLAGS="-std=c11 $WARN_FLAGS -Wno-strict-prototypes -O2"
 CXX_FLAGS="-std=c++11 $WARN_FLAGS -O2"
 
 errors=0

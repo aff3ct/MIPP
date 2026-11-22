@@ -16,7 +16,7 @@ MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC
 ### 1.1. Three APIs
 Three complementary interfaces mapping to the same inlined instructions:
 
-- **C API (`<mipp.h>`, C99)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
+- **C API (`<mipp.h>`, C11)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
 - **C++ Functional API (`<mipp.hpp>`, C++11)**: Overloaded functions under namespace `mipp::` (`mipp::add(a, b)`), with datatype and LMUL deduced from the register types.
 - **C++ Object API (`<mipp_obj.hpp>`, C++11)**: Register classes (`mipp::Rvd`, `mipp::Rvm`) with complete operator overloading.
 
@@ -65,7 +65,7 @@ Choosing the right SIMD library depends on language requirements, compilation co
 | ARM SVE | <span class="p">◐</span> <small>Fixed-width</small> | <span class="n">—</span> | <span class="y">✓</span> <small>Scalable & fixed</small> | <span class="p">◐</span> <small>Fixed-width</small> | <span class="p">◐</span> <small>Fixed-width</small> | <span class="y">✓</span> <small>Scalable & fixed</small> | <span class="n">—</span> | <span class="n">—</span> | <span class="p">◐</span> <small>Fixed-width, WIP</small> | <span class="p">◐</span> <small>ACLE, VLA / fixed</small> | <span class="p">◐</span> <small>Unpredictable</small> |
 | Generalized LMUL ($1,2,4,8$) | <span class="y">✓</span> <small>Plus half-vectors</small> | <span class="n">—</span> | <span class="p">◐</span> <small>RVV only (`kPow2`)</small> | <span class="n">—</span> | <span class="n">—</span> | <span class="n">—</span> | <span class="n">—</span> | <span class="n">—</span> | <span class="n">—</span> | <span class="n">—</span> <small>RVV only</small> | <span class="n">—</span> |
 | Dispatch | Static | Static | Static & dynamic | Static & dynamic | Static | Static & dynamic | Static | Static <small>Manual dynamic</small> | Static | Static <small>Manual dynamic</small> | Static <small>Dynamic via `target_clones`</small> |
-| Minimum standard | C99 / C++11 | C++11 | C++17 | C++17 | C++20 | C89 / C++98 | C++11 | C++17 | C++26 | C99 / C++11 | C99 / C++11 |
+| Minimum standard | C11 / C++11 | C++11 | C++17 | C++17 | C++20 | C89 / C++98 | C++11 | C++17 | C++26 | C99 / C++11 | C99 / C++11 |
 | Compile-time cost | Low <small>Flat inlines</small> | Medium <small>Deep templates</small> | High <small>Templates</small> | Medium | Very high | High <small>Macros</small> | Medium to high | Low <small>Inline headers</small> | High <small>Templates</small> | Very low | None |
 | Generated assembly | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Explicit | Heuristic |
 | Implementation | Generated <small>Python</small> | Handwritten <small>C++</small> | Handwritten <small>Templates</small> | Handwritten <small>Templates</small> | Handwritten <small>C++20</small> | Generated <small>Python + macros</small> | Handwritten <small>Templates</small> | Handwritten <small>Classes</small> | Handwritten <small>Templates</small> | Manual | Compiler |
@@ -94,7 +94,7 @@ Choosing the right SIMD library depends on language requirements, compilation co
 
 ### Key Differentiators for MIPPv2
 
-1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C99 inline functions (C API) alongside the C++ Functional and C++ Object APIs.
+1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C11 inline functions (C API) alongside the C++ Functional and C++ Object APIs.
 2. **Expressive Syntax without Portability Sacrifices**: While Google Highway restricts operator overloading to fixed-width targets to accommodate sizeless SVE / RVV vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
 3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, covering the function / datatype matrix across all 10 datatypes (except the few [known limitations](user/implementation_levels.md#known-limitations)).
 4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.

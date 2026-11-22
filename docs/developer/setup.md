@@ -10,7 +10,7 @@ This page sets up a development environment: generate the headers, build and run
 | :--- | :--- | :--- |
 | Python | 3 (the CI uses 3.12 on GitLab and 3.14 on GitHub) | the generators |
 | Jinja2, jsonschema, colorama | see `generator/requirements.txt` | the generators |
-| A C++20 compiler | GCC 14 (GCC 15 for SVE) and Clang 20 in the CI | the unit tests (the headers themselves only need C99 or C++11) |
+| A C++20 compiler | GCC 14 (GCC 15 for SVE) and Clang 20 in the CI | the unit tests (the headers themselves only need C11 or C++11) |
 | CMake | 3.5 or later (3.16 or later for precompiled headers) | the unit tests |
 | Catch2 | v3 | the unit tests |
 
@@ -202,7 +202,7 @@ The tabs of a set do exactly the same thing: same variables, same order, same co
     ...
 ```
 
-Each program prepares its inputs outside the sections, and checks the results announced by the snippet with `DOC_CHECK` (`examples/doc/doc_check.h`): a failed check makes the program return a non-zero exit code. `scripts/check_doc_snippets.sh` compiles every program with `-Werror` (C99 and C++11, or the standard given by a `// doc-std: c++17` line), runs it, compiles and runs the C++ example of `README.md`, and fails if a C or C++ block of `docs/user/` is written inline, if a tab label is not one of the three above, if a tab includes the file of another API, if the tabs of a set include sections of different lengths (non-blank lines of the named sections at the top level of each tab; complete programs are not compared), or if the included code uses `auto` (exceptions in `AUTO_ALLOWED`):
+Each program prepares its inputs outside the sections, and checks the results announced by the snippet with `DOC_CHECK` (`examples/doc/doc_check.h`): a failed check makes the program return a non-zero exit code. `scripts/check_doc_snippets.sh` compiles every program with `-Werror` (C11 and C++11, or the standard given by a `// doc-std: c++17` line), runs it, compiles and runs the C++ example of `README.md`, and fails if a C or C++ block of `docs/user/` is written inline, if a tab label is not one of the three above, if a tab includes the file of another API, if the tabs of a set include sections of different lengths (non-blank lines of the named sections at the top level of each tab; complete programs are not compared), or if the included code uses `auto` (exceptions in `AUTO_ALLOWED`):
 
 ```bash
 scripts/check_doc_snippets.sh                                    # native target

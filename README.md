@@ -9,7 +9,7 @@
 [![Documentation](https://img.shields.io/badge/docs-online-blue)](https://aff3ct.github.io/MIPP/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-MIPP is a header-only SIMD library for C99 and C++11. The same code compiles
+MIPP is a header-only SIMD library for C11 and C++11. The same code compiles
 for SSE, AVX, AVX-512, NEON, SVE and RVV, and falls back to emulation or scalar
 code where an instruction is missing. The headers are generated from a
 declarative registry of functions and implementations.
