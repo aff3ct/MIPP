@@ -17,6 +17,7 @@ from tools import build_func_name_internal, get_dt_par_size, is_guard_dead_under
 from registry import scalar_isa
 from codegen.implem_tracker import get_implem_bucket, missing_build_negated_ifdef_for_existing_implems
 from codegen.emit_helpers import emit_function_body, emit_panic_stub
+from luts import TEMPLATE_GLOBALS
 
 
 _template_cache = {}
@@ -25,6 +26,8 @@ def _get_template(code):
     cached = _template_cache.get(code)
     if cached is None:
         cached = Template(code, undefined=StrictUndefined)
+        # constant tables computed at generation time (compress_lut...): see luts.py
+        cached.globals.update(TEMPLATE_GLOBALS)
         _template_cache[code] = cached
     return cached
 

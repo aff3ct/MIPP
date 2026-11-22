@@ -83,6 +83,7 @@ The code is rendered by Jinja2 with these variables:
 | `cstdint_ret` | The C type of the return datatype (`int32_t`, `float`, ...). |
 | `func_name` | The MIPP function name (`absdiff`), useful in templates shared by several functions. |
 | `lmul`, `mask_kind` | The LMUL and the mask variant being generated. |
+| `compress_lut(lanes, units, fill)` | A function (`helpers_headers/luts.py`) that computes the constant table of a `compress` by permutation and returns its C initializer: `static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=128) }};` (SSSE3 `pshufb`, 32-bit lanes). The tables of the templates are computed there at generation time, not written in the JSON files. |
 
 The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `r0.r` is the native register wrapped by the MIPP type `rvd_neon_float32_m1_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(r0, r1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
 

@@ -160,6 +160,7 @@ At the end of a run, `print_summary_table()` reads the generated `simd_ext/<isa>
 | `cond_utils.py` | Parsing, simplification and algebra of preprocessor conditions. |
 | `c_generator.py` | One ISA layer: common header, candidate registration, LMUL loops ([§2](#2-one-isa-layer)). |
 | `codegen/candidate_resolver.py` | Candidate resolution, effective levels, emission, scalar fallback and stubs ([§4](#4-resolution), [§5](#5-emission)). |
+| `luts.py` | Constant tables of the implementation templates computed at generation time (`compress_lut`: the shuffle of `compress` for each value of the mask), available in every template as Jinja globals (`TEMPLATE_GLOBALS`, `render_template()`). |
 | `codegen/lmul_orchestrator.py` | Software LMUL and `sub_isa` half-vector wrappers, horizontal LMUL wrappers. |
 | `codegen/ldiv_modes.py` | Half-vector representations selected at compile time (`ldiv_modes`, RVV): the descriptor of each mode, its macro. |
 | `codegen/sw_lmul.py` | `wcvt` (`m1` → `m2`) and `ncvt` (`m2` → `m1`) of a software LMUL written by the ISA (`<isa>_sw_lmul.json`), rendered with the engine of `ldiv_mask.py`. |
