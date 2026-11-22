@@ -306,6 +306,73 @@
             "return res;"
         ]
     },
+    "gather_mixed": {
+        "format": "long",
+        "code": [
+            "{%- set lss = ['mf8', 'mf4', 'mf2', 'm1', 'm2', 'm4', 'm8'] -%}",
+            "{%- set ls = isa_dt_par.data_ext[(isa_dt_par.data_ext.index('m')):] -%}",
+            "{%- set k = {1: 0, 2: 1, 4: 2, 8: 3}[(dt_ret.n_bits // dt_par.n_bits) if dt_ret.n_bits >= dt_par.n_bits else 1] -%}",
+            "{%- set narrow = dt_ret.n_bits < dt_par.n_bits -%}",
+            "{%- set ils = lss[lss.index(ls) - 1] if narrow else lss[lss.index(ls) + k] -%}",
+            "{%- set eew = dt_par.n_bits if narrow else dt_ret.n_bits -%}",
+            "{%- set ols = ls if narrow else ils -%}",
+            "{% if narrow -%}",
+            "// 32-bit indices of 64-bit elements: byte offsets widened to 64 bits (idx * 8 overflows 32 bits from 2^29)",
+            "vuint64{{ ols }}_t off = {{ isa.prefix }}_vwmulu_vx_u64{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% else -%}",
+            "// indices wider than the elements: byte offsets in the width of the index",
+            "vuint{{ eew }}{{ ols }}_t off = {{ isa.prefix }}_vmul_vx_u{{ eew }}{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% endif -%}",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vluxei{{ eew }}_v_{{ isa_dt_par.data_ext }}(p0, off, %N<tp>%);",
+            "return res;"
+        ]
+    },
+    "gather_mixed_masks": {
+        "format": "long",
+        "code": [
+            "{%- set lss = ['mf8', 'mf4', 'mf2', 'm1', 'm2', 'm4', 'm8'] -%}",
+            "{%- set ls = isa_dt_par.data_ext[(isa_dt_par.data_ext.index('m')):] -%}",
+            "{%- set k = {1: 0, 2: 1, 4: 2, 8: 3}[(dt_ret.n_bits // dt_par.n_bits) if dt_ret.n_bits >= dt_par.n_bits else 1] -%}",
+            "{%- set narrow = dt_ret.n_bits < dt_par.n_bits -%}",
+            "{%- set ils = lss[lss.index(ls) - 1] if narrow else lss[lss.index(ls) + k] -%}",
+            "{%- set eew = dt_par.n_bits if narrow else dt_ret.n_bits -%}",
+            "{%- set ols = ls if narrow else ils -%}",
+            "{% if narrow -%}",
+            "// 32-bit indices of 64-bit elements: byte offsets widened to 64 bits (idx * 8 overflows 32 bits from 2^29)",
+            "vuint64{{ ols }}_t off = {{ isa.prefix }}_vwmulu_vx_u64{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% else -%}",
+            "// indices wider than the elements: byte offsets in the width of the index",
+            "vuint{{ eew }}{{ ols }}_t off = {{ isa.prefix }}_vmul_vx_u{{ eew }}{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% endif -%}",
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}_vluxei{{ eew }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, p0, off, %N<tp>%);",
+            "return res;"
+        ]
+    },
+    "gather_mixed_maskz": {
+        "format": "long",
+        "code": [
+            "{%- set lss = ['mf8', 'mf4', 'mf2', 'm1', 'm2', 'm4', 'm8'] -%}",
+            "{%- set ls = isa_dt_par.data_ext[(isa_dt_par.data_ext.index('m')):] -%}",
+            "{%- set k = {1: 0, 2: 1, 4: 2, 8: 3}[(dt_ret.n_bits // dt_par.n_bits) if dt_ret.n_bits >= dt_par.n_bits else 1] -%}",
+            "{%- set narrow = dt_ret.n_bits < dt_par.n_bits -%}",
+            "{%- set ils = lss[lss.index(ls) - 1] if narrow else lss[lss.index(ls) + k] -%}",
+            "{%- set eew = dt_par.n_bits if narrow else dt_ret.n_bits -%}",
+            "{%- set ols = ls if narrow else ils -%}",
+            "{% if narrow -%}",
+            "// 32-bit indices of 64-bit elements: byte offsets widened to 64 bits (idx * 8 overflows 32 bits from 2^29)",
+            "vuint64{{ ols }}_t off = {{ isa.prefix }}_vwmulu_vx_u64{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% else -%}",
+            "// indices wider than the elements: byte offsets in the width of the index",
+            "vuint{{ eew }}{{ ols }}_t off = {{ isa.prefix }}_vmul_vx_u{{ eew }}{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% endif -%}",
+            "%r<tp>% res;",
+            "%r<tp>% zeroes = %set0<tp>%();",
+            "res.r = {{ isa.prefix }}_vluxei{{ eew }}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, zeroes.r, p0, off, %N<tp>%);",
+            "return res;"
+        ]
+    },
     "hadd_hmax_float": {
         "format": "long",
         "code": [
@@ -651,6 +718,69 @@
             "{% else -%}",
             "{{ isa.prefix }}_vsuxei{% if mode == 'wide' %}32{% else %}{{ isa_dt_par.width }}{% endif %}_v_{{ isa_dt_par.data_ext }}(p0, {% if mode == 'wide' %}off{% elif mode == 'e8' %}r0.r{% else %}off.r{% endif %}, blended.r, %N<tp>%);",
             "{%- endif %}"
+        ]
+    },
+    "scatter_mixed": {
+        "format": "long",
+        "code": [
+            "{%- set lss = ['mf8', 'mf4', 'mf2', 'm1', 'm2', 'm4', 'm8'] -%}",
+            "{%- set ls = isa_dt_par.data_ext[(isa_dt_par.data_ext.index('m')):] -%}",
+            "{%- set k = {1: 0, 2: 1, 4: 2, 8: 3}[(dt_ret.n_bits // dt_par.n_bits) if dt_ret.n_bits >= dt_par.n_bits else 1] -%}",
+            "{%- set narrow = dt_ret.n_bits < dt_par.n_bits -%}",
+            "{%- set ils = lss[lss.index(ls) - 1] if narrow else lss[lss.index(ls) + k] -%}",
+            "{%- set eew = dt_par.n_bits if narrow else dt_ret.n_bits -%}",
+            "{%- set ols = ls if narrow else ils -%}",
+            "{% if narrow -%}",
+            "// 32-bit indices of 64-bit elements: byte offsets widened to 64 bits (idx * 8 overflows 32 bits from 2^29)",
+            "vuint64{{ ols }}_t off = {{ isa.prefix }}_vwmulu_vx_u64{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% else -%}",
+            "// indices wider than the elements: byte offsets in the width of the index",
+            "vuint{{ eew }}{{ ols }}_t off = {{ isa.prefix }}_vmul_vx_u{{ eew }}{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% endif -%}",
+            "{{ isa.prefix }}_vsuxei{{ eew }}_v_{{ isa_dt_par.data_ext }}(p0, off, r1.r, %N<tp>%);"
+        ]
+    },
+    "scatter_mixed_mask": {
+        "format": "long",
+        "code": [
+            "{%- set lss = ['mf8', 'mf4', 'mf2', 'm1', 'm2', 'm4', 'm8'] -%}",
+            "{%- set ls = isa_dt_par.data_ext[(isa_dt_par.data_ext.index('m')):] -%}",
+            "{%- set k = {1: 0, 2: 1, 4: 2, 8: 3}[(dt_ret.n_bits // dt_par.n_bits) if dt_ret.n_bits >= dt_par.n_bits else 1] -%}",
+            "{%- set narrow = dt_ret.n_bits < dt_par.n_bits -%}",
+            "{%- set ils = lss[lss.index(ls) - 1] if narrow else lss[lss.index(ls) + k] -%}",
+            "{%- set eew = dt_par.n_bits if narrow else dt_ret.n_bits -%}",
+            "{%- set ols = ls if narrow else ils -%}",
+            "{% if narrow -%}",
+            "// 32-bit indices of 64-bit elements: byte offsets widened to 64 bits (idx * 8 overflows 32 bits from 2^29)",
+            "vuint64{{ ols }}_t off = {{ isa.prefix }}_vwmulu_vx_u64{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% else -%}",
+            "// indices wider than the elements: byte offsets in the width of the index",
+            "vuint{{ eew }}{{ ols }}_t off = {{ isa.prefix }}_vmul_vx_u{{ eew }}{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% endif -%}",
+            "{{ isa.prefix }}_vsuxei{{ eew }}_v_{{ isa_dt_par.data_ext }}_m(m0.m, p0, off, r1.r, %N<tp>%);"
+        ]
+    },
+    "scatter_mixed_maskz": {
+        "format": "long",
+        "code": [
+            "{%- set lss = ['mf8', 'mf4', 'mf2', 'm1', 'm2', 'm4', 'm8'] -%}",
+            "{%- set ls = isa_dt_par.data_ext[(isa_dt_par.data_ext.index('m')):] -%}",
+            "{%- set k = {1: 0, 2: 1, 4: 2, 8: 3}[(dt_ret.n_bits // dt_par.n_bits) if dt_ret.n_bits >= dt_par.n_bits else 1] -%}",
+            "{%- set narrow = dt_ret.n_bits < dt_par.n_bits -%}",
+            "{%- set ils = lss[lss.index(ls) - 1] if narrow else lss[lss.index(ls) + k] -%}",
+            "{%- set eew = dt_par.n_bits if narrow else dt_ret.n_bits -%}",
+            "{%- set ols = ls if narrow else ils -%}",
+            "{% if narrow -%}",
+            "// 32-bit indices of 64-bit elements: byte offsets widened to 64 bits (idx * 8 overflows 32 bits from 2^29)",
+            "vuint64{{ ols }}_t off = {{ isa.prefix }}_vwmulu_vx_u64{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% else -%}",
+            "// indices wider than the elements: byte offsets in the width of the index",
+            "vuint{{ eew }}{{ ols }}_t off = {{ isa.prefix }}_vmul_vx_u{{ eew }}{{ ols }}(r0.r, sizeof({{ isa_dt_par.to_ptr }}), %N<tp>%);",
+            "{% endif -%}",
+            "%r<tp>% zeroes = %set0<tp>%();",
+            "%r<tp>% blended;",
+            "blended.r = {{ isa.prefix }}_vmerge_vvm_{{ isa_dt_par.data_ext }}(zeroes.r, r1.r, m0.m, %N<tp>%);",
+            "{{ isa.prefix }}_vsuxei{{ eew }}_v_{{ isa_dt_par.data_ext }}(p0, off, blended.r, %N<tp>%);"
         ]
     },
     "set0_k": {

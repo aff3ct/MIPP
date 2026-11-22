@@ -150,13 +150,25 @@
             ""
         ]
     },
+    "gather_i32_64_maskz_f": {
+        "format": "short",
+        "code": [
+            "_mm256_mask_i32gather_pd(_mm256_setzero_pd(), p0, r0.r, m0.m, 8);"
+        ]
+    },
+    "gather_i32_64_maskz_i": {
+        "format": "short",
+        "code": [
+            "_mm256_mask_i32gather_epi64(_mm256_setzero_si256(), (const long long*)p0, r0.r, m0.m, 8);"
+        ]
+    },
     "gather_maskz_f32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,_mm256_castsi256_ps(m0.m),4);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,4);"
     },
     "gather_maskz_f64": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,_mm256_castsi256_pd(m0.m),8);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,8);"
     },
     "gather_maskz_i32": {
         "format": "short",

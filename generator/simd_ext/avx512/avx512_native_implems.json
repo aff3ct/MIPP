@@ -1116,10 +1116,10 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32"
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32"
             ],
             "template": "gather",
             "if": "defined(__AVX512F__)"
@@ -1127,8 +1127,8 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64",
-                "int64,int64"
+                "float64,uint64",
+                "int64,uint64"
             ],
             "template": "gather_masks_64",
             "if": "defined(__AVX512F__)",
@@ -1137,8 +1137,8 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float32,float32",
-                "int32,int32"
+                "float32,uint32",
+                "int32,uint32"
             ],
             "template": "gather_masks_32",
             "if": "defined(__AVX512F__)",
@@ -1151,6 +1151,42 @@
                 "uint32,uint32"
             ],
             "template": "gather_var",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "gather_i32_64_f",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_i32_64_i",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "gather_i32_64_masks_f",
+            "variant": "s",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_i32_64_masks_i",
+            "variant": "s",
             "if": "defined(__AVX512F__)"
         }
     ],
@@ -2227,10 +2263,10 @@
         {
             "instr_name": "scatter",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32"
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32"
             ],
             "template": "scatter",
             "if": "defined(__AVX512F__)"
@@ -2238,8 +2274,8 @@
         {
             "instr_name": "scatter",
             "datatypes": [
-                "float64,float64",
-                "int64,int64"
+                "float64,uint64",
+                "int64,uint64"
             ],
             "template": "scatter_mask_64",
             "if": "defined(__AVX512F__)",
@@ -2248,8 +2284,8 @@
         {
             "instr_name": "scatter",
             "datatypes": [
-                "float32,float32",
-                "int32,int32"
+                "float32,uint32",
+                "int32,uint32"
             ],
             "template": "scatter_mask_32",
             "if": "defined(__AVX512F__)",
@@ -2262,6 +2298,42 @@
                 "uint32,uint32"
             ],
             "template": "scatter_var",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32scatter",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "scatter_i32_64_f",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32scatter",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "scatter_i32_64_i",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32scatter",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "scatter_i32_64_mask_f",
+            "variant": "m",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32scatter",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "scatter_i32_64_mask_i",
+            "variant": "m",
             "if": "defined(__AVX512F__)"
         }
     ],

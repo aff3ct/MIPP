@@ -85,17 +85,41 @@
         "format": "short",
         "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r,{{dt_par.n_bits//8}});"
     },
+    "gather_i32_64_f": {
+        "format": "short",
+        "code": [
+            "_mm256_i32gather_pd(p0, r0.r, 8);"
+        ]
+    },
+    "gather_i32_64_i": {
+        "format": "short",
+        "code": [
+            "_mm256_i32gather_epi64((const long long*)p0, r0.r, 8);"
+        ]
+    },
+    "gather_i32_64_masks_f": {
+        "format": "short",
+        "code": [
+            "_mm256_mask_i32gather_pd(rsrc.r, p0, r0.r, m0.m, 8);"
+        ]
+    },
+    "gather_i32_64_masks_i": {
+        "format": "short",
+        "code": [
+            "_mm256_mask_i32gather_epi64(rsrc.r, (const long long*)p0, r0.r, m0.m, 8);"
+        ]
+    },
     "gather_i64": {
         "format": "short",
         "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}((long long*)p0,r0.r,{{dt_par.n_bits//8}});"
     },
     "gather_masks_f32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,_mm256_castsi256_ps(m0.m),4);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,m0.m,4);"
     },
     "gather_masks_f64": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,_mm256_castsi256_pd(m0.m),8);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,p0,r0.r,m0.m,8);"
     },
     "gather_masks_i32": {
         "format": "short",

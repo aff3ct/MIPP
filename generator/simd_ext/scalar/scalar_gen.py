@@ -76,29 +76,31 @@ def _build_func_name_scalar(isa, dt, dt_par, dt_ret, f, masked_version=False, lm
         return build_func_name(isa, dt_par, dt_ret, f, True, masked_version=masked_version, lmul=lmul)
 
 # Important changes here!!
-def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0):
+def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0, dt_par=None):
+    # the returned datatype (dt_ret, or dt_par for the `fixeddatatype: par` of the result of gather)
+    ret_dt_name = resolve_param_datatype(funcs_for_f["proto"]["ret"], dt_par or dt_ret, dt_ret, is_ret=True)["name"]
     # Keep same layout as original.
     if funcs_for_f["proto"]["args"]:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
     else:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
             # print("\tres.r = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
 
@@ -123,7 +125,7 @@ def _emit_function_body_scalar(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rende
     if ff["type"] == "element-wide":
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-            _emit_short_format_prologue_scalar(funcs[f], dt_ret, isa, file, lmul=lmul)
+            _emit_short_format_prologue_scalar(funcs[f], dt_ret, isa, file, lmul=lmul, dt_par=dt_par)
             print(f"\tfor (size_t i = 0; i < MIPP_SCALAR_N_{dt_par.upper()}{lmul_str}; i++)", file=file)
             print("\t{", file=file)
         # cleaning

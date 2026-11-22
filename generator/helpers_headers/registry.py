@@ -115,6 +115,9 @@ def _load_funcs_registry():
                 c_arg["charac"] = arg["charac"]
             if "offset_lmul" in arg:
                 c_arg["offset_lmul"] = arg["offset_lmul"]
+            if "lmul" in arg:
+                # "ratio": LMUL of an index of gather / scatter (see name_builder.resolve_arg_lmul)
+                c_arg["lmul"] = arg["lmul"]
             cleaned_proto["args"].append(c_arg)
         protos[k] = cleaned_proto
 

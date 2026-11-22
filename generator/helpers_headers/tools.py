@@ -80,6 +80,7 @@ DATATYPES_MAP = {
     "all_datatypes_cart_prod_except_f64": all_datatypes_cart_prod_except_f64,
     "all_datatypes_cart_prod_inc_f64": all_datatypes_cart_prod_inc_f64,
     "all_datatypes_idx_pair": all_datatypes_idx_pair,
+    "all_datatypes_idx_mixed": all_datatypes_idx_mixed,
     "all_datatypes_same_size": all_datatypes_same_size,
     "all_datatypes_same_size_except_f64": all_datatypes_same_size_except_f64,
     "all_datatypes_same_size_inc_f64": all_datatypes_same_size_inc_f64,

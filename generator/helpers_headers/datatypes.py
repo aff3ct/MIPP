@@ -73,7 +73,18 @@ for type in [cfloat, cint, cuint]:
             continue
         dt = type + str(n_bits)
         idx = cuint + str(n_bits)
-        all_datatypes_idx_pair.append(dt + "," + dt)
+        # pair "data,index": the index of gather / scatter is the unsigned type of the same size
+        all_datatypes_idx_pair.append(dt + "," + idx)
+
+# gather / scatter with an index of another width than the data: 32 and 64-bit unsigned indices
+all_datatypes_idx_mixed = []
+for type in [cfloat, cint, cuint]:
+    for n_bits in [64, 32, 16, 8]:
+        if type == cfloat and n_bits in [16, 8]:
+            continue
+        for idx_bits in [32, 64]:
+            if idx_bits != n_bits:
+                all_datatypes_idx_mixed.append(type + str(n_bits) + "," + cuint + str(idx_bits))
 
 avx_datatypes_idx_pair = [
     "float64,float64",

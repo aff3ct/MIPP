@@ -88,7 +88,7 @@ static void gather()
     mipp::Rvd<uint32_t> indices = mipp::load_obj<uint32_t>(idx_ptr);
     mipp::Rvd<float> res = mipp::gather(table, indices);
 
-    mipp::Rvm<uint32_t> m = (indices < vmax_idx);
+    mipp::Rvm<float> m = mipp::cast<float>(indices < vmax_idx); // mask of the data
     mipp::Rvd<float> res_z = mipp::gather<mipp::Z>(m, table, indices);
     // --8<-- [end:gather]
     for (int i = 0; i < mipp::Rvd<float>::N(); i++) {
@@ -109,7 +109,7 @@ static void scatter()
     mipp::Rvd<uint32_t> indices = mipp::load_obj<uint32_t>(idx_ptr);
     mipp::scatter(out_table, indices, values);
 
-    mipp::Rvm<uint32_t> m = (indices < vmax_idx);
+    mipp::Rvm<float> m = mipp::cast<float>(indices < vmax_idx); // mask of the data
     mipp::scatter<mipp::M>(m, out_table, indices, values);
     // --8<-- [end:scatter]
     for (int i = 0; i < mipp::Rvd<float>::N(); i++)

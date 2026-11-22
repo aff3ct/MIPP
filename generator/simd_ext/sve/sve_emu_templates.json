@@ -48,6 +48,24 @@
             "return res;"
         ]
     },
+    "gather_u32idx_64": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}ld1_gather_u64index_{{ isa_dt_par.data_ext }}(svptrue_b64(), p0, {{ isa.prefix }}unpklo_u64(r0.r));"
+        ]
+    },
+    "gather_u32idx_64_s": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}ld1_gather_u64index_{{ isa_dt_par.data_ext }}(m0.m, p0, {{ isa.prefix }}unpklo_u64(r0.r)), rsrc.r);"
+        ]
+    },
+    "gather_u32idx_64_z": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}ld1_gather_u64index_{{ isa_dt_par.data_ext }}(m0.m, p0, {{ isa.prefix }}unpklo_u64(r0.r));"
+        ]
+    },
     "getfirst_lasta": {
         "format": "long",
         "code": [
@@ -107,6 +125,24 @@
     "scatter": {
         "format": "short",
         "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, r0.r, r1.r);"
+    },
+    "scatter_u32idx_64": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}st1_scatter_u64index_{{ isa_dt_par.data_ext }}(svptrue_b64(), p0, {{ isa.prefix }}unpklo_u64(r0.r), r1.r);"
+        ]
+    },
+    "scatter_u32idx_64_m": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}st1_scatter_u64index_{{ isa_dt_par.data_ext }}(m0.m, p0, {{ isa.prefix }}unpklo_u64(r0.r), r1.r);"
+        ]
+    },
+    "scatter_u32idx_64_z": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}st1_scatter_u64index_{{ isa_dt_par.data_ext }}(svptrue_b64(), p0, {{ isa.prefix }}unpklo_u64(r0.r), {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, r1.r, {{ isa.prefix }}dup_n_{{ isa_dt_par.data_ext }}(0)));"
+        ]
     },
     "scatter_z": {
         "format": "short",

@@ -173,6 +173,30 @@
             "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, p0, {{dt_par.n_bits//8}});"
         ]
     },
+    "gather_i32_64_f": {
+        "format": "short",
+        "code": [
+            "_mm512_i32gather_pd(r0.r, p0, 8);"
+        ]
+    },
+    "gather_i32_64_i": {
+        "format": "short",
+        "code": [
+            "_mm512_i32gather_epi64(r0.r, p0, 8);"
+        ]
+    },
+    "gather_i32_64_masks_f": {
+        "format": "short",
+        "code": [
+            "_mm512_mask_i32gather_pd(rsrc.r, m0.m, r0.r, p0, 8);"
+        ]
+    },
+    "gather_i32_64_masks_i": {
+        "format": "short",
+        "code": [
+            "_mm512_mask_i32gather_epi64(rsrc.r, m0.m, r0.r, p0, 8);"
+        ]
+    },
     "gather_masks_32": {
         "format": "short",
         "code": [
@@ -287,6 +311,30 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, r1.r, {{dt_par.n_bits//8}});"
+        ]
+    },
+    "scatter_i32_64_f": {
+        "format": "short",
+        "code": [
+            "_mm512_i32scatter_pd(p0, r0.r, r1.r, 8);"
+        ]
+    },
+    "scatter_i32_64_i": {
+        "format": "short",
+        "code": [
+            "_mm512_i32scatter_epi64(p0, r0.r, r1.r, 8);"
+        ]
+    },
+    "scatter_i32_64_mask_f": {
+        "format": "short",
+        "code": [
+            "_mm512_mask_i32scatter_pd(p0, m0.m, r0.r, r1.r, 8);"
+        ]
+    },
+    "scatter_i32_64_mask_i": {
+        "format": "short",
+        "code": [
+            "_mm512_mask_i32scatter_epi64(p0, m0.m, r0.r, r1.r, 8);"
         ]
     },
     "scatter_mask_32": {

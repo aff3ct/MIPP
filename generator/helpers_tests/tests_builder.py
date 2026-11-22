@@ -845,11 +845,12 @@ class TestsBuilderEngine:
     def _build_indexed_test_file(self, dialect_name, func_name, lmul_suffix, mkind, lmul, N,
                                  lmul_list, ldiv_list, mask_list) -> str:
         """gather / scatter: see helpers_tests/indexed_tests.py."""
+        # pairs "data,index"
         dts = []
         for dt in self._resolve_datatypes(func_name):
-            first = str(dt).split(",")[0].strip()
-            if first not in dts:
-                dts.append(first)
+            pair = ",".join(x.strip() for x in str(dt).split(","))
+            if pair not in dts:
+                dts.append(pair)
         if dialect_name == "c":
             return indexed_tests.build_c(func_name, dts, lmul_suffix, mkind, lmul, N)
         func_variants = self.interfaces[func_name].get("variants", ["u", "m", "z", "s"])
@@ -858,8 +859,8 @@ class TestsBuilderEngine:
             if mask_list is None or m in mask_list or (m == "unmasked" and "" in mask_list):
                 if m == "unmasked" or self._is_mask_kind_supported(func_variants, m):
                     mkinds.append("" if m == "unmasked" else m)
-        return indexed_tests.build_cpp(dialect_name, func_name, [self._format_cpp_type(d) for d in dts],
-                                       mkinds, lmul_list, ldiv_list, N)
+        return indexed_tests.build_cpp(dialect_name, func_name, dts, mkinds, lmul_list, ldiv_list, N,
+                                       cpp_type=self._format_cpp_type)
 
     def format_cpp_op_call(self, func_name: str, mkind: str, is_scalar: bool = False) -> str:
         """Build a C++ template call expression with symbolic params (V, T, LMUL).

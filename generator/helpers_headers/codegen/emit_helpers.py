@@ -19,31 +19,33 @@ def emit_ifdef_begin_and_update_emulated(funcs, f, dt_key, ff, ifd, file, mask_k
         print("#if " + ifd, file=file)
         update_emulated(funcs, f, dt_key, ff, ifd, mask_kind=mask_kind)
 
-def emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0):
+def emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0, dt_par=None):
+    # the returned datatype (dt_ret, or dt_par for the `fixeddatatype: par` of the result of gather)
+    ret_dt_name = resolve_param_datatype(funcs_for_f["proto"]["ret"], dt_par or dt_ret, dt_ret, is_ret=True)["name"]
     # Keep same layout as original.
     if funcs_for_f["proto"]["args"]:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
             print("\tres.r = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
             print("\tres.m = ", end="", file=file)
     else:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
             print("\tres.r = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
-                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[dt_ret], isa, lmul=lmul) + " res;",
+                "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
             print("\tres.m = ", end="", file=file)
@@ -74,7 +76,7 @@ def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, fi
     if is_short:
         # Original code had a redundant always-true condition; keep behavior identical.
         if funcs[f]["proto"]["args"] or (not funcs[f]["proto"]["args"]):
-            emit_short_format_prologue(funcs[f], dt_ret, isa, file, lmul=lmul)
+            emit_short_format_prologue(funcs[f], dt_ret, isa, file, lmul=lmul, dt_par=dt_par)
     
     body_lines = []
     first_code_line = True

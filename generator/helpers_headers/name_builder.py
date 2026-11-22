@@ -187,6 +187,70 @@ def is_defined_for_lmul(proto, lmul):
         return True
     return bool(lmul) and resolve_ret_lmul(proto["ret"], lmul) is not None
 
+# ---------------------------------------------------------------------------------------------------------------------
+# Datatype and LMUL of a return value or an argument
+# ---------------------------------------------------------------------------------------------------------------------
+# A function is generated for a datatype, or a pair of datatypes "dt_par,dt_ret" (conversions; data and index of
+# gather / scatter). By default, the arguments have the datatype dt_par and the return value dt_ret. `fixeddatatype`
+# changes it: a datatype (`int32` for a shift count), a category (`uint`: the unsigned type of the size of dt_par),
+# `par` (dt_par, for the result of gather) or `ret` (dt_ret, for the index of gather and scatter).
+
+def resolve_param_datatype(param, dt_par, dt_ret, is_ret=False):
+    """Datatype (dict of tools.datatypes) of a return value (is_ret=True) or of an argument of a prototype."""
+    fd = param.get("fixeddatatype", False)
+    if not fd:
+        return tools.datatypes[dt_ret if is_ret else dt_par]
+    if fd == "par":
+        return tools.datatypes[dt_par]
+    if fd == "ret":
+        return tools.datatypes[dt_ret]
+    if fd not in tools.datatypes and fd in tools.all_categories:
+        return tools.datatypes[fd + str(get_dt_par_size(dt_par))]
+    return tools.datatypes[fd]
+
+def resolve_arg_lmul(arg, lmul, dt_par, dt_ret):
+    """
+    LMUL of an argument when the function is generated for the LMUL `lmul`. `"lmul": "ratio"` (index of gather /
+    scatter): the index has one lane per lane of the data, so its LMUL is lmul * size(dt_ret) / size(dt_par) (an
+    index of 32 bits for 64-bit data: half the LMUL). Returns None when this LMUL does not exist (no d4, no m16).
+    """
+    if arg.get("lmul", "same") != "ratio":
+        return lmul
+    l = 1 if int(lmul) in (0, 1) else int(lmul)
+    num, den = tools.datatypes[dt_ret]["n_bits"], tools.datatypes[dt_par]["n_bits"]
+    # LMUL as a fraction: d2 is 1/2
+    f_num, f_den = (1, -l) if l < 0 else (l, 1)
+    f_num, f_den = f_num * num, f_den * den
+    if f_num >= f_den:
+        if f_num % f_den:
+            return None
+        r = f_num // f_den
+        if r not in (1, 2, 4, 8):
+            return None
+        return (0 if int(lmul) == 0 and r == 1 else r)
+    if f_den % f_num or f_den // f_num != 2:
+        return None
+    return -2
+
+def is_defined_for_dt_lmul(proto, dt, lmul):
+    """
+    Whether a function with this prototype exists for the datatype (or pair "dt_par,dt_ret") `dt` at the LMUL `lmul`:
+    always, except for an argument of LMUL `ratio` (index of gather / scatter of another width than the data), whose
+    LMUL must exist (no d4, no m16), and which is not generated for the half-vectors (the d2 of the data is a register
+    of the sub-ISA or of the ISA itself, whose functions take an index of the same width).
+    """
+    parts = [x.strip() for x in str(dt).split(",")]
+    dt_par, dt_ret = (parts[0], parts[1]) if len(parts) > 1 else (parts[0], parts[0])
+    for arg in proto["args"]:
+        if arg.get("lmul", "same") != "ratio":
+            continue
+        l = resolve_arg_lmul(arg, lmul, dt_par, dt_ret)
+        if l is None:
+            return False
+        if int(lmul) == -2 and tools.datatypes[dt_par]["n_bits"] != tools.datatypes[dt_ret]["n_bits"]:
+            return False
+    return True
+
 def build_type(type_str, datatype, isa, lmul=0, isa_name=True, cpp=False):
     if type_str:
         if type_str == "reg":
@@ -406,69 +470,43 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
         ret = f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const {dt_par}* p0"
     return  ret
 
+def _idx_lmul_str(dt_par, dt_ret, lmul):
+    """LMUL of the index register of gather / scatter (pair "data,index") for the data LMUL `lmul`."""
+    l = resolve_arg_lmul({"lmul": "ratio"}, lmul, dt_par, dt_ret)
+    return str(1 if l == 0 else l)
+
 def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    """
+    C++ masked gather: rvd<T, LMUL> gather<V, T, T_IDX, LMUL>(m0, [rsrc,] const T* p0, idx). The pair is
+    "data,index" (dt_par, dt_ret); the mask has the type of the data, the index its own LMUL (`"lmul": "ratio"`).
+    """
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
-    isa_type = "DEFAULT_ISA"
-    msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]["name"]+ "_t"
-    if isa_name:
-        isa_type = isa["name"].upper()
-    template = f"<{dt_ret}_t, {dt_par}_t, {lmul}, {isa_type}>"
-    if masked_version:
-        if masked_version == "mask" :
-            template = f"<M, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-        elif masked_version == "maskz" :
-            template = f"<Z, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-        elif masked_version == "masks" :
-            template = f"<S, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-        else :
-            print("error: masked_version should be mask, maskz or masks")
-            exit(-1)
-    reg_type = "rvd"
-    if masked_version:
-        if masked_version == "mask" :
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
-        elif masked_version == "maskz" :
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
-        elif masked_version == "masks" :
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const rvd<{dt_par}_t,{lmul}, {isa_type}> rsrc, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0"
-        else : 
-            print("error: masked_version should be mask, maskz or masks")
-            exit(-1)
-    else :
-        print("error: Unmasked gather proto should be built by build_proto.")
+    isa_type = isa["name"].upper() if isa_name else "DEFAULT_ISA"
+    t, t_idx, l_idx = f"{dt_par}_t", f"{dt_ret}_t", _idx_lmul_str(dt_par, dt_ret, lmul)
+    letters = {"mask": "M", "maskz": "Z", "masks": "S"}
+    if masked_version not in letters:
+        print("error: Unmasked gather proto should be built by build_proto, masked_version should be mask, maskz or masks.")
         exit(-1)
+    template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
+    p = f"inline rvd<{t}, {lmul}, {isa_type}> {func_name}{template}(const rvm<{t},{lmul}, {isa_type}> m0"
+    if masked_version == "masks":
+        p += f", const rvd<{t},{lmul}, {isa_type}> rsrc"
+    return p + f", const {t}* p0, const rvd<{t_idx},{l_idx}, {isa_type}> r0"
 
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
+    """C++ masked scatter: void scatter<V, T, T_IDX, LMUL>(m0, T* p0, idx, r1), as build_proto_gather."""
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
-    isa_type = "DEFAULT_ISA"
-    msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]["name"]+ "_t"
-    if isa_name:
-        isa_type = isa["name"].upper()
-    template = f"<{dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-    if masked_version:
-        if masked_version == "mask" :
-            template = f"<M, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-        elif masked_version == "maskz" :
-            template = f"<Z, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-        elif masked_version == "masks" :
-            template = f"<S, {dt_ret}_t, {msk_dt}, {lmul}, {isa_type}>"
-        else :
-            print("error: masked_version should be mask, maskz or masks")
-            exit(-1)
-    reg_type = "rvd"
-    if masked_version:
-        if masked_version == "mask" :
-            return f"inline void {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0, const rvd<{dt_ret}_t,{lmul}, {isa_type}> r1"
-        elif masked_version == "maskz" :
-            return f"inline void {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0, const rvd<{dt_ret}_t,{lmul}, {isa_type}> r1"
-        elif masked_version == "masks" :
-            return f"inline void {func_name}{template}(const rvm<{msk_dt},{lmul}, {isa_type}> m0, const rvd<{msk_dt},{lmul}, {isa_type}> rsrc, const {dt_par}_t* p0, const rvd<{msk_dt},{lmul}, {isa_type}> r0, const rvd<{dt_ret}_t,{lmul}, {isa_type}> r1"
-        else : 
-            print("error: masked_version should be mask, maskz or masks")
-            exit(-1)
-    else :
-        print("error: Unmasked scatter proto should be built by build_proto.")
+    isa_type = isa["name"].upper() if isa_name else "DEFAULT_ISA"
+    t, t_idx, l_idx = f"{dt_par}_t", f"{dt_ret}_t", _idx_lmul_str(dt_par, dt_ret, lmul)
+    letters = {"mask": "M", "maskz": "Z", "masks": "S"}
+    if masked_version not in letters:
+        print("error: Unmasked scatter proto should be built by build_proto, masked_version should be mask, maskz or masks.")
         exit(-1)
+    template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
+    p = f"inline void {func_name}{template}(const rvm<{t},{lmul}, {isa_type}> m0"
+    if masked_version == "masks":
+        p += f", const rvd<{t},{lmul}, {isa_type}> rsrc"
+    return p + f", {t}* p0, const rvd<{t_idx},{l_idx}, {isa_type}> r0, const rvd<{t},{lmul}, {isa_type}> r1"
 
 #function message error set functions
 def gen_set_func_error(func_name, file):
@@ -502,10 +540,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     if "scatter" in func_name and masked_version and cpp:
         return  build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=isa_name, cpp=cpp, masked_version=masked_version) +')'
 
-    realdatatype = tools.datatypes[dt_ret]
-    if (proto["ret"]["fixeddatatype"]):
-        realdatatype = tools.datatypes[proto["ret"]["fixeddatatype"]]
-    
+    realdatatype = resolve_param_datatype(proto["ret"], dt_par, dt_ret, is_ret=True)
+
     p = "inline " + build_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name, cpp) + " " + func_name + "("
     cnt_reg = 0
     cnt_msk = 0
@@ -515,9 +551,8 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     
     #add m0 as first argument for masked version of function
     if masked_version:
+        # the mask has the datatype of the function (gather / scatter: the one of the data)
         msk_dt = tools.datatypes[dt_par]
-        if "gather" in func_name or "scatter" in func_name:
-            msk_dt = tools.datatypes["uint" + str(get_dt_par_size(dt_par))]
 
         if masked_version == "mask" or masked_version == "maskz":
             p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
@@ -530,16 +565,10 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     for arg in proto["args"]:
         if not is_first:
             p += ", "
-        realdatatype = tools.datatypes[dt_par]
-        if (arg["fixeddatatype"]):
-            if arg["fixeddatatype"] not in tools.datatypes and arg["fixeddatatype"] in tools.all_categories:
-                dt_str =  arg["fixeddatatype"] + str(get_dt_par_size(dt_par))
-                realdatatype = tools.datatypes[dt_str]
-            elif arg["fixeddatatype"] in tools.datatypes:
-                realdatatype = tools.datatypes[arg["fixeddatatype"]]
+        realdatatype = resolve_param_datatype(arg, dt_par, dt_ret)
         if arg["charac"] == "RO":
             p += "const "
-        p += build_type(arg["type"], realdatatype, isa, lmul, isa_name, cpp)
+        p += build_type(arg["type"], realdatatype, isa, resolve_arg_lmul(arg, lmul, dt_par, dt_ret), isa_name, cpp)
         if arg["type"] == "reg":
             p += " r" + str(cnt_reg)
             cnt_reg = cnt_reg + 1
@@ -566,9 +595,7 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
 
 # For layer object
 def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=False, cpp=False):
-    realdatatype = tools.datatypes[dt_ret]
-    if (proto["ret"]["fixeddatatype"]):
-        realdatatype = tools.datatypes[proto["ret"]["fixeddatatype"]]
+    realdatatype = resolve_param_datatype(proto["ret"], dt_par, dt_ret, is_ret=True)
     p = build_class_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name, cpp) + " " + func_name + "(" 
     
     cnt_reg = 0
@@ -580,13 +607,11 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
         if not is_first:
             p += ","
 
-        realdatatype = tools.datatypes[dt_par]
-        if (arg["fixeddatatype"]):
-            realdatatype = tools.datatypes[arg["fixeddatatype"]]
+        realdatatype = resolve_param_datatype(arg, dt_par, dt_ret)
         if arg["charac"] == "RO":
             p += " const "
 
-        p += build_class_type(arg["type"], realdatatype, isa, lmul, isa_name, cpp)
+        p += build_class_type(arg["type"], realdatatype, isa, resolve_arg_lmul(arg, lmul, dt_par, dt_ret), isa_name, cpp)
         if arg["type"] == "reg":
             p += " r" + str(cnt_reg)
             cnt_reg = cnt_reg + 1
@@ -646,7 +671,7 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, mas
     return p + ")"
 
 # build call function  
-def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_version=False):
+def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_version=False, isa_name=True):
     p = ""
     if proto["ret"]["type"] == "reg":
         p += "res.r" + str(int(part)) + " = "
@@ -671,7 +696,17 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
     for arg in proto["args"]:
         if not is_first:
             p += ", "
-        if arg["type"] == "reg":
+        if arg["type"] == "reg" and arg.get("lmul", "same") == "ratio":
+            # index of gather / scatter: half of the register of its own LMUL (2 * lmul for the whole data)
+            idx_lmul = resolve_arg_lmul(arg, 2 * int(lmul), dt_par, dt_ret)
+            if idx_lmul >= 2:
+                p += "r" + str(cnt_reg) + ".r" + str(int(part))
+            else:
+                # a register of LMUL 1 (or less): its lower / upper half with low / high
+                half = "low" if int(part) == 1 else "high"
+                p += build_func_name_short(isa, dt_ret, half, isa_name, lmul=idx_lmul) + "(r" + str(cnt_reg) + ")"
+            cnt_reg = cnt_reg + 1
+        elif arg["type"] == "reg":
             p += "r" + str(cnt_reg) + ".r" + str(int(part))
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "msk":
@@ -694,16 +729,14 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
 def build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul=2, isa_name=True, masked_version=False):
     lmul_2 = int(lmul / 2)
     str_code = ""
-    realdatatype = tools.datatypes[dt_ret]
-    if proto["ret"]["fixeddatatype"]:
-        realdatatype = tools.datatypes[proto["ret"]["fixeddatatype"]]
+    realdatatype = resolve_param_datatype(proto["ret"], dt_par, dt_ret, is_ret=True)
     if proto["ret"]["type"] == "reg":
         str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name) + " res;\n"
     elif proto["ret"]["type"] == "msk":
         str_code += "\t" + build_type(proto["ret"]["type"], realdatatype, isa, resolve_ret_lmul(proto["ret"], lmul), isa_name) + " msk;\n"
     
-    str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1, masked_version=masked_version) + ";\n"
-    str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2, masked_version=masked_version) + ";"
+    str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 1, masked_version=masked_version, isa_name=isa_name) + ";\n"
+    str_code += "\t" + _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul_2, 2, masked_version=masked_version, isa_name=isa_name) + ";"
     if proto["ret"]["type"] == "reg":
         str_code += "\n\t" + "return res;"
     elif proto["ret"]["type"] == "msk":

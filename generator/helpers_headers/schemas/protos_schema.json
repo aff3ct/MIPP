@@ -65,7 +65,7 @@
                     ]
                 },
                 "fixeddatatype": {
-                    "description": "`false`: the value has the datatype of the function. Otherwise its type is fixed: a datatype (`int32` for a shift count, `uint32`, ...) or a category (`uint`: the unsigned type of the same size, for the indices of gather and scatter).",
+                    "description": "`false`: the value has the datatype of the function (the first type `dt_par` of a pair for the arguments, the second one `dt_ret` for the return value). Otherwise its type is fixed: a datatype (`int32` for a shift count, `uint32`, ...), a category (`uint`: the unsigned type of the same size as `dt_par`), `par` (the first type of the pair: the result of gather) or `ret` (the second type of the pair: the index of gather and scatter, pairs `\"data,index\"`).",
                     "anyOf": [
                         {
                             "type": "boolean"
@@ -80,8 +80,18 @@
                     "type": "string"
                 },
                 "lmul": {
-                    "description": "Return value only. LMUL of the returned register, relative to the LMUL of the function: `same` (default), `down` (one step below: `m4` -> `m2` -> `m1` -> `d2`), `up` (one step above: `d2` -> `m1` -> `m2` -> `m4` -> `m8`) or a fixed LMUL (`d2`, `m1`, `m2`, `m4`, `m8`). The function is only generated for the LMULs whose resulting LMUL exists (no `down` from `d2`, no `up` from `m8`). The LMUL in the name of a C function is always the one of the arguments.",
-                    "enum": ["same", "down", "up", "d2", "m1", "m2", "m4", "m8"]
+                    "description": "LMUL of the returned register, relative to the LMUL of the function: `same` (default), `down` (one step below: `m4` -> `m2` -> `m1` -> `d2`), `up` (one step above: `d2` -> `m1` -> `m2` -> `m4` -> `m8`) or a fixed LMUL (`d2`, `m1`, `m2`, `m4`, `m8`). The function is only generated for the LMULs whose resulting LMUL exists (no `down` from `d2`, no `up` from `m8`). The LMUL in the name of a C function is always the one of the arguments. For an argument, `ratio` (the index of gather / scatter): the argument has one lane per lane of the function, so its LMUL is the LMUL of the function times size(`dt_ret`) / size(`dt_par`) (32-bit indices of 64-bit data at `m1`: `d2`); the function is only generated for the LMULs where this LMUL exists.",
+                    "enum": [
+                        "same",
+                        "down",
+                        "up",
+                        "d2",
+                        "m1",
+                        "m2",
+                        "m4",
+                        "m8",
+                        "ratio"
+                    ]
                 },
                 "changes_type": {
                     "description": "Return value only. `true` if the datatype of the result differs from the one of the argument (wcvt, ncvt): the LMUL change then keeps the lanes, a wider (`up`) or narrower (`down`) element in a register one step above or below. Without it, `down` / `up` split (low, high) or join (combine) the registers.",

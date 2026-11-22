@@ -81,7 +81,7 @@
                 "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_rsrc') }};{% else %}for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
                 "\tbuf[i] = 0;{% endif %}",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i', dt=UI) }})",
+                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
                 "\t\tbuf[i] = p0[idx[i]];",
                 "{{ ret_d2(call1('loadu', 'buf')) }}"
             ]
@@ -270,7 +270,7 @@
                 "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
                 "{{ call1('storeu', 'buf', 'w_r1') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i', dt=UI) }})",
+                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
                 "\t\tp0[idx[i]] = buf[i];"
             ]
         },
@@ -286,7 +286,7 @@
                 "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
                 "{{ call1('storeu', 'buf', 'w_r1') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tp0[idx[i]] = {{ call1('get_k', 'w_m0', 'i', dt=UI) }} ? buf[i] : 0;"
+                "\tp0[idx[i]] = {{ call1('get_k', 'w_m0', 'i') }} ? buf[i] : 0;"
             ]
         }
     ],

@@ -285,6 +285,9 @@ def _gen_ci_structures(isa_list, file):
     print("#endif", file=file)    
    
 def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, lmul=0):
+    if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
+        # gather / scatter: index LMUL that does not exist for this pair at this LMUL
+        return
     # now that lmul funcs have been moved to simd_ext layer, this is just a wrapper to call the correct function depending on the ISA.
 
     if changes_lmul(funcs[f]["proto"]):
@@ -315,6 +318,8 @@ def _ci_lmul_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask
     print("}", file=file)
 
 def _ci_ldiv_writer(f,func_name, dt, dt_par, dt_ret, isa_list, funcs, file, mask_type=None, ldiv=0):
+    if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, ldiv):
+        return
     # temporary writer while support is added for ldiv in the simd_ext layer.
     if len(dt.split(',')) <= 1:
         full_func_name = build_func_name_short(isa_list[0], dt_par, f, isa_name=False, lmul=ldiv, masked_version=mask_type)

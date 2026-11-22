@@ -93,24 +93,18 @@ def _select_templates(templates, f, dt_par, mask_kind):
     return chain
 
 
-def _params(proto, dt_par, isa, mask_kind):
+def _params(proto, dt_par, isa, mask_kind, dt_ret=None):
     """Parameters of the function, in the order of its prototype (see name_builder.build_proto)."""
     params = []
     if mask_kind:
+        # the mask has the datatype of the function (gather / scatter: the one of the data)
         msk_dt = datatypes[dt_par]
-        if proto["_name"] in ("gather", "scatter"):
-            msk_dt = datatypes["uint" + str(get_dt_par_size(dt_par))]
         params.append({"name": "m0", "kind": "msk", "dt": msk_dt})
         if mask_kind == "masks":
             params.append({"name": "rsrc", "kind": "reg", "dt": datatypes[dt_par]})
     cnt = {"reg": 0, "msk": 0 if not mask_kind else 1, "val": 0, "ptr": 0}
     for arg in proto["args"]:
-        realdatatype = datatypes[dt_par]
-        if arg["fixeddatatype"]:
-            if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
-                realdatatype = datatypes[arg["fixeddatatype"] + str(get_dt_par_size(dt_par))]
-            elif arg["fixeddatatype"] in datatypes:
-                realdatatype = datatypes[arg["fixeddatatype"]]
+        realdatatype = resolve_param_datatype(arg, dt_par, dt_ret or dt_par)
         kind = arg["type"]
         if kind in cnt:
             name = {"reg": "r", "msk": "m", "val": "s", "ptr": "p"}[kind] + str(cnt[kind])
@@ -179,9 +173,7 @@ class _Ctx:
         ret = self.proto["ret"]
         if ret["type"] not in ("reg", "msk"):
             return "void"
-        realdt = datatypes[self.dt_ret]
-        if ret["fixeddatatype"]:
-            realdt = datatypes[ret["fixeddatatype"]]
+        realdt = resolve_param_datatype(ret, self.dt_par, self.dt_ret, is_ret=True)
         lmul_in = {"down": 1, "up": -2}.get(ret.get("lmul", "same"))
         lmul_out = resolve_ret_lmul(ret, lmul_in) if lmul_in else -2
         return build_type(ret["type"], realdt, self.isa, lmul_out, True, False)
@@ -201,9 +193,7 @@ class _Ctx:
         ret = self.proto["ret"]
         if ret["type"] not in ("reg", "msk"):
             return f"return {expr};"
-        realdt = datatypes[self.dt_ret]
-        if ret["fixeddatatype"]:
-            realdt = datatypes[ret["fixeddatatype"]]
+        realdt = resolve_param_datatype(ret, self.dt_par, self.dt_ret, is_ret=True)
         d2 = build_type(ret["type"], realdt, self.isa, -2, True, False)
         member = "r" if ret["type"] == "reg" else "m"
         return f"{d2} res;\nres.{member} = ({expr}).{member};\nreturn res;"
@@ -337,7 +327,7 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
 
     proto_info = dict(funcs[f]["proto"])
     proto_info["_name"] = f
-    params = _params(proto_info, dt_par, isa, mask_kind)
+    params = _params(proto_info, dt_par, isa, mask_kind, dt_ret)
     calls = set()
     ctx = _Ctx(isa, funcs, f, dt, dt_par, dt_ret, mask_kind, params, calls, lmul_in)
 
@@ -526,4 +516,7 @@ def gen_c_ldiv_mask(isa, include_manager, funcs, only_changing=False, ldiv_pairs
         for mask_kind in kinds:
             file_w = include_manager.get_fd(isa["name"], f, variant=_VARIANT_OF[mask_kind], lmul=-2)
             for dt in funcs[f]["datatypes"]:
+                if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2):
+                    # gather / scatter with an index of another width than the data: not for the half-vectors
+                    continue
                 _emit_one(isa, file_w, funcs, templates, f, dt, mask_kind, record_call)

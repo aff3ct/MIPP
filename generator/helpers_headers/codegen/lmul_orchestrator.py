@@ -338,6 +338,26 @@ def _emit_lmul1_alias(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None):
     print("\t" + build_call(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=1, isa_name=True, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
 
+_VARIANT_OF_MASK_TYPE = {None: "u", "mask": "m", "maskz": "z", "masks": "s"}
+
+
+def _add_ratio_split_dependencies(f, dt_par, dt_ret, isa, funcs, lmul, mask_type, include_manager):
+    """
+    The halves of an argument of LMUL `ratio` (index of a gather / scatter with mixed widths) are taken with
+    `low` / `high` when that argument is a register of LMUL 1 (see name_builder._build_call_lmul): the function
+    then depends on them (the header that defines them must be included).
+    """
+    if include_manager is None:
+        return
+    for arg in funcs[f]["proto"]["args"]:
+        if arg["type"] != "reg" or arg.get("lmul", "same") != "ratio":
+            continue
+        if resolve_arg_lmul(arg, int(lmul), dt_par, dt_ret) < 2:
+            variant = _VARIANT_OF_MASK_TYPE[mask_type]
+            for half in ("low", "high"):
+                include_manager.add_call_dependency(isa["name"], f, variant, f"m{lmul}", half, "u", "m1")
+
+
 def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul=0, include_manager=None):
     if len(dt.split(',')) <= 1:
         func_name = build_func_name_short(isa, dt_par, f, lmul=0, masked_version=mask_type)
@@ -357,6 +377,7 @@ def _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None, lmul
         print("\nstatic " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True, masked_version=mask_type) + " {", file=file)
         print(build_call_lmul(funcs[f]["proto"], dt_par, dt_ret, isa, func_name_half_lmul, lmul=lmul, isa_name=True, masked_version=mask_type), file=file)
         print("}", file=file)
+        _add_ratio_split_dependencies(f, dt_par, dt_ret, isa, funcs, lmul, mask_type, include_manager)
     else:
         # Avoid direct import loop by resolving dynamically or calling local gen_c_horiz_lmul
         from registry import implems_horiz_lmul_generic_emu
@@ -418,6 +439,8 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None, lmul1=False):
         for dt in funcs[f]["datatypes"]:
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
             for lmul in lmuls:
+                if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
+                    continue
                 file_w = include_manager.get_fd(isa["name"], f, variant="u", lmul=lmul)
                 _c_lmul_writer(f=f, dt=dt, dt_par=dt_par, dt_ret=dt_ret, isa=isa, funcs=funcs, file=file_w, lmul=lmul, include_manager=include_manager)
         
@@ -428,17 +451,17 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None, lmul1=False):
                 else:
                     mask_status = VariantSet()
 
-                if not mask_status.is_any_mask():
+                if not mask_status.is_any_mask() or not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
                     continue
                 if mask_status.is_maskable():
                     file_w = include_manager.get_fd(isa["name"], f, variant="m", lmul=lmul)
-                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="mask", lmul=lmul)
+                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="mask", lmul=lmul, include_manager=include_manager)
                 if mask_status.is_maskzable():
                     file_w = include_manager.get_fd(isa["name"], f, variant="z", lmul=lmul)
-                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="maskz", lmul=lmul)
+                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="maskz", lmul=lmul, include_manager=include_manager)
                 if mask_status.is_masksable():
                     file_w = include_manager.get_fd(isa["name"], f, variant="s", lmul=lmul)
-                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul)
+                    _c_lmul_writer(f, dt, dt_par, dt_ret, isa, funcs, file_w, mask_type="masks", lmul=lmul, include_manager=include_manager)
 
 def gen_c_lmul1_aliases(isa, include_manager, funcs):
     """
@@ -459,6 +482,8 @@ def gen_c_lmul1_aliases(isa, include_manager, funcs):
         if variants.is_masksable():
             kinds.append(("s", "masks"))
         for dt in funcs[f]["datatypes"]:
+            if not is_defined_for_dt_lmul(proto, dt, 1):
+                continue
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
             for variant, mask_type in kinds:
                 file_w = include_manager.get_fd(isa["name"], f, variant=variant, lmul=1)
@@ -480,22 +505,30 @@ def gen_c_ldiv(isa_base, isa_div, include_manager, funcs):
         if changes_lmul(funcs[f]["proto"]):
             continue
         for dt in funcs[f]["datatypes"]:
+            if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2):
+                continue
             dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
             file_w = include_manager.get_fd(isa_base["name"], f, variant="u", lmul=-2)
             _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind=None, ldiv=2)
         variant_set = funcs[f]["variants"] if "variants" in funcs[f] else None
         if variant_set and variant_set.is_maskable():
             for dt in funcs[f]["datatypes"]:
+                if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2):
+                    continue
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 file_w = include_manager.get_fd(isa_base["name"], f, variant="m", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="mask", ldiv=2)
         if variant_set and variant_set.is_maskzable():
             for dt in funcs[f]["datatypes"]:
+                if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2):
+                    continue
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 file_w = include_manager.get_fd(isa_base["name"], f, variant="z", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="maskz", ldiv=2)
         if variant_set and variant_set.is_masksable():
             for dt in funcs[f]["datatypes"]:
+                if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2):
+                    continue
                 dt_par, dt_ret = compute_dt_par_dt_ret(funcs, f, dt)
                 file_w = include_manager.get_fd(isa_base["name"], f, variant="s", lmul=-2)
                 _gen_c_function_one_ldiv_avx(isa_base=isa_base, isa_div=isa_div, file=file_w, funcs=funcs, f=f, ff=None, dt=dt, mask_kind="masks", ldiv=2)

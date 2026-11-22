@@ -14,6 +14,11 @@ The memory accessed through the indices is a table of M elements, larger than a 
 then cover the whole range of the 8 and 16-bit index types, which catches the byte offsets computed
 in the index width that overflow (e.g. idx * 2 on 16 bits from idx = 2^15).
 
+The functions are generated for pairs "data,index" (index: an unsigned type, of the width of the data or
+another one): the index has one lane per lane of the data, so its LMUL is the LMUL of the data times
+size(index) / size(data) (see name_builder.resolve_arg_lmul), and a pair is only tested for the LMULs
+where this LMUL exists. The mask has the type and the LMUL of the data.
+
   gather : the indices are random values of [0, M)
   scatter: the indices are N distinct values of [0, M) (offset + i * stride mod M, with a stride
            coprime with M, then shuffled), so that the result does not depend on the order of the
@@ -34,12 +39,34 @@ _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("load", "gather"), ("stor
                  ("reinterpret", "torvd"), ("reinterpret", "torvm"))
 
 
-def _bits(dt: str) -> str:
-    return "".join(c for c in dt if c.isdigit())
+def _bits(dt: str) -> int:
+    return int("".join(c for c in dt if c.isdigit()))
 
 
-def _idx_dt(dt: str) -> str:
-    return "uint" + _bits(dt)
+def _pair(p: str):
+    """"float64,uint32" -> ("float64", "uint32")."""
+    a, b = p.split(",")
+    return a.strip(), b.strip()
+
+
+def idx_lmul(dt: str, idt: str, lmul: int) -> Optional[int]:
+    """
+    LMUL of the index for the data LMUL `lmul` (0 and 1: m1, -2: d2), None when it does not exist, or when the
+    function is not generated: the mixed pairs have no d2 version (name_builder.is_defined_for_dt_lmul).
+    """
+    if lmul == -2 and _bits(idt) != _bits(dt):
+        return None
+    num, den = (1, 2) if lmul == -2 else (max(lmul, 1), 1)
+    num, den = num * _bits(idt), den * _bits(dt)
+    if num >= den:
+        r = num // den if num % den == 0 else None
+        return r if r in (1, 2, 4, 8) else None
+    return -2 if den == 2 * num else None
+
+
+def _c_sfx(lmul: int) -> str:
+    """Suffix of the public C names (m1: none)."""
+    return "" if lmul in (0, 1) else (f"_m{lmul}" if lmul > 0 else "_d2")
 
 
 def _scalar_includes(ext: str) -> List[str]:
@@ -104,23 +131,24 @@ def _indent(lines: List[str], n: int) -> List[str]:
 # C API
 # --------------------------------------------------------------------------------------------------
 
-def _c_test(func: str, dt: str, sfx: str, mkind: str, lmul: int) -> List[str]:
+def _c_test(func: str, pair: str, sfx: str, mkind: str, lmul: int) -> List[str]:
+    dt, idt = _pair(pair)
     sfx_u = f"_{sfx}" if sfx and sfx != "m0" else ""
     mult = f" * {lmul}" if lmul > 0 else (f" / {-lmul}" if lmul < 0 else "")
-    idt = _idx_dt(dt)
+    isfx = _c_sfx(idx_lmul(dt, idt, lmul))
     mk_sfx = f"_{mkind}" if mkind else ""
 
     def names(prefix: str):
         return {
-            "call": f"mipp_{prefix}{func}_{dt}_{dt}{mk_sfx}{sfx_u}",
-            "load_i": f"mipp_{prefix}load_{idt}{sfx_u}(idx)",
+            "call": f"mipp_{prefix}{func}_{dt}_{idt}{mk_sfx}{sfx_u}",
+            "load_i": f"mipp_{prefix}load_{idt}{isfx}(idx)",
             "load_src": f"mipp_{prefix}load_{dt}{sfx_u}(src)",
             "load_data": f"mipp_{prefix}load_{dt}{sfx_u}(src)",
-            "set_k": f"mipp_{prefix}set_k_{idt}{sfx_u}(mk)",
+            "set_k": f"mipp_{prefix}set_k_{dt}{sfx_u}(mk)",
             "store": f"mipp_{prefix}store_{dt}{sfx_u}",
             "r_t": f"rvd_{prefix}{dt}{sfx_u}_t",
-            "ri_t": f"rvd_{prefix}{idt}{sfx_u}_t",
-            "rm_t": f"rvm_{prefix}{idt}{sfx_u}_t",
+            "ri_t": f"rvd_{prefix}{idt}{isfx}_t",
+            "rm_t": f"rvm_{prefix}{dt}{sfx_u}_t",
         }
 
     tag = f"{mkind}_{sfx}" if mkind else sfx
@@ -141,26 +169,38 @@ def _c_test(func: str, dt: str, sfx: str, mkind: str, lmul: int) -> List[str]:
             args = f"{p}m, {res}.data(), {p}i, {p}v" if mkind else f"{res}.data(), {p}i, {p}v"
             b += [f"{n['call']}({args});", ""]
     b += _compare(func)
-    return ([f"static void test_mipp_c_{func}_{dt}_{tag}()", "{", f"\tusing T = {dt}_t;", f"\tusing IDX = {idt}_t;",
+    return ([f"static void test_mipp_c_{func}_{dt}_{idt}_{tag}()", "{", f"\tusing T = {dt}_t;", f"\tusing IDX = {idt}_t;",
              "\tstd::mt19937 seed(Catch::getSeed());",
              "\tfor (unsigned n = 0; n < get_n_iter(); n++)", "\t{"] + _indent(b, 2) + ["\t}", "}", ""])
 
 
-def build_c(func: str, datatypes: List[str], sfx: str, mkind: str, lmul: int, N: int) -> str:
+def build_c(func: str, pairs: List[str], sfx: str, mkind: str, lmul: int, N: int) -> str:
+    """One test per pair "data,index" whose index LMUL exists for this LMUL (a d2 index needs MIPP_LDIV_2)."""
+    pairs = [p for p in pairs if idx_lmul(*_pair(p), lmul) is not None]
     lines = [l.replace("{N_ITER}", str(N)) for l in _C_STD]
     lines += _scalar_includes("h")
     lines += ["#include <mipp.h>", "", "#include <catch2/catch_test_macros.hpp>",
               "#include <catch2/catch_get_random_seed.hpp>", ""]
     if lmul < 0:
         lines.append("#if defined(MIPP_LDIV_2)")
-    for dt in datatypes:
-        lines += _c_test(func, dt, sfx, mkind, lmul)
+    d2_idx = lambda p: lmul >= 0 and idx_lmul(*_pair(p), lmul) == -2
+    for p in pairs:
+        if d2_idx(p):
+            lines.append("#if defined(MIPP_LDIV_2)")
+        lines += _c_test(func, p, sfx, mkind, lmul)
+        if d2_idx(p):
+            lines += ["#endif // MIPP_LDIV_2", ""]
     tag = f"{mkind}_{sfx}" if mkind else sfx
     lines += [f'TEST_CASE("{func} - c tests [{_MK_LABEL[mkind]}, {sfx}]", "[{func}]")', "{"]
-    for dt in datatypes:
-        lines += [f'\tSECTION("datatype = {dt}")', "\t{", "\t\ttry {",
-                  f"\t\t\ttest_mipp_c_{func}_{dt}_{tag}();",
+    for p in pairs:
+        dt, idt = _pair(p)
+        if d2_idx(p):
+            lines.append("#if defined(MIPP_LDIV_2)")
+        lines += [f'\tSECTION("datatype = {dt}, index = {idt}")', "\t{", "\t\ttry {",
+                  f"\t\t\ttest_mipp_c_{func}_{dt}_{idt}_{tag}();",
                   "\t\t} catch (const mipp::stub_exception& e) {", "\t\t\tWARN(e.what());", "\t\t}", "\t}"]
+        if d2_idx(p):
+            lines.append("#endif // MIPP_LDIV_2")
     lines.append("}")
     if lmul < 0:
         lines += ["", "#endif // MIPP_LDIV_2"]
@@ -198,12 +238,12 @@ def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
         p = "s" if scalar else "r"
         if scalar or dialect == "cpp":
             isa = ", mipp::ISA::SCALAR" if scalar else ""
-            return [f"[[maybe_unused]] auto {p}i = mipp::load<IDX, LMUL{isa}>(idx);",
-                    f"[[maybe_unused]] auto {p}m = mipp::set_k<IDX, LMUL{isa}>(mk);",
+            return [f"[[maybe_unused]] auto {p}i = mipp::load<IDX, LMUL_IDX{isa}>(idx);",
+                    f"[[maybe_unused]] auto {p}m = mipp::set_k<T, LMUL{isa}>(mk);",
                     f"[[maybe_unused]] auto {p}src = mipp::load<T, LMUL{isa}>(src);",
                     f"[[maybe_unused]] auto {p}v = mipp::load<T, LMUL{isa}>(src);"]
-        return [f"[[maybe_unused]] auto ri = mipp::Rvd<IDX, LMUL>(idx);",
-                f"[[maybe_unused]] auto rm = mipp::Rvm<IDX, LMUL>(mk);",
+        return [f"[[maybe_unused]] auto ri = mipp::Rvd<IDX, LMUL_IDX>(idx);",
+                f"[[maybe_unused]] auto rm = mipp::Rvm<T, LMUL>(mk);",
                 f"[[maybe_unused]] auto rsrc = mipp::Rvd<T, LMUL>(src);",
                 f"[[maybe_unused]] auto rv = mipp::Rvd<T, LMUL>(src);"]
 
@@ -230,17 +270,19 @@ def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
         b += ["res_r = table;", "res_s = table;"]
         b += dispatch(False, True, "") + dispatch(True, True, "") + [""]
     b += _compare(func)
-    head = [f"template <mipp::VARIANT V = mipp::U, typename T = double, int LMUL = 1>",
+    head = [f"template <mipp::VARIANT V = mipp::U, typename T = double, typename IDX = uint64_t, int LMUL = 1>",
             f"static void test_mipp_{dialect}_{func}()", "{",
-            "\tusing IDX = std::conditional_t<sizeof(T) == 1, uint8_t, std::conditional_t<sizeof(T) == 2, uint16_t, "
-            "std::conditional_t<sizeof(T) == 4, uint32_t, uint64_t>>>;",
+            "\t// one index lane per data lane: the index has its own LMUL when its width differs",
+            "\tconstexpr int LMUL_IDX = mipp::details::idx_lmul<T, IDX>(LMUL);",
             "\tstd::mt19937 seed(Catch::getSeed());",
             "\tfor (unsigned n = 0; n < get_n_iter(); n++)", "\t{"]
     return head + _indent(b, 2) + ["\t}", "}", ""]
 
 
-def build_cpp(dialect: str, func: str, datatypes_cpp: List[str], mkinds: List[str],
-              lmul_list: Optional[List[int]], ldiv_list: Optional[List[int]], N: int) -> str:
+def build_cpp(dialect: str, func: str, pairs: List[str], mkinds: List[str],
+              lmul_list: Optional[List[int]], ldiv_list: Optional[List[int]], N: int, cpp_type=None) -> str:
+    """One section per pair "data,index" and per LMUL where the index LMUL exists; `cpp_type` gives the C++
+    name of a datatype (float64 -> double)."""
     lines = [l.replace("{N_ITER}", str(N)) for l in _C_STD]
     lines += _scalar_includes("hpp")
     lines += ["#include <mipp.hpp>"]
@@ -257,21 +299,26 @@ def build_cpp(dialect: str, func: str, datatypes_cpp: List[str], mkinds: List[st
         lmuls = [l for l in lmuls if l in want]
     label = "cpp" if dialect == "cpp" else "obj"
     lines += [f'TEST_CASE("{func} - {label} tests", "[{func}]")', "{"]
+    cpp_type = cpp_type or (lambda d: d)
     for mk in mkinds:
         lines += [f'\tSECTION("{_MK_LABEL[mk]}")', "\t{"]
-        for dt in datatypes_cpp:
-            lines += [f'\t\tSECTION("datatype = {dt}")', "\t\t{"]
+        for p in pairs:
+            dt, idt = _pair(p)
+            lines += [f'\t\tSECTION("datatype = {cpp_type(dt)}, index = {cpp_type(idt)}")', "\t\t{"]
             calls = [(f"LMUL = {l}", l) for l in lmuls]
             if ldiv_list is None or 2 in ldiv_list:
                 calls.append(("LDIV = 2", -2))
             for lab, l in calls:
-                if l < 0:
+                il = idx_lmul(dt, idt, l)
+                if il is None:
+                    continue
+                if l < 0 or il < 0:
                     lines.append("#if defined(MIPP_LDIV_2)")
                 lines += [f'\t\t\tSECTION("{lab}")', "\t\t\t{", "\t\t\t\ttry {",
-                          f"\t\t\t\t\ttest_mipp_{dialect}_{func}<{_MK_ENUM[mk]}, {dt}, {l}>();",
+                          f"\t\t\t\t\ttest_mipp_{dialect}_{func}<{_MK_ENUM[mk]}, {cpp_type(dt)}, {cpp_type(idt)}, {l}>();",
                           "\t\t\t\t} catch (const mipp::stub_exception& e) {", "\t\t\t\t\tWARN(e.what());",
                           "\t\t\t\t}", "\t\t\t}"]
-                if l < 0:
+                if l < 0 or il < 0:
                     lines.append("#endif // MIPP_LDIV_2")
             lines.append("\t\t}")
         lines.append("\t}")

@@ -67,6 +67,15 @@ namespace mipp
     enum_names = ["scalar"] + sorted(n for n in set(all_isa_names) | {i["name"] for i in isa_list} if n != "scalar")
     print("enum ISA { " + ", ".join(n.upper() for n in enum_names) + " };", file=file_common_enum)
     print("enum VARIANT { U, M, Z, S }; //variant enum for function templates", file=file_common_enum)
+    # LMUL of the index of gather / scatter: one lane per lane of the data, so lmul * sizeof(U) / sizeof(T)
+    # (-2 for d2; e.g. 32-bit indices of 64-bit data at LMUL 1: -2)
+    print("namespace details {", file=file_common_enum)
+    print("constexpr int idx_lmul_frac(int num, int den) { return num >= den ? num / den : -(den / num); }", file=file_common_enum)
+    print("template <typename T, typename U> constexpr int idx_lmul(int lmul)", file=file_common_enum)
+    print("{ return lmul > 0 ? idx_lmul_frac(lmul * (int)sizeof(U), (int)sizeof(T)) : idx_lmul_frac((int)sizeof(U), -lmul * (int)sizeof(T)); }", file=file_common_enum)
+    print("template <typename T, typename U> constexpr int data_lmul(int lmul_idx)", file=file_common_enum)
+    print("{ return lmul_idx > 0 ? idx_lmul_frac(lmul_idx * (int)sizeof(T), (int)sizeof(U)) : idx_lmul_frac((int)sizeof(T), -lmul_idx * (int)sizeof(U)); }", file=file_common_enum)
+    print("} // namespace details", file=file_common_enum)
 
     isa_list_copy = prepare_isa_defines(isa_list) # this is the function that sets the gen_define key for every ISAs for some reason
 
@@ -249,6 +258,9 @@ def get_dt_par_size(dt_par):
 def _tpl_scalar_for_arg(arg):
     # Returns a string type name usable in C++ template decls: "T" or "int32_t" etc.
     if arg.get("fixeddatatype"):
+        if arg["fixeddatatype"] == "ret":
+            # index of gather / scatter: the second type of the pair
+            return "U"
         if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
                 return "U"
         elif arg["fixeddatatype"] in datatypes:
@@ -278,11 +290,12 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
     cnt_val = 0
     cnt_ptr = 0
 
+    # the mask has the type of the data (T); the index (U) has its own LMUL (one lane per lane of the data)
     if mask_kind in ("mask", "maskz"):
-        s += "rvm<U,LMUL,ISA_TYPE> m0"
+        s += "rvm<T,LMUL,ISA_TYPE> m0"
         is_first = False
     elif mask_kind == "masks":
-        s += "const rvm<U,LMUL,ISA_TYPE> m0, rvd<T,LMUL,ISA_TYPE> rsrc"
+        s += "const rvm<T,LMUL,ISA_TYPE> m0, rvd<T,LMUL,ISA_TYPE> rsrc"
         is_first = False
     for args in proto["args"]:
 
@@ -294,7 +307,10 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
 
         A = _tpl_scalar_for_arg(args)
 
-        if args["type"] == "reg":
+        if args["type"] == "reg" and args.get("lmul", "same") == "ratio":
+            tmp_str += "rvd<{{A}},details::idx_lmul<T,{{A}}>(LMUL),ISA_TYPE> r" + str(cnt_reg)
+            cnt_reg += 1
+        elif args["type"] == "reg":
             tmp_str += "rvd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "msk":
@@ -636,13 +652,13 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
 
-                for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
+                for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, l)]:
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
                     print("}", file=file)
                 mask_status = funcs[f]["variants"]
 
-                has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2)
+                has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2)
                 if has_ldiv:
                     ldiv = -2
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
@@ -653,10 +669,10 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     proto = funcs[f]["proto"]
                     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-                    for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
+                    for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, l)]:
                         _emit_mask_specs(lambda _v: file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa)
 
-                    has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2)
+                    has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2)
                     if has_ldiv:
                         ldiv = -2
                         _emit_mask_specs(lambda _v: file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, ldiv, isa)
@@ -687,13 +703,13 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
 
-                for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)]:
+                for lmul in [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, l)]:
                     file_u = include_manager.get_fd(layer_name, f, variant="u", lmul=lmul)
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file_u)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file_u)
                     print("}", file=file_u)
 
-                has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2)
+                has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2)
                 if has_ldiv:
                     ldiv = -2
                     file_u = include_manager.get_fd(layer_name, f, variant="u", lmul=ldiv)
@@ -706,7 +722,7 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     proto = funcs[f]["proto"]
                     c_base = _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=isa, isa_name=True)
 
-                    lmuls = [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l)] + ([-2] if has_ldiv else [])
+                    lmuls = [l for l in all_lmul if isa_provides_lmul(isa, funcs[f]["proto"], l) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, l)] + ([-2] if has_ldiv else [])
                     for lmul in lmuls:
                         get_file = lambda v, _l=lmul: include_manager.get_fd(layer_name, f, variant=v, lmul=_l)
                         _emit_mask_specs(get_file, proto, dt_par, dt_ret, cpp_func_name, c_base, mask_status, lmul, isa)

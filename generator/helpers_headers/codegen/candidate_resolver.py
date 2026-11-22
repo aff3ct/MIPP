@@ -128,17 +128,7 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
         pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
 
 def _resolve_arg_datatype(arg, dt_par, dt_ret):
-    arg_type_name = arg["type"]
-    realdatatype = datatypes[dt_par]
-    if arg.get("fixeddatatype"):
-        if arg["fixeddatatype"] not in datatypes and arg["fixeddatatype"] in all_categories:
-            dt_str = arg["fixeddatatype"] + str(get_dt_par_size(dt_par))
-            realdatatype = datatypes[dt_str]
-        elif arg["fixeddatatype"] in datatypes:
-            realdatatype = datatypes[arg["fixeddatatype"]]
-    elif arg_type_name == "ret":
-        realdatatype = datatypes[dt_ret]
-    return realdatatype
+    return resolve_param_datatype(arg, dt_par, dt_ret)
 
 def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector_ret_type, ret_type_name):
     dt_ret_name = dt_ret["name"]
@@ -193,10 +183,9 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
     return_statement = None
 
     if mask_kind is not None:
+        # the mask has the datatype of the function (gather / scatter: the one of the data)
         msk_dt = datatypes[dt_par]
-        if "gather" in f or "scatter" in f:
-            msk_dt = datatypes["uint" + str(get_dt_par_size(dt_par))]
-        elif funcs[f]["proto"]["ret"].get("fixeddatatype"):
+        if funcs[f]["proto"]["ret"].get("fixeddatatype") not in (False, None, "par", "ret"):
             msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
         _prepare_mask_variable(pre_statements, isa, msk_dt, "m0", cond, target_scalar_lmul, f, is_initial_mask=True)
         call_args.append("s_m0")
@@ -215,9 +204,15 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
         if arg_type_name == "reg" or arg_type_name == "ret":
             arg_name = f"r{cnt_reg}"
             cnt_reg += 1
-            scalar_type = build_type("reg", realdatatype, scalar_isa, target_scalar_lmul, True, False)
+            arg_lmul = resolve_arg_lmul(arg, target_scalar_lmul, dt_par, dt_ret)
+            scalar_type = build_type("reg", realdatatype, scalar_isa, arg_lmul, True, False)
             pre_statements.append(f"\t{scalar_type} s_{arg_name} = {{0}};")
-            pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
+            if arg_lmul != target_scalar_lmul:
+                # index of gather / scatter at another LMUL: a d2 register of the ISA (a full register on SSE, NEON,
+                # SVE) can be larger than the scalar d2 array, only its lanes are copied
+                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof(s_{arg_name}) < sizeof({arg_name}) ? sizeof(s_{arg_name}) : sizeof({arg_name}));")
+            else:
+                pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, sizeof({arg_name}));")
             call_args.append(f"s_{arg_name}")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
@@ -240,11 +235,12 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
 
     ret_type_name = proto["ret"]["type"]
     if ret_type_name == "reg" or ret_type_name == "msk":
-        vector_ret_type = build_type(ret_type_name, datatypes[dt_ret], isa, lmul, True, False)
-        scalar_ret_type = build_type(ret_type_name, datatypes[dt_ret], scalar_isa, target_scalar_lmul, True, False)
+        ret_dt = resolve_param_datatype(proto["ret"], dt_par, dt_ret, is_ret=True)
+        vector_ret_type = build_type(ret_type_name, ret_dt, isa, lmul, True, False)
+        scalar_ret_type = build_type(ret_type_name, ret_dt, scalar_isa, target_scalar_lmul, True, False)
         call_statement = f"{scalar_ret_type} sres = {scalar_func_name}({call_args_str});"
 
-        _prepare_return_variable(post_statements, isa, datatypes[dt_ret], cond, target_scalar_lmul, f, vector_ret_type, ret_type_name)
+        _prepare_return_variable(post_statements, isa, ret_dt, cond, target_scalar_lmul, f, vector_ret_type, ret_type_name)
         return_statement = "return res;"
     elif ret_type_name == "val":
         call_statement = f"return {scalar_func_name}({call_args_str});"
@@ -327,6 +323,9 @@ def resolve_candidates(isa, funcs, lmul=0):
             # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
             continue
         for dt in funcs[f]["datatypes"]:
+            if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
+                # pair "data,index" of gather / scatter whose index LMUL does not exist at this LMUL
+                continue
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
@@ -361,6 +360,9 @@ def resolve_candidates(isa, funcs, lmul=0):
             # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
             continue
         for dt in funcs[f]["datatypes"]:
+            if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
+                # pair "data,index" of gather / scatter whose index LMUL does not exist at this LMUL
+                continue
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
@@ -766,6 +768,9 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
         
         # Emit forward declarations first to prevent order-of-declaration issues
         for dt in funcs[f]["datatypes"]:
+            if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
+                # pair "data,index" of gather / scatter whose index LMUL does not exist at this LMUL
+                continue
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             
@@ -792,6 +797,9 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         print("static " + proto_str + ";", file=target_file)
                         
         for dt in funcs[f]["datatypes"]:
+            if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
+                # pair "data,index" of gather / scatter whose index LMUL does not exist at this LMUL
+                continue
             dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
             dt_key = dt_par + "," + dt_ret
             

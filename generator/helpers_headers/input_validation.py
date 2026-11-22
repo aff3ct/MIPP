@@ -660,9 +660,10 @@ def validate_protos_config(protos_dict):
     validate_json_data(protos_dict, "protos_schema.json", label="registry_protos.json")
     for name, proto in protos_dict.items():
         for i, arg in enumerate(proto.get("args", [])):
-            if "lmul" in arg:
+            # an argument may only have the LMUL `ratio` (index of gather / scatter), the others are for `ret`
+            if "lmul" in arg and arg["lmul"] != "ratio":
                 print("Error: Logical integrity check failed for registry_protos.json:", file=sys.stderr)
-                print(f"  - Prototype '{name}': 'lmul' is only allowed in 'ret' (found in args[{i}]).", file=sys.stderr)
+                print(f"  - Prototype '{name}': an argument may only have \"lmul\": \"ratio\" (found '{arg['lmul']}' in args[{i}]).", file=sys.stderr)
                 sys.exit(1)
 
 def validate_interfaces_config(interfaces_dict, protos_dict):

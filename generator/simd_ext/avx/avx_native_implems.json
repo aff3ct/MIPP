@@ -226,9 +226,9 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int32,int32"
+                "float64,uint64",
+                "float32,uint32",
+                "int32,uint32"
             ],
             "template": "gather",
             "if": "defined(__AVX2__)"
@@ -236,7 +236,7 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "int64,int64"
+                "int64,uint64"
             ],
             "template": "gather_i64",
             "if": "defined(__AVX2__)"
@@ -244,7 +244,7 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64"
+                "float64,uint64"
             ],
             "template": "gather_masks_f64",
             "if": "defined(__AVX2__)",
@@ -253,7 +253,7 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "int64,int64"
+                "int64,uint64"
             ],
             "template": "gather_masks_i64",
             "if": "defined(__AVX2__)",
@@ -262,7 +262,7 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float32,float32"
+                "float32,uint32"
             ],
             "template": "gather_masks_f32",
             "if": "defined(__AVX2__)",
@@ -271,11 +271,47 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "int32,int32"
+                "int32,uint32"
             ],
             "template": "gather_masks_i32",
             "if": "defined(__AVX2__)",
             "variant": "s"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "gather_i32_64_f",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_i32_64_i",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "gather_i32_64_masks_f",
+            "variant": "s",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_i32_64_masks_i",
+            "variant": "s",
+            "if": "defined(__AVX2__)"
         }
     ],
     "getfirst": [

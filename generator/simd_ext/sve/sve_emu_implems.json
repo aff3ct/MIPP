@@ -220,11 +220,11 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64",
-                "int64,int64",
+                "float64,uint64",
+                "int64,uint64",
                 "uint64,uint64",
-                "float32,float32",
-                "int32,int32",
+                "float32,uint32",
+                "int32,uint32",
                 "uint32,uint32"
             ],
             "template": "gather"
@@ -232,15 +232,44 @@
         {
             "instr_name": "gather",
             "datatypes": [
-                "float64,float64",
-                "int64,int64",
+                "float64,uint64",
+                "int64,uint64",
                 "uint64,uint64",
-                "float32,float32",
-                "int32,int32",
+                "float32,uint32",
+                "int32,uint32",
                 "uint32,uint32"
             ],
             "variant": "s",
             "template": "gather_s"
+        },
+        {
+            "instr_name": "ld1_gather",
+            "datatypes": [
+                "float64,uint32",
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_u32idx_64"
+        },
+        {
+            "instr_name": "ld1_gather",
+            "datatypes": [
+                "float64,uint32",
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_u32idx_64_z",
+            "variant": "z"
+        },
+        {
+            "instr_name": "ld1_gather",
+            "datatypes": [
+                "float64,uint32",
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_u32idx_64_s",
+            "variant": "s"
         }
     ],
     "getfirst": [
@@ -439,11 +468,11 @@
         {
             "instr_name": "scatter",
             "datatypes": [
-                "float64,float64",
-                "int64,int64",
+                "float64,uint64",
+                "int64,uint64",
                 "uint64,uint64",
-                "float32,float32",
-                "int32,int32",
+                "float32,uint32",
+                "int32,uint32",
                 "uint32,uint32"
             ],
             "template": "scatter"
@@ -451,15 +480,44 @@
         {
             "instr_name": "scatter",
             "datatypes": [
-                "float64,float64",
-                "int64,int64",
+                "float64,uint64",
+                "int64,uint64",
                 "uint64,uint64",
-                "float32,float32",
-                "int32,int32",
+                "float32,uint32",
+                "int32,uint32",
                 "uint32,uint32"
             ],
             "variant": "z",
             "template": "scatter_z"
+        },
+        {
+            "instr_name": "st1_scatter",
+            "datatypes": [
+                "float64,uint32",
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "scatter_u32idx_64"
+        },
+        {
+            "instr_name": "st1_scatter",
+            "datatypes": [
+                "float64,uint32",
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "scatter_u32idx_64_m",
+            "variant": "m"
+        },
+        {
+            "instr_name": "st1_scatter",
+            "datatypes": [
+                "float64,uint32",
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "scatter_u32idx_64_z",
+            "variant": "z"
         }
     ],
     "sqrt": [

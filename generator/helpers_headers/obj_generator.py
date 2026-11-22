@@ -202,32 +202,33 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"inline void {fn}(const Rvm<T, LMUL>& m0, T* p0, const Rvd<T, LMUL>& r0)")
             lines.append(f"{{ mipp::{fn}<V, T, LMUL>(m0.m, p0, r0.r); }}")
             lines.append("")
-    # Masked gather / scatter: as in the C++ Functional API, the mask is typed on the index type
-    # (`Rvm<T_IDX, LMUL>`, `T_IDX` being the unsigned type of the same width as `T`).
+    # gather / scatter: the index (T_IDX, unsigned) has one lane per lane of the data, so its own LMUL when its
+    # width differs from the one of the data (32-bit indices of 64-bit data at LMUL 1: LMUL_IDX = -2). The mask has
+    # the type and the LMUL of the data.
     elif fn == "gather":
-        lines.append("template <typename T, typename T_IDX, int LMUL = 1>")
-        lines.append("inline Rvd<T, LMUL> gather(const T* p0, const Rvd<T_IDX, LMUL>& vi)")
-        lines.append("{ return Rvd<T, LMUL>(mipp::gather(p0, vi.r)); }")
+        lines.append("template <typename T, typename T_IDX, int LMUL_IDX = 1>")
+        lines.append("inline Rvd<T, details::data_lmul<T, T_IDX>(LMUL_IDX)> gather(const T* p0, const Rvd<T_IDX, LMUL_IDX>& vi)")
+        lines.append("{ return Rvd<T, details::data_lmul<T, T_IDX>(LMUL_IDX)>(mipp::gather(p0, vi.r)); }")
         lines.append("")
         if is_maskzable:
             lines.append("template <VARIANT V = Z, typename T, typename T_IDX, int LMUL = 1>")
-            lines.append("inline Rvd<T, LMUL> gather(const Rvm<T_IDX, LMUL>& m0, const T* p0, const Rvd<T_IDX, LMUL>& vi)")
+            lines.append("inline Rvd<T, LMUL> gather(const Rvm<T, LMUL>& m0, const T* p0, const Rvd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi)")
             lines.append("{ return Rvd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(m0.m, p0, vi.r)); }")
             lines.append("")
         if is_masksable:
             lines.append("template <VARIANT V = S, typename T, typename T_IDX, int LMUL = 1>")
-            lines.append("inline Rvd<T, LMUL> gather(const Rvm<T_IDX, LMUL>& m0, const Rvd<T, LMUL>& rsrc, const T* p0, const Rvd<T_IDX, LMUL>& vi)")
+            lines.append("inline Rvd<T, LMUL> gather(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, const T* p0, const Rvd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi)")
             lines.append("{ return Rvd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(m0.m, rsrc.r, p0, vi.r)); }")
             lines.append("")
     elif fn == "scatter":
         lines.append("template <typename T, typename T_IDX, int LMUL = 1>")
-        lines.append("inline void scatter(T* p0, const Rvd<T_IDX, LMUL>& vi, const Rvd<T, LMUL>& r0)")
+        lines.append("inline void scatter(T* p0, const Rvd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi, const Rvd<T, LMUL>& r0)")
         lines.append("{ mipp::scatter(p0, vi.r, r0.r); }")
         lines.append("")
         if is_maskable or is_maskzable:
             mk = "M" if is_maskable else "Z"
             lines.append(f"template <VARIANT V = {mk}, typename T, typename T_IDX, int LMUL = 1>")
-            lines.append("inline void scatter(const Rvm<T_IDX, LMUL>& m0, T* p0, const Rvd<T_IDX, LMUL>& vi, const Rvd<T, LMUL>& r0)")
+            lines.append("inline void scatter(const Rvm<T, LMUL>& m0, T* p0, const Rvd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi, const Rvd<T, LMUL>& r0)")
             lines.append("{ mipp::scatter<V, T, T_IDX, LMUL>(m0.m, p0, vi.r, r0.r); }")
             lines.append("")
     elif fn == "get":
@@ -718,6 +719,11 @@ def _write_fine_granules(fn, cat, body, output_dir):
                         line = line.replace(
                             "int LMUL = 1>",
                             f"int LMUL = 1, typename std::enable_if<{cond}, int>::type = 0>")
+                    if line.startswith("template <") and "int LMUL_IDX = 1>" in line:
+                        # unmasked gather: deduced from the index, whose LMUL differs from the one of the data
+                        line = line.replace(
+                            "int LMUL_IDX = 1>",
+                            f"int LMUL_IDX = 1, typename std::enable_if<details::data_lmul<T, T_IDX>(LMUL_IDX) == {val}, int>::type = 0>")
                     # helper structs are shared names: make them unique per granule
                     line = re.sub(r"\b(\w+_helper)\b", rf"\1_{v}_{l}", line)
                     out.append(line)

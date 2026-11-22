@@ -325,7 +325,7 @@
     "ret_reg_2args_ptr_reg": {
         "ret": {
             "type": "reg",
-            "fixeddatatype": false,
+            "fixeddatatype": "par",
             "charac": "WO"
         },
         "args": [
@@ -337,8 +337,9 @@
             },
             {
                 "type": "reg",
-                "fixeddatatype": "uint",
-                "charac": "RO"
+                "fixeddatatype": "ret",
+                "charac": "RO",
+                "lmul": "ratio"
             }
         ]
     },
@@ -605,8 +606,9 @@
             },
             {
                 "type": "reg",
-                "fixeddatatype": "uint",
-                "charac": "RO"
+                "fixeddatatype": "ret",
+                "charac": "RO",
+                "lmul": "ratio"
             },
             {
                 "type": "reg",

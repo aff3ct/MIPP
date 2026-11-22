@@ -246,7 +246,7 @@
     },
     "gather": {
         "proto_ref": "ret_reg_2args_ptr_reg",
-        "datatypes": "all_datatypes_idx_pair",
+        "datatypes": ["all_datatypes_idx_pair", "all_datatypes_idx_mixed"],
         "horizontal": false,
         "variants": ["u", "z", "s"]
     },
@@ -464,7 +464,7 @@
     },
     "scatter": {
         "proto_ref": "ret_void_3args_ptr_reg_reg",
-        "datatypes": "all_datatypes_idx_pair",
+        "datatypes": ["all_datatypes_idx_pair", "all_datatypes_idx_mixed"],
         "horizontal": false,
         "variants": ["u", "m", "z"]
     },

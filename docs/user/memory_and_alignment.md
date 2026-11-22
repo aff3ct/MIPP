@@ -103,7 +103,19 @@ In the C++ Functional API, a masked access deduces `T` from the pointer and assu
 
 ## 3. Non-Contiguous Memory Access: Gather & Scatter
 
-When data elements reside at non-sequential memory addresses, MIPP provides vectorized **gather** and **scatter** operations using index vectors. The index vector holds unsigned integers of the same size as the data elements (`uint32_t` indices for `float` data, `uint64_t` indices for `double` data), counted in elements, not in bytes. For the masked variants, the mask has the type of the **index** vector (`rvm<uint32_t>` for a `float` gather). In the C++ Functional API, the masked variants cannot deduce the types: give `T` and the index type (`mipp::gather<mipp::Z, float, uint32_t>`). In the C++ Object API, they are deduced from the arguments.
+When data elements reside at non-sequential memory addresses, MIPP provides vectorized **gather** and **scatter** operations using index vectors. The index vector holds unsigned integers counted in elements, not in bytes (`uint32_t` indices for `float` data, `uint64_t` indices for `double` data). The C names give the type of the data then the type of the index: `mipp_gather_float32_uint32`. For the masked variants, the mask has the type of the **data** (`rvm<float>` for a `float` gather, as for the masked loads); a mask computed on the indices is converted with `cast_k`. In the C++ Functional API, the masked variants cannot deduce the types: give `T` and the index type (`mipp::gather<mipp::Z, float, uint32_t>`). In the C++ Object API, they are deduced from the arguments.
+
+### 3.0. Indices of Another Width than the Data
+
+The indices can also be `uint32_t` or `uint64_t` whatever the width of the data: `uint32_t` indices for `double` data (`mipp_gather_float64_uint32`), `uint64_t` indices for `float` or `int8_t` data, etc. There is one index per element of data, so the index register then has **its own LMUL**: the LMUL of the data times $\text{size(index)} / \text{size(data)}$. With `double` data at LMUL 1, the `uint32_t` indices are a half-vector (`d2`); with `float` data at LMUL 1, the `uint64_t` indices are an LMUL 2 register. The LMUL in the name of the function is the one of the data, and the function only exists where the LMUL of the index does: from `m1` to `m8` for 32-bit indices of 64-bit data, from `m1` to `m4` for 64-bit indices of 32-bit data, etc. (not for the half-vectors of the data).
+
+| Data | Index | Index LMUL for data at `m1` | Native |
+| :--- | :--- | :--- | :--- |
+| `float64`, `int64`, `uint64` | `uint32` | `d2` | AVX2, AVX-512 (`vgatherdpd`, `vscatterdpd`), SVE (`svunpklo` + gather), RVV |
+| 32, 16 or 8-bit types | `uint64` | `m2`, `m4` or `m8` | RVV |
+| 16 or 8-bit types | `uint32` | `m2` or `m4` | RVV |
+
+Elsewhere the scalar fallback applies, as for the gathers of 8 and 16-bit elements on x86. With the C++ Object API, the LMUL of the result is deduced from the index (`mipp::gather(table, idx)` with an `Rvd<uint32_t, -2>` gives an `Rvd<double, 1>`); with the C++ Functional API, it is the LMUL of the data (`mipp::gather<mipp::Z, double, uint32_t, 1>`).
 
 !!! warning "Range of the indices"
     Every index must address an element of the array. The 8-bit and 16-bit indices can take any value of their type. The 32-bit indices must be lower than $2^{31}$: the x86 gather and scatter instructions read them as signed integers. On RVV, the byte offset of a 32-bit element, $\text{index} \times 4$, is computed on 32 bits: the indices must be lower than $2^{30}$ (arrays of at most 4 GiB).

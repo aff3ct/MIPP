@@ -246,11 +246,11 @@
         {
             "instr_name": "luxei",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32",
+                "int16,uint16",
                 "uint64,uint64",
                 "uint32,uint32",
                 "uint16,uint16"
@@ -260,12 +260,12 @@
         {
             "instr_name": "luxei",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32",
+                "int16,uint16",
+                "int8,uint8",
                 "uint64,uint64",
                 "uint32,uint32",
                 "uint16,uint16",
@@ -277,17 +277,102 @@
         {
             "instr_name": "luxei",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32",
+                "int16,uint16",
                 "uint64,uint64",
                 "uint32,uint32",
                 "uint16,uint16"
             ],
             "template": "gather_masks",
             "variant": "s"
+        },
+        {
+            "instr_name": "luxei",
+            "datatypes": [
+                "float64,uint32",
+                "float32,uint64",
+                "int64,uint32",
+                "int32,uint64",
+                "int16,uint64",
+                "int8,uint64",
+                "uint64,uint32",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64"
+            ],
+            "template": "gather_mixed",
+            "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64"
+        },
+        {
+            "instr_name": "luxei",
+            "datatypes": [
+                "int16,uint32",
+                "int8,uint32",
+                "uint16,uint32",
+                "uint8,uint32"
+            ],
+            "template": "gather_mixed"
+        },
+        {
+            "instr_name": "luxei",
+            "datatypes": [
+                "float64,uint32",
+                "float32,uint64",
+                "int64,uint32",
+                "int32,uint64",
+                "int16,uint64",
+                "int8,uint64",
+                "uint64,uint32",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64"
+            ],
+            "template": "gather_mixed_masks",
+            "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64",
+            "variant": "s"
+        },
+        {
+            "instr_name": "luxei",
+            "datatypes": [
+                "int16,uint32",
+                "int8,uint32",
+                "uint16,uint32",
+                "uint8,uint32"
+            ],
+            "template": "gather_mixed_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "luxei",
+            "datatypes": [
+                "float64,uint32",
+                "float32,uint64",
+                "int64,uint32",
+                "int32,uint64",
+                "int16,uint64",
+                "int8,uint64",
+                "uint64,uint32",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64"
+            ],
+            "template": "gather_mixed_maskz",
+            "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64",
+            "variant": "z"
+        },
+        {
+            "instr_name": "luxei",
+            "datatypes": [
+                "int16,uint32",
+                "int8,uint32",
+                "uint16,uint32",
+                "uint8,uint32"
+            ],
+            "template": "gather_mixed_maskz",
+            "variant": "z"
         }
     ],
     "get": [
@@ -654,11 +739,11 @@
         {
             "instr_name": "suxei",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32",
+                "int16,uint16",
                 "uint64,uint64",
                 "uint32,uint32",
                 "uint16,uint16"
@@ -668,11 +753,11 @@
         {
             "instr_name": "suxei",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32",
+                "int16,uint16",
                 "uint64,uint64",
                 "uint32,uint32",
                 "uint16,uint16"
@@ -683,18 +768,103 @@
         {
             "instr_name": "suxei",
             "datatypes": [
-                "float64,float64",
-                "float32,float32",
-                "int64,int64",
-                "int32,int32",
-                "int16,int16",
-                "int8,int8",
+                "float64,uint64",
+                "float32,uint32",
+                "int64,uint64",
+                "int32,uint32",
+                "int16,uint16",
+                "int8,uint8",
                 "uint64,uint64",
                 "uint32,uint32",
                 "uint16,uint16",
                 "uint8,uint8"
             ],
             "template": "scatter_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "suxei",
+            "datatypes": [
+                "float64,uint32",
+                "float32,uint64",
+                "int64,uint32",
+                "int32,uint64",
+                "int16,uint64",
+                "int8,uint64",
+                "uint64,uint32",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64"
+            ],
+            "template": "scatter_mixed",
+            "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64"
+        },
+        {
+            "instr_name": "suxei",
+            "datatypes": [
+                "int16,uint32",
+                "int8,uint32",
+                "uint16,uint32",
+                "uint8,uint32"
+            ],
+            "template": "scatter_mixed"
+        },
+        {
+            "instr_name": "suxei",
+            "datatypes": [
+                "float64,uint32",
+                "float32,uint64",
+                "int64,uint32",
+                "int32,uint64",
+                "int16,uint64",
+                "int8,uint64",
+                "uint64,uint32",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64"
+            ],
+            "template": "scatter_mixed_mask",
+            "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64",
+            "variant": "m"
+        },
+        {
+            "instr_name": "suxei",
+            "datatypes": [
+                "int16,uint32",
+                "int8,uint32",
+                "uint16,uint32",
+                "uint8,uint32"
+            ],
+            "template": "scatter_mixed_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "suxei",
+            "datatypes": [
+                "float64,uint32",
+                "float32,uint64",
+                "int64,uint32",
+                "int32,uint64",
+                "int16,uint64",
+                "int8,uint64",
+                "uint64,uint32",
+                "uint32,uint64",
+                "uint16,uint64",
+                "uint8,uint64"
+            ],
+            "template": "scatter_mixed_maskz",
+            "if": "defined(__riscv_v_elen) && __riscv_v_elen >= 64",
+            "variant": "z"
+        },
+        {
+            "instr_name": "suxei",
+            "datatypes": [
+                "int16,uint32",
+                "int8,uint32",
+                "uint16,uint32",
+                "uint8,uint32"
+            ],
+            "template": "scatter_mixed_maskz",
             "variant": "z"
         }
     ],

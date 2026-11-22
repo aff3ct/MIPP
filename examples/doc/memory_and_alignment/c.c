@@ -88,10 +88,10 @@ static void gather(void)
     rvd_uint32_t vmax_idx = mipp_set1_uint32(LIMIT);
     /* --8<-- [start:gather] */
     rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
-    rvd_float32_t res = mipp_gather_float32_float32(table, indices);
+    rvd_float32_t res = mipp_gather_float32_uint32(table, indices);
 
-    rvm_uint32_t m = mipp_cmplt_uint32(indices, vmax_idx);
-    rvd_float32_t res_z = mipp_gather_float32_float32_maskz(m, table, indices);
+    rvm_float32_t m = mipp_cast_k_uint32_float32(mipp_cmplt_uint32(indices, vmax_idx)); /* mask of the data */
+    rvd_float32_t res_z = mipp_gather_float32_uint32_maskz(m, table, indices);
     /* --8<-- [end:gather] */
     float r[DOC_BUF], z[DOC_BUF];
     mipp_storeu_float32(r, res);
@@ -112,10 +112,10 @@ static void scatter(void)
     rvd_uint32_t vmax_idx = mipp_set1_uint32(LIMIT);
     /* --8<-- [start:scatter] */
     rvd_uint32_t indices = mipp_load_uint32(idx_ptr);
-    mipp_scatter_float32_float32(out_table, indices, values);
+    mipp_scatter_float32_uint32(out_table, indices, values);
 
-    rvm_uint32_t m = mipp_cmplt_uint32(indices, vmax_idx);
-    mipp_scatter_float32_float32_mask(m, out_table, indices, values);
+    rvm_float32_t m = mipp_cast_k_uint32_float32(mipp_cmplt_uint32(indices, vmax_idx)); /* mask of the data */
+    mipp_scatter_float32_uint32_mask(m, out_table, indices, values);
     /* --8<-- [end:scatter] */
     for (int i = 0; i < MIPP_N_FLOAT32; i++)
         DOC_CHECK(out_table[IDX[i]] == A[i]);
