@@ -6,41 +6,43 @@ This document tracks pending engineering tasks, missing functionality relative t
 
 ## 1. MIPPv1 Function Parity & Missing Interfaces
 
-MIPPv2 currently defines and generates **98 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline. The detailed plan (API, per-ISA mapping, generator changes) is being implemented on the `feat/mippv1-parity` branch.
+MIPPv2 currently defines and generates **144 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, selection, rearrangements and complex numbers, plus their scalar forms (`sub_vs`, `fmadd_vsv`...). The MIPPv1 families below are migrated on the `feat/mippv1-parity` branch; what is left is postponed with the register tuples (`sincos`, transposes, `interleavex*`) or deliberately not reproduced (`cmask`).
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
-MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components):
-- [ ] `cadd`: Complex addition $((a_r + b_r) + i(a_i + b_i))$.
-- [ ] `csub`: Complex subtraction $((a_r - b_r) + i(a_i - b_i))$.
-- [ ] `cmul`: Complex multiplication $((a_r b_r - a_i b_i) + i(a_r b_i + a_i b_r))$.
-- [ ] `cmulconj`: Complex multiplication with conjugate second operand $((a_r b_r + a_i b_i) + i(a_i b_r - a_r b_i))$.
-- [ ] `cdiv`: Complex division ($\frac{a \cdot \bar{b}}{|b|^2}$).
-- [ ] `conj`: Complex conjugation ($a_r - i a_i$).
-- [ ] `norm`: Complex squared Euclidean norm ($a_r^2 + a_i^2$).
-- [ ] `sincos`, `cossin`: Simultaneous evaluation of sine and cosine returning register pairs (`regx2` with sine/cosine or cosine/sine components).
+MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components). MIPPv2 works on the interleaved layout, in ordinary `float32` / `float64` registers (category `complex`, see `docs/user/complex_numbers.md`); the split layout is written with the real functions:
+- [x] `cadd`: Complex addition $((a_r + b_r) + i(a_i + b_i))$: `add` on the interleaved layout.
+- [x] `csub`: Complex subtraction $((a_r - b_r) + i(a_i - b_i))$: `sub`.
+- [x] `cmul`: Complex multiplication $((a_r b_r - a_i b_i) + i(a_r b_i + a_i b_r))$, with `cfmadd` ($a b + c$).
+- [x] `cmulconj`: Complex multiplication with conjugate second operand $((a_r b_r + a_i b_i) + i(a_i b_r - a_r b_i))$.
+- [x] `cdiv`: Complex division ($\frac{a \cdot \bar{b}}{|b|^2}$), with the algorithm of Smith (no overflow of $|b|^2$).
+- [x] `conj`: Complex conjugation ($a_r - i a_i$).
+- [x] `norm`: Complex squared Euclidean norm ($a_r^2 + a_i^2$): `cnorm`, and `cabs` for the modulus.
+- [ ] `sincos`, `cossin`: Simultaneous evaluation of sine and cosine returning register pairs (`regx2` with sine/cosine or cosine/sine components). Postponed with the register tuples (`sin` and `cos` exist).
 
 ### 1.2. Vector Interleaving & Deinterleaving
 MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives for vector transpositions:
-- [ ] `interleavelo`, `interleavehi`: Low/high lane interleaving of two registers.
-- [ ] `interleavelo2`, `interleavehi2`: 2-element granular low/high interleaving.
-- [ ] `interleavelo4`, `interleavehi4`: 4-element granular low/high interleaving.
-- [ ] `interleave`, `deinterleave`: Full two-register zip and unzip operations returning `regx2`.
-- [ ] `interleave2`, `interleave4`: Multi-stride 2-way and 4-way register interleaving returning `regx2`. In MIPPv1 the block is relative to the register (a half or a quarter, i.e. 256 bits on AVX-512): MIPPv2 uses fixed 128-bit blocks instead (`_b128` variants).
+- [x] `interleavelo`, `interleavehi`: Low/high lane interleaving of two registers: `zip_lo`, `zip_hi` (and `unzip_even`, `unzip_odd` for the inverse).
+- [x] `interleavelo2`, `interleavehi2`: 2-element granular low/high interleaving: `zip_lo_b128`, `zip_hi_b128` (per 128-bit block, see below).
+- [x] `interleavelo4`, `interleavehi4`: 4-element granular low/high interleaving: same `_b128` variants.
+- [x] `interleave`, `deinterleave`: Full two-register zip and unzip operations returning `regx2`: the result is a register of LMUL 2 (`combine(zip_lo(a, b), zip_hi(a, b))`); `interleave(a)` / `deinterleave(a)` in one register, and `load_interleaved2` / `store_interleaved2`.
+- [x] `interleave2`, `interleave4`: Multi-stride 2-way and 4-way register interleaving returning `regx2`. In MIPPv1 the block is relative to the register (a half or a quarter, i.e. 256 bits on AVX-512): MIPPv2 uses fixed 128-bit blocks instead (`_b128` variants).
 - [ ] `interleavex2`, `interleavex4`, `interleavex16`: Cross-lane intra-register interleaving permutations.
 
 ### 1.3. Permutation, Shuffling & Packing
-- [ ] `shuff`, `shuff2`, `shuff4`: Arbitrary intra-vector element shuffling governed by **runtime index registers only** (MIPPv1 has no immediate shuffle masks). `shuff2`/`shuff4` apply the same pattern to each half/quarter of the register. Planned as `permute` / `permute2` (whole vector) and `permute_b128`.
+- [x] `shuff`, `shuff2`, `shuff4`: Arbitrary intra-vector element shuffling governed by **runtime index registers only** (MIPPv1 has no immediate shuffle masks). `shuff2`/`shuff4` apply the same pattern to each half/quarter of the register. Done as `permute` / `permute2` (whole vector) and `permute_b128`, plus `permute<P>` / `permute2<P>` with a pattern known at compile time (C++17).
 - [ ] `cmask`, `cmask2`, `cmask4`: Opaque, ISA-specific encoding of the shuffle indices (byte indices for `pshufb`/`vtbl`), prepared once. MIPPv2 starts with plain index registers; a prepared type will only be added if measurements require it.
-- [ ] `combine<S>(a, b)`: Lanes `S` to `S + N - 1` of the concatenation of `a` and `b` (`alignr` / `ext`). Planned as `slide(a, b, n)`, since `combine` is the concatenation of two halves in MIPPv2.
+- [x] `combine<S>(a, b)`: Lanes `S` to `S + N - 1` of the concatenation of `a` and `b` (`alignr` / `ext`). Done as `slide(a, b, n)` (and `slide_up`, `slide_down`, `_b128`), since `combine` is the concatenation of two halves in MIPPv2. The count is an ordinary argument, not an immediate.
 - [ ] `transpose`, `transpose8x8`, `transpose2`, `transpose28x8`: Register-block transposes (a few datatypes and ISAs only in MIPPv1). Postponed with the register tuples.
-- [ ] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`).
+- [x] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`), with `expand`, `count`, `compress_store` (exact), `compress_store_full` (a whole register written) and `expand_load`.
+- [ ] `MIPP_STATIC_LIB`: compiled shuffle tables of `compress` for the 8 and 16-bit elements on SSSE3, AVX2 and NEON (Level 3 today), and the large tables out of the headers.
 - [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation, done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
 - [x] `pack`: Saturating register narrowing from two inputs: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs, and `mipp::pack<T_DST>(a, b)` = `ncvts(combine(a, b))` in the C++ APIs.
   > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`low`/`high`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
-- [ ] `lrot`, `rrot`: Rotation of the **lanes** of a register by one position (not a bitwise rotation of the elements). Planned as `rotate(v, n)`.
-- [ ] `lshiftr`, `rshiftr`: Variable element-wise vector-by-vector left and right logical/arithmetic bit shifts (where shift counts vary per lane, e.g., `_mm256_sllv_epi32`).
+- [x] `lrot`, `rrot`: Rotation of the **lanes** of a register by one position (not a bitwise rotation of the elements): `rotate(v, n)` (`rotate(v, 1)`, `rotate(v, N - 1)`), and `rotate_b128`.
+- [x] `lshiftr`, `rshiftr`: Variable element-wise vector-by-vector left and right logical/arithmetic bit shifts (where shift counts vary per lane, e.g., `_mm256_sllv_epi32`): `lshift(a, n)` / `rshift(a, n)` with a register of counts; the same count for every lane is `lshift_vs` / `rshift_vs`.
+- [ ] Immediate arguments (`alignr`, `vext`, `svext`, shifts by a constant): dispatch of the constant counts to the immediate instructions (`template <int N>` in C++17, a `switch` in C).
 
 ### 1.5. Memory Management & Dynamic Buffers
 - [x] `isAligned`: `mipp_is_aligned(p)` / `mipp::is_aligned(p)` against `MIPP_REQUIRED_ALIGNMENT` (the register size).
@@ -52,7 +54,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 ### 1.6. Reductions, Aliases & Diagnostics
 - [x] `reduction<T, OP>`: `mipp::reduce(v, op)` and `mipp::reduce<T, LMUL>(ptr, n, op)` in the Object API, with the operations of `mipp::op` (`add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`) or any functor.
 - [x] `sum`: Reduction alias for horizontal addition (`hadd`), C++ APIs.
-- [ ] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation. Planned as `clamp(v, lo, hi)`.
+- [x] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation: `clamp(v, lo, hi)`, with its scalar forms (`clamp(v, 0.f, 1.f)`).
 - [x] `dump`: `mipp_dump_<type>[_<lmul>]` / `mipp_fdump_...` (C, `_k` for the masks), `mipp::dump<T, LMUL>` / `mipp::dump_k` (C++ Functional), `operator<<` on `Rvd` and `Rvm` (C++ Object).
 - [x] `neg(r, s)`, `copysign(r, s)`, `sign(r)`: `xorsign(a, b)` (negates `a` where `b` is negative: the MIPPv1 `neg` / `copysign`), `copysign(a, b)` (IEEE: magnitude of `a`, sign of `b`) and `signbit(v)` (mask of the negative lanes, including -0.0).
 - [x] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`, native on every ISA (movemask, testz/testc, kortest, maxv/minv, ptest, vcpop).
@@ -63,12 +65,16 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::load_2<T>`, `mipp::loadu_2<T>` | `mipp::load<T, -2>` / `mipp_load_*_d2` | Handled natively via MIPPv2 Length Division ($\text{LDIV} / LMUL=-2$). |
 | `mipp::mask<T, fn>`, `mipp::maskz<T, fn>` | `_mask`, `_maskz`, `_masks` variants on all functions | Masking promoted to a first-class execution mode across all 4 variants rather than higher-order function pointer wrappers. |
 | `mipp::cvt<T1, T2>` (all conversions) | `cvt` (same-size), `wcvt` (widening), `ncvt` (narrowing, truncating), `cast` (reinterpreting) | Disambiguates arithmetic casting, widening/narrowing conversions, and zero-cost bit reinterpretation into dedicated primitives. |
-| `mipp::pack<T1, T2>`, `low`, `high` | `ncvt` (truncating), `low` / `high` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives; a saturating `pack` is still to be defined. |
-| `mipp::sat(r, min, max)` | `clamp` (planned) | Clamping between runtime bounds. Not to be confused with `adds`/`subs`, the saturated arithmetic at the type boundaries (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
+| `mipp::pack<T1, T2>`, `low`, `high` | `ncvts` (saturating), `ncvt` (truncating), `mipp::pack<T_DST>(a, b)`, `low` / `high` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives. |
+| `mipp::sat(r, min, max)` | `clamp` | Clamping between runtime bounds. Not to be confused with `adds`/`subs`, the saturated arithmetic at the type boundaries (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
 | `mipp::toreg<N>(m)` | `torvd(m)` / `torvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
 | `mipp::neg(r, s)`, `mipp::copysign(r, s)`, `mipp::sign(r)` | `xorsign(a, b)`, `copysign(a, b)`, `signbit(v)` | The MIPPv1 `copysign` was a sign flip (`xorsign`); MIPPv2 `copysign` follows IEEE 754. `signbit` is named after C99. |
 | `mipp::blend(r1, r2, m)` | `select(m, r1, r2)` | Renamed after the operation (`m ? r1 : r2`), mask first as in every masked MIPPv2 function. |
+| `mipp::interleavelo/hi`, `interleave2/4`, `deinterleave` | `zip_lo` / `zip_hi`, `unzip_even` / `unzip_odd`, `_b128` variants | Named after the operation; the blocks are fixed (128 bits) instead of relative to the register size, and two-register results are registers of LMUL 2. |
+| `mipp::shuff`, `shuff2`, `shuff4` | `permute`, `permute2`, `permute_b128`, `permute<P>` | Indices in a register of unsigned integers of the width of the elements; compile-time patterns in C++17. |
+| `mipp::combine<S>(a, b)`, `lrot`, `rrot` | `slide(a, b, n)`, `rotate(v, n)` | `combine` concatenates two halves in MIPPv2; the counts are ordinary arguments. |
+| `mipp::cmul`, `norm`, ... on `regx2` | `cmul`, `cnorm`, `cabs`, `cdiv`... on one register | Interleaved layout in ordinary registers; `cdiv` with the algorithm of Smith. |
 
 ---
 
