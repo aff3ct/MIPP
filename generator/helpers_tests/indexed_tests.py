@@ -9,8 +9,15 @@ half-vector (d2) and mask variant, in the three APIs:
   gather : the register is stored and compared lane by lane
   scatter: the memory written by both targets is compared
 
-The indices of a gather are random values of [0, N); the ones of a scatter are a permutation of
-[0, N), so that the result does not depend on the order of the writes.
+The memory accessed through the indices is a table of M elements, larger than a register: M is
+2^8 for 8-bit indices, 2^16 for 16-bit indices and 2^17 for wider ones (and at least N). The indices
+then cover the whole range of the 8 and 16-bit index types, which catches the byte offsets computed
+in the index width that overflow (e.g. idx * 2 on 16 bits from idx = 2^15).
+
+  gather : the indices are random values of [0, M)
+  scatter: the indices are N distinct values of [0, M) (offset + i * stride mod M, with a stride
+           coprime with M, then shuffled), so that the result does not depend on the order of the
+           writes; the whole table is compared
 """
 from typing import List, Optional
 
@@ -19,7 +26,7 @@ INDEXED_FUNCS = ("gather", "scatter")
 _MK_ENUM = {"": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
 _MK_LABEL = {"": "unmasked", "mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": "Source-Masked"}
 _C_STD = ("#include <exception>", "#include <algorithm>", "#include <numeric>", "#include <random>",
-          "#include <cstdio>", "#include <cmath>", "#include <cstdlib>", "#include <cstring>",
+          "#include <cstdio>", "#include <cmath>", "#include <cstdlib>", "#include <cstring>", "#include <vector>",
           '#include "utils/random.hpp"', "#ifndef N_ITER", "#define N_ITER {N_ITER}", "#endif")
 # scalar reference headers (first, as in the other tests: see TestsBuilderEngineCppBase._render_headers)
 _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("load", "gather"), ("store", "store"),
@@ -40,40 +47,53 @@ def _scalar_includes(ext: str) -> List[str]:
             for cat, fn in _SCALAR_FUNCS]
 
 
-def _fill() -> List[str]:
-    return [
-        "for (size_t i = 0; i < N; i++)",
-        "{",
-        "\tdata[i] = rnd::uniform<T>(seed);",
-        "\tsrc[i] = rnd::uniform<T>(seed);",
-        "\tmk[i] = rnd::uniform_bool(seed) ? -1 : 0;",
-        "\tidx[i] = %s;" % "FILL_IDX",
-        "}",
-    ]
+def _table_size() -> List[str]:
+    """Size M of the memory accessed through the indices (see the module docstring)."""
+    return ["constexpr size_t K = sizeof(IDX) == 1 ? 256 : (sizeof(IDX) == 2 ? 65536 : 131072);",
+            "constexpr size_t M = N > K ? N : K;"]
 
 
 def _body_common(func: str) -> List[str]:
-    lines = _fill()
-    lines[5] = ("\tidx[i] = rnd::uniform<IDX>(seed, static_cast<IDX>(0), static_cast<IDX>(N - 1));"
-                if func == "gather" else "\tidx[i] = static_cast<IDX>(i);")
-    if func == "scatter":
-        lines.append("std::shuffle(idx, idx + N, seed);")
+    """Random inputs: the table (data for gather, initial memory for scatter), the register inputs and the indices."""
+    lines = ["for (size_t i = 0; i < M; i++)", "\ttable[i] = rnd::uniform<T>(seed);",
+             "for (size_t i = 0; i < N; i++)", "{",
+             "\tsrc[i] = rnd::uniform<T>(seed);",
+             "\tmk[i] = rnd::uniform_bool(seed) ? -1 : 0;"]
+    if func == "gather":
+        lines += ["\tidx[i] = rnd::uniform<IDX>(seed, static_cast<IDX>(0), static_cast<IDX>(M - 1));", "}"]
+    else:
+        # N distinct indices of [0, M): i -> offset + i * stride mod M is injective when gcd(stride, M) = 1
+        lines += ["}",
+                  "uint64_t stride = 2 * rnd::uniform<uint64_t>(seed, 0, M / 2 - 1) + 1;",
+                  "while (std::gcd(stride, static_cast<uint64_t>(M)) != 1)",
+                  "\tstride += 2;",
+                  "const uint64_t offset = rnd::uniform<uint64_t>(seed, 0, M - 1);",
+                  "for (size_t i = 0; i < N; i++)",
+                  "\tidx[i] = static_cast<IDX>((offset + i * stride) % M);",
+                  "std::shuffle(idx, idx + N, seed);"]
     return lines
 
 
-def _decls() -> List[str]:
-    return [
-        "alignas(64) T data[N];",
-        "alignas(64) T src[N];",
-        "alignas(64) IDX idx[N];",
-        "int32_t mk[N];",
-        "alignas(64) T res_r[N];",
-        "alignas(64) T res_s[N];",
-    ]
+def _decls(func: str) -> List[str]:
+    """The table of M elements is a vector (up to 1 MiB); the register-sized arrays stay on the stack."""
+    d = _table_size() + ["std::vector<T> table(M);",
+                         "alignas(64) T src[N];",
+                         "alignas(64) IDX idx[N];",
+                         "int32_t mk[N];"]
+    if func == "gather":
+        d += ["alignas(64) T res_r[N];", "alignas(64) T res_s[N];"]
+    else:
+        d += ["std::vector<T> res_r(M);", "std::vector<T> res_s(M);"]
+    return d
 
 
-def _compare() -> List[str]:
-    return ["for (size_t i = 0; i < N; i++)", "{", "\tREQUIRE(res_r[i] == res_s[i]);", "}"]
+def _compare(func: str) -> List[str]:
+    if func == "gather":
+        return ["for (size_t i = 0; i < N; i++)", "{", "\tREQUIRE(res_r[i] == res_s[i]);", "}"]
+    # scatter: the whole table (M elements) is compared at once; the elements are only checked one by
+    # one (for the report) when the tables differ, to keep the number of assertions small
+    return ["if (res_r != res_s)", "{", "\tfor (size_t i = 0; i < M; i++)", "\t\tREQUIRE(res_r[i] == res_s[i]);", "}",
+            "REQUIRE(res_r == res_s);"]
 
 
 def _indent(lines: List[str], n: int) -> List[str]:
@@ -95,7 +115,7 @@ def _c_test(func: str, dt: str, sfx: str, mkind: str, lmul: int) -> List[str]:
             "call": f"mipp_{prefix}{func}_{dt}_{dt}{mk_sfx}{sfx_u}",
             "load_i": f"mipp_{prefix}load_{idt}{sfx_u}(idx)",
             "load_src": f"mipp_{prefix}load_{dt}{sfx_u}(src)",
-            "load_data": f"mipp_{prefix}load_{dt}{sfx_u}(data)",
+            "load_data": f"mipp_{prefix}load_{dt}{sfx_u}(src)",
             "set_k": f"mipp_{prefix}set_k_{idt}{sfx_u}(mk)",
             "store": f"mipp_{prefix}store_{dt}{sfx_u}",
             "r_t": f"rvd_{prefix}{dt}{sfx_u}_t",
@@ -105,21 +125,22 @@ def _c_test(func: str, dt: str, sfx: str, mkind: str, lmul: int) -> List[str]:
 
     tag = f"{mkind}_{sfx}" if mkind else sfx
     b = [f"constexpr size_t N = MIPP_N_{dt.upper()}{mult};"]
-    b += _decls() + [""] + _body_common(func) + [""]
+    b += _decls(func) + [""] + _body_common(func) + [""]
     for prefix, res, p in (("", "res_r", "r"), ("scalar_", "res_s", "s")):
         n = names(prefix)
         b += [f"[[maybe_unused]] {n['ri_t']} {p}i = {n['load_i']};",
               f"[[maybe_unused]] {n['rm_t']} {p}m = {n['set_k']};",
               f"[[maybe_unused]] {n['r_t']} {p}src = {n['load_src']};"]
         if func == "gather":
-            args = {"masks": f"{p}m, {p}src, data, {p}i", "maskz": f"{p}m, data, {p}i"}.get(mkind, f"data, {p}i")
+            args = {"masks": f"{p}m, {p}src, table.data(), {p}i",
+                    "maskz": f"{p}m, table.data(), {p}i"}.get(mkind, f"table.data(), {p}i")
             b += [f"{n['r_t']} {p}res = {n['call']}({args});", f"{n['store']}({res}, {p}res);", ""]
         else:
-            b += [f"std::memcpy({res}, src, sizeof({res}));",
+            b += [f"{res} = table;",
                   f"[[maybe_unused]] {n['r_t']} {p}v = {n['load_data']};"]
-            args = f"{p}m, {res}, {p}i, {p}v" if mkind else f"{res}, {p}i, {p}v"
+            args = f"{p}m, {res}.data(), {p}i, {p}v" if mkind else f"{res}.data(), {p}i, {p}v"
             b += [f"{n['call']}({args});", ""]
-    b += _compare()
+    b += _compare(func)
     return ([f"static void test_mipp_c_{func}_{dt}_{tag}()", "{", f"\tusing T = {dt}_t;", f"\tusing IDX = {idt}_t;",
              "\tstd::mt19937 seed(Catch::getSeed());",
              "\tfor (unsigned n = 0; n < get_n_iter(); n++)", "\t{"] + _indent(b, 2) + ["\t}", "}", ""])
@@ -163,13 +184,13 @@ def _cpp_calls(func: str, dialect: str, mkind: str, scalar: bool) -> List[str]:
     if func == "gather":
         if mkind == "":
             # unmasked: not a template (the types are deduced from the arguments)
-            return [f"return mipp::gather(data, {p}i);"]
+            return [f"return mipp::gather(table.data(), {p}i);"]
         if mkind == "maskz":
-            return [f"return mipp::gather<{var}>({p}m, data, {p}i);"]
-        return [f"return mipp::gather<{var}>({p}m, {p}src, data, {p}i);"]
+            return [f"return mipp::gather<{var}>({p}m, table.data(), {p}i);"]
+        return [f"return mipp::gather<{var}>({p}m, {p}src, table.data(), {p}i);"]
     if mkind == "":
-        return [f"mipp::scatter({res}, {p}i, {p}v);"]
-    return [f"mipp::scatter<{var}>({p}m, {res}, {p}i, {p}v);"]
+        return [f"mipp::scatter({res}.data(), {p}i, {p}v);"]
+    return [f"mipp::scatter<{var}>({p}m, {res}.data(), {p}i, {p}v);"]
 
 
 def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
@@ -180,11 +201,11 @@ def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
             return [f"[[maybe_unused]] auto {p}i = mipp::load<IDX, LMUL{isa}>(idx);",
                     f"[[maybe_unused]] auto {p}m = mipp::set_k<IDX, LMUL{isa}>(mk);",
                     f"[[maybe_unused]] auto {p}src = mipp::load<T, LMUL{isa}>(src);",
-                    f"[[maybe_unused]] auto {p}v = mipp::load<T, LMUL{isa}>(data);"]
+                    f"[[maybe_unused]] auto {p}v = mipp::load<T, LMUL{isa}>(src);"]
         return [f"[[maybe_unused]] auto ri = mipp::Rvd<IDX, LMUL>(idx);",
                 f"[[maybe_unused]] auto rm = mipp::Rvm<IDX, LMUL>(mk);",
                 f"[[maybe_unused]] auto rsrc = mipp::Rvd<T, LMUL>(src);",
-                f"[[maybe_unused]] auto rv = mipp::Rvd<T, LMUL>(data);"]
+                f"[[maybe_unused]] auto rv = mipp::Rvd<T, LMUL>(src);"]
 
     def dispatch(scalar: bool, void: bool, var: str) -> List[str]:
         out: List[str] = []
@@ -200,15 +221,15 @@ def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
     b: List[str] = [
         "constexpr size_t N = (LMUL > 0) ? (mipp::N<T>() * static_cast<size_t>(LMUL)) : (mipp::N<T>() / static_cast<size_t>(-LMUL));",
     ]
-    b += _decls() + [""] + _body_common(func) + [""]
+    b += _decls(func) + [""] + _body_common(func) + [""]
     b += regs(False) + regs(True)
     if func == "gather":
         b += dispatch(False, False, "rres") + dispatch(True, False, "sres")
         b += ["mipp::store(res_r, rres);", "mipp::store(res_s, sres);", ""]
     else:
-        b += ["std::memcpy(res_r, src, sizeof(res_r));", "std::memcpy(res_s, src, sizeof(res_s));"]
+        b += ["res_r = table;", "res_s = table;"]
         b += dispatch(False, True, "") + dispatch(True, True, "") + [""]
-    b += _compare()
+    b += _compare(func)
     head = [f"template <mipp::VARIANT V = mipp::U, typename T = double, int LMUL = 1>",
             f"static void test_mipp_{dialect}_{func}()", "{",
             "\tusing IDX = std::conditional_t<sizeof(T) == 1, uint8_t, std::conditional_t<sizeof(T) == 2, uint16_t, "

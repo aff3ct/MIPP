@@ -140,7 +140,7 @@
     "latex": "\\text{res}_i = -(r0_i \\cdot r1_i) - r2_i"
   },
   "gather": {
-    "description": "Loads elements from non-contiguous memory locations into a vector register using an index vector.",
+    "description": "Loads elements from non-contiguous memory locations into a vector register using an index vector (indices counted in elements; 32-bit indices lower than 2^31, and than 2^30 on RVV).",
     "latex": "\\text{res}_i = \\text{p0}[r0_i]"
   },
   "get": {
@@ -272,7 +272,7 @@
     "latex": "\\text{res}_i = \\frac{1}{\\sqrt{r0_i}}"
   },
   "scatter": {
-    "description": "Stores vector elements into non-contiguous memory locations using an index vector.",
+    "description": "Stores vector elements into non-contiguous memory locations using an index vector (indices counted in elements; 32-bit indices lower than 2^31, and than 2^30 on RVV).",
     "latex": "\\text{p0}[r0_i] = r1_i"
   },
   "select": {

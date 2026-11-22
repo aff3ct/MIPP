@@ -149,6 +149,18 @@
             "{{isa.prefix}}_{{ instr_name }}_v_f_{{isa_dt_par.data_ext}}(0.f,%N<tp>%);"
         ]
     },
+    "gather_e8": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_vluxei8_v_{{ isa_dt_par.data_ext }}(p0, r0.r, %N<tp>%);"
+        ]
+    },
+    "gather_e8_masks": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_vluxei8_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, p0, r0.r, %N<tp>%);"
+        ]
+    },
     "load": {
         "format": "short",
         "code": [
@@ -221,6 +233,18 @@
         "format": "short",
         "code": [
             "{{isa.prefix}}_{{ instr_name }}_v_x_{{isa_dt_par.data_ext}}(0,%N<tp>%);"
+        ]
+    },
+    "scatter_e8": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_vsuxei8_v_{{ isa_dt_par.data_ext }}(p0, r0.r, r1.r, %N<tp>%);"
+        ]
+    },
+    "scatter_e8_mask": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_vsuxei8_v_{{ isa_dt_par.data_ext }}_m(m0.m, p0, r0.r, r1.r, %N<tp>%);"
         ]
     },
     "set": {

@@ -244,11 +244,9 @@
                 "int64,int64",
                 "int32,int32",
                 "int16,int16",
-                "int8,int8",
                 "uint64,uint64",
                 "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
+                "uint16,uint16"
             ],
             "template": "gather"
         },
@@ -277,11 +275,9 @@
                 "int64,int64",
                 "int32,int32",
                 "int16,int16",
-                "int8,int8",
                 "uint64,uint64",
                 "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
+                "uint16,uint16"
             ],
             "template": "gather_masks",
             "variant": "s"
@@ -656,11 +652,9 @@
                 "int64,int64",
                 "int32,int32",
                 "int16,int16",
-                "int8,int8",
                 "uint64,uint64",
                 "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
+                "uint16,uint16"
             ],
             "template": "scatter"
         },
@@ -672,11 +666,9 @@
                 "int64,int64",
                 "int32,int32",
                 "int16,int16",
-                "int8,int8",
                 "uint64,uint64",
                 "uint32,uint32",
-                "uint16,uint16",
-                "uint8,uint8"
+                "uint16,uint16"
             ],
             "template": "scatter_mask",
             "variant": "m"

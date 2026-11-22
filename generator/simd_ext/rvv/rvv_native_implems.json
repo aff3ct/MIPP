@@ -468,6 +468,25 @@
             "variant": "m"
         }
     ],
+    "gather": [
+        {
+            "instr_name": "vluxei8",
+            "datatypes": [
+                "int8,int8",
+                "uint8,uint8"
+            ],
+            "template": "gather_e8"
+        },
+        {
+            "instr_name": "vluxei8",
+            "datatypes": [
+                "int8,int8",
+                "uint8,uint8"
+            ],
+            "template": "gather_e8_masks",
+            "variant": "s"
+        }
+    ],
     "getfirst": [
         {
             "instr_name": "mv",
@@ -823,6 +842,25 @@
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
             "variant": "s"
+        }
+    ],
+    "scatter": [
+        {
+            "instr_name": "vsuxei8",
+            "datatypes": [
+                "int8,int8",
+                "uint8,uint8"
+            ],
+            "template": "scatter_e8"
+        },
+        {
+            "instr_name": "vsuxei8",
+            "datatypes": [
+                "int8,int8",
+                "uint8,uint8"
+            ],
+            "template": "scatter_e8_mask",
+            "variant": "m"
         }
     ],
     "select": [
