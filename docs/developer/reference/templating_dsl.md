@@ -50,7 +50,7 @@ Inside a template body, the parameters of the function being generated are not n
 | :--- | :--- | :--- |
 | **`r0`, `r1`, `r2`, ...** | Vector data registers (`rvd`) | `add(r0, r1)` |
 | **`m0`, `m1`, `m2`, ...** | Vector mask registers (`rvm`) | `select(m0, r0, r1)` |
-| **`s0`, `s1`, `s2`, ...** | Scalar values | `set1(s0)`, `rshift(r0, s0)` |
+| **`s0`, `s1`, `s2`, ...** | Scalar values | `set1(s0)`, `rshift_vs(r0, s0)` |
 | **`p0`, `p1`, `p2`, ...** | Pointers (memory addresses) | `loadu(p0)` |
 
 For example, in `%r<tp>% res = %add<tp>%(r0, r1);`, `r0` and `r1` are the first and second register arguments. A function taking a mask, a register and a scalar (e.g. a masked shift) names them `m0`, `r0` and `s0`.

@@ -714,6 +714,17 @@ def resolve_candidates(isa, funcs, lmul=0):
             if cond != "0":
                 cand["level"] = _get_effective_level(cand)
 
+    # 3. Generic body of a scalar form (`sub_vs(r, s)` = `sub(r, set1(s))`, see forms.generic_implems): the broadcast
+    # is free (decision 9.4), the level is the one of the base function for the same datatype and mask variant.
+    for (f, dt_key, mask_kind), rcands in resolved.items():
+        for cand, cond in rcands:
+            base = cand.get("ff", {}).get("derived_form")
+            if cond == "0" or not base:
+                continue
+            base_active = [c for c, c_cond in resolved.get((base, dt_key, mask_kind), []) if c_cond != "0"]
+            if base_active:
+                cand["level"] = min(c.get("level", 3) for c in base_active)
+
     return resolved
 
 # Level of the resolved functions of the base registers (LMUL 0), per (isa, function, "dt_par,dt_ret",

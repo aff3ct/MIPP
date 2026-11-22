@@ -142,6 +142,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}dupq_n_{{ isa_dt_par.data_ext_msk }}(s0 ? ({% if isa_dt_par.data_ext_msk == 'u64' -%}~0ULL{% elif isa_dt_par.data_ext_msk == 'u32' -%}~0U{% elif isa_dt_par.data_ext_msk == 'u16' -%}(uint16_t)~0U{% else -%}0xFF{% endif %}) : 0);"
     },
+    "shv_shl_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    },
     "sqrt": {
         "format": "short",
         "code": "{{ isa.prefix }}sqrtq_{{ isa_dt_par.data_ext }}(r0.r);"

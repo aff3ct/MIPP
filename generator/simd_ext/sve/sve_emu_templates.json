@@ -36,6 +36,30 @@
         "format": "short",
         "code": "{{ isa.prefix }}cvt_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}_z({% if dt_par.n_bits >= dt_ret.n_bits %}svptrue_{{ isa_dt_par.data_ext_logi }}(){% else %}svptrue_{{ isa_dt_ret.data_ext_logi }}(){% endif %}, r0.r);"
     },
+    "form_n_cmp": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, s0);"
+        ]
+    },
+    "form_n_fma_acc": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), r1.r, r0.r, s0);"
+        ]
+    },
+    "form_n_fma_mad": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r, s0);"
+        ]
+    },
+    "form_n_x": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, s0);"
+        ]
+    },
     "gather": {
         "format": "short",
         "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, r0.r);"
@@ -159,6 +183,22 @@
             "res.r = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(m0.m, {{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(m0.m, r0.r, (uint{{ dt_par.n_bits }}_t)s0), rsrc.r);",
             "return res;"
         ]
+    },
+    "shv_m_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(m0.m, r0.r, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r));"
+    },
+    "shv_x_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r));"
+    },
+    "shv_x_u": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), r0.r, r1.r);"
+    },
+    "shv_z_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r));"
     },
     "std_1_reg_z": {
         "format": "short",

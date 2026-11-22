@@ -449,6 +449,22 @@
         "format": "short",
         "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(m0.m, r0.r, s0);"
     },
+    "shv_vv": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, r1.r);"
+    },
+    "shv_vv_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, m0.m, r0.r, r1.r);"
+    },
+    "shv_vv_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_epi{{ dt_par.n_bits }}(rsrc.r, m0.m, r0.r, r1.r);"
+    },
+    "shv_vv_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_epi{{ dt_par.n_bits }}(m0.m, r0.r, r1.r);"
+    },
     "store": {
         "format": "short",
         "code": [

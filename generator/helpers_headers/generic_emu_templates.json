@@ -611,6 +611,12 @@
             "m0.m;"
         ]
     },
+    "clamp": {
+        "format": "long",
+        "code": [
+            "return %min<tp>%(%max<tp>%(r0, r1), r2);"
+        ]
+    },
     "cmpeq_u": {
         "format": "long",
         "code": [
@@ -700,7 +706,7 @@
             "",
             "/* 2. Quadrant Mask & Sign Bit Computation */",
             "%r<c:int|b:32>% quadrant_mask_i = %sub<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(2));",
-            "%r<c:int|b:32>% sign_mask_i = %lshift<c:int|b:32>%(%andnb<c:int|b:32>%(quadrant_mask_i, %set1<c:int|b:32>%(4)), 29);",
+            "%r<c:int|b:32>% sign_mask_i = %lshift_vs<c:int|b:32>%(%andnb<c:int|b:32>%(quadrant_mask_i, %set1<c:int|b:32>%(4)), 29);",
             "quadrant_mask_i = %torvd<c:int|b:32>%(%cmpeq<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_mask_i, %set1<c:int|b:32>%(2)), %set0<c:int|b:32>%()));",
             "%r<tp>% sign_bit = %cast<c:int|b:32,tp>%(sign_mask_i);",
             "%r<tp>% poly_mask = %cast<c:int|b:32,tp>%(quadrant_mask_i);",
@@ -828,7 +834,7 @@
     "div2_int": {
         "format": "long",
         "code": [
-            "return %rshift<tp>%(r0, 1);"
+            "return %rshift_vs<tp>%(r0, 1);"
         ]
     },
     "div4": {
@@ -842,7 +848,7 @@
     "div4_int": {
         "format": "long",
         "code": [
-            "return %rshift<tp>%(r0, 2);"
+            "return %rshift_vs<tp>%(r0, 2);"
         ]
     },
     "exp_f32": {
@@ -899,7 +905,7 @@
             "",
             "%r<c:int|b:32>% imm0 = %cvt<tp,c:int|b:32>%(fx2);",
             "%r<c:int|b:32>% imm1 = %add<c:int|b:32>%(imm0, %set1<c:int|b:32>%(0x7f));",
-            "%r<c:int|b:32>% imm2 = %lshift<c:int|b:32>%(imm1, 23);",
+            "%r<c:int|b:32>% imm2 = %lshift_vs<c:int|b:32>%(imm1, 23);",
             "%r<tp>% pow2n = %cast<c:int|b:32,tp>%(imm2);",
             "%r<tp>% res = %mul<tp>%(y13, pow2n);",
             "return res;"
@@ -964,7 +970,7 @@
             "",
             "%r<c:int|b:64>% ni0 = %cvt<tp,c:int|b:64>%(n1);",
             "%r<c:int|b:64>% ni1 = %add<c:int|b:64>%(ni0, %set1<c:int|b:64>%(1023));",
-            "%r<c:int|b:64>% ni2 = %lshift<c:int|b:64>%(ni1, 52);",
+            "%r<c:int|b:64>% ni2 = %lshift_vs<c:int|b:64>%(ni1, 52);",
             "%r<tp>% pow2n = %cast<c:int|b:64,tp>%(ni2);",
             "%r<tp>% res = %mul<tp>%(y2, pow2n);",
             "return res;"
@@ -1053,7 +1059,7 @@
             "%r<tp>% x1 = %max<tp>%(x0, min_norm_pos);",
             "",
             "%r<c:int|b:32>% xi = %cast<tp,c:int|b:32>%(x1);",
-            "%r<c:int|b:32>% imm0 = %rshift<c:int|b:32>%(xi, 23);",
+            "%r<c:int|b:32>% imm0 = %rshift_vs<c:int|b:32>%(xi, 23);",
             "",
             "%r<tp>% x2 = %andb<tp>%(x1, inv_mant_mask);",
             "%r<tp>% x3 = %orb<tp>%(x2, half);",
@@ -1133,7 +1139,7 @@
             "%r<tp>% x1 = %max<tp>%(x0, min_norm_pos);",
             "",
             "%r<c:int|b:64>% xi = %cast<tp,c:int|b:64>%(x1);",
-            "%r<c:int|b:64>% imm0 = %rshift<c:int|b:64>%(xi, 52);",
+            "%r<c:int|b:64>% imm0 = %rshift_vs<c:int|b:64>%(xi, 52);",
             "",
             "%r<tp>% x2 = %andb<tp>%(x1, inv_mant_mask);",
             "%r<tp>% x3 = %orb<tp>%(x2, half);",
@@ -1503,7 +1509,7 @@
             "",
             "/* 2. Quadrant Mask & Sign Bit Computation */",
             "%r<tp>% sign_bit = %andb<tp>%(input_x, %cast<c:int|b:32,tp>%(%set1<c:int|b:32>%(0x80000000)));",
-            "%r<c:int|b:32>% sign_mask_i = %lshift<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(4)), 29);",
+            "%r<c:int|b:32>% sign_mask_i = %lshift_vs<c:int|b:32>%(%andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(4)), 29);",
             "sign_bit = %xorb<tp>%(sign_bit, %cast<c:int|b:32,tp>%(sign_mask_i));",
             "%r<c:int|b:32>% sin_quadrant_i = %andb<c:int|b:32>%(quadrant_idx_i, %set1<c:int|b:32>%(2));",
             "%m<c:int|b:32>% sin_quadrant_mask = %cmpeq<c:int|b:32>%(sin_quadrant_i, %set0<c:int|b:32>%( ));",
@@ -1860,7 +1866,7 @@
     "xorsign_int": {
         "format": "long",
         "code": [
-            "%r<tp>% s = %rshift<tp>%(r1, {{ dt_par.n_bits - 1 }});",
+            "%r<tp>% s = %rshift_vs<tp>%(r1, {{ dt_par.n_bits - 1 }});",
             "return %sub<tp>%(%xorb<tp>%(r0, s), s);"
         ]
     }

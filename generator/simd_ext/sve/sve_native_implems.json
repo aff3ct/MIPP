@@ -54,6 +54,20 @@
             "template": "bin_z"
         }
     ],
+    "add_vs": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_z"
+        }
+    ],
     "adds": [
         {
             "instr_name": "qadd",
@@ -73,6 +87,20 @@
             "datatypes": "all_int_uint",
             "variant": "z",
             "template": "bin_z"
+        }
+    ],
+    "andb_vs": [
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "variant": "z",
+            "template": "form_n_z"
         }
     ],
     "cast": [
@@ -99,12 +127,36 @@
             "template": "cmp_z"
         }
     ],
+    "cmpeq_vs": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
     "cmpge": [
         {
             "instr_name": "cmpge",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template": "cmp_z"
+        }
+    ],
+    "cmpge_sv": [
+        {
+            "instr_name": "cmple",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
+    "cmpge_vs": [
+        {
+            "instr_name": "cmpge",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
         }
     ],
     "cmpgt": [
@@ -115,12 +167,44 @@
             "template": "cmp_z"
         }
     ],
+    "cmpgt_sv": [
+        {
+            "instr_name": "cmplt",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
+    "cmpgt_vs": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
     "cmple": [
         {
             "instr_name": "cmple",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template": "cmp_z"
+        }
+    ],
+    "cmple_sv": [
+        {
+            "instr_name": "cmpge",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
+    "cmple_vs": [
+        {
+            "instr_name": "cmple",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
         }
     ],
     "cmplt": [
@@ -131,12 +215,36 @@
             "template": "cmp_z"
         }
     ],
+    "cmplt_sv": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
+    "cmplt_vs": [
+        {
+            "instr_name": "cmplt",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
+        }
+    ],
     "cmpneq": [
         {
             "instr_name": "cmpne",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template": "cmp_z"
+        }
+    ],
+    "cmpneq_vs": [
+        {
+            "instr_name": "cmpne",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_cmp_z"
         }
     ],
     "cvt": [
@@ -167,6 +275,20 @@
             "datatypes": "all_float",
             "variant": "z",
             "template": "bin_z"
+        }
+    ],
+    "div_vs": [
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "variant": "z",
+            "template": "form_n_z"
         }
     ],
     "fmadd": [
@@ -299,6 +421,20 @@
     "lshift": [
         {
             "instr_name": "lsl",
+            "datatypes": "all_uint",
+            "variant": "m",
+            "template": "shv_m_u"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_uint",
+            "variant": "z",
+            "template": "shv_z_u"
+        }
+    ],
+    "lshift_vs": [
+        {
+            "instr_name": "lsl",
             "datatypes": "all_int_uint",
             "variant": "m",
             "template": "shift_m"
@@ -324,6 +460,20 @@
             "template": "bin_z"
         }
     ],
+    "max_vs": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_z"
+        }
+    ],
     "min": [
         {
             "instr_name": "min",
@@ -338,6 +488,20 @@
             "template": "bin_z"
         }
     ],
+    "min_vs": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_z"
+        }
+    ],
     "mul": [
         {
             "instr_name": "mul",
@@ -350,6 +514,20 @@
             "datatypes": "all_datatypes",
             "variant": "z",
             "template": "bin_z"
+        }
+    ],
+    "mul_vs": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_z"
         }
     ],
     "neg": [
@@ -407,6 +585,20 @@
             "template": "bin_z"
         }
     ],
+    "orb_vs": [
+        {
+            "instr_name": "orr",
+            "datatypes": "all_int_uint",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "orr",
+            "datatypes": "all_int_uint",
+            "variant": "z",
+            "template": "form_n_z"
+        }
+    ],
     "round": [
         {
             "instr_name": "rinta",
@@ -428,6 +620,20 @@
         }
     ],
     "rshift": [
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "m",
+            "template": "shv_m_u"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "z",
+            "template": "shv_z_u"
+        }
+    ],
+    "rshift_vs": [
         {
             "instr_name": "asr",
             "datatypes": "all_int",
@@ -553,6 +759,20 @@
             "template": "bin_z"
         }
     ],
+    "sub_vs": [
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "form_n_z"
+        }
+    ],
     "subs": [
         {
             "instr_name": "qsub",
@@ -599,6 +819,20 @@
             "datatypes": "all_int_uint",
             "variant": "z",
             "template": "bin_z"
+        }
+    ],
+    "xorb_vs": [
+        {
+            "instr_name": "eor",
+            "datatypes": "all_int_uint",
+            "variant": "m",
+            "template": "form_n_m"
+        },
+        {
+            "instr_name": "eor",
+            "datatypes": "all_int_uint",
+            "variant": "z",
+            "template": "form_n_z"
         }
     ]
 }

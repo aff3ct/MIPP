@@ -17,6 +17,8 @@ from .domain_resolver import DomainResolver
 from . import indexed_tests
 from tools import DATATYPES_MAP, resolve_ret_lmul, is_defined_for_lmul, changes_lmul, isa_provides_lmul
 from include_gen import _match_category
+import copy
+import forms
 
 # Auxiliary MIPP functions whose headers must always be included in generated test files.
 _AUX_HEADERS = ["load", "get", "get_k", "torvd", "torvm", "set_k"]
@@ -81,6 +83,14 @@ class TestsBuilderEngine:
         self.interfaces = self._load_json(os.path.join(self.helpers_headers_dir, "registry_interfaces.json"))
         self.categories = self._load_json(os.path.join(self.helpers_headers_dir, "registry_categories.json"))
         self.protos = self._load_json(os.path.join(self.helpers_headers_dir, "registry_protos.json"))
+        # Scalar forms (`sub_vs`, `sub_sv`...): functions of their own, as in the registry of the generator
+        # (helpers_headers/forms.py). A form without a spec of its own takes the one of its base: the domains of
+        # `input_domain` are the ones of the operands of the base, scalar or register (see _build_op_call_args).
+        self.form_functions = forms.expand_interfaces(self.protos, self.interfaces)
+        forms.expand_categories(self.categories, self.form_functions)
+        for name, base in self.form_functions.items():
+            if name not in self.specs["functions"] and base in self.specs["functions"]:
+                self.specs["functions"][name] = copy.deepcopy(self.specs["functions"][base])
 
         self._audit_specs()
         self.isa_definitions = self._discover_isa_definitions()
@@ -118,7 +128,39 @@ class TestsBuilderEngine:
                 return True
         return False
 
+    def _build_form_call_args(self, func_name: str, is_scalar: bool) -> List[str]:
+        """
+        Arguments of a scalar form (`sub_sv(s, r)`): the operands keep the inputs of their position in the base
+        function (the test loads `r<k>` / `s<k>` from `inputs<k>` for each operand k of the base), the scalars are
+        the first element of their input: `sub_sv` -> ["inputs1[0]", "r2"], with the domains of `sub`.
+        """
+        iface = self.interfaces[func_name]
+        form = iface[forms.FORM_KEY]
+        base_args = self.protos[self.interfaces[iface[forms.FORM_OF_KEY]]["proto_ref"]]["args"]
+        args, k, msk_i = [], 0, 1
+        for arg in base_args:
+            if arg["type"] == "reg" and arg.get("fixeddatatype", False) is False:
+                letter = form[k]
+                k += 1
+                if letter == "s":
+                    args.append(f"inputs{k}[0]")
+                else:
+                    args.append(f"s{k}" if is_scalar else f"r{k}")
+            elif arg["type"] == "msk":
+                args.append(f"sm{msk_i}" if is_scalar else f"m{msk_i}")
+                msk_i += 1
+            else:
+                raise ValueError(f"'{func_name}': argument {arg['type']} of a scalar form is not supported by the tests")
+        return args
+
     def _build_op_call_args(self, func_name: str, mkind: str, is_scalar: bool = False) -> List[str]:
+        if func_name in self.form_functions:
+            args = self._build_form_call_args(func_name, is_scalar)
+            if mkind in ("mask", "maskz", "masks"):
+                args.insert(0, "sm1" if is_scalar else "m1")
+            if mkind == "masks":
+                args.insert(1, "ssrc" if is_scalar else "rsrc")
+            return args
         proto_ref = self.interfaces.get(func_name, {}).get("proto_ref", "")
         proto_spec = self.protos.get(proto_ref, {})
         args_info = proto_spec.get("args", [])
@@ -909,9 +951,9 @@ class TestsBuilderEngine:
             }
             if func_name in all_binary_ops and len(args) == 2:
                 return f"{args[0]} {all_binary_ops[func_name]} {args[1]}"
-            if func_name == "lshift" and len(args) == 2:
+            if func_name in ("lshift", "lshift_vs") and len(args) == 2:
                 return f"{args[0]} << {args[1]}"
-            if func_name == "rshift" and len(args) == 2:
+            if func_name in ("rshift", "rshift_vs") and len(args) == 2:
                 return f"{args[0]} >> {args[1]}"
             if func_name == "neg" and len(args) == 1:
                 return f"-{args[0]}"

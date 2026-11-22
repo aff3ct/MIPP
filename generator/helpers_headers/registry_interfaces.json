@@ -22,13 +22,15 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "adds": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_int_uint",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "all": {
         "proto_ref": "ret_i32_1arg_msk",
@@ -40,7 +42,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "andb_k": {
         "proto_ref": "ret_msk_2args_msk",
@@ -53,7 +56,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs", "sv"]
     },
     "andnb_k": {
         "proto_ref": "ret_msk_2args_msk",
@@ -90,7 +94,8 @@
       "proto_ref": "ret_reg_2args_reg",
       "datatypes": "all_float",
       "horizontal": false,
-      "variants": ["u", "m", "z", "s"]
+      "variants": ["u", "m", "z", "s"],
+        "forms": ["vs", "sv"]
     },
     "atanh": {
       "proto_ref": "ret_reg_1arg_reg",
@@ -111,41 +116,54 @@
         "variants": ["u"],
         "cpp_name": "cast"
     },
+    "clamp": {
+        "proto_ref": "ret_reg_3args_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vss"]
+    },
     "cmpeq": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "z"]
+        "variants": ["u", "z"],
+        "forms": ["vs"]
     },
     "cmpge": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "z"]
+        "variants": ["u", "z"],
+        "forms": ["vs", "sv"]
     },
     "cmpgt": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "z"]
+        "variants": ["u", "z"],
+        "forms": ["vs", "sv"]
     },
     "cmple": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "z"]
+        "variants": ["u", "z"],
+        "forms": ["vs", "sv"]
     },
     "cmplt": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "z"]
+        "variants": ["u", "z"],
+        "forms": ["vs", "sv"]
     },
     "cmpneq": {
         "proto_ref": "ret_msk_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "z"]
+        "variants": ["u", "z"],
+        "forms": ["vs"]
     },
     "combine": {
         "proto_ref": "ret_reg_2args_reg_lmul_up",
@@ -164,7 +182,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": ["all_float"],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "cos": {
       "proto_ref": "ret_reg_1arg_reg",
@@ -188,7 +207,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_float",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs", "sv"]
     },
     "div2": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -215,7 +235,8 @@
             "int32"
         ],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vsv", "vvs"]
     },
     "fmsub": {
         "proto_ref": "ret_reg_3args_reg",
@@ -224,7 +245,8 @@
             "int32"
         ],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vsv", "vvs"]
     },
     "fnmadd": {
         "proto_ref": "ret_reg_3args_reg",
@@ -233,7 +255,8 @@
             "int32"
         ],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vsv", "vvs"]
     },
     "fnmsub": {
         "proto_ref": "ret_reg_3args_reg",
@@ -242,7 +265,8 @@
             "int32"
         ],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vsv", "vvs"]
     },
     "gather": {
         "proto_ref": "ret_reg_2args_ptr_reg",
@@ -344,22 +368,31 @@
         "cpp_name": "low"
     },
     "lshift": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_int_uint",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "lshift_vs": {
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "cpp_name": "lshift"
     },
     "max": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "min": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "msb": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -371,7 +404,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "ncvt": {
         "proto_ref": "ret_reg_1arg_reg_lmul_down_conv",
@@ -417,7 +451,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "orb_k": {
         "proto_ref": "ret_msk_2args_msk",
@@ -433,7 +468,8 @@
             "all_float"
         ],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs", "sv"]
     },
     "pow2": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -451,10 +487,17 @@
         "variants": ["u", "m", "z", "s"]
     },
     "rshift": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": "all_int_uint",
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "rshift_vs": {
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "cpp_name": "rshift"
     },
     "rsqrt": {
         "proto_ref": "ret_reg_1arg_reg",
@@ -472,7 +515,8 @@
         "proto_ref": "ret_reg_3args_1msk_2reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u"]
+        "variants": ["u"],
+        "forms": ["vs", "sv"]
     },
     "set": {
         "proto_ref": "ret_reg_1arg_Nele",
@@ -550,13 +594,15 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs", "sv"]
     },
     "subs": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_int_uint",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs", "sv"]
     },
     "tan": {
       "proto_ref": "ret_reg_1arg_reg",
@@ -604,7 +650,8 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     },
     "xorb_k": {
         "proto_ref": "ret_msk_2args_msk",
@@ -617,6 +664,7 @@
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": ["all_int", "all_float"],
         "horizontal": false,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u", "m", "z", "s"],
+        "forms": ["vs"]
     }
 }

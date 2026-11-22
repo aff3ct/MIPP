@@ -550,6 +550,25 @@
     "lshift": [
         {
             "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s_msks",
+            "variant": "s"
+        }
+    ],
+    "lshift_vs": [
+        {
+            "instr_name": "sll",
             "datatypes": "all_float",
             "template": "shift_float"
         },
@@ -691,6 +710,25 @@
         }
     ],
     "rshift": [
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s_msks",
+            "variant": "s"
+        }
+    ],
+    "rshift_vs": [
         {
             "instr_name": "srl",
             "datatypes": "all_float",

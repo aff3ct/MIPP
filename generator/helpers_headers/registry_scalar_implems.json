@@ -323,6 +323,17 @@
             ]
         }
     ],
+    "clamp": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<tr>% lo = r0.r[i] > r1.r[i] ? r0.r[i] : r1.r[i];",
+                "res.r[i] = %!pred_cond!% (lo < r2.r[i] ? lo : r2.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
     "cmpeq": [
         {
             "type": "element-wide",
@@ -926,6 +937,19 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
+                "// in the unsigned type: the left shift of a negative value is undefined in C",
+                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)r0.r[i];",
+                "%s<tr>% v = (%s<tr>%)(%s<c:uint|b:tp>%)(u0 << (unsigned)r1.r[i]);",
+                "res.r[i] = %!pred_cond!% v %!pred_alt!%;"
+            ]
+        }
+    ],
+    "lshift_vs": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "variants": [],
+            "implem": [
                 "res.r[i] =  %!pred_cond!% r0.r[i] << (uint8_t)s0 %!pred_alt!% ;"
             ]
         },
@@ -1321,6 +1345,17 @@
         }
     ],
     "rshift": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "variants": [],
+            "implem": [
+                "// arithmetic shift for the signed types, logical for the unsigned ones",
+                "res.r[i] = %!pred_cond!% (%s<tr>%)(r0.r[i] >> (unsigned)r1.r[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "rshift_vs": [
           {
               "type": "element-wide",
               "datatypes": "all_int_uint",

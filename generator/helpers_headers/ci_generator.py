@@ -184,6 +184,8 @@ def generate_c_interface(isa_list, include_manager=None):
     _gen_ci_defines(isa_list, file_common)
     _gen_ci_structures(isa_list, file_common)
 
+    _gen_ci_vv_aliases(file_common)
+
     tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
     j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
@@ -195,6 +197,23 @@ def generate_c_interface(isa_list, include_manager=None):
     print(str_mipp_info, file=file_common)
 
     _gen_ci_functions(isa_list, include_manager, copy_interfaces)
+
+def _gen_ci_vv_aliases(file):
+    """
+    `mipp_<f>_vv_<...>`: aliases of the functions that have scalar forms (forms.py), named as their base form `vv`
+    (decision 9.5), for every datatype, mask variant and LMUL suffix. Macros: nothing is compiled when they are not
+    used, and they are visible from every header of the C API (all of them include this one).
+    """
+    import forms
+    bases = sorted(set(form_functions.values()))
+    if not bases:
+        return
+    print("\n/* Aliases of the base form (all registers) of the functions with scalar forms: mipp_<f>_vv_<...> */", file=file)
+    for f in bases:
+        variants = interfaces[f]["variants"].variants()
+        dts = sorted({dt.split(",")[0] for dt in interfaces[f]["datatypes"]})
+        for line in forms.c_vv_aliases(f, variants, dts, ["", "_m1", "_m2", "_m4", "_m8", "_d2"]):
+            print(line, file=file)
 
 def _gen_ci_defines(isa_list, file):
     for i, isa in enumerate(isa_list):

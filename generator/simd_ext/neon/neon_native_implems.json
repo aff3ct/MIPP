@@ -601,6 +601,18 @@
             "template": "load"
         }
     ],
+    "lshift": [
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "shv_shl_s"
+        }
+    ],
     "max": [
         {
             "instr_name": "maxq",

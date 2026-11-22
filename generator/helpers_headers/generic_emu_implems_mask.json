@@ -239,6 +239,26 @@
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
+    "clamp": [
+        {
+            "instr_name": "clamp",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.ternary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "clamp",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.ternary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "clamp",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.ternary_masks_all_datatypes"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",
@@ -784,18 +804,38 @@
     "lshift": [
         {
             "instr_name": "lshift",
+            "datatypes": "all_int_uint",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "lshift",
+            "datatypes": "all_int_uint",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "lshift",
+            "datatypes": "all_int_uint",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
+        }
+    ],
+    "lshift_vs": [
+        {
+            "instr_name": "lshift_vs",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "lshift",
+            "instr_name": "lshift_vs",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "lshift",
+            "instr_name": "lshift_vs",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
@@ -1058,18 +1098,38 @@
     "rshift": [
         {
             "instr_name": "rshift",
+            "datatypes": "all_int_uint",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "rshift",
+            "datatypes": "all_int_uint",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "rshift",
+            "datatypes": "all_int_uint",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
+        }
+    ],
+    "rshift_vs": [
+        {
+            "instr_name": "rshift_vs",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "rshift",
+            "instr_name": "rshift_vs",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "rshift",
+            "instr_name": "rshift_vs",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"

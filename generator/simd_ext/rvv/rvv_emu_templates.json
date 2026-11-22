@@ -924,6 +924,24 @@
             "return tmp;"
         ]
     },
+    "shv_s": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(r1.r), %N<tp>%);"
+        ]
+    },
+    "shv_s_msk": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(r1.r), %N<tp>%);"
+        ]
+    },
+    "shv_s_msks": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, r0.r, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(r1.r), %N<tp>%);"
+        ]
+    },
     "store_mskz": {
         "format": "long",
         "code": [

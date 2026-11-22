@@ -321,6 +321,12 @@
             "template_ref": "tpl_generic_emu.cast_k_same_size"
         }
     ],
+    "clamp": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.clamp"
+        }
+    ],
     "cmpeq": [
         {
             "datatypes": [
@@ -884,9 +890,9 @@
             "template_ref": "tpl_generic_emu.log_f64"
         }
     ],
-    "lshift": [
+    "lshift_vs": [
         {
-            "instr_name": "lshift",
+            "instr_name": "lshift_vs",
             "datatypes": "all_float",
             "template_ref": "tpl_generic_emu.shift_float"
         }
@@ -1071,9 +1077,9 @@
             "template_ref": "tpl_generic_emu.round_float"
         }
     ],
-    "rshift": [
+    "rshift_vs": [
         {
-            "instr_name": "rshift",
+            "instr_name": "rshift_vs",
             "datatypes": "all_float",
             "template_ref": "tpl_generic_emu.shift_float"
         }

@@ -60,7 +60,9 @@
         "notb",
         "notb_k",
         "lshift",
-        "rshift"
+        "lshift_vs",
+        "rshift",
+        "rshift_vs"
     ],
     "math": [
         "abs",
@@ -109,7 +111,8 @@
     "selection": [
         "select",
         "min",
-        "max"
+        "max",
+        "clamp"
     ],
     "store": [
         "store",

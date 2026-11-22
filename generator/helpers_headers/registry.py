@@ -7,6 +7,8 @@ import os
 import json
 import copy
 
+import forms
+
 from tools import resolve_datatypes
 from datatypes import (
     all_float, all_uint, all_int, all_int_uint, all_datatypes, all_64bit, all_32bit, all_16bit, all_8bit,
@@ -79,9 +81,16 @@ def _load_funcs_registry():
     )
     validate_protos_config(raw_protos)
     validate_categories_config(categories)
-    validate_categories_logical_integrity(categories, raw_interfaces)
     validate_interfaces_config(raw_interfaces, raw_protos)
     validate_scalar_implems_config(raw_scalar_implems)
+
+    # Scalar forms (`"forms"` of the interfaces, see forms.py): each one becomes a function of its own, with its
+    # prototype, category and scalar reference derived from the base function.
+    form_functions = forms.expand_interfaces(raw_protos, raw_interfaces)
+    forms.expand_categories(categories, form_functions)
+    forms.expand_scalar_implems(raw_scalar_implems, raw_interfaces, form_functions)
+
+    validate_categories_logical_integrity(categories, raw_interfaces)
     validate_scalar_implems_logical_integrity(raw_scalar_implems, raw_interfaces)
 
     def resolve_fixed_datatype(fd):
@@ -132,6 +141,10 @@ def _load_funcs_registry():
         }
         if "cpp_name" in v:
             interfaces[k]["cpp_name"] = v["cpp_name"]
+        if forms.FORM_OF_KEY in v:
+            # scalar form: name of the base function and form ("vs", "sv"...)
+            interfaces[k][forms.FORM_OF_KEY] = v[forms.FORM_OF_KEY]
+            interfaces[k][forms.FORM_KEY] = v[forms.FORM_KEY]
 
     # Resolve scalar_implems
     scalar_implems = {}
@@ -150,7 +163,7 @@ def _load_funcs_registry():
                 "implem": implem_val
             })
 
-    return protos, categories, interfaces, scalar_implems
+    return protos, categories, interfaces, scalar_implems, raw_protos, raw_interfaces, form_functions
 
 generic_flat_implems = None
 generic_data_templates = None
@@ -302,6 +315,14 @@ def _load_generic_emu():
                 processed[func_name].append(processed_item)
         return processed
 
+    # Generic bodies of the scalar forms (base function with the scalars broadcast, see forms.generic_implems):
+    # added after the checks of the JSON files, as they are not written in them.
+    forms_std, forms_mask = forms.generic_implems(_raw_protos, _raw_interfaces, form_functions)
+    for table, extra in ((data_implems["implems_generic_emu"], forms_std),
+                         (data_implems["implems_mask_generic_emu"], forms_mask)):
+        for name, items in extra.items():
+            table.setdefault(name, []).extend(items)
+
     implems_generic_emu = process_table(data_implems["implems_generic_emu"], default_type="emulated", default_level=2)
     implems_mask_generic_emu = process_table(data_implems["implems_mask_generic_emu"], default_type="emulated", default_level=2)
     implems_horiz_lmul_generic_emu = process_table(data_implems["implems_horiz_lmul_generic_emu"], default_level=2)
@@ -309,7 +330,7 @@ def _load_generic_emu():
     return implems_generic_emu, implems_mask_generic_emu, implems_horiz_lmul_generic_emu
 
 # Initialize globals dynamically
-protos, categories, interfaces, scalar_implems = _load_funcs_registry()
+protos, categories, interfaces, scalar_implems, _raw_protos, _raw_interfaces, form_functions = _load_funcs_registry()
 copy_interfaces = copy.deepcopy(interfaces)
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))

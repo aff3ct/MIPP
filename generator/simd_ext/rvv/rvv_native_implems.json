@@ -35,6 +35,30 @@
             "variant": "s"
         }
     ],
+    "add_vs": [
+        {
+            "instr_name": "fadd",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "fadd",
+            "datatypes": "all_float",
+            "template": "form_vf_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
+        }
+    ],
     "adds": [
         {
             "instr_name": "sadd",
@@ -95,6 +119,19 @@
             "instr_name": "mand",
             "datatypes": "all_datatypes",
             "template": "mask_2args"
+        }
+    ],
+    "andb_vs": [
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
         }
     ],
     "andnb_k": [
@@ -183,6 +220,18 @@
             "template": "arith_msk_type_2args"
         }
     ],
+    "cmpeq_vs": [
+        {
+            "instr_name": "mseq",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mfeq",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
     "cmpge": [
         {
             "instr_name": "msge",
@@ -198,6 +247,30 @@
             "instr_name": "mfge",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args"
+        }
+    ],
+    "cmpge_sv": [
+        {
+            "instr_name": "msle",
+            "datatypes": "all_int",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "msleu",
+            "datatypes": "all_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mfle",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
+    "cmpge_vs": [
+        {
+            "instr_name": "mfge",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
         }
     ],
     "cmpgt": [
@@ -217,6 +290,40 @@
             "template": "arith_msk_type_2args"
         }
     ],
+    "cmpgt_sv": [
+        {
+            "instr_name": "mslt",
+            "datatypes": "all_int",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "msltu",
+            "datatypes": "all_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mflt",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
+    "cmpgt_vs": [
+        {
+            "instr_name": "msgt",
+            "datatypes": "all_int",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "msgtu",
+            "datatypes": "all_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mfgt",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
     "cmple": [
         {
             "instr_name": "msle",
@@ -232,6 +339,30 @@
             "instr_name": "mfle",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args"
+        }
+    ],
+    "cmple_sv": [
+        {
+            "instr_name": "mfge",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
+    "cmple_vs": [
+        {
+            "instr_name": "msle",
+            "datatypes": "all_int",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "msleu",
+            "datatypes": "all_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mfle",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
         }
     ],
     "cmplt": [
@@ -251,6 +382,40 @@
             "template": "arith_msk_type_2args"
         }
     ],
+    "cmplt_sv": [
+        {
+            "instr_name": "msgt",
+            "datatypes": "all_int",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "msgtu",
+            "datatypes": "all_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mfgt",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
+    "cmplt_vs": [
+        {
+            "instr_name": "mslt",
+            "datatypes": "all_int",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "msltu",
+            "datatypes": "all_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mflt",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
+        }
+    ],
     "cmpneq": [
         {
             "instr_name": "msne",
@@ -261,6 +426,18 @@
             "instr_name": "mfne",
             "datatypes": "all_float",
             "template": "arith_msk_type_2args"
+        }
+    ],
+    "cmpneq_vs": [
+        {
+            "instr_name": "msne",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_cmp"
+        },
+        {
+            "instr_name": "mfne",
+            "datatypes": "all_float",
+            "template": "form_vf_cmp"
         }
     ],
     "cvt": [
@@ -438,6 +615,26 @@
             "variant": "s"
         }
     ],
+    "div_sv": [
+        {
+            "instr_name": "frdiv",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        }
+    ],
+    "div_vs": [
+        {
+            "instr_name": "fdiv",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "fdiv",
+            "datatypes": "all_float",
+            "template": "form_vf_msk",
+            "variant": "m"
+        }
+    ],
     "fmadd": [
         {
             "instr_name": "fmadd",
@@ -466,6 +663,13 @@
             "variant": "m"
         }
     ],
+    "fmadd_vsv": [
+        {
+            "instr_name": "fmadd",
+            "datatypes": "all_float",
+            "template": "form_vf_fma_vsv"
+        }
+    ],
     "fmsub": [
         {
             "instr_name": "fmsub",
@@ -477,6 +681,27 @@
             "datatypes": "all_float",
             "template": "arith_3args_msk",
             "variant": "m"
+        }
+    ],
+    "fmsub_vsv": [
+        {
+            "instr_name": "fmsub",
+            "datatypes": "all_float",
+            "template": "form_vf_fma_vsv"
+        }
+    ],
+    "fnmadd_vsv": [
+        {
+            "instr_name": "fnmsub",
+            "datatypes": "all_float",
+            "template": "form_vf_fma_vsv"
+        }
+    ],
+    "fnmsub_vsv": [
+        {
+            "instr_name": "fnmadd",
+            "datatypes": "all_float",
+            "template": "form_vf_fma_vsv"
         }
     ],
     "gather": [
@@ -537,6 +762,25 @@
         }
     ],
     "lshift": [
+        {
+            "instr_name": "sll",
+            "datatypes": "all_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msks",
+            "variant": "s"
+        }
+    ],
+    "lshift_vs": [
         {
             "instr_name": "sll",
             "datatypes": "all_int_uint",
@@ -608,6 +852,41 @@
             "variant": "s"
         }
     ],
+    "max_vs": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_int",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "maxu",
+            "datatypes": "all_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "fmax",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": "all_int",
+            "template": "form_vx_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "maxu",
+            "datatypes": "all_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "fmax",
+            "datatypes": "all_float",
+            "template": "form_vf_msk",
+            "variant": "m"
+        }
+    ],
     "min": [
         {
             "instr_name": "min",
@@ -661,6 +940,41 @@
             "variant": "s"
         }
     ],
+    "min_vs": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_int",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "minu",
+            "datatypes": "all_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "fmin",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": "all_int",
+            "template": "form_vx_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "minu",
+            "datatypes": "all_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "fmin",
+            "datatypes": "all_float",
+            "template": "form_vf_msk",
+            "variant": "m"
+        }
+    ],
     "mul": [
         {
             "instr_name": "fmul",
@@ -695,6 +1009,30 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        }
+    ],
+    "mul_vs": [
+        {
+            "instr_name": "fmul",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "fmul",
+            "datatypes": "all_float",
+            "template": "form_vf_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
         }
     ],
     "neg": [
@@ -792,6 +1130,19 @@
             "template": "mask_2args"
         }
     ],
+    "orb_vs": [
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
+        }
+    ],
     "round": [
         {
             "instr_name": "vfcvt",
@@ -801,6 +1152,25 @@
         }
     ],
     "rshift": [
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msks",
+            "variant": "s"
+        }
+    ],
+    "rshift_vs": [
         {
             "instr_name": "srl",
             "datatypes": "all_uint",
@@ -981,6 +1351,42 @@
             "variant": "s"
         }
     ],
+    "sub_sv": [
+        {
+            "instr_name": "frsub",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "rsub",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        }
+    ],
+    "sub_vs": [
+        {
+            "instr_name": "fsub",
+            "datatypes": "all_float",
+            "template": "form_vf"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "fsub",
+            "datatypes": "all_float",
+            "template": "form_vf_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
+        }
+    ],
     "subs": [
         {
             "instr_name": "ssub",
@@ -1041,6 +1447,19 @@
             "instr_name": "mxor",
             "datatypes": "all_datatypes",
             "template": "mask_2args"
+        }
+    ],
+    "xorb_vs": [
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "form_vx"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "form_vx_msk",
+            "variant": "m"
         }
     ]
 }

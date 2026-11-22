@@ -10,7 +10,7 @@ The options of the script are in the [Command-Line Reference](../reference/cli.m
 
 | Step | What happens | Code |
 | :--- | :--- | :--- |
-| 1. Load | The registries are loaded and validated against their JSON Schemas when `registry.py` is imported. A validation error stops the script. | `helpers_headers/registry.py` |
+| 1. Load | The registries are loaded and validated against their JSON Schemas when `registry.py` is imported. A validation error stops the script. The [scalar forms](../../user/scalar_forms.md) (`"forms"` of an interface) are expanded into functions of their own: prototype, category, scalar reference, and generic body appended to the generic tables (`forms.py`). | `helpers_headers/registry.py`, `helpers_headers/forms.py` |
 | 2. Check | Cross-file validation checks (blocking) and the audits selected with `--audit` (warnings). | `helpers_headers/input_validation.py`, [Audits & Validation](../reference/audits.md) |
 | 3. Discover the ISAs | Each directory of `simd_ext/` is an ISA. `--simd-ext` keeps the selected ISAs, their `sub_isa` chain and `scalar`. The ISAs are sorted so that a `sub_isa` comes before the ISAs built on it. | `discover_and_sort_isas()` in `gen_mipp_headers.py` |
 | 4. ISA layers | One layer per ISA: `scalar` is emitted directly from `registry_scalar_implems.json`, the other ISAs go through the candidate resolution ([§2](#2-one-isa-layer)). | `simd_ext/scalar/scalar_gen.py`, `helpers_headers/c_generator.py` |
@@ -100,6 +100,8 @@ On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fa
 
 After the resolution, the level of each chosen candidate becomes the highest level among itself and its dependencies (for a dependency with several branches, the best one counts). An <span class="mipp-isa-badge lvl-2">L2</span> sequence that calls an <span class="mipp-isa-badge lvl-3">L3</span> function is reported as <span class="mipp-isa-badge lvl-3">L3</span> in the generated comment, in the summary table and in the documentation.
 
+The generic body of a scalar form (`derived_form`, see `forms.py`) then takes the level of its base function for the same datatype and mask variant: the broadcast of the scalar (`set1`) is free.
+
 ---
 
 ## 5. Emission
@@ -150,6 +152,7 @@ At the end of a run, `print_summary_table()` reads the generated `simd_ext/<isa>
 | File (in `generator/helpers_headers/`) | Role |
 | :--- | :--- |
 | `registry.py` | Loads and validates the registries; module-level data shared by the generators. |
+| `forms.py` | Scalar forms (`sub_vs`, `sub_sv`, `fmadd_vsv`...): derived prototypes, interfaces, categories, scalar references, documentation and generic bodies (`sub(r0, set1(s0))`, marked `derived_form`), and the C aliases `mipp_<f>_vv_<...>`. Also used by the test and documentation generators. |
 | `input_validation.py` | Validation checks and header audits. |
 | `tools.py` | ISA loading, datatype aliases, DSL parsing (`parse_placeholders()`, `get_requirements()`). |
 | `datatypes.py`, `name_builder.py` | Datatypes; function names, prototypes and call arguments. |

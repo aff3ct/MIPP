@@ -15,6 +15,7 @@ import os
 
 from datatypes import all_datatypes, all_ldiv, all_lmul
 from registry import categories, interfaces
+from include_gen import _match_category
 
 # Display name of the targets, and order of the rows (other ISAs are appended)
 TARGET_NAMES = {
@@ -145,6 +146,35 @@ def render_variants():
     return _header("registry_interfaces.json") + "\n".join(lines) + "\n"
 
 
+def render_forms():
+    """Functions with scalar forms (forms.py): the forms of each one, with an example of C name and the C++ calls."""
+    import forms
+    from registry import form_functions
+    bases = {}
+    for name, base in form_functions.items():
+        bases.setdefault(base, []).append(interfaces[name][forms.FORM_KEY])
+    lines = ["| Function | Forms | C (example) | C++ |", "| :--- | :--- | :--- | :--- |"]
+    for base in sorted(bases):
+        dts = [d.split(",")[0] for d in interfaces[base]["datatypes"]]
+        dt = "float32" if "float32" in dts else ("int32" if "int32" in dts else dts[0])
+        c_names, cpp_calls = [], []
+        for form in bases[base]:
+            c_names.append(f"`mipp_{base}_{form}_{dt}`")
+            # arguments of the base: the data registers a, b, c (or the scalar s of the form), the masks m
+            call, k = [], 0
+            for arg in interfaces[base]["proto"]["args"]:
+                if arg["type"] == "msk":
+                    call.append("m")
+                else:
+                    call.append("abc"[k] if form[k] == "v" else "s")
+                    k += 1
+            cpp_calls.append(f"`mipp::{interfaces[base].get('cpp_name', base)}({', '.join(call)})`")
+        lines.append(f"| [`{base}`](../funcs_support/{_match_category(base)}/{base}.md) | "
+                     + ", ".join(f"`{f}`" for f in bases[base]) + " | " + ", ".join(c_names) + " | "
+                     + ", ".join(cpp_calls) + " |")
+    return _header("registry_interfaces.json (forms)") + "\n".join(lines) + "\n"
+
+
 def write_includes(generator_dir, out_dir):
     """Writes the fragments into out_dir (deleted and rewritten)."""
     os.makedirs(out_dir, exist_ok=True)
@@ -156,6 +186,7 @@ def write_includes(generator_dir, out_dir):
         "datatypes.md": render_datatypes(generator_dir),
         "categories.md": render_categories(),
         "variants.md": render_variants(),
+        "forms.md": render_forms(),
     }
     for name, text in fragments.items():
         with open(os.path.join(out_dir, name), "w", encoding="utf-8") as f:

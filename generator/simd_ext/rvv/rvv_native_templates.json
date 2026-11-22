@@ -155,6 +155,54 @@
             "{{isa.prefix}}_{{ instr_name }}_v_f_{{isa_dt_par.data_ext}}(0.f,%N<tp>%);"
         ]
     },
+    "form_vf": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vf_{{ isa_dt_par.data_ext }}(r0.r, s0, %N<tp>%);"
+        ]
+    },
+    "form_vf_cmp": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vf_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}(r0.r, s0, %N<tp>%);"
+        ]
+    },
+    "form_vf_fma_vsv": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vf_{{ isa_dt_par.data_ext }}(r0.r, s0, r1.r, %N<tp>%);"
+        ]
+    },
+    "form_vf_msk": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vf_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, s0, %N<tp>%);"
+        ]
+    },
+    "form_vx": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.data_ext }}(r0.r, s0, %N<tp>%);"
+        ]
+    },
+    "form_vx_cmp": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.data_ext }}_{{isa_dt_par.data_ext_logi}}(r0.r, s0, %N<tp>%);"
+        ]
+    },
+    "form_vx_fma_vsv": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.data_ext }}(r0.r, s0, r1.r, %N<tp>%);"
+        ]
+    },
+    "form_vx_msk": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.data_ext }}_mu(m0.m, r0.r, r0.r, s0, %N<tp>%);"
+        ]
+    },
     "gather_e8": {
         "format": "short",
         "code": [

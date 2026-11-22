@@ -26,6 +26,13 @@
             "template": "bin_s"
         }
     ],
+    "add_vs": [
+        {
+            "instr_name": "add",
+            "datatypes": "all_datatypes",
+            "template": "form_n_x"
+        }
+    ],
     "all": [
         {
             "instr_name": "ptest_any",
@@ -51,6 +58,13 @@
             "instr_name": "and",
             "datatypes": "all_datatypes",
             "template": "andb_k"
+        }
+    ],
+    "andb_vs": [
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "form_n_x"
         }
     ],
     "andnb": [
@@ -81,11 +95,32 @@
             "template": "std_2_reg_in_no_msk"
         }
     ],
+    "cmpeq_vs": [
+        {
+            "instr_name": "cmpeq",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
     "cmpge": [
         {
             "instr_name": "cmpge",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmpge_sv": [
+        {
+            "instr_name": "cmple",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
+    "cmpge_vs": [
+        {
+            "instr_name": "cmpge",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
         }
     ],
     "cmpgt": [
@@ -95,11 +130,39 @@
             "template": "std_2_reg_in_no_msk"
         }
     ],
+    "cmpgt_sv": [
+        {
+            "instr_name": "cmplt",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
+    "cmpgt_vs": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
     "cmple": [
         {
             "instr_name": "cmple",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmple_sv": [
+        {
+            "instr_name": "cmpge",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
+    "cmple_vs": [
+        {
+            "instr_name": "cmple",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
         }
     ],
     "cmplt": [
@@ -109,11 +172,32 @@
             "template": "std_2_reg_in_no_msk"
         }
     ],
+    "cmplt_sv": [
+        {
+            "instr_name": "cmpgt",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
+    "cmplt_vs": [
+        {
+            "instr_name": "cmplt",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
+        }
+    ],
     "cmpneq": [
         {
             "instr_name": "cmpne",
             "datatypes": "all_datatypes",
             "template": "std_2_reg_in_no_msk"
+        }
+    ],
+    "cmpneq_vs": [
+        {
+            "instr_name": "cmpne",
+            "datatypes": "all_datatypes",
+            "template": "form_n_cmp"
         }
     ],
     "cvt": [
@@ -145,6 +229,20 @@
             "template": "bin_s"
         }
     ],
+    "div_sv": [
+        {
+            "instr_name": "divr",
+            "datatypes": "all_float",
+            "template": "form_n_x"
+        }
+    ],
+    "div_vs": [
+        {
+            "instr_name": "div",
+            "datatypes": "all_float",
+            "template": "form_n_x"
+        }
+    ],
     "fmadd": [
         {
             "instr_name": "mla",
@@ -169,6 +267,20 @@
             "template": "ter_s"
         }
     ],
+    "fmadd_vsv": [
+        {
+            "instr_name": "mla",
+            "datatypes": "all_float",
+            "template": "form_n_fma_acc"
+        }
+    ],
+    "fmadd_vvs": [
+        {
+            "instr_name": "mad",
+            "datatypes": "all_float",
+            "template": "form_n_fma_mad"
+        }
+    ],
     "fmsub": [
         {
             "instr_name": "nmls",
@@ -180,6 +292,20 @@
             "datatypes": "all_float",
             "variant": "s",
             "template": "ter_s"
+        }
+    ],
+    "fmsub_vsv": [
+        {
+            "instr_name": "nmls",
+            "datatypes": "all_float",
+            "template": "form_n_fma_acc"
+        }
+    ],
+    "fmsub_vvs": [
+        {
+            "instr_name": "nmsb",
+            "datatypes": "all_float",
+            "template": "form_n_fma_mad"
         }
     ],
     "fnmadd": [
@@ -203,6 +329,20 @@
             "template": "ter_s"
         }
     ],
+    "fnmadd_vsv": [
+        {
+            "instr_name": "mls",
+            "datatypes": "all_float",
+            "template": "form_n_fma_acc"
+        }
+    ],
+    "fnmadd_vvs": [
+        {
+            "instr_name": "msb",
+            "datatypes": "all_float",
+            "template": "form_n_fma_mad"
+        }
+    ],
     "fnmsub": [
         {
             "instr_name": "nmla",
@@ -214,6 +354,20 @@
             "datatypes": "all_float",
             "variant": "s",
             "template": "ter_s"
+        }
+    ],
+    "fnmsub_vsv": [
+        {
+            "instr_name": "nmla",
+            "datatypes": "all_float",
+            "template": "form_n_fma_acc"
+        }
+    ],
+    "fnmsub_vvs": [
+        {
+            "instr_name": "nmad",
+            "datatypes": "all_float",
+            "template": "form_n_fma_mad"
         }
     ],
     "gather": [
@@ -329,6 +483,30 @@
     "lshift": [
         {
             "instr_name": "lsl",
+            "datatypes": "all_uint",
+            "template": "shv_x_u"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int",
+            "template": "shv_x_s"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int",
+            "variant": "m",
+            "template": "shv_m_s"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int",
+            "variant": "z",
+            "template": "shv_z_s"
+        }
+    ],
+    "lshift_vs": [
+        {
+            "instr_name": "lsl",
             "datatypes": "all_int_uint",
             "template": "shift_n_z"
         },
@@ -352,6 +530,13 @@
             "template": "bin_s"
         }
     ],
+    "max_vs": [
+        {
+            "instr_name": "max",
+            "datatypes": "all_datatypes",
+            "template": "form_n_x"
+        }
+    ],
     "min": [
         {
             "instr_name": "min",
@@ -365,6 +550,13 @@
             "template": "bin_s"
         }
     ],
+    "min_vs": [
+        {
+            "instr_name": "min",
+            "datatypes": "all_datatypes",
+            "template": "form_n_x"
+        }
+    ],
     "mul": [
         {
             "instr_name": "mul",
@@ -376,6 +568,13 @@
             "datatypes": "all_datatypes",
             "variant": "s",
             "template": "bin_s"
+        }
+    ],
+    "mul_vs": [
+        {
+            "instr_name": "mul",
+            "datatypes": "all_datatypes",
+            "template": "form_n_x"
         }
     ],
     "neg": [
@@ -433,6 +632,13 @@
             "template": "andb_k"
         }
     ],
+    "orb_vs": [
+        {
+            "instr_name": "orr",
+            "datatypes": "all_int_uint",
+            "template": "form_n_x"
+        }
+    ],
     "round": [
         {
             "instr_name": "rinta",
@@ -441,6 +647,30 @@
         }
     ],
     "rshift": [
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "template": "shv_x_u"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "template": "shv_x_s"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "variant": "m",
+            "template": "shv_m_s"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "variant": "z",
+            "template": "shv_z_s"
+        }
+    ],
+    "rshift_vs": [
         {
             "instr_name": "asr",
             "datatypes": "all_int",
@@ -566,6 +796,20 @@
             "template": "bin_s"
         }
     ],
+    "sub_sv": [
+        {
+            "instr_name": "subr",
+            "datatypes": "all_datatypes",
+            "template": "form_n_x"
+        }
+    ],
+    "sub_vs": [
+        {
+            "instr_name": "sub",
+            "datatypes": "all_datatypes",
+            "template": "form_n_x"
+        }
+    ],
     "torvd": [
         {
             "instr_name": "dup",
@@ -605,6 +849,13 @@
             "instr_name": "eor",
             "datatypes": "all_datatypes",
             "template": "andb_k"
+        }
+    ],
+    "xorb_vs": [
+        {
+            "instr_name": "eor",
+            "datatypes": "all_int_uint",
+            "template": "form_n_x"
         }
     ]
 }

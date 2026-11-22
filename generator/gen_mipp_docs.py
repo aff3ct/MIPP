@@ -46,6 +46,10 @@ if os.path.exists(funcs_docs_path):
         funcs_docs = json.load(f)
 else:
     funcs_docs = {}
+# scalar forms without an entry of their own: the description and the formula of their base (forms.expand_docs)
+import forms
+from registry import _raw_interfaces, form_functions
+forms.expand_docs(funcs_docs, _raw_interfaces, form_functions)
 
 # Test properties of the functions, resolved with the test generator (helpers_docs/test_specs.py)
 _resolved_test_specs = None
@@ -554,6 +558,10 @@ class SpecFuncInfo:
                 break
 
     def get_cpp_func_name(self):
+        # name in the C++ APIs given by the registry: the scalar forms are overloads of their base (`sub_sv` is
+        # `mipp::sub(s, r)`), `lshift_vs` is `mipp::lshift(r, n)`
+        if forms.FORM_OF_KEY in interfaces.get(self.func_name, {}) or self.func_name in ("lshift_vs", "rshift_vs"):
+            return interfaces[self.func_name].get("cpp_name", self.func_name)
         has_reg_or_msk_arg = any(arg["type"] in ("reg", "msk") for arg in self.args)
         if has_reg_or_msk_arg and self.func_name.endswith("_k"):
             return self.func_name[:-2]
@@ -737,7 +745,7 @@ class SpecFuncInfo:
                 "andb": "&", "orb": "|", "xorb": "^",
                 "andb_k": "&", "orb_k": "|", "xorb_k": "^",
                 "cmpeq": "==", "cmpneq": "!=", "cmplt": "<", "cmple": "<=", "cmpgt": ">", "cmpge": ">=",
-                "lshift": "<<", "rshift": ">>"
+                "lshift": "<<", "rshift": ">>", "lshift_vs": "<<", "rshift_vs": ">>"
             }
             if self.func_name in op_map and len(self.args) == 2:
                 op = op_map[self.func_name]
@@ -751,9 +759,14 @@ class SpecFuncInfo:
                     lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
                     lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const T val);")
                     lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const T val, const Rvd<T{lmul_arg}>& r1);")
-                elif self.func_name in ("lshift", "rshift"):
+                elif self.func_name in ("lshift_vs", "rshift_vs"):
+                    # same count for every lane
                     lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const int32_t val);")
                     lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const int32_t val);")
+                elif self.func_name in ("lshift", "rshift"):
+                    # count of each lane in a register
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
                 else:
                     lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
                     lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const T val);")

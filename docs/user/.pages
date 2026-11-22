@@ -5,6 +5,7 @@ nav:
   - Vector Types & LMUL: vector_types_and_lmul.md
   - Memory & Alignment: memory_and_alignment.md
   - Masking Semantics: masking_semantics.md
+  - Scalar Forms: scalar_forms.md
   - Headers & Compile Time: headers_and_compile_time.md
   - Implementation Levels: implementation_levels.md
   - ...

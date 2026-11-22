@@ -51,6 +51,12 @@
             "cpp_name": {
                 "description": "Name of the function in the C++ APIs when it differs from the C name: `get_k` is `mipp::get`.",
                 "type": "string"
+            },
+            "forms": {
+                "description": "Scalar forms of the function (see [Scalar Forms](../../user/scalar_forms.md)): one string per form, with one letter per data register argument of the prototype, `v` (register) or `s` (scalar of the type of the function, broadcast to every lane). `\"forms\": [\"vs\", \"sv\"]` on `sub` gives `sub_vs(r, s)` and `sub_sv(s, r)` (C: `mipp_sub_vs_float32`, C++: overloads of `mipp::sub`). Each form is a function of its own, derived when the registry is loaded (`helpers_headers/forms.py`): prototype, category, scalar reference and a generic Level 2 body (the base function with the scalar broadcast), whose level is the one of the base. The all-`v` form is the base function itself.",
+                "type": "array",
+                "uniqueItems": true,
+                "items": { "type": "string", "pattern": "^[vs]*s[vs]*$" }
             }
         },
         "required": [

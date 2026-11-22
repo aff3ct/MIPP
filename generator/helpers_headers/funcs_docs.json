@@ -71,6 +71,10 @@
     "description": "In-register bitcast/reinterpretation of a mask register to another datatype of identical bitwidth with zero runtime instructions.",
     "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{rvm}\\langle T_{\\text{dst}}\\rangle \\rangle(m0)"
   },
+  "clamp": {
+    "description": "Clamps each element between the elements of the same lane of the second (lower bound) and third (upper bound) registers: `min(max(r0, r1), r2)`. With bounds such that lo > hi, the result is hi. The form `vss` takes scalar bounds: `clamp(r, lo, hi)`.",
+    "latex": "\\text{res}_i = \\min(\\max(r0_i, r1_i), r2_i)"
+  },
   "cmpeq": {
     "description": "Compares two vector registers element-wise for equality (a == b).",
     "latex": "m_i = (r0_i == r1_i)"
@@ -216,8 +220,12 @@
     "latex": "m_{\\text{res}, i} = m_{0, i}, \\quad 0 \\le i < N / 2"
   },
   "lshift": {
-    "description": "Shifts each vector element left by a given number of bits.",
-    "latex": "\\text{res}_i = r0_i \\ll \\text{count}"
+    "description": "Shifts each element left by the number of bits of the same lane of the second register (from 0 to the number of bits of the type minus 1; any other count is undefined behavior). The shift by the same count for every lane is `lshift_vs` (`mipp::lshift(r, n)` in C++).",
+    "latex": "\\text{res}_i = r0_i \\ll r1_i"
+  },
+  "lshift_vs": {
+    "description": "Shifts every element left by the same number of bits `s0` (scalar form `vs` of `lshift`; `mipp::lshift(r, n)` in C++). The bits of the floating-point elements are shifted as an integer of the same size.",
+    "latex": "\\text{res}_i = r0_i \\ll s0"
   },
   "max": {
     "description": "Selects the maximum value element-wise between two vector registers.",
@@ -280,8 +288,12 @@
     "latex": "\\text{res}_i = \\operatorname{round}(r0_i)"
   },
   "rshift": {
-    "description": "Shifts each vector element right by a given number of bits.",
-    "latex": "\\text{res}_i = r0_i \\gg \\text{count}"
+    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(r, n)` in C++).",
+    "latex": "\\text{res}_i = r0_i \\gg r1_i"
+  },
+  "rshift_vs": {
+    "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshift`; `mipp::rshift(r, n)` in C++): arithmetic shift for the signed types, logical shift for the unsigned ones. The bits of the floating-point elements are shifted as an unsigned integer of the same size.",
+    "latex": "\\text{res}_i = r0_i \\gg s0"
   },
   "rsqrt": {
     "description": "Computes the reciprocal square root of each floating-point element (1 / sqrt(a)).",

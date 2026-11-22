@@ -175,6 +175,14 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
 # Helpers
 # -------------------------------------------------------------------------------------------------
 
+def _cpp_base_name(funcs, f):
+    """
+    Name of `f` in the C++ APIs: `cpp_name` of the registry when given, `f` otherwise. The scalar forms of a function
+    (`sub_vs`, `sub_sv`, see forms.py) are overloads of the base function (`mipp::sub(r, s)`, `mipp::sub(s, r)`).
+    """
+    return funcs[f].get("cpp_name", f)
+
+
 set_functions = ["set0", "set0_k", "set", "set_k", "set1", "set1_k", "load", "loadu"]
 
 
@@ -538,7 +546,7 @@ def _gen_cpp_generic_templates(include_manager, isa, funcs):
         proto = funcs[f]["proto"]
 
         dt_par, dr_ret = _compute_dt_par_dt_ret(funcs, f, funcs[f]["datatypes"][0]) # we just need one dt to build the template since it's generic on T
-        cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, f) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
+        cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_par, _cpp_base_name(funcs, f)) # THIS IS A HACK BC build_cpp_func_name_short explodes w/o concrete type ...
 
         if ms.is_maskable():
             _generic_mask_decl(file, cpp_func_name, proto, "mask")
@@ -644,10 +652,10 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
 
                 if not is_cast and not is_gthr_scttr:
                     c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True, alias=True)
-                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, _cpp_base_name(funcs, f))
                 elif is_gthr_scttr:
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)                
-                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, _cpp_base_name(funcs, f))
                 else:
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)
@@ -695,10 +703,10 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
 
                 if not is_cast and not is_gthr_scttr:
                     c_func_name = build_func_name_short(isa, dt_par, f, isa_name=True, alias=True)
-                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, _cpp_base_name(funcs, f))
                 elif is_gthr_scttr:
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)                
-                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, f)
+                    cpp_func_name = build_cpp_func_name_short(funcs[f]["proto"], dt_ret, _cpp_base_name(funcs, f))
                 else:
                     c_func_name = build_func_name(isa, dt_par, dt_ret, f, isa_name=True, alias=True)
                     cpp_func_name = build_cpp_func_name(dt_ret, f)

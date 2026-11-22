@@ -630,6 +630,10 @@ def generate_mipp_api_data(project_root=None):
     if os.path.exists(funcs_docs_path):
         with open(funcs_docs_path, "r", encoding="utf-8") as f:
             funcs_docs = json.load(f)
+    # scalar forms without an entry of their own: the description and the formula of their base
+    import forms
+    from registry import _raw_interfaces, form_functions
+    forms.expand_docs(funcs_docs, _raw_interfaces, form_functions)
 
     # Test properties, resolved with the test generator (same source as the Function Support pages)
     from helpers_docs.test_specs import resolve_all

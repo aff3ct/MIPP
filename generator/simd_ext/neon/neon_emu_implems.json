@@ -213,6 +213,18 @@
         {
             "instr_name": "shlq",
             "datatypes": [
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "shv_shl_u"
+        }
+    ],
+    "lshift_vs": [
+        {
+            "instr_name": "shlq",
+            "datatypes": [
                 "int64",
                 "uint64"
             ],
@@ -270,6 +282,28 @@
         }
     ],
     "rshift": [
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "shv_shr_s"
+        },
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "shv_shr_u"
+        }
+    ],
+    "rshift_vs": [
         {
             "instr_name": "shrq",
             "datatypes": [

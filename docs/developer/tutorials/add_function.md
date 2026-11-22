@@ -35,6 +35,7 @@ In `helpers_headers/registry_interfaces.json`:
 | `horizontal` | `true` for reductions across the lanes of a register (`hadd`, `hmax`), `false` otherwise. |
 | `variants` | Variants generated for the function, as a list of `u` (unmasked, always present), `m` (Merge-Masked), `z` (Zero-Masked) and `s` (Source-Masked): `["u"]` for no mask variant, `["u", "m", "z", "s"]` for all of them. The lists used are in the table below ([Masking Semantics](../../user/masking_semantics.md)). |
 | `cpp_name` | Optional. Name of the C++ function when it differs from the C name: `get_k` is exposed as `mipp::get`. |
+| `forms` | Optional. [Scalar forms](../../user/scalar_forms.md) of the function: one string per form, one letter per data register of the prototype, `v` (register) or `s` (scalar). `"forms": ["vs", "sv"]` adds `absdiff_vs(r, s)` and `absdiff_sv(s, r)`: functions of their own, derived when the registry is loaded (`helpers_headers/forms.py`), with the category, the variants and a scalar reference derived from the ones of `absdiff`, a generic body (`absdiff(r0, set1(s0))`, at the level of `absdiff`) and C++ overloads of `mipp::absdiff`. A native body is written in an ISA file under the name of the form (`"absdiff_vs": [...]`, with `s0` for the scalar). The scalar reference of the base must read the registers lane by lane (`r1.r[i]`). |
 
 Lists used for `variants`, with the number of functions that use each one:
 

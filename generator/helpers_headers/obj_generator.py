@@ -135,6 +135,43 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, p0)); }}")
             lines.append("")
 
+    # Category 1a: scalar forms (`sub_vs`, `sub_sv`, `fmadd_vsv`, `cmplt_vs`, `select_vs`... see forms.py): overloads
+    # of the base function (`mipp::sub(r, s)`), the scalars of type T exactly (no promotion: `Rvd<int8_t> - 300`
+    # does not compile, as T is deduced from both the register and the scalar).
+    elif info.get("form_of"):
+        ret = "Rvm<T, LMUL>" if p["ret"]["type"] == "msk" else "Rvd<T, LMUL>"
+        typed_args, raw_args = [], []
+        cnt = {"reg": 0, "msk": 0, "val": 0}
+        for a_type in args:
+            i = cnt[a_type]
+            cnt[a_type] += 1
+            if a_type == "reg":
+                typed_args.append(f"const Rvd<T, LMUL>& r{i}")
+                raw_args.append(f"r{i}.r")
+            elif a_type == "msk":
+                typed_args.append(f"const Rvm<T, LMUL>& m{i}")
+                raw_args.append(f"m{i}.m")
+            else:
+                typed_args.append(f"const T s{i}")
+                raw_args.append(f"s{i}")
+        typed_str, raw_str = ", ".join(typed_args), ", ".join(raw_args)
+        lines.append("template <typename T, int LMUL = 1>")
+        lines.append(f"inline {ret} {cpp_fn}({typed_str})")
+        lines.append(f"{{ return {ret}(mipp::{cpp_fn}({raw_str})); }}")
+        lines.append("")
+        if is_maskable or is_maskzable:
+            # one overload for the merge and zero masking (V = M or Z), the default is the first variant
+            mk = "M" if is_maskable else "Z"
+            lines.append(f"template <VARIANT V = {mk}, typename T, int LMUL = 1>")
+            lines.append(f"inline {ret} {cpp_fn}(const Rvm<T, LMUL>& m0, {typed_str})")
+            lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(m0.m, {raw_str})); }}")
+            lines.append("")
+        if is_masksable:
+            lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
+            lines.append(f"inline {ret} {cpp_fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, {typed_str})")
+            lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
+            lines.append("")
+
     # Category 1b: low / high / combine (the LMUL of the result differs from the one of the arguments)
     elif fn in ("low", "high", "low_k", "high_k"):
         cls = "Rvm" if fn.endswith("_k") else "Rvd"
@@ -528,22 +565,22 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         typed_str = ", ".join(typed_args)
         raw_str = ", ".join(raw_args)
 
-        # 1. Free function overload
+        # 1. Free function overload (`cpp_fn`: name in the C++ APIs, `lshift` for `lshift_vs`)
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Rvd<T, LMUL> {fn}({typed_str})")
-        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}({raw_str})); }}")
+        lines.append(f"inline Rvd<T, LMUL> {cpp_fn}({typed_str})")
+        lines.append(f"{{ return Rvd<T, LMUL>(mipp::{cpp_fn}({raw_str})); }}")
         lines.append("")
 
         # 2. Masked overloads
         if is_maskable:
             lines.append("template <VARIANT V = M, typename T, int LMUL = 1>")
-            lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, {typed_str})")
-            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, {raw_str})); }}")
+            lines.append(f"inline Rvd<T, LMUL> {cpp_fn}(const Rvm<T, LMUL>& m0, {typed_str})")
+            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{cpp_fn}<V, T, LMUL>(m0.m, {raw_str})); }}")
             lines.append("")
         if is_masksable:
             lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
-            lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, {typed_str})")
-            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
+            lines.append(f"inline Rvd<T, LMUL> {cpp_fn}(const Rvm<T, LMUL>& m0, const Rvd<T, LMUL>& rsrc, {typed_str})")
+            lines.append(f"{{ return Rvd<T, LMUL>(mipp::{cpp_fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
             lines.append("")
 
         # 3. Operators
@@ -573,15 +610,28 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ r0 = r0 {op} Rvd<T, LMUL>(val); return r0; }}")
             lines.append("")
 
-        elif fn in ("lshift", "rshift"):
-            op = "<<" if fn == "lshift" else ">>"
+        elif fn in ("lshift_vs", "rshift_vs"):
+            # same count for every lane: `r << 3`
+            op = "<<" if fn == "lshift_vs" else ">>"
             lines.append("template <typename T, int LMUL = 1>")
             lines.append(f"inline Rvd<T, LMUL> operator{op}(const Rvd<T, LMUL>& r0, const int32_t val)")
-            lines.append(f"{{ return mipp::{fn}(r0, val); }}")
+            lines.append(f"{{ return mipp::{cpp_fn}(r0, val); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
             lines.append(f"inline Rvd<T, LMUL>& operator{op}=(Rvd<T, LMUL>& r0, const int32_t val)")
             lines.append(f"{{ r0 = r0 {op} val; return r0; }}")
+            lines.append("")
+
+        elif fn in ("lshift", "rshift"):
+            # count of each lane in a register: `r << n`
+            op = "<<" if fn == "lshift" else ">>"
+            lines.append("template <typename T, int LMUL = 1>")
+            lines.append(f"inline Rvd<T, LMUL> operator{op}(const Rvd<T, LMUL>& r0, const Rvd<T, LMUL>& r1)")
+            lines.append(f"{{ return mipp::{fn}(r0, r1); }}")
+            lines.append("")
+            lines.append("template <typename T, int LMUL = 1>")
+            lines.append(f"inline Rvd<T, LMUL>& operator{op}=(Rvd<T, LMUL>& r0, const Rvd<T, LMUL>& r1)")
+            lines.append(f"{{ r0 = r0 {op} r1; return r0; }}")
             lines.append("")
 
         elif fn == "neg":

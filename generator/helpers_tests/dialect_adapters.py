@@ -364,9 +364,9 @@ class CppObjDialectAdapter(DialectAdapter):
         if mkind in ("", "unmasked"):
             if func_name in all_syms and len(parts) == 2:
                 return f"{parts[0]} {all_syms[func_name]} {parts[1]}"
-            if func_name == "lshift" and len(parts) == 2:
+            if func_name in ("lshift", "lshift_vs") and len(parts) == 2:
                 return f"{parts[0]} << {parts[1]}"
-            if func_name == "rshift" and len(parts) == 2:
+            if func_name in ("rshift", "rshift_vs") and len(parts) == 2:
                 return f"{parts[0]} >> {parts[1]}"
             if func_name == "neg" and len(parts) == 1:
                 return f"-{parts[0]}"

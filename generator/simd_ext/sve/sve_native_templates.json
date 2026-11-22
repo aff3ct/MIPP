@@ -27,6 +27,18 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
     },
+    "form_n_cmp_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}(m0.m, r0.r, s0);"
+    },
+    "form_n_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_m(m0.m, r0.r, s0);"
+    },
+    "form_n_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, s0);"
+    },
     "gather_z": {
         "format": "short",
         "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(m0.m, p0, r0.r);"
@@ -82,6 +94,14 @@
     "shift_z": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, (uint{{ dt_par.n_bits }}_t)s0);"
+    },
+    "shv_m_u": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(m0.m, r0.r, r1.r);"
+    },
+    "shv_z_u": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r0.r, r1.r);"
     },
     "std_2_reg_unpred": {
         "format": "short",

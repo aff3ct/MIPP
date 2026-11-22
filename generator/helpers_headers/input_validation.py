@@ -194,6 +194,10 @@ def validate_logical_integrity(isa, implems, implems_emu):
         interfaces = json.load(f)
     with open(os.path.join(current_dir, "registry_protos.json"), "r", encoding="utf-8") as f:
         protos = json.load(f)
+    # the scalar forms (`add_vs`...) are functions of their own, derived when the registry is loaded (forms.py)
+    import forms
+    form_functions = forms.expand_interfaces(protos, interfaces)
+    forms.expand_categories(categories, form_functions)
 
     # 1. Verify that in categories, the function names exist in the interfaces
     for cat_name, func_list in categories.items():

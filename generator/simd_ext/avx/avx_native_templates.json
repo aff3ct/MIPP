@@ -305,6 +305,10 @@
             "\tvals[ 3] ? 0xFF : 0, vals[ 2] ? 0xFF : 0, vals[ 1] ? 0xFF : 0, vals[ 0] ? 0xFF : 0);"
         ]
     },
+    "shv_vv": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, r1.r);"
+    },
     "store": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}{{ '_u' if instr_name in ('loadu', 'storeu') and isa_dt_par.to_ptr.startswith('__m') else '' }}*) p0, r0.r);"

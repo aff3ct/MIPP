@@ -271,9 +271,9 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
-    "lshift": [
+    "lshift_vs": [
         {
-            "instr_name": "lshift",
+            "instr_name": "lshift_vs",
             "datatypes": [
                 "int8",
                 "uint8"
@@ -321,9 +321,9 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
-    "rshift": [
+    "rshift_vs": [
         {
-            "instr_name": "rshift",
+            "instr_name": "rshift_vs",
             "datatypes": [
                 "uint8"
             ],
@@ -331,7 +331,7 @@
             "if": "defined(__AVX512BW__)"
         },
         {
-            "instr_name": "rshift",
+            "instr_name": "rshift_vs",
             "datatypes": [
                 "int8"
             ],
