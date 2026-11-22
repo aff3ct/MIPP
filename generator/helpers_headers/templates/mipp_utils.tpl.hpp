@@ -142,3 +142,4 @@ inline auto pack(const R& a, const R& b) -> decltype(details::ncvts_to<T_DST>::a
 }
 
 } // namespace mipp
+

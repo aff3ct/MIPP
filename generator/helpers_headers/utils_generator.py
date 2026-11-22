@@ -7,7 +7,10 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
 - `include/mipp/cpp/utils.hpp` (C++ Functional API, `mipp_utils.tpl.hpp`): `mipp::malloc`, `mipp::free`,
   `mipp::allocator`, `mipp::vector`, `mipp::dump`, `mipp::sum`, `mipp::pack`;
 - `include/mipp/obj/utils.hpp` (C++ Object API, `mipp_obj_utils.tpl.hpp`): `operator<<`, `pack`, `reduce` and the
-  operations of `mipp::op`.
+  operations of `mipp::op`;
+- `include/mipp/cpp/patterns.hpp` and `include/mipp/obj/patterns.hpp` (C++17, `mipp_patterns.tpl.hpp`,
+  `mipp_obj_patterns.tpl.hpp`): `permute<P>` and `permute2<P>`, permutations whose pattern is known at compile time.
+  They pull about 20 rearrangement functions: only the global headers include them, not the utils headers.
 
 These functions are not in the registry: they are not implemented per ISA, they are written once on top of the
 generated functions (storeu, torvd, hadd, combine, ncvts, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
@@ -50,6 +53,8 @@ def generate_utils(output_dir="../include"):
         ("mipp_utils.tpl.h", os.path.join(output_dir, "mipp", "c", "utils.h")),
         ("mipp_utils.tpl.hpp", os.path.join(output_dir, "mipp", "cpp", "utils.hpp")),
         ("mipp_obj_utils.tpl.hpp", os.path.join(output_dir, "mipp", "obj", "utils.hpp")),
+        ("mipp_patterns.tpl.hpp", os.path.join(output_dir, "mipp", "cpp", "patterns.hpp")),
+        ("mipp_obj_patterns.tpl.hpp", os.path.join(output_dir, "mipp", "obj", "patterns.hpp")),
     ]
     for tpl, path in outputs:
         os.makedirs(os.path.dirname(path), exist_ok=True)

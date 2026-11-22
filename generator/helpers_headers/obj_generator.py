@@ -881,4 +881,6 @@ def generate_obj(include_manager=None, output_dir="../include"):
             f.write(f'#include "mipp/obj/cat/{cat}.hpp"\n')
         # hand-written utilities (operator<<, pack, reduce): utils_generator.py
         f.write('#include "mipp/obj/utils.hpp"\n')
+        # compile-time permutations of the Rvd registers (C++17): utils_generator.py
+        f.write('#include "mipp/obj/patterns.hpp"\n')
 

@@ -160,7 +160,32 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ---
 
-## 7. Implementation Levels
+## 7. Patterns Known at Compile Time (C++17)
+
+With C++17, `mipp::permute<P>(a)` and `mipp::permute2<P>(a, b)` take the indices from a **pattern** `P`: a type with a function `static constexpr int get(int i, int n)` that gives the source lane of the lane `i` of the result, `n` being the number of lanes of the whole group (`[0, n)` for `permute`, `[0, 2n)` for `permute2`), or `-1` for a zero. The number of lanes is a constant of the compilation on every ISA (SVE and RVV with a fixed register size), so the indices are known by the compiler:
+
+- a pattern of a named rearrangement is replaced by its function: `reverse`, `rotate`, `broadcast_lane`, `slide_up`, `slide_down`, `swap_pairs`, `dup_even`, `dup_odd` for one register; `slide`, `zip_lo`, `zip_hi`, `unzip_even`, `unzip_odd` for two registers (and `permute` when all the indices of `permute2` are in one register);
+- the other patterns are a `permute` / `permute2` with a constant table of indices, then a `select` for the zeros; with 8-bit elements and more than 256 lanes (or 128 for `permute2`), through memory.
+
+An index out of `[-1, n)` (`[-1, 2n)` for `permute2`) is a compilation error. The patterns are an option of C++17: the C++11 API has the functions with indices in a register (§5). They are in `mipp/cpp/patterns.hpp` and `mipp/obj/patterns.hpp`, included by `mipp.hpp` and `mipp_obj.hpp` but not by the [per-function headers](headers_and_compile_time.md): they pull about twenty rearrangement functions.
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/patterns/fun.cpp:patterns"
+    --8<-- "examples/doc/patterns/fun.cpp:calls"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/patterns/obj.cpp:patterns"
+    --8<-- "examples/doc/patterns/obj.cpp:calls"
+    ```
+
+---
+
+## 8. Implementation Levels
 
 The rearrangements are native on most ISAs: `svrev`, `svzip1`, `svuzp1`, `svsplice`, `svdup_lane`, `svtbl`, `svcompact` on SVE; `vzip1q`, `vuzp1q`, `vtrn1q`, `vrev64q`, `vqtbl1q` on NEON (AArch64); `unpcklps`, `shufps`, `vpermps`, `vpermt2ps`, `pshufb`, `vcompressps` on x86; `vrgather`, `vcompress`, `viota`, `vslideup` / `vslidedown` on RVV. `permute` of SSE and NEON computes the byte indices of the lanes for `pshufb` / `vqtbl1q`, and `compress` of SSE, AVX2 and NEON (32 and 64-bit elements) reads the shuffle of the mask in a small table of the headers. The others are generic (a slide through memory, `get` and `set1` for a broadcast) or, for some types and ISAs, written lane by lane (Level 3); the levels of each function are in its [reference page](../funcs_support/index.md).
 

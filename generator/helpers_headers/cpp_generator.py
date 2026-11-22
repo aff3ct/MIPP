@@ -27,6 +27,8 @@ def _generate_mipp_hpp(include_manager=None):
         content += f'#include "mipp/internal/interfaces/cpp/functions/{category}/{func}.hpp"\n'
     # hand-written utilities (allocator, printing, sum, pack): utils_generator.py
     content += '#include "mipp/cpp/utils.hpp"\n'
+    # compile-time permutations (C++17), not included by utils.hpp: they pull 20 rearrangement functions
+    content += '#include "mipp/cpp/patterns.hpp"\n'
     print(content, file=file)
 
 def generate_cpp(include_manager=None, isa_list=None, all_isa_names=None):
