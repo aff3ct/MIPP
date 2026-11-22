@@ -156,6 +156,12 @@
             "return %orb<tp>%(s, %torvd<tp>%(%cmplt<tp>%(s, r0)));"
         ]
     },
+    "all": {
+        "format": "long",
+        "code": [
+            "return %none<tp>%(%notb_k<tp>%(m0));"
+        ]
+    },
     "andb_k_emu": {
         "format": "long",
         "code": [
@@ -190,6 +196,12 @@
             "%r<tp>% tmp2 = %torvd<tp>%(m1);",
             "%r<tp>% res = %andnb<tp>%(tmp1, tmp2);",
             "return %torvm<tp>%(res);"
+        ]
+    },
+    "any": {
+        "format": "long",
+        "code": [
+            "return !%none<tp>%(m0);"
         ]
     },
     "arith_2args_u": {
@@ -666,6 +678,12 @@
     "cmpneq": {
         "format": "long",
         "code": "return %notb_k<tp>%(%cmpeq<tp>%(r0, r1));"
+    },
+    "copysign": {
+        "format": "long",
+        "code": [
+            "return %orb<tp>%(%abs<tp>%(r0), %msb<tp>%(r1));"
+        ]
     },
     "cos_f32": {
         "format": "long",
@@ -1458,6 +1476,18 @@
             "return %cast<c:uint|b:tp,tp>%(%{{ instr_name }}<c:uint|b:tp>%(%cast<tp,c:uint|b:tp>%(r0), s0));"
         ]
     },
+    "signbit_float": {
+        "format": "long",
+        "code": [
+            "return %cast_k<c:int|b:tp,tp>%(%cmplt<c:int|b:tp>%(%cast<tp,c:int|b:tp>%(r0), %set0<c:int|b:tp>%()));"
+        ]
+    },
+    "signbit_int": {
+        "format": "long",
+        "code": [
+            "return %cmplt<tp>%(r0, %set0<tp>%());"
+        ]
+    },
     "sin_f32": {
         "format": "long",
         "code": [
@@ -1819,6 +1849,19 @@
             "%r<tp>% tmp2 = %torvd<tp>%(m1);",
             "%r<tp>% res = %xorb<tp>%(tmp1, tmp2);",
             "return %torvm<tp>%(res);"
+        ]
+    },
+    "xorsign_float": {
+        "format": "long",
+        "code": [
+            "return %xorb<tp>%(r0, %msb<tp>%(r1));"
+        ]
+    },
+    "xorsign_int": {
+        "format": "long",
+        "code": [
+            "%r<tp>% s = %rshift<tp>%(r1, {{ dt_par.n_bits - 1 }});",
+            "return %sub<tp>%(%xorb<tp>%(r0, s), s);"
         ]
     }
 }

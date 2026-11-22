@@ -78,6 +78,13 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "any": [
+        {
+            "instr_name": "testz",
+            "datatypes": "all_datatypes",
+            "template": "any_testz"
+        }
+    ],
     "cast": [
         {
             "instr_name": "cast",

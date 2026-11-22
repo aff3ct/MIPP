@@ -1,4 +1,16 @@
 {
+    "all_movemask": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m) == {% if isa_dt_par.data_ext_logi == 'ps' %}0xF{% elif isa_dt_par.data_ext_logi == 'pd' %}0x3{% else %}0xFFFF{% endif %};"
+        ]
+    },
+    "any_movemask": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m) != 0;"
+        ]
+    },
     "arith_1arg": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"

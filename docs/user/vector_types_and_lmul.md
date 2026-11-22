@@ -197,9 +197,9 @@ The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-pe
 - **AVX / AVX2, AVX-512**: a native register of the narrower ISA: 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`) on AVX, 256-bit AVX registers on AVX-512.
 - **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array, and most operations on it use the scalar fallback. They are implemented with the standard `V` extension; on cores without 64-bit elements or with VLEN < 128, some of them are not (see [Implementation Levels](implementation_levels.md#known-limitations)).
 - **SSE / NEON / ARM SVE**: there is no narrower register (on ARMv7, part of the `float64` half-vector operations are not implemented, see [Implementation Levels](implementation_levels.md#known-limitations)), so a `d2` value is stored in a full LMUL = 1 register (same member as the `m1` type, but a distinct type). Only the lower $N/2$ lanes are meaningful; the upper lanes are unspecified and ignored (they may hold garbage). Consequences:
-    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions, `testz` and `none` ignore the upper lanes;
+    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions, `testz`, `none`, `any` and `all` ignore the upper lanes;
     - `get(r, lane)` with `lane` outside $[0, N/2)$ is undefined behavior;
-    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, `none`, masked loads/stores/gathers/scatters, masked reductions, `combine` on masks).
+    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, `none`, `any`, `all`, masked loads/stores/gathers/scatters, masked reductions, `combine` on masks).
 - **Scalar**: plain array of half the elements.
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
@@ -215,7 +215,7 @@ For this reason, MIPP only exposes $\text{LDIV} = 2$ (`d2`), and deeper division
 
 ## 5. Type Conversions
 
-MIPP provides four conversions between data vectors. They differ in what they preserve: the bits (`cast`), the values (`cvt`), or the values with a wider (`wcvt`) or narrower (`ncvt`) type. The last two change the `LMUL` of the register, so that no element is lost or left unused (see [§5.5](#55-changing-the-lmul)).
+MIPP provides five conversions between data vectors. They differ in what they preserve: the bits (`cast`), the values (`cvt`), or the values with a wider (`wcvt`) or narrower (`ncvt`, `ncvts`) type. The last two change the `LMUL` of the register, so that no element is lost or left unused (see [§5.5](#55-changing-the-lmul)).
 
 | Operation | Effect | C API | C++ Functional API | C++ Object API |
 | :--- | :--- | :--- | :--- | :--- |
@@ -223,8 +223,9 @@ MIPP provides four conversions between data vectors. They differ in what they pr
 | **`cvt`** | Converts the value of each element to another type **of the same width**. | `mipp_cvt_[src]_[dst]_[lmul](v)` | `mipp::cvt_[dst](v)` | `mipp::cvt<T_DST>(v)` |
 | **`wcvt`** | Converts the value of **every element** to the type **twice as wide**; the result has the next `LMUL` up. | `mipp_wcvt_[src]_[dst]_[lmul](v)` | `mipp::wcvt_[dst](v)` | `mipp::wcvt<T_DST>(v)` |
 | **`ncvt`** | Converts the value of every element to the type **twice as narrow** (truncation); the result has the next `LMUL` down. | `mipp_ncvt_[src]_[dst]_[lmul](v)` | `mipp::ncvt_[dst](v)` | `mipp::ncvt<T_DST>(v)` |
+| **`ncvts`** | As `ncvt` for the integers, with **saturation** to the range of the destination type. | `mipp_ncvts_[src]_[dst]_[lmul](v)` | `mipp::ncvts_[dst](v)` | `mipp::ncvts<T_DST>(v)` |
 
-`cast` and `cvt` keep the `LMUL` of their input; `wcvt` and `ncvt` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `torvd` / `torvm` ([§6.2](masking_semantics.md#62-torvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-torvd-mask-to-data-vector)).
+`cast` and `cvt` keep the `LMUL` of their input; `wcvt`, `ncvt` and `ncvts` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `torvd` / `torvm` ([§6.2](masking_semantics.md#62-torvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-torvd-mask-to-data-vector)).
 
 === "C API"
 
@@ -264,12 +265,14 @@ MIPP provides four conversions between data vectors. They differ in what they pr
 
 `ncvt` is the inverse of `wcvt`: `int16` $\to$ `int8`, `int32` $\to$ `int16`, `int64` $\to$ `int32`, the same for the unsigned types, and `float64` $\to$ `float32`. The result has the **next `LMUL` down** (`m8` $\to$ `m4`, ..., `m1` $\to$ `d2`), and keeps every element. There is nothing to narrow into from `d2`.
 
-- **Integers**: the value is **truncated** (modulo $2^{n}$ of the destination width), like a C cast. There is no saturation.
+- **Integers**: the value is **truncated** (modulo $2^{n}$ of the destination width), like a C cast. There is no saturation: see `ncvts`.
 - **`float64` to `float32`**: rounded to the nearest representable value.
+
+`ncvts` is the **saturating** version, for the integers of the same signedness (`int16` $	o$ `int8`, ..., `uint64` $	o$ `uint32`): a value out of the range of the destination type gives the nearest bound (`300` gives `127` in `int8`, `-300` gives `-128`; `70000` gives `65535` in `uint16`). It is the `pack` of MIPPv1 on one register of the `LMUL` above. From a signed type to the unsigned type of half the width, clamp the negative values first: `ncvts_uint8(cast_uint16(max(v, 0)))`.
 
 ### 5.5. Changing the LMUL
 
-`wcvt` and `ncvt` are two of the functions whose result has an `LMUL` different from the one of their arguments. The others split and join registers:
+`wcvt`, `ncvt` and `ncvts` are functions whose result has an `LMUL` different from the one of their arguments. The others split and join registers:
 
 | Function | Effect | Input $\to$ result |
 | :--- | :--- | :--- |

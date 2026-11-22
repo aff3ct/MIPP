@@ -62,6 +62,21 @@ inline bool uniform_bool(std::mt19937& rng) {
     return dist(rng) != 0;
 }
 
+// Mask lane `i` of the iteration `n` for the tests of the mask reductions (`any`, `all`, `none`,
+// `testz`): random masks are almost never all true or all false, so each iteration uses another
+// case: all true, all false, all true but the lane 0, only the lane 0, all true but the lane 1,
+// random. Returns -1 (active) or 0.
+inline int32_t mask_cycle(std::mt19937& rng, unsigned n, size_t i) {
+    switch (n % 6) {
+        case 0:  return -1;
+        case 1:  return 0;
+        case 2:  return i == 0 ? 0 : -1;
+        case 3:  return i == 0 ? -1 : 0;
+        case 4:  return i == 1 ? 0 : -1;
+        default: return uniform_bool(rng) ? -1 : 0;
+    }
+}
+
 // --- Strictly Positive (> 0) ---
 template <class T>
 requires (std::is_integral_v<T> || std::is_floating_point_v<T>)

@@ -517,13 +517,14 @@
                     "type": "boolean"
                 },
                 "mask_pattern": {
-                    "description": "Values of the input masks: `uniform_bool` (random), `alternating` (even lanes), `sparse` (one lane in four), `dense` (three lanes in four), `all_true`, `all_false`.",
+                    "description": "Values of the input masks: `uniform_bool` (random), `alternating` (even lanes), `sparse` (one lane in four), `dense` (three lanes in four), `all_true`, `all_false`, or `reduction_cycle` (a different case at each iteration: all true, all false, all true but one lane, only one lane true, random; for the mask reductions such as `any` and `all`).",
                     "type": "string",
                     "enum": [
                         "uniform_bool",
                         "alternating",
                         "all_true",
                         "all_false",
+                        "reduction_cycle",
                         "sparse",
                         "dense"
                     ]

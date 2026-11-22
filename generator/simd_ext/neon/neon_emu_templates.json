@@ -1,4 +1,16 @@
 {
+    "all_minv64": {
+        "format": "long",
+        "code": [
+            "return vminvq_u32(vreinterpretq_u32_u64(m0.m)) != 0;"
+        ]
+    },
+    "any_maxv64": {
+        "format": "long",
+        "code": [
+            "return vmaxvq_u32(vreinterpretq_u32_u64(m0.m)) != 0;"
+        ]
+    },
     "arith_2args_recp": {
         "format": "long",
         "code": [

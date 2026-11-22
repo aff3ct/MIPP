@@ -1,4 +1,20 @@
 {
+    "all": [
+        {
+            "instr_name": "all",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.tpl_all"
+        }
+    ],
+    "any": [
+        {
+            "instr_name": "any",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.tpl_any"
+        }
+    ],
     "get": [
         {
             "instr_name": "get",

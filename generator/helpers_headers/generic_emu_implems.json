@@ -70,6 +70,12 @@
             "template_ref": "tpl_generic_emu.adds_uint"
         }
     ],
+    "all": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.all"
+        }
+    ],
     "andb": [
         {
             "instr_name": "andb",
@@ -130,6 +136,12 @@
                 "rvv"
             ],
             "template_ref": "tpl_generic_emu.andnb_k_direct_emu"
+        }
+    ],
+    "any": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.any"
         }
     ],
     "asin": [
@@ -579,6 +591,12 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.cmpneq"
+        }
+    ],
+    "copysign": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.copysign"
         }
     ],
     "cos": [
@@ -1365,6 +1383,16 @@
             "template_ref": "tpl_generic_emu.set_k_emu"
         }
     ],
+    "signbit": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.signbit_float"
+        },
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.signbit_int"
+        }
+    ],
     "sin": [
         {
             "datatypes": [
@@ -1541,6 +1569,16 @@
                 "avx"
             ],
             "template_ref": "tpl_generic_emu.logi_m_2args_e"
+        }
+    ],
+    "xorsign": [
+        {
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.xorsign_float"
+        },
+        {
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.xorsign_int"
         }
     ]
 }

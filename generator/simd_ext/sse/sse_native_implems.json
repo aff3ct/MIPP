@@ -51,6 +51,29 @@
             "if": "defined(__SSE2__)"
         }
     ],
+    "all": [
+        {
+            "instr_name": "movemask",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "all_movemask"
+        },
+        {
+            "instr_name": "movemask",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "all_movemask",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "movemask",
+            "datatypes": "all_int_uint",
+            "template": "all_movemask",
+            "if": "defined(__SSE2__)"
+        }
+    ],
     "andb": [
         {
             "instr_name": "and",
@@ -140,6 +163,29 @@
             "instr_name": "andnot",
             "datatypes": "all_int_uint",
             "template": "logi_m_2args_si128",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "any": [
+        {
+            "instr_name": "movemask",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "any_movemask"
+        },
+        {
+            "instr_name": "movemask",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "any_movemask",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "movemask",
+            "datatypes": "all_int_uint",
+            "template": "any_movemask",
             "if": "defined(__SSE2__)"
         }
     ],

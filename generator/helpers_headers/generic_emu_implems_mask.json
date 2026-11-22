@@ -287,6 +287,26 @@
             "template_ref": "tpl_mask_generic_emu.cmp_2args"
         }
     ],
+    "copysign": [
+        {
+            "instr_name": "copysign",
+            "datatypes": "all_float",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "copysign",
+            "datatypes": "all_float",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "copysign",
+            "datatypes": "all_float",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
+        }
+    ],
     "cos": [
         {
             "instr_name": "cos",
@@ -1315,6 +1335,35 @@
         {
             "instr_name": "xorb",
             "datatypes": "all_datatypes",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
+        }
+    ],
+    "xorsign": [
+        {
+            "instr_name": "xorsign",
+            "datatypes": [
+                "all_int",
+                "all_float"
+            ],
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "xorsign",
+            "datatypes": [
+                "all_int",
+                "all_float"
+            ],
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "xorsign",
+            "datatypes": [
+                "all_int",
+                "all_float"
+            ],
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }

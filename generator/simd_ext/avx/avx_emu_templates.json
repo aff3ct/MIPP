@@ -1,4 +1,12 @@
 {
+    "all_testc": {
+        "format": "long",
+        "code": [
+            "{%- set ones = '_mm256_set1_epi32(-1)' -%}",
+            "{%- if isa_dt_par.data_ext_msk == 'ps' %}{% set ones = '_mm256_castsi256_ps(' ~ ones ~ ')' %}{% elif isa_dt_par.data_ext_msk == 'pd' %}{% set ones = '_mm256_castsi256_pd(' ~ ones ~ ')' %}{% endif -%}",
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, {{ ones }});"
+        ]
+    },
     "cvt_f32_u32": {
         "format": "long",
         "code": [

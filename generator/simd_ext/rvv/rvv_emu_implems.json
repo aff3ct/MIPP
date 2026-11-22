@@ -27,6 +27,13 @@
             "variant": "z"
         }
     ],
+    "all": [
+        {
+            "instr_name": "cpop",
+            "datatypes": "all_datatypes",
+            "template": "all_cpop"
+        }
+    ],
     "andb": [
         {
             "instr_name": "and",

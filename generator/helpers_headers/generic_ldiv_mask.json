@@ -1,4 +1,22 @@
 {
+    "all": [
+        {
+            "code": [
+                "{{ lanemask() }}",
+                "{{ wrap('m0') }}",
+                "return {{ call1('all', call1('orb_k', 'w_m0', call1('notb_k', 'lm'))) }};"
+            ]
+        }
+    ],
+    "any": [
+        {
+            "code": [
+                "{{ lanemask() }}",
+                "{{ wrap('m0') }}",
+                "return {{ call1('any', call1('andb_k', 'w_m0', 'lm')) }};"
+            ]
+        }
+    ],
     "combine": [
         {
             "level": 3,
@@ -188,6 +206,27 @@
                 "%s<tr>% bd[%N<tr|m:tr*2>%] = {0};",
                 "for (unsigned i = 0; i < %N<tr>%; i++)",
                 "\tbd[i] = (%s<tr>%)bs[i];",
+                "%r<tr>% res;",
+                "res.r = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.r;",
+                "return res;"
+            ]
+        }
+    ],
+    "ncvts": [
+        {
+            "level": 3,
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set D = ctx.dt_ret | upper %}",
+                "{{ wrap('r0') }}",
+                "%s<tp>% bs[%N<tp>%];",
+                "{{ call1('storeu', 'bs', 'w_r0') }};",
+                "%s<tr>% bd[%N<tr|m:tr*2>%] = {0};",
+                "for (unsigned i = 0; i < %N<tr>%; i++)",
+                "{% if ctx.dt_ret.startswith('u') %}\tbd[i] = (%s<tr>%)(bs[i] > {{ D }}_MAX ? {{ D }}_MAX : bs[i]);",
+                "{% else %}\tbd[i] = (%s<tr>%)(bs[i] < {{ D }}_MIN ? {{ D }}_MIN : (bs[i] > {{ D }}_MAX ? {{ D }}_MAX : bs[i]));{% endif %}",
                 "%r<tr>% res;",
                 "res.r = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.r;",
                 "return res;"

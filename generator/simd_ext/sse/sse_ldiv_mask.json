@@ -204,44 +204,123 @@
     ],
     "ncvt": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_packus_epi16(_mm_and_si128(r0.r, _mm_set1_epi16(0x00FF)), _mm_setzero_si128());",
                 "return res;"
             ],
-            "datatypes": ["int16", "uint16"],
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
             "if": "defined(__SSE2__)"
         },
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_packs_epi32(_mm_srai_epi32(_mm_slli_epi32(r0.r, 16), 16), _mm_setzero_si128());",
                 "return res;"
             ],
-            "datatypes": ["int32", "uint32"],
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
             "if": "defined(__SSE2__)"
         },
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_shuffle_epi32(r0.r, _MM_SHUFFLE(3, 3, 2, 0));",
                 "return res;"
             ],
-            "datatypes": ["int64", "uint64"],
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
             "if": "defined(__SSE2__)"
         },
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_cvtpd_ps(r0.r);",
                 "return res;"
             ],
-            "datatypes": ["float64"],
+            "datatypes": [
+                "float64"
+            ],
             "if": "defined(__SSE2__)"
+        }
+    ],
+    "ncvts": [
+        {
+            "datatypes": [
+                "int16"
+            ],
+            "variants": [
+                "u"
+            ],
+            "if": "defined(__SSE2__)",
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_packs_epi16(r0.r, _mm_setzero_si128());",
+                "return res;"
+            ]
+        },
+        {
+            "datatypes": [
+                "int32"
+            ],
+            "variants": [
+                "u"
+            ],
+            "if": "defined(__SSE2__)",
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_packs_epi32(r0.r, _mm_setzero_si128());",
+                "return res;"
+            ]
+        },
+        {
+            "datatypes": [
+                "uint16"
+            ],
+            "variants": [
+                "u"
+            ],
+            "if": "defined(__SSE2__)",
+            "code": [
+                "// min(x, 255) = x - (x -sat 255) with unsigned saturations, then packus on values < 2^15",
+                "__m128i x = _mm_sub_epi16(r0.r, _mm_subs_epu16(r0.r, _mm_set1_epi16(255)));",
+                "%r<tr>% res;",
+                "res.r = _mm_packus_epi16(x, _mm_setzero_si128());",
+                "return res;"
+            ]
+        },
+        {
+            "datatypes": [
+                "uint32"
+            ],
+            "variants": [
+                "u"
+            ],
+            "if": "defined(__SSE4_1__)",
+            "code": [
+                "%r<tr>% res;",
+                "res.r = _mm_packus_epi32(_mm_min_epu32(r0.r, _mm_set1_epi32(65535)), _mm_setzero_si128());",
+                "return res;"
+            ]
         }
     ],
     "store|storeu": [
@@ -259,43 +338,68 @@
     ],
     "wcvt": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_cvt{{ isa_dt.data_ext }}_{{ isa.datatypes[ctx.dt_ret].data_ext | replace('epu', 'epi') }}(r0.r);",
                 "return res;"
             ],
-            "datatypes": ["int8", "int16", "int32", "uint8", "uint16", "uint32"],
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32",
+                "uint8",
+                "uint16",
+                "uint32"
+            ],
             "if": "defined(__SSE4_1__)"
         },
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_unpacklo_{{ isa_dt.data_ext }}(r0.r, _mm_cmpgt_{{ isa_dt.data_ext }}(_mm_setzero_si128(), r0.r));",
                 "return res;"
             ],
-            "datatypes": ["int8", "int16", "int32"],
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32"
+            ],
             "if": "defined(__SSE2__)"
         },
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_unpacklo_{{ isa_dt.data_ext | replace('epu', 'epi') }}(r0.r, _mm_setzero_si128());",
                 "return res;"
             ],
-            "datatypes": ["uint8", "uint16", "uint32"],
+            "datatypes": [
+                "uint8",
+                "uint16",
+                "uint32"
+            ],
             "if": "defined(__SSE2__)"
         },
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = _mm_cvtps_pd(r0.r);",
                 "return res;"
             ],
-            "datatypes": ["float32"],
+            "datatypes": [
+                "float32"
+            ],
             "if": "defined(__SSE2__)"
         }
     ]

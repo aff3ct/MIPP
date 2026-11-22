@@ -1,4 +1,10 @@
 {
+    "any_testz": {
+        "format": "long",
+        "code": [
+            "return !{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m0.m);"
+        ]
+    },
     "arith_1arg": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"

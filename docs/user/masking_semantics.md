@@ -313,13 +313,15 @@ In C, $\text{LMUL}$ is part of the type and function names. In the C++ Functiona
 
 ---
 
-## 9. Mask Tests (`testz`, `none`)
+## 9. Mask Tests (`testz`, `none`, `any`, `all`)
 
-Two functions reduce masks to a scalar `int32_t` (`1` for true, `0` for false), typically to leave a loop early or to skip a branch when no lane is concerned:
+Four functions reduce masks to a scalar `int32_t` (`1` for true, `0` for false), typically to leave a loop early or to skip a branch when no lane is concerned:
 
 | Function | C API Function | C++ Functional API | C++ Object API | Semantics |
 | :--- | :--- | :--- | :--- | :--- |
 | **None active** | `mipp_none_[type]_[lmul](m)` | `mipp::none(m)` | `mipp::none(m)` | $1$ if no lane of `m` is active, $0$ otherwise. |
 | **Disjoint** | `mipp_testz_[type]_[lmul](m0, m1)` | `mipp::testz(m0, m1)` | `mipp::testz(m0, m1)` | $1$ if `m0 & m1` has no active lane, $0$ otherwise. |
+| **Any active** | `mipp_any_[type]_[lmul](m)` | `mipp::any(m)` | `mipp::any(m)` | $1$ if at least one lane of `m` is active, $0$ otherwise. |
+| **All active** | `mipp_all_[type]_[lmul](m)` | `mipp::all(m)` | `mipp::all(m)` | $1$ if every lane of `m` is active, $0$ otherwise. |
 
-`none(m)` is `testz(m, m)`. On half-vectors (`d2`), both functions ignore the unused upper lanes (see [Vector Types & LMUL §4.1](vector_types_and_lmul.md#41-availability)). `none` was named `testz_2` before MIPP v2.2.0.
+`none(m)` is `testz(m, m)`, and `any(m)` is `!none(m)`. On half-vectors (`d2`), the four functions ignore the unused upper lanes (see [Vector Types & LMUL §4.1](vector_types_and_lmul.md#41-availability)). `none` was named `testz_2` before MIPP v2.2.0.

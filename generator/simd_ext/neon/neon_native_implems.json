@@ -46,6 +46,22 @@
             "template": "arith_2args"
         }
     ],
+    "all": [
+        {
+            "instr_name": "minv",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "all_minv",
+            "if": "defined(__aarch64__)"
+        }
+    ],
     "andb": [
         {
             "instr_name": "andq",
@@ -82,6 +98,22 @@
             "instr_name": "bicq",
             "datatypes": "all_datatypes",
             "template": "logi_m_2args_rev"
+        }
+    ],
+    "any": [
+        {
+            "instr_name": "maxv",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "any_maxv",
+            "if": "defined(__aarch64__)"
         }
     ],
     "cast": [

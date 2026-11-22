@@ -90,6 +90,19 @@
             ]
         }
     ],
+    "ncvts": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "{% set E_out = ctx.ext(ctx.dt_ret, ctx.lmul_out) %}",
+                "%r<tr>% res;",
+                "res.r = {{ isa.prefix }}_vnclip{{ 'u' if ctx.dt_ret.startswith('u') else '' }}_wx_{{ E_out }}(r0.r, 0, __RISCV_VXRM_RNU, %N<tp>%);",
+                "return res;"
+            ]
+        }
+    ],
     "wcvt": [
         {
             "variants": [

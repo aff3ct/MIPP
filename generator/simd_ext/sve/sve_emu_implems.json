@@ -26,6 +26,13 @@
             "template": "bin_s"
         }
     ],
+    "all": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "all_ptest"
+        }
+    ],
     "andb": [
         {
             "instr_name": "and",
@@ -58,6 +65,13 @@
             "instr_name": "bic",
             "datatypes": "all_datatypes",
             "template": "andnb_k"
+        }
+    ],
+    "any": [
+        {
+            "instr_name": "ptest_any",
+            "datatypes": "all_datatypes",
+            "template": "any_ptest"
         }
     ],
     "cmpeq": [

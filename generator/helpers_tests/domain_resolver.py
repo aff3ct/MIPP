@@ -524,6 +524,9 @@ class DomainResolver:
             return f"{var_name}[i] = (i % 4 == 0) ? -1 : 0;"
         elif pattern == "dense":
             return f"{var_name}[i] = (i % 4 != 0) ? -1 : 0;"
+        elif pattern == "reduction_cycle":
+            # one pattern per iteration n: all true, all false, one lane off, one lane on, random
+            return f"{var_name}[i] = rnd::mask_cycle(seed, n, i);"
         else:
             return f"{var_name}[i] = rnd::uniform_bool(seed) ? -1 : 0;"
 

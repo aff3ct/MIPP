@@ -19,6 +19,10 @@
     "description": "Adds two integer vector registers element-wise with saturation to [MIN, MAX] on underflow/overflow.",
     "latex": "\\text{res}_i = \\operatorname{saturate}(r0_i + r1_i)"
   },
+  "all": {
+    "description": "Tests if every element of a mask register is active (returns 1 if all active, 0 otherwise).",
+    "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, m_{0, i} \\neq 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
+  },
   "andb": {
     "description": "Computes the bitwise AND of two vector registers.",
     "latex": "\\text{res}_i = r0_i \\ \\& \\ r1_i"
@@ -34,6 +38,10 @@
   "andnb_k": {
     "description": "Computes the bitwise AND-NOT of two mask registers (~m0 & m1).",
     "latex": "m_{\\text{res}, i} = (\\sim m_{0, i}) \\ \\& \\ m_{1, i}"
+  },
+  "any": {
+    "description": "Tests if at least one element of a mask register is active (returns 1 if any active, 0 otherwise).",
+    "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\exists i, \\, m_{0, i} \\neq 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
   },
   "asin": {
     "description": "Computes the arc sine of each floating-point element in radians.",
@@ -94,6 +102,10 @@
   "combine_k": {
     "description": "Joins two mask registers into a mask of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
     "latex": "m_{\\text{res}, i} = \\begin{cases} m_{0, i} & \\text{if } i < N \\\\ m_{1, i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
+  },
+  "copysign": {
+    "description": "Builds each element with the magnitude of the first register and the sign of the second one (IEEE copysign).",
+    "latex": "\\text{res}_i = \\text{sign}(r1_i) \\cdot |r0_i|"
   },
   "cos": {
     "description": "Computes the trigonometric cosine of each floating-point element in radians.",
@@ -227,6 +239,10 @@
     "description": "Narrowing conversion: converts vector elements to a narrower datatype, keeping the lanes in a register one LMUL below. The value is truncated (modulo for integers), not saturated.",
     "latex": "\\text{res}_i = (T_{\\text{narrow}}) r0_i"
   },
+  "ncvts": {
+    "description": "Converts each integer element to the type twice as narrow with saturation to its range; the result has the next LMUL down.",
+    "latex": "\\text{res}_i = \\min(\\max(r0_i, \\text{MIN}), \\text{MAX})"
+  },
   "neg": {
     "description": "Negates each element of a vector register.",
     "latex": "\\text{res}_i = -r0_i"
@@ -303,6 +319,10 @@
     "description": "Initializes a mask register from an array of int32_t evaluating boolean truthiness.",
     "latex": "m_i = (\\text{p0}[i] \\neq 0)"
   },
+  "signbit": {
+    "description": "Returns the mask of the elements whose sign bit is set (negative values, including -0.0 for the floating-point types).",
+    "latex": "m_{\\text{res}, i} = (r0_i < 0)"
+  },
   "sin": {
     "description": "Computes the trigonometric sine of each floating-point element in radians.",
     "latex": "\\text{res}_i = \\sin(r0_i)"
@@ -366,5 +386,9 @@
   "xorb_k": {
     "description": "Computes the bitwise XOR of two mask registers.",
     "latex": "m_{\\text{res}, i} = m_{0, i} \\oplus m_{1, i}"
+  },
+  "xorsign": {
+    "description": "Negates each element of the first register where the element of the second register is negative (sign bit set).",
+    "latex": "\\text{res}_i = \\begin{cases} -r0_i & \\text{if } r1_i < 0 \\\\ r0_i & \\text{otherwise} \\end{cases}"
   }
 }

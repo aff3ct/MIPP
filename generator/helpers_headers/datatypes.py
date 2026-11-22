@@ -115,3 +115,5 @@ uint_dt_widenning = [ "uint32,uint64", "uint16,uint32", "uint8,uint16" ]
 
 all_datatypes_widenning = int_dt_widenning + float_dt_widenning + uint_dt_widenning
 all_datatypes_narrowing = [",".join(reversed(p.split(","))) for p in all_datatypes_widenning]
+# integer narrowings only (the saturating narrowing ncvts has no float64 -> float32)
+all_int_uint_narrowing = [",".join(reversed(p.split(","))) for p in int_dt_widenning + uint_dt_widenning]

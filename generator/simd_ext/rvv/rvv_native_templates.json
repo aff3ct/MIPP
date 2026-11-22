@@ -1,4 +1,10 @@
 {
+    "any_cpop": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}_v{{ instr_name }}_m_{{ isa_dt_par.data_ext_logi }}(m0.m, %N<tp>%) != 0;"
+        ]
+    },
     "arith_1arg": {
         "format": "short",
         "code": [

@@ -85,6 +85,7 @@ DATATYPES_MAP = {
     "all_datatypes_same_size_inc_f64": all_datatypes_same_size_inc_f64,
     "all_datatypes_widenning": all_datatypes_widenning,
     "all_datatypes_narrowing": all_datatypes_narrowing,
+    "all_int_uint_narrowing": all_int_uint_narrowing,
     "float64": [float64],
     "float32": [float32],
     "int64": [int64],

@@ -292,9 +292,9 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ m0 = m0 {op} Rvm<T, LMUL>(val); return m0; }}")
             lines.append("")
 
-    elif args == ["msk"] and fn in ("notb_k", "none"):
+    elif args == ["msk"] and fn in ("notb_k", "none", "any", "all"):
         lines.append("template <typename T, int LMUL = 1>")
-        ret_t = "int32_t" if fn == "none" else "Rvm<T, LMUL>"
+        ret_t = "int32_t" if fn in ("none", "any", "all") else "Rvm<T, LMUL>"
         lines.append(f"inline {ret_t} {cpp_fn}(const Rvm<T, LMUL>& m0)")
         lines.append(f"{{ return {ret_t if ret_t == 'int32_t' else 'Rvm<T, LMUL>'}(mipp::{cpp_fn}(m0.m)); }}")
         lines.append("")
@@ -351,10 +351,10 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("inline Rvd<T, LMUL> torvd(const Rvm<T, LMUL>& m0)")
         lines.append("{ return Rvd<T, LMUL>(mipp::torvd(m0.m)); }")
         lines.append("")
-    elif fn == "torvm":
+    elif fn in ("torvm", "signbit"):
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Rvm<T, LMUL> torvm(const Rvd<T, LMUL>& r0)")
-        lines.append("{ return Rvm<T, LMUL>(mipp::torvm(r0.r)); }")
+        lines.append(f"inline Rvm<T, LMUL> {fn}(const Rvd<T, LMUL>& r0)")
+        lines.append(f"{{ return Rvm<T, LMUL>(mipp::{fn}(r0.r)); }}")
         lines.append("")
     elif fn == "cast":
         lines.append("namespace details")
@@ -474,11 +474,13 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("{ return details::wcvt_rvd_helper<T_DST>::apply(r0); }")
         lines.append("")
 
-    elif fn == "ncvt":
+    elif fn in ("ncvt", "ncvts"):
+        # ncvt (truncating) and ncvts (saturating, integers only): the destination type is a template
+        # parameter, dispatched to mipp::<fn>_<dst> by a helper structure
         lines.append("namespace details")
         lines.append("{")
         lines.append("template <typename T_DST>")
-        lines.append("struct ncvt_rvd_helper;")
+        lines.append(f"struct {fn}_rvd_helper;")
         lines.append("")
         types_map = [
             ("float", "float32"),
@@ -489,17 +491,19 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             ("int8_t", "int8"),
             ("uint8_t", "uint8"),
         ]
+        if fn == "ncvts":
+            types_map = types_map[1:]
         for c_t, f_suffix in types_map:
-            lines.append(f"template <> struct ncvt_rvd_helper<{c_t}> {{")
+            lines.append(f"template <> struct {fn}_rvd_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
             lines.append(f"\tstatic inline Rvd<{c_t}, details::lmul_down(LMUL)> apply(const Rvd<T_SRC, LMUL>& r0)")
-            lines.append(f"\t{{ return Rvd<{c_t}, details::lmul_down(LMUL)>(mipp::ncvt_{f_suffix}(r0.r)); }}")
+            lines.append(f"\t{{ return Rvd<{c_t}, details::lmul_down(LMUL)>(mipp::{fn}_{f_suffix}(r0.r)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append("inline Rvd<T_DST, details::lmul_down(LMUL)> ncvt(const Rvd<T_SRC, LMUL>& r0)")
-        lines.append("{ return details::ncvt_rvd_helper<T_DST>::apply(r0); }")
+        lines.append(f"inline Rvd<T_DST, details::lmul_down(LMUL)> {fn}(const Rvd<T_SRC, LMUL>& r0)")
+        lines.append(f"{{ return details::{fn}_rvd_helper<T_DST>::apply(r0); }}")
         lines.append("")
 
     # Category 8: General Register Operations (1-arg, 2-arg, 3-arg, shifts)

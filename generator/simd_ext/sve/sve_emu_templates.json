@@ -1,4 +1,11 @@
 {
+    "all_ptest": {
+        "format": "long",
+        "code": [
+            "svbool_t pg = svptrue_{{ isa_dt_par.data_ext_logi }}();",
+            "return !{{ isa.prefix }}{{ instr_name }}(pg, svnot_b_z(pg, m0.m));"
+        ]
+    },
     "andb_k": {
         "format": "short",
         "code": [
@@ -9,6 +16,12 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), m1.m, m0.m);"
+        ]
+    },
+    "any_ptest": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
         ]
     },
     "bin_s": {

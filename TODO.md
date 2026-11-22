@@ -6,7 +6,7 @@ This document tracks pending engineering tasks, missing functionality relative t
 
 ## 1. MIPPv1 Function Parity & Missing Interfaces
 
-MIPPv2 currently defines and generates **92 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline. The detailed plan (API, per-ISA mapping, generator changes) is being implemented on the `feat/mippv1-parity` branch.
+MIPPv2 currently defines and generates **98 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, and selection. Several specialized function families and utility modules from MIPPv1 have not yet been migrated to the MIPPv2 code generation pipeline. The detailed plan (API, per-ISA mapping, generator changes) is being implemented on the `feat/mippv1-parity` branch.
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
 MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components):
@@ -35,7 +35,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `transpose`, `transpose8x8`, `transpose2`, `transpose28x8`: Register-block transposes (a few datatypes and ISAs only in MIPPv1). Postponed with the register tuples.
 - [ ] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`).
 - [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation, done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
-- [ ] `pack`: Saturating register narrowing from two inputs. `ncvt` (truncating, one input) covers the non-saturating case; a saturating `pack` is postponed.
+- [x] `pack`: Saturating register narrowing: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs.
   > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`low`/`high`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
@@ -54,10 +54,8 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `sum`: Reduction alias for horizontal addition (`hadd`).
 - [ ] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation. Planned as `clamp(v, lo, hi)`.
 - [ ] `dump`: Formatted debug printing of vector and mask register contents to standard output streams.
-- [ ] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`. `none(m)` (no active lane, ex-`testz_2`) and `testz(m0, m1)` (AND of two masks) exist; `any(m)` (at least one active lane) and `all(m)` (all lanes active) are to be added.
-  - Declare them in the registry (`ret_i32_1arg_msk`, `horizontal`, variant `u`), `funcs_docs.json`, categories, scalar implementation, tests specs, and the object API (`int32_t` return).
-  - Generic Level 2: `any = !none(m)`, `all = none(notb_k(m))`. Beware: `all` via `notb_k` is wrong if the complement touches unused lanes (AVX-512 whole `__mmask`, partial LMUL such as `d2`): mask to the lane count or use a native form. Test all-zero, all-one, single-lane, `d2` and `m2` masks.
-  - Later (optional) native Level 1 versions: `kortest` (AVX-512), `vfirst` / `vmsbf` (RVV), `svptest_any` (SVE), `vmaxvq` (NEON).
+- [x] `neg(r, s)`, `copysign(r, s)`, `sign(r)`: `xorsign(a, b)` (negates `a` where `b` is negative: the MIPPv1 `neg` / `copysign`), `copysign(a, b)` (IEEE: magnitude of `a`, sign of `b`) and `signbit(v)` (mask of the negative lanes, including -0.0).
+- [x] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`, native on every ISA (movemask, testz/testc, kortest, maxv/minv, ptest, vcpop).
 
 ### 1.7. Summary of Function Renames & Architectural Evolution in MIPPv2
 | MIPPv1 Concept | MIPPv2 Implementation | Architectural Rationale |
@@ -69,6 +67,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::sat(r, min, max)` | `clamp` (planned) | Clamping between runtime bounds. Not to be confused with `adds`/`subs`, the saturated arithmetic at the type boundaries (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
 | `mipp::toreg<N>(m)` | `torvd(m)` / `torvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
+| `mipp::neg(r, s)`, `mipp::copysign(r, s)`, `mipp::sign(r)` | `xorsign(a, b)`, `copysign(a, b)`, `signbit(v)` | The MIPPv1 `copysign` was a sign flip (`xorsign`); MIPPv2 `copysign` follows IEEE 754. `signbit` is named after C99. |
 | `mipp::blend(r1, r2, m)` | `select(m, r1, r2)` | Renamed after the operation (`m ? r1 : r2`), mask first as in every masked MIPPv2 function. |
 
 ---

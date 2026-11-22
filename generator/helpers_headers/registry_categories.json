@@ -27,11 +27,13 @@
         "cmple",
         "cmplt",
         "cmpge",
-        "cmpgt"
+        "cmpgt",
+        "signbit"
     ],
     "convert": [
         "cvt",
         "ncvt",
+        "ncvts",
         "wcvt"
     ],
     "load": [
@@ -74,6 +76,8 @@
         "exp",
         "log",
         "neg",
+        "xorsign",
+        "copysign",
         "pow",
         "pow2",
         "round",
@@ -92,7 +96,9 @@
         "hmin",
         "hmax",
         "testz",
-        "none"
+        "none",
+        "any",
+        "all"
     ],
     "reinterpret": [
         "cast",

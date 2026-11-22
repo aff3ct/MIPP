@@ -1,4 +1,11 @@
 {
+    "all_cpop": {
+        "format": "long",
+        "code": [
+            "// no inactive lane: count of the complement. Not `vcpop(m) == N`, folded to 0 by GCC 14 when N >= 128",
+            "return {{ isa.prefix }}_v{{ instr_name }}_m_{{ isa_dt_par.data_ext_logi }}({{ isa.prefix }}_vmnot_m_{{ isa_dt_par.data_ext_logi }}(m0.m, %N<tp>%), %N<tp>%) == 0;"
+        ]
+    },
     "arith_1arg_mskz": {
         "format": "long",
         "code": [

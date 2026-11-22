@@ -1,7 +1,9 @@
 {
     "combine": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = vcombine_{{ isa_dt.data_ext }}(vget_low_{{ isa_dt.data_ext }}(r0.r), vget_low_{{ isa_dt.data_ext }}(r1.r));",
@@ -11,7 +13,9 @@
     ],
     "combine_k": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%m<tr>% res;",
                 "res.m = vcombine_{{ isa_dt.data_ext_msk }}(vget_low_{{ isa_dt.data_ext_msk }}(m0.m), vget_low_{{ isa_dt.data_ext_msk }}(m1.m));",
@@ -21,7 +25,9 @@
     ],
     "high": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = vextq_{{ isa_dt.data_ext }}(r0.r, r0.r, %N<tp|m:tp/2>%);",
@@ -31,7 +37,9 @@
     ],
     "high_k": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%m<tr>% res;",
                 "res.m = vextq_{{ isa_dt.data_ext_msk }}(m0.m, m0.m, %N<tp|m:tp/2>%);",
@@ -53,7 +61,9 @@
     ],
     "low": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = r0.r;",
@@ -63,7 +73,9 @@
     ],
     "low_k": [
         {
-            "variants": ["u"],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%m<tr>% res;",
                 "res.m = m0.m;",
@@ -73,8 +85,17 @@
     ],
     "ncvt": [
         {
-            "datatypes": ["int16", "int32", "int64", "uint16", "uint32", "uint64"],
-            "variants": ["u"],
+            "datatypes": [
+                "int16",
+                "int32",
+                "int64",
+                "uint16",
+                "uint32",
+                "uint64"
+            ],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = vcombine_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vmovn_{{ isa_dt.data_ext }}(r0.r), vdup_n_{{ isa.datatypes[ctx.dt_ret].data_ext }}(0));",
@@ -82,11 +103,35 @@
             ]
         },
         {
-            "datatypes": ["float64"],
-            "variants": ["u"],
+            "datatypes": [
+                "float64"
+            ],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = vcombine_f32(vcvt_f32_f64(r0.r), vdup_n_f32(0));",
+                "return res;"
+            ]
+        }
+    ],
+    "ncvts": [
+        {
+            "datatypes": [
+                "int16",
+                "int32",
+                "int64",
+                "uint16",
+                "uint32",
+                "uint64"
+            ],
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = vcombine_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vqmovn_{{ isa_dt.data_ext }}(r0.r), vdup_n_{{ isa.datatypes[ctx.dt_ret].data_ext }}(0));",
                 "return res;"
             ]
         }
@@ -103,8 +148,17 @@
     ],
     "wcvt": [
         {
-            "datatypes": ["int8", "int16", "int32", "uint8", "uint16", "uint32"],
-            "variants": ["u"],
+            "datatypes": [
+                "int8",
+                "int16",
+                "int32",
+                "uint8",
+                "uint16",
+                "uint32"
+            ],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = vmovl_{{ isa_dt.data_ext }}(vget_low_{{ isa_dt.data_ext }}(r0.r));",
@@ -112,8 +166,12 @@
             ]
         },
         {
-            "datatypes": ["float32"],
-            "variants": ["u"],
+            "datatypes": [
+                "float32"
+            ],
+            "variants": [
+                "u"
+            ],
             "code": [
                 "%r<tr>% res;",
                 "res.r = vcvt_f64_f32(vget_low_f32(r0.r));",

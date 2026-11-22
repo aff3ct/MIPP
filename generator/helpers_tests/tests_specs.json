@@ -302,6 +302,9 @@
                 }
             }
         },
+        "all": {
+            "mask_pattern": "reduction_cycle"
+        },
         "andb": {
             "comparison": "bitwise",
             "support_obj": true
@@ -311,6 +314,9 @@
             "extra_includes": [
                 "torvd"
             ]
+        },
+        "any": {
+            "mask_pattern": "reduction_cycle"
         },
         "asin": {
             "domain": {
@@ -837,6 +843,9 @@
             "support_obj": true
         },
         "neg": {},
+        "none": {
+            "mask_pattern": "reduction_cycle"
+        },
         "notb": {
             "comparison": "bitwise"
         },
@@ -1283,6 +1292,9 @@
                 }
             },
             "comparison": "tolerance"
+        },
+        "testz": {
+            "mask_pattern": "reduction_cycle"
         },
         "torvd": {
             "comparison": "bitwise"

@@ -115,6 +115,26 @@
             "{% endif %}"
         ]
     },
+    "tpl_all": {
+        "format": "long",
+        "code": [
+            "{% if lmul == 1 %}",
+            "return %all<tp>%(m0);",
+            "{% else %}",
+            "return %all<c:tp|b:tp|m:tp/2>%(m0.m1) && %all<c:tp|b:tp|m:tp/2>%(m0.m2);",
+            "{% endif %}"
+        ]
+    },
+    "tpl_any": {
+        "format": "long",
+        "code": [
+            "{% if lmul == 1 %}",
+            "return %any<tp>%(m0);",
+            "{% else %}",
+            "return %any<c:tp|b:tp|m:tp/2>%(m0.m1) || %any<c:tp|b:tp|m:tp/2>%(m0.m2);",
+            "{% endif %}"
+        ]
+    },
     "tpl_get": {
         "format": "long",
         "code": [

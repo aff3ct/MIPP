@@ -32,6 +32,13 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "all": [
+        {
+            "instr_name": "testc",
+            "datatypes": "all_datatypes",
+            "template": "all_testc"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",

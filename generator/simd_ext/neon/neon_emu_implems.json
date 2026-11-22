@@ -1,4 +1,20 @@
 {
+    "all": [
+        {
+            "instr_name": "minv",
+            "datatypes": "all_64bit",
+            "template": "all_minv64",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "any": [
+        {
+            "instr_name": "maxv",
+            "datatypes": "all_64bit",
+            "template": "any_maxv64",
+            "if": "defined(__aarch64__)"
+        }
+    ],
     "cmpeq": [
         {
             "instr_name": "cmpeq",

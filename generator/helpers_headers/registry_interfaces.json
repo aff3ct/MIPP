@@ -30,6 +30,12 @@
         "horizontal": false,
         "variants": ["u", "m", "z", "s"]
     },
+    "all": {
+        "proto_ref": "ret_i32_1arg_msk",
+        "datatypes": "all_datatypes",
+        "horizontal": true,
+        "variants": ["u"]
+    },
     "andb": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
@@ -55,6 +61,12 @@
         "horizontal": false,
         "variants": ["u"],
         "cpp_name": "andnb"
+    },
+    "any": {
+        "proto_ref": "ret_i32_1arg_msk",
+        "datatypes": "all_datatypes",
+        "horizontal": true,
+        "variants": ["u"]
     },
     "asin": {
       "proto_ref": "ret_reg_1arg_reg",
@@ -147,6 +159,12 @@
         "horizontal": false,
         "variants": ["u"],
         "cpp_name": "combine"
+    },
+    "copysign": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": ["all_float"],
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
     },
     "cos": {
       "proto_ref": "ret_reg_1arg_reg",
@@ -361,6 +379,12 @@
         "horizontal": false,
         "variants": ["u"]
     },
+    "ncvts": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down_conv",
+        "datatypes": "all_int_uint_narrowing",
+        "horizontal": false,
+        "variants": ["u"]
+    },
     "neg": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": [
@@ -486,6 +510,12 @@
         "horizontal": true,
         "variants": ["u"]
     },
+    "signbit": {
+        "proto_ref": "ret_msk_1arg_reg",
+        "datatypes": ["all_int", "all_float"],
+        "horizontal": false,
+        "variants": ["u"]
+    },
     "sin": {
       "proto_ref": "ret_reg_1arg_reg",
       "datatypes": "all_float",
@@ -582,5 +612,11 @@
         "horizontal": false,
         "variants": ["u"],
         "cpp_name": "xorb"
+    },
+    "xorsign": {
+        "proto_ref": "ret_reg_2args_reg",
+        "datatypes": ["all_int", "all_float"],
+        "horizontal": false,
+        "variants": ["u", "m", "z", "s"]
     }
 }

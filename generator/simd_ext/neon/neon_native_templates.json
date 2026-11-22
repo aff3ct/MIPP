@@ -1,4 +1,16 @@
 {
+    "all_minv": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}minvq_{{ isa_dt_par.data_ext_msk }}(m0.m) != 0;"
+        ]
+    },
+    "any_maxv": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}maxvq_{{ isa_dt_par.data_ext_msk }}(m0.m) != 0;"
+        ]
+    },
     "arith_2args": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"

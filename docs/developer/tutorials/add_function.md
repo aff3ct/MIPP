@@ -31,7 +31,7 @@ In `helpers_headers/registry_interfaces.json`:
 | Field | Values |
 | :--- | :--- |
 | `proto_ref` | A prototype of `registry_protos.json`. `ret_reg_2args_reg` takes two registers and returns one. See [Choosing a Prototype](#choosing-a-prototype). |
-| `datatypes` | An alias of `DATATYPES_MAP` (`generator/helpers_headers/tools.py`): `all_datatypes`, `all_float`, `all_int` (signed), `all_uint`, `all_int_uint`, `all_64bit`, `all_32bit`, `all_16bit`, `all_8bit`, or pair aliases for conversions (`all_datatypes_cart_prod`, `all_datatypes_same_size`, `all_datatypes_widenning`, ...). An explicit list such as `["float32", "float64"]` is also accepted. |
+| `datatypes` | An alias of `DATATYPES_MAP` (`generator/helpers_headers/tools.py`): `all_datatypes`, `all_float`, `all_int` (signed), `all_uint`, `all_int_uint`, `all_64bit`, `all_32bit`, `all_16bit`, `all_8bit`, or pair aliases for conversions (`all_datatypes_cart_prod`, `all_datatypes_same_size`, `all_datatypes_widenning`, `all_datatypes_narrowing`, `all_int_uint_narrowing` for the integers only, ...). An explicit list such as `["float32", "float64"]` is also accepted. |
 | `horizontal` | `true` for reductions across the lanes of a register (`hadd`, `hmax`), `false` otherwise. |
 | `variants` | Variants generated for the function, as a list of `u` (unmasked, always present), `m` (Merge-Masked), `z` (Zero-Masked) and `s` (Source-Masked): `["u"]` for no mask variant, `["u", "m", "z", "s"]` for all of them. The lists used are in the table below ([Masking Semantics](../../user/masking_semantics.md)). |
 | `cpp_name` | Optional. Name of the C++ function when it differs from the C name: `get_k` is exposed as `mipp::get`. |

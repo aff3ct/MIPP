@@ -115,6 +115,19 @@
             ]
         }
     ],
+    "all": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% res = 1;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres &= m0.m[i] != 0;",
+                "return res;"
+            ]
+        }
+    ],
     "andb": [
         {
             "type": "element-wide",
@@ -180,6 +193,19 @@
             "variants": [],
             "implem": [
                 "res.m[i] = (~m0.m[i]) & m1.m[i];"
+            ]
+        }
+    ],
+    "any": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% res = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres |= m0.m[i] != 0;",
+                "return res;"
             ]
         }
     ],
@@ -384,6 +410,22 @@
                 "\tres.m[i + %N<tp>%] = m1.m[i];",
                 "}",
                 "return res;"
+            ]
+        }
+    ],
+    "copysign": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "%s<c:uint|b:tp>% r0i, r1i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "%s<c:uint|b:tp>% resi = (r0i & ~((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) | (r1i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1)));",
+                "%s<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -1003,6 +1045,98 @@
             ]
         }
     ],
+    "ncvts": [
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "int16,int8"
+            ],
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++) {",
+                "\t%s<tp>% v = r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)(v < -128 ? -128 : (v > 127 ? 127 : v));",
+                "}",
+                "return res;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "int32,int16"
+            ],
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++) {",
+                "\t%s<tp>% v = r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)(v < -32768 ? -32768 : (v > 32767 ? 32767 : v));",
+                "}",
+                "return res;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "int64,int32"
+            ],
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++) {",
+                "\t%s<tp>% v = r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)(v < -2147483648LL ? -2147483648LL : (v > 2147483647LL ? 2147483647LL : v));",
+                "}",
+                "return res;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "uint16,uint8"
+            ],
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++) {",
+                "\t%s<tp>% v = r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)(v > 255 ? 255 : v);",
+                "}",
+                "return res;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "uint32,uint16"
+            ],
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++) {",
+                "\t%s<tp>% v = r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)(v > 65535 ? 65535 : v);",
+                "}",
+                "return res;"
+            ]
+        },
+        {
+            "type": "vector-wide",
+            "datatypes": [
+                "uint64,uint32"
+            ],
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "for (size_t i = 0; i < %N<tr>%; i++) {",
+                "\t%s<tp>% v = r0.r[i];",
+                "\tres.r[i] = (%s<tr>%)(v > 4294967295ULL ? 4294967295ULL : v);",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
     "neg": [
         {
             "type": "element-wide",
@@ -1327,6 +1461,26 @@
               ]
           }
       ],
+      "signbit": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "%s<c:uint|b:tp>% r0i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "res.m[i] = (r0i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) ? (%s<c:uint|b:tr>%)-1 : 0;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_int",
+            "variants": [],
+            "implem": [
+                "res.m[i] = (r0.r[i] < 0) ? (%s<c:uint|b:tr>%)-1 : 0;"
+            ]
+        }
+    ],
       "sin": [
           {
             "type": "element-wide",
@@ -1621,6 +1775,33 @@
             "variants": [],
             "implem": [
                 "res.m[i] = m0.m[i] ^ m1.m[i];"
+            ]
+        }
+    ],
+    "xorsign": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "%s<c:uint|b:tp>% r0i, r1i;",
+                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "%s<c:uint|b:tp>% resi = r0i ^ (r1i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1)));",
+                "%s<tr>% resv;",
+                "BIT_CAST_1(&resv, &resi);",
+                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_int",
+            "variants": [],
+            "implem": [
+                "// negation in the unsigned type: wraps around for the minimum value, as the SIMD code",
+                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)r0.r[i];",
+                "%s<tp>% neg0 = (%s<tp>%)(%s<c:uint|b:tp>%)(0u - u0);",
+                "res.r[i] = %!pred_cond!% (r1.r[i] < 0 ? neg0 : r0.r[i]) %!pred_alt!%;"
             ]
         }
     ]

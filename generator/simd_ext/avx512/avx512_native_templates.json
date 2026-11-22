@@ -1,10 +1,22 @@
 {
+    "all_kortest": {
+        "format": "long",
+        "code": [
+            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);"
+        ]
+    },
     "andb_k_emu": {
         "format": "long",
         "code": [
             "%m<tp>% ret; ",
             "ret.m = m0.m & m1.m;",
             "return ret;"
+        ]
+    },
+    "any_kortest": {
+        "format": "long",
+        "code": [
+            "return !(int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);"
         ]
     },
     "arith_1arg": {

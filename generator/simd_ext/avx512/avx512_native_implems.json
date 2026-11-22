@@ -242,6 +242,44 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "all": [
+        {
+            "instr_name": "kortestc",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "all_kortest",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "kortestc",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "all_kortest",
+            "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"
+        },
+        {
+            "instr_name": "kortestc",
+            "datatypes": "all_16bit",
+            "template": "all_kortest",
+            "if": "defined (__AVX512BW__)"
+        },
+        {
+            "instr_name": "kortestc",
+            "datatypes": "all_8bit",
+            "template": "all_kortest",
+            "if": "defined (__AVX512BW__)"
+        },
+        {
+            "instr_name": "kortestc",
+            "datatypes": "all_float",
+            "template": "all_kortest",
+            "if": "defined(__AVX512DQ__)"
+        }
+    ],
     "andb": [
         {
             "instr_name": "and",
@@ -503,6 +541,44 @@
             "datatypes": "all_8bit",
             "template": "bitwise_2args",
             "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "any": [
+        {
+            "instr_name": "kortestz",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "any_kortest",
+            "if": "defined(__AVX512DQ__)"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "any_kortest",
+            "if": "(defined (__AVX512F__) || defined(__MIC__) || defined(__KNCNI__))"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": "all_16bit",
+            "template": "any_kortest",
+            "if": "defined (__AVX512BW__)"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": "all_8bit",
+            "template": "any_kortest",
+            "if": "defined (__AVX512BW__)"
+        },
+        {
+            "instr_name": "kortestz",
+            "datatypes": "all_float",
+            "template": "any_kortest",
+            "if": "defined(__AVX512DQ__)"
         }
     ],
     "cast": [
