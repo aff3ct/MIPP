@@ -59,7 +59,7 @@
     },
     "load": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}{{ '_u' if instr_name in ('loadu', 'storeu') and isa_dt_par.to_ptr.startswith('__m') else '' }}*) p0);"
     },
     "logi_2args": {
         "format": "short",
@@ -195,7 +195,7 @@
     },
     "store": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}{{ '_u' if instr_name in ('loadu', 'storeu') and isa_dt_par.to_ptr.startswith('__m') else '' }}*) p0, r0.r);"
     },
     "sxl_epi": {
         "format": "short",
