@@ -197,6 +197,9 @@ export function targetMacros(isa, options, simdWidth = 256, overrides = {}) {
       if (toks.some((t) => t === "-mfpu=neon-vfpv4")) set("__ARM_FEATURE_FMA");
     } else {
       set("__aarch64__"); set("__ARM_NEON"); set("__ARM_FEATURE_FMA"); set("__ARM_FEATURE_DIRECTED_ROUNDING");
+      // complex number instructions (FCMLA, FCADD): Armv8.3-A and later
+      const v = arch.match(/^armv(\d+)(?:\.(\d+))?/);
+      if (v && (Number(v[1]) > 8 || Number(v[2] || 0) >= 3)) set("__ARM_FEATURE_COMPLEX");
     }
     if (/\+sve/.test(arch)) {
       set("__ARM_FEATURE_SVE");

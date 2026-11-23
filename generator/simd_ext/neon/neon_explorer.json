@@ -6,7 +6,7 @@
         "label": "AArch64 GCC",
         "base_flags": "-O3 -march=armv8-a+simd",
         "compiler_32": {
-            "id": "arm-gcc-1320",
+            "id": "carmg1320",
             "arch": "arm",
             "label": "ARM32 GCC",
             "base_flags": "-O3 -march=armv7-a -mfloat-abi=hard"
@@ -20,7 +20,8 @@
             { "id": "NEON",     "label": "NEON",             "define": "__ARM_NEON",                     "flag": "",     "default": true, "locked": true,  "description": "Base ARM Advanced SIMD (NEON)" },
             { "id": "AArch64",  "label": "AArch64",          "define": "__aarch64__",                    "flag": "",     "default": true, "locked": false, "description": "ARM 64-bit Architecture (AArch64)" },
             { "id": "FMA",      "label": "FMA",              "define": "__ARM_FEATURE_FMA",              "flag": "",     "default": true, "locked": false, "description": "ARM Floating-Point Fused Multiply-Add (always on AArch64; -mfpu=neon-vfpv4 on ARMv7)" },
-            { "id": "Rounding", "label": "Rounding",         "define": "__ARM_FEATURE_DIRECTED_ROUNDING","flag": "",     "default": true, "locked": false, "description": "ARM Directed Rounding Instructions" }
+            { "id": "Rounding", "label": "Rounding",         "define": "__ARM_FEATURE_DIRECTED_ROUNDING","flag": "",     "default": true, "locked": false, "description": "ARM Directed Rounding Instructions" },
+            { "id": "Complex",  "label": "Complex",          "define": "__ARM_FEATURE_COMPLEX",          "flag": "-march=armv8.3-a+simd", "default": false, "locked": false, "description": "Armv8.3-A Complex Number Instructions (FCMLA, FCADD)" }
         ]
     },
     "headers": ["<arm_neon.h>"],

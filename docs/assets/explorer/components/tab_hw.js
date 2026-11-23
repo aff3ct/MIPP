@@ -138,7 +138,9 @@ export function renderTabHw(entry) {
               const groupsMap = new Map();
               for (const dt of dtsToConsider) {
                 const lvl = getDtLevel(dt);
-                const feat = (lvl === 0 && reqFeatures[dt]) ? reqFeatures[dt] : null;
+                // required_features describes the unmasked function, of Level 0 or 1
+                const featLevel = lvl === 0 || (lvl === 1 && currentMask === "unmasked");
+                const feat = (featLevel && reqFeatures[dt]) ? reqFeatures[dt] : null;
                 const groupKey = `${lvl}::${feat || ""}`;
                 if (!groupsMap.has(groupKey)) {
                   groupsMap.set(groupKey, { level: lvl, reqFeature: feat, dts: [] });

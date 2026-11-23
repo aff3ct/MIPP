@@ -794,14 +794,15 @@ def generate_mipp_api_data(project_root=None):
                 by_datatype[dt] = changing_levels_by_isa[isa_name].get((func, dt_key), lvl)
                 lvl = by_datatype[dt]
 
-                # Detect if level 0 candidate requires a sub-extension / feature flag
+                # Detect if the candidate of the level (0 or 1: one that names instructions)
+                # requires a sub-extension / feature flag
                 for cand, cond in cands:
-                    if cand.get("level") == 0:
+                    if lvl in (0, 1) and cand.get("level") == lvl:
                         feat = extract_required_feature(cond, isas_meta.get(isa_name, {}).get("features"))
                         if feat:
                             required_features[dt] = feat
                             for cand_fb, cond_fb in cands:
-                                if cand_fb.get("level") != 0:
+                                if cand_fb.get("level") != lvl:
                                     fallback_levels[dt] = cand_fb.get("level", 2)
                                     break
                             break
