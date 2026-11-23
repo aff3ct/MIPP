@@ -75,7 +75,7 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ## 3. Windows and Broadcasts
 
-`slide(a, b, n)` is the `alignr` of x86 and the `ext` of ARM (MIPPv1 `combine<n>`); `rotate(a, n)` is `slide(a, a, n)`, and `slidedown(a, n)` is `slide(a, 0, n)`.
+`slide(a, b, n)` is the `alignr` of x86 and the `ext` of ARM; `rotate(a, n)` is `slide(a, a, n)`, and `slidedown(a, n)` is `slide(a, 0, n)`.
 
 === "C API"
 
@@ -102,7 +102,7 @@ The number of lanes of `slide`, `slideup`, `slidedown`, `rotate`, `bcast` (and t
 - with a **variable**, the function runs its dynamic body: `slide` through `permute2` and indices `i + n` (`pshufb`, `vpermps`, `vpermt2ps`, `tbl`), `svsplice` on SVE, `vslidedown` / `vslideup` on RVV;
 - with a **constant**, once the function is inlined (any optimization level but `-O0`), the immediate instruction: the function tests `__builtin_constant_p(n)` and selects it at compile time, at no run-time cost. `get` needs no such test: its dynamic body (store, then read of the lane) already becomes an extraction (`pextrd`, `vextracti128`, `umov`...) when the lane is a constant, with GCC as with Clang.
 
-The C++ APIs also have a **template version**, `mipp::slide<2>(a, b)`, `mipp::get<3>(r)`, `mipp::lshift<4>(r)`, as the MIPPv1 `combine<2>(a, b)`: the value must be a constant, and a value out of the range is a compilation error (`static_assert`). It calls the same function with the constant.
+The C++ APIs also have a **template version**, `mipp::slide<2>(a, b)`, `mipp::get<3>(r)`, `mipp::lshift<4>(r)`: the value must be a constant, and a value out of the range is a compilation error (`static_assert`). It calls the same function with the constant.
 
 === "C API"
 

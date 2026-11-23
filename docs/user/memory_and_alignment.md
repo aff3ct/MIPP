@@ -70,9 +70,6 @@ For a multi-register vector (`LMUL > 1`), the alignment required is still the si
     --8<-- "examples/doc/memory_and_alignment/obj.cpp:load_store"
     ```
 
-!!! note "Migrating from MIPP v1"
-    The `MIPP_ALIGNED_LOADS` macro of MIPP v1 (unaligned `load` / `store` by default, aligned only when the macro was defined) no longer exists: `load` / `store` are always aligned. Code that relied on the default must call `loadu` / `storeu`.
-
 ### 2.2. Masked Loads & Stores
 
 A masked access reads or writes the active lanes only: inactive lanes are never accessed, so a mask can guard the end of an array (see the [masked remainder example](programming_model.md#5-example-remainder-handled-with-masked-memory-accesses)). Loads exist in the Zero-Masked (`Z`, inactive lanes set to 0) and Source-Masked (`S`, inactive lanes taken from `src`) variants, stores in the Merge-Masked variant (`M`, memory of inactive lanes left unchanged). The alignment contract of [§2.1](#21-aligned-vs-unaligned-access) is unchanged: masked `load` / `store` require an aligned pointer, masked `loadu` / `storeu` accept any address.
