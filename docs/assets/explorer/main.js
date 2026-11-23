@@ -513,36 +513,49 @@ function bindCompareBarEvents(appEl) {
   }
 }
 
-// Size of the Algorithm modal chosen by the user (desktop: CSS resize from the
-// bottom right corner). The modal is rebuilt at each change (ISA, datatype,
-// view...), so the size is kept here and applied again after each render; it
-// is also remembered in the browser (a display preference, not part of the URL).
-const ALGO_MODAL_SIZE_KEY = "mipp_algo_modal_size";
-let algoModalSize = null;
-try {
-  algoModalSize = JSON.parse(localStorage.getItem(ALGO_MODAL_SIZE_KEY) || "null");
-} catch (e) {
-  algoModalSize = null;
+// Size of the Algorithm and comparison modals chosen by the user (desktop: CSS
+// resize from the bottom right corner). The modals are rebuilt at each change
+// (ISA, datatype, view...), so the sizes are kept here and applied again after
+// each render; they are also remembered in the browser (a display preference,
+// not part of the URL).
+const RESIZABLE_MODALS = [
+  { selector: ".mipp-algo-modal-content", key: "mipp_algo_modal_size" },
+  { selector: ".mipp-compare-modal-content", key: "mipp_compare_modal_size" },
+];
+const modalSizes = {};
+for (const { key } of RESIZABLE_MODALS) {
+  try {
+    modalSizes[key] = JSON.parse(localStorage.getItem(key) || "null");
+  } catch (e) {
+    modalSizes[key] = null;
+  }
 }
 
-function applyAlgoModalSize(modalsContainerEl) {
-  const el = modalsContainerEl.querySelector(".mipp-algo-modal-content");
-  if (!el || !algoModalSize || !window.matchMedia("(min-width: 769px)").matches) return;
-  if (algoModalSize.width) el.style.width = algoModalSize.width;
-  if (algoModalSize.height) el.style.height = algoModalSize.height;
+function applyModalSizes(modalsContainerEl) {
+  if (!window.matchMedia("(min-width: 769px)").matches) return;
+  for (const { selector, key } of RESIZABLE_MODALS) {
+    const el = modalsContainerEl.querySelector(selector);
+    const size = modalSizes[key];
+    if (!el || !size) continue;
+    if (size.width) el.style.width = size.width;
+    if (size.height) el.style.height = size.height;
+  }
 }
 
 // The browser writes the new size as an inline style at the end of a resize
-function rememberAlgoModalSize() {
-  const el = document.querySelector("#mipp-modals-container .mipp-algo-modal-content");
-  if (!el || (!el.style.width && !el.style.height)) return;
-  const size = { width: el.style.width || null, height: el.style.height || null };
-  if (algoModalSize && size.width === algoModalSize.width && size.height === algoModalSize.height) return;
-  algoModalSize = size;
-  try {
-    localStorage.setItem(ALGO_MODAL_SIZE_KEY, JSON.stringify(size));
-  } catch (e) {
-    /* private mode: kept for this visit only */
+function rememberModalSizes() {
+  for (const { selector, key } of RESIZABLE_MODALS) {
+    const el = document.querySelector(`#mipp-modals-container ${selector}`);
+    if (!el || (!el.style.width && !el.style.height)) continue;
+    const size = { width: el.style.width || null, height: el.style.height || null };
+    const prev = modalSizes[key];
+    if (prev && size.width === prev.width && size.height === prev.height) continue;
+    modalSizes[key] = size;
+    try {
+      localStorage.setItem(key, JSON.stringify(size));
+    } catch (e) {
+      /* private mode: kept for this visit only */
+    }
   }
 }
 
@@ -554,7 +567,7 @@ function updateModals(modalsContainerEl) {
     ${state.compareModalOpen ? renderCompareModal(apiData) : ""}
   `;
 
-  applyAlgoModalSize(modalsContainerEl);
+  applyModalSizes(modalsContainerEl);
 
   // The URL always encodes the current view (shareable link): every render of
   // the app ends here (renderApp), like every change of a modal
@@ -968,8 +981,8 @@ export async function initExplorer() {
     if (!globalListenersBound) {
       globalListenersBound = true;
 
-      // End of a resize of the Algorithm modal (see rememberAlgoModalSize)
-      document.addEventListener("mouseup", rememberAlgoModalSize);
+      // End of a resize of a modal (see rememberModalSizes)
+      document.addEventListener("mouseup", rememberModalSizes);
 
       // "/" on the Explorer page: focus the search bar of the Explorer instead of
       // opening the site search (Material listens on the document; "s" and "f"

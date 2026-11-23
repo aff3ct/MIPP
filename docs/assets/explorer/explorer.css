@@ -2842,8 +2842,8 @@ html:not(.js) .mipp-explorer-loading {
 }
 
 .mipp-compare-modal-content {
-  width: 95vw !important;
-  max-width: 1700px !important;
+  width: 95vw;
+  max-width: 1700px;
   max-height: 92vh;
 }
 
@@ -2853,18 +2853,26 @@ html:not(.js) .mipp-explorer-loading {
   max-height: 92vh;
 }
 
-/* Desktop: the Algorithm modal can be resized from its bottom right corner.
-   No !important on its size: the browser writes the size chosen by the user as
-   an inline style, which main.js keeps across the renders of the modal
-   (applyAlgoModalSize) */
+/* Desktop: the Algorithm and comparison modals can be resized from their bottom
+   right corner. No !important on their size: the browser writes the size chosen
+   by the user as an inline style, which main.js keeps across the renders of the
+   modals (applyModalSizes) */
 @media (min-width: 769px) {
-  .mipp-algo-modal-content {
-    width: min(95vw, 1400px);
+  .mipp-algo-modal-content,
+  .mipp-compare-modal-content {
     max-width: 98vw;
     max-height: 96vh;
     min-width: 600px;
     min-height: 320px;
     resize: both;
+  }
+
+  .mipp-algo-modal-content {
+    width: min(95vw, 1400px);
+  }
+
+  .mipp-compare-modal-content {
+    width: min(95vw, 1700px);
   }
 }
 

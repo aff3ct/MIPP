@@ -64,7 +64,7 @@ export function renderCompareModal(apiData) {
 
   return `
     <div id="mipp-compare-modal-backdrop" class="mipp-modal-backdrop ${state.compareModalOpen ? "visible active" : ""}">
-      <div class="mipp-modal-content mipp-compare-modal-content" style="max-width: 95vw; width: 1200px;">
+      <div class="mipp-modal-content mipp-compare-modal-content">
         <div class="mipp-modal-header">
           <h2 class="mipp-modal-title" style="margin: 0; font-size: var(--mipp-fs-md, 0.8rem); display: flex; align-items: center; gap: 0.5rem;">
             <span>Side-by-Side Primitive Comparison</span>
