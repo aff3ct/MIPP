@@ -147,7 +147,7 @@ The generated test of each function is protected by `#if defined(MIPP_<ISA>)` fo
     "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
     "order": 10,
     "headers": ["<immintrin.h>"],
-    "compiler": { "id": "g142", "arch": "x86", "label": "x86-64 GCC", "base_flags": "-O3" },
+    "compiler": { "id": "cg142", "arch": "x86", "label": "x86-64 GCC", "base_flags": "-O3" },
     "features": {
         "mode": "hierarchy",
         "default": "SSE4.2",

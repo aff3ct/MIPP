@@ -1,7 +1,7 @@
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
     "compiler": {
-        "id": "g142",
+        "id": "cg142",
         "arch": "x86",
         "label": "x86-64 GCC",
         "base_flags": "-O3 -DMIPP_SCALAR -DMIPP_SCALAR_SIZE={simd_width}",

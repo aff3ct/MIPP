@@ -57,7 +57,7 @@
             "additionalProperties": false,
             "properties": {
                 "id": {
-                    "description": "Godbolt compiler identifier (e.g. g142, carm64g1420, rv64-clang)",
+                    "description": "Godbolt identifier of a C compiler (e.g. cg142, carm64g1420, rv64-cclang): the Flat C code is compiled as C",
                     "type": "string"
                 },
                 "arch": {

@@ -59,7 +59,7 @@ export function isFeatureSupported(info, targetDt, targetIsa, targetDefines) {
 
 export function getCompilerConfigForFlat(isa, defines = {}, scalarSize = 256) {
   const isaMeta = apiMetadata.isas ? apiMetadata.isas[isa] : null;
-  const defaultCompiler = { id: "g142", arch: "x86", base_flags: "-O3", label: "x86-64 GCC" };
+  const defaultCompiler = { id: "cg142", arch: "x86", base_flags: "-O3", label: "x86-64 GCC" };
   let compilerMeta = (isaMeta && isaMeta.compiler) ? isaMeta.compiler : defaultCompiler;
 
   // Handle 32-bit architecture override if requested (e.g. ARM32 NEON when __aarch64__ is false)
@@ -67,7 +67,7 @@ export function getCompilerConfigForFlat(isa, defines = {}, scalarSize = 256) {
     compilerMeta = compilerMeta.compiler_32;
   }
 
-  const compiler = compilerMeta.id || "g142";
+  const compiler = compilerMeta.id || "cg142";
   let baseFlags = (compilerMeta.base_flags || "-O3").replace(/\{simd_width\}/g, String(scalarSize || 256));
   const targetDesc = compilerMeta.label || "GCC / Clang";
   const flags = [baseFlags];
@@ -159,7 +159,8 @@ export function buildGodboltUrlForFlat(sourceCode, isa, defines = {}, scalarSize
     return encodeURIComponent(escaped);
   };
 
-  const lang = "c";
+  // Compiler Explorer identifier of the C language (the compilers must be C compilers: cg142, ...)
+  const lang = "___c";
   return (
     "https://godbolt.org/#g:!((g:!((g:!((h:codeEditor,i:(filename:'1',fontScale:14,fontUseDefault:true,lang:'" +
     lang +
@@ -167,7 +168,7 @@ export function buildGodboltUrlForFlat(sourceCode, isa, defines = {}, scalarSize
     encodeRisonString(sourceCode) +
     "'),l:'5',n:'0',o:'MIPP+Flat+C',t:'0')),k:50,l:'4',m:100,n:'0',o:'',s:0,t:'0'),(g:!((h:compiler,i:(compiler:" +
     compiler +
-    ",filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'" + (execute ? "1" : "0") + "',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUseDefault:true,lang:'" +
+    ",filters:(b:'0',binary:'1',binaryObject:'1',commentOnly:'0',demangle:'0',directives:'0',execute:'" + (execute ? "0" : "1") + "',intel:'0',libraryCode:'0',trim:'1'),flagsViewOpen:'1',fontScale:14,fontUseDefault:true,lang:'" +
     lang +
     "',options:'" +
     encodeRisonString(options) +
