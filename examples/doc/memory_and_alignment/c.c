@@ -65,9 +65,9 @@ static void masked(void)
     mipp_store_float32_mask(m, out_ptr, v_z);                   // inactive lanes: memory unchanged
 
     // LMUL = 2:
-    vm_float32_m2_t m2  = mipp_cmplt_float32_m2(wa, wlimit);
-    vd_float32_m2_t w_z = mipp_loadu_float32_maskz_m2(m2, uptr);
-    mipp_storeu_float32_mask_m2(m2, uout, w_z);
+    vm_float32_m2_t vm2  = mipp_cmplt_float32_m2(wa, wlimit);
+    vd_float32_m2_t w_z = mipp_loadu_float32_maskz_m2(vm2, uptr);
+    mipp_storeu_float32_mask_m2(vm2, uout, w_z);
     /* --8<-- [end:masked] */
     float s[DOC_BUF];
     mipp_storeu_float32(s, v_s);

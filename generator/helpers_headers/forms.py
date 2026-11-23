@@ -10,14 +10,14 @@ is the all-`v` form; the registry lists the other ones:
 
 gives `sub_vs(r, s)` and `sub_sv(s, r)`. Every form is expanded here, when the registry is loaded, into a function of
 its own (`<base>_<form>`): a prototype where the `s` registers became `val` arguments of the type of the function,
-the datatypes, variants and category of the base, and a scalar reference derived from the one of the base (`r1.r[i]`
+the datatypes, variants and category of the base, and a scalar reference derived from the one of the base (`vd1.vd[i]`
 becomes `s0`). The rest of the generator handles them as any other function. Their names follow the RVV style:
 `mipp_sub_vs_float32_maskz_m2` in C (the form right after the name of the function), and `mipp::sub(r, s)` /
 `mipp::sub(s, r)` in C++ (overloads of the base name, `cpp_name`).
 
 Implementations:
 - every form gets a generic Level 2 body (`generic_implems`): the base function with the scalar broadcast,
-  `sub(r0, set1(s0))`, for every mask variant. Its level is the level of the base function (decision 9.4: the
+  `sub(vd0, set1(s0))`, for every mask variant. Its level is the level of the base function (decision 9.4: the
   broadcast is free, as a cast): see `codegen/candidate_resolver.py` (`derived_form`);
 - an ISA can give a native body under the name of the form (`"sub_vs": [...]` in `<isa>_native_implems.json`), with
   `s0`, `s1`... for the scalars: SVE `_n` intrinsics, RVV `.vx` / `.vf`, NEON `_n`.
@@ -74,14 +74,14 @@ def derive_proto(proto, form):
 
 def arg_renaming(form):
     """
-    Names of the arguments of the base (`r0`, `r1`...) in a form: the generator names the registers `r<i>` and the
-    scalars `s<i>`, each with its own counter. `vs` -> {0: "r0", 1: "s0"}, `sv` -> {0: "s0", 1: "r0"}.
+    Names of the arguments of the base (`vd0`, `vd1`...) in a form: the generator names the registers `r<i>` and the
+    scalars `s<i>`, each with its own counter. `vs` -> {0: "vd0", 1: "s0"}, `sv` -> {0: "s0", 1: "vd0"}.
     """
     names = {}
     n_r = n_s = 0
     for i, letter in enumerate(form):
         if letter == "v":
-            names[i] = f"r{n_r}"
+            names[i] = f"vd{n_r}"
             n_r += 1
         else:
             names[i] = f"s{n_s}"
@@ -91,21 +91,21 @@ def arg_renaming(form):
 
 def derive_scalar_code(code, form):
     """
-    Scalar reference of a form from the one of the base: the lane `r<i>.r[i]` of a register that became a scalar
+    Scalar reference of a form from the one of the base: the lane `r<i>.vd[i]` of a register that became a scalar
     is the scalar itself (`s<j>`), and the other registers are renumbered. Applied to the `implem` strings of
-    `registry_scalar_implems.json`, which only read the registers lane by lane (`r<i>.r[i]`).
+    `registry_scalar_implems.json`, which only read the registers lane by lane (`vd<i>.vd[i]`).
     """
     names = arg_renaming(form)
 
     def repl(m):
         new = names[int(m.group(1))]
-        return new if new.startswith("s") else f"{new}.r[i]"
+        return new if new.startswith("s") else f"{new}.vd[i]"
 
-    out = re.sub(r"\br(\d+)\.r\[i\]", repl, code)
+    out = re.sub(r"\bvd(\d+)\.vd\[i\]", repl, code)
     # any other use of a register would not be renamed: the scalar reference must be written lane by lane
-    left = [int(x) for x in re.findall(r"\br(\d+)\b", re.sub(r"\br\d+\.r\[i\]", "", code))]
+    left = [int(x) for x in re.findall(r"\bvd(\d+)\b", re.sub(r"\bvd\d+\.vd\[i\]", "", code))]
     if any(names.get(i, "").startswith("s") for i in left):
-        raise ValueError(f"scalar reference '{code}' uses a register other than lane by lane (r<i>.r[i])")
+        raise ValueError(f"scalar reference '{code}' uses a register other than lane by lane (vd<i>.vd[i])")
     return out
 
 
@@ -185,18 +185,18 @@ def expand_docs(funcs_docs, raw_interfaces, derived):
                 if new is None:
                     return m.group(0)
                 return new if new.startswith("s") else f"{new}_i"
-            entry["latex"] = re.sub(r"\br(\d+)_i\b", repl, base_doc["latex"])
+            entry["latex"] = re.sub(r"\bvd(\d+)_i\b", repl, base_doc["latex"])
         funcs_docs[name] = entry
 
 
 def base_call_args(base_proto, form):
     """
     Arguments of the call of the base function in the generic body of a form, in the order of the base prototype,
-    with the names of the arguments of the form (the generator numbers each kind on its own: `r`, `m`, `s`, `p`):
-    `select` (m, r, r) in form `vs` -> ["m0", "r0", "%set1<tp>%(s0)"].
+    with the names of the arguments of the form (the generator numbers each kind on its own: `vd`, `vm`, `s`, `p`):
+    `select` (m, r, r) in form `vs` -> ["vm0", "vd0", "%set1<tp>%(s0)"].
     """
     form_proto = derive_proto(base_proto, form)
-    prefix = {"reg": "r", "msk": "m", "val": "s", "ptr": "p"}
+    prefix = {"reg": "vd", "msk": "vm", "val": "s", "ptr": "p"}
     counters = {}
     args = []
     for base_arg, arg in zip(base_proto["args"], form_proto["args"]):
@@ -231,13 +231,13 @@ def generic_implems(raw_protos, raw_interfaces, derived):
         # `svsubr_n_m`): the merge variant of the base would keep the broadcast scalar when the base operand 0 became
         # a scalar, the inactive lanes are then taken back from the register by a select.
         if iface[FORM_KEY][0] == "s":
-            m_call = f"return %select<tp>%(m0, %{base}<tp>%({args}), r0);"
+            m_call = f"return %select<tp>%(vm0, %{base}<tp>%({args}), vd0);"
         else:
-            m_call = f"return %{base}<tp|v:M>%(m0, {args});"
+            m_call = f"return %{base}<tp|v:M>%(vm0, {args});"
         calls = {
             "m": m_call,
-            "z": f"return %{base}<tp|v:Z>%(m0, {args});",
-            "s": f"return %{base}<tp|v:S>%(m0, rsrc, {args});",
+            "z": f"return %{base}<tp|v:Z>%(vm0, {args});",
+            "s": f"return %{base}<tp|v:S>%(vm0, vdsrc, {args});",
         }
         mask[name] = [{
             "datatypes": datatypes,

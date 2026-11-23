@@ -169,66 +169,66 @@ int main(int argc, char** argv)
 	std::cout << "[PASS] load_obj<float>(vals) => " << r_load[0] << std::endl;
 
 	// 11. Mask operator overloads (&, &=, |, |=, ^, ^=, ~, !)
-	mipp::Vm<float, 1> m1(true);
-	mipp::Vm<float, 1> m0(false);
+	mipp::Vm<float, 1> vm1(true);
+	mipp::Vm<float, 1> vm0(false);
 
 	// 11a. Bitwise AND
-	auto m_and = m1 & m0;
+	auto m_and = vm1 & vm0;
 	assert(m_and[0] == false);
-	auto m_and2 = m1 & true;
+	auto m_and2 = vm1 & true;
 	assert(m_and2[0] == true);
-	auto m_and3 = false & m1;
+	auto m_and3 = false & vm1;
 	assert(m_and3[0] == false);
-	m1 &= false;
-	assert(m1[0] == false);
-	m1 = true;
+	vm1 &= false;
+	assert(vm1[0] == false);
+	vm1 = true;
 	std::cout << "[PASS] Vm & and &= operators verified" << std::endl;
 
 	// 11b. Bitwise OR
-	auto m_or = m1 | m0;
+	auto m_or = vm1 | vm0;
 	assert(m_or[0] == true);
-	auto m_or2 = m0 | false;
+	auto m_or2 = vm0 | false;
 	assert(m_or2[0] == false);
-	auto m_or3 = true | m0;
+	auto m_or3 = true | vm0;
 	assert(m_or3[0] == true);
-	m0 |= true;
-	assert(m0[0] == true);
-	m0 = false;
+	vm0 |= true;
+	assert(vm0[0] == true);
+	vm0 = false;
 	std::cout << "[PASS] Vm | and |= operators verified" << std::endl;
 
 	// 11c. Bitwise XOR
-	auto m_xor = m1 ^ m0;
+	auto m_xor = vm1 ^ vm0;
 	assert(m_xor[0] == true);
-	auto m_xor2 = m1 ^ true;
+	auto m_xor2 = vm1 ^ true;
 	assert(m_xor2[0] == false);
-	auto m_xor3 = false ^ m0;
+	auto m_xor3 = false ^ vm0;
 	assert(m_xor3[0] == false);
-	m1 ^= true;
-	assert(m1[0] == false);
-	m1 = true;
+	vm1 ^= true;
+	assert(vm1[0] == false);
+	vm1 = true;
 	std::cout << "[PASS] Vm ^ and ^= operators verified" << std::endl;
 
 	// 11d. Bitwise NOT and Logical NOT (~ and !)
-	auto m_not = ~m1;
+	auto m_not = ~vm1;
 	assert(m_not[0] == false);
-	auto m_not0 = ~m0;
+	auto m_not0 = ~vm0;
 	assert(m_not0[0] == true);
-	auto m_bang = !m1;
+	auto m_bang = !vm1;
 	assert(m_bang[0] == false);
-	auto m_bang0 = !m0;
+	auto m_bang0 = !vm0;
 	assert(m_bang0[0] == true);
 	std::cout << "[PASS] Vm ~ and ! operators verified" << std::endl;
 
 	// 11e. Free functions without _k on Vm (andb, orb, xorb, notb, get)
-	auto fn_and = mipp::andb(m1, m0);
+	auto fn_and = mipp::andb(vm1, vm0);
 	assert(fn_and[0] == false);
-	auto fn_or  = mipp::orb(m1, m0);
+	auto fn_or  = mipp::orb(vm1, vm0);
 	assert(fn_or[0] == true);
-	auto fn_xor = mipp::xorb(m1, m0);
+	auto fn_xor = mipp::xorb(vm1, vm0);
 	assert(fn_xor[0] == true);
-	auto fn_not = mipp::notb(m1);
+	auto fn_not = mipp::notb(vm1);
 	assert(fn_not[0] == false);
-	auto val_get = mipp::get(m1, 0);
+	auto val_get = mipp::get(vm1, 0);
 	assert(val_get != 0);
 	std::cout << "[PASS] Vm free functions without _k (andb, orb, xorb, notb, get) verified" << std::endl;
 

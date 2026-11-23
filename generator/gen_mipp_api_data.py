@@ -69,7 +69,7 @@ def clean_code_indentation(s):
 
 def build_obj_prototype(func, interfaces_dict):
     """
-    Generates a representative C++ Object API prototype (e.g. `r0 + r1` or `select(m0, r0, r1)`).
+    Generates a representative C++ Object API prototype (e.g. `vd0 + vd1` or `select(vm0, vd0, vd1)`).
     """
     args = interfaces_dict[func]["proto"]["args"]
     ret = interfaces_dict[func]["proto"]["ret"]
@@ -83,14 +83,14 @@ def build_obj_prototype(func, interfaces_dict):
     
     if func in all_binary_ops and len(args) == 2:
         sym = all_binary_ops[func]["operation"]
-        return f"inline {ret_type} operator {sym} (const Vd<T,LMUL>& r1) const;"
+        return f"inline {ret_type} operator {sym} (const Vd<T,LMUL>& vd1) const;"
     elif func == "notb" and len(args) == 1:
         return f"inline {ret_type} operator~ () const;"
     
     # Method invocation on object (first argument is 'this', rest are passed as args)
     method_name = func[:-2] if func.endswith("_k") else func
     if len(args) <= 1:
-        return f"inline {ret_type} r0.{method_name}() const;"
+        return f"inline {ret_type} vd0.{method_name}() const;"
     
     arg_strs = []
     reg_idx = 1
@@ -98,10 +98,10 @@ def build_obj_prototype(func, interfaces_dict):
     for arg in args[1:]:
         atype = arg.get("type", "reg")
         if atype == "reg":
-            arg_strs.append(f"const Vd<T,LMUL>& r{reg_idx}")
+            arg_strs.append(f"const Vd<T,LMUL>& vd{reg_idx}")
             reg_idx += 1
         elif atype == "msk":
-            arg_strs.append(f"const Vm<T,LMUL>& m{mask_idx}")
+            arg_strs.append(f"const Vm<T,LMUL>& vm{mask_idx}")
             mask_idx += 1
         elif atype == "scl":
             arg_strs.append("const T val")
@@ -112,7 +112,7 @@ def build_obj_prototype(func, interfaces_dict):
         else:
             arg_strs.append("arg")
             
-    return f"inline {ret_type} r0.{method_name}({', '.join(arg_strs)}) const;"
+    return f"inline {ret_type} vd0.{method_name}({', '.join(arg_strs)}) const;"
 
 
 def extract_required_feature(cond, isa_features=None):
@@ -313,23 +313,23 @@ def build_code_snippets(func, category, spec_info):
         "",
         "int main() {",
         "    // 1. Initialize vector registers",
-        "    mipp::reg r0 = mipp::set1<float>(1.5f);"
+        "    mipp::reg vd0 = mipp::set1<float>(1.5f);"
     ]
-    call_args = ["r0"]
+    call_args = ["vd0"]
     if n_args >= 2:
         if args[1].get("type") == "msk":
-            cpp_lines.append("    mipp::msk m0 = mipp::set0<float>();")
-            call_args.append("m0")
+            cpp_lines.append("    mipp::msk vm0 = mipp::set0<float>();")
+            call_args.append("vm0")
         else:
-            cpp_lines.append("    mipp::reg r1 = mipp::set1<float>(2.5f);")
-            call_args.append("r1")
+            cpp_lines.append("    mipp::reg vd1 = mipp::set1<float>(2.5f);")
+            call_args.append("vd1")
     if n_args >= 3:
         if args[2].get("type") == "msk":
-            cpp_lines.append("    mipp::msk m0 = mipp::set0<float>();")
-            call_args.append("m0")
+            cpp_lines.append("    mipp::msk vm0 = mipp::set0<float>();")
+            call_args.append("vm0")
         else:
-            cpp_lines.append("    mipp::reg r2 = mipp::set1<float>(0.5f);")
-            call_args.append("r2")
+            cpp_lines.append("    mipp::reg vd2 = mipp::set1<float>(0.5f);")
+            call_args.append("vd2")
             
     cpp_name = func[:-2] if func.endswith("_k") else func
     cpp_lines.append("")
@@ -348,23 +348,23 @@ def build_code_snippets(func, category, spec_info):
         "",
         "int main(void) {",
         "    // 1. Initialize C99 vector registers",
-        "    vd_float32_m1_t r0 = mipp_set1_float32_m1(1.5f);"
+        "    vd_float32_m1_t vd0 = mipp_set1_float32_m1(1.5f);"
     ]
-    c_args = ["r0"]
+    c_args = ["vd0"]
     if n_args >= 2:
         if args[1].get("type") == "msk":
-            c99_lines.append("    vm_float32_m1_t m0 = mipp_set0_float32_m1();")
-            c_args.append("m0")
+            c99_lines.append("    vm_float32_m1_t vm0 = mipp_set0_float32_m1();")
+            c_args.append("vm0")
         else:
-            c99_lines.append("    vd_float32_m1_t r1 = mipp_set1_float32_m1(2.5f);")
-            c_args.append("r1")
+            c99_lines.append("    vd_float32_m1_t vd1 = mipp_set1_float32_m1(2.5f);")
+            c_args.append("vd1")
     if n_args >= 3:
         if args[2].get("type") == "msk":
-            c99_lines.append("    vm_float32_m1_t m0 = mipp_set0_float32_m1();")
-            c_args.append("m0")
+            c99_lines.append("    vm_float32_m1_t vm0 = mipp_set0_float32_m1();")
+            c_args.append("vm0")
         else:
-            c99_lines.append("    vd_float32_m1_t r2 = mipp_set1_float32_m1(0.5f);")
-            c_args.append("r2")
+            c99_lines.append("    vd_float32_m1_t vd2 = mipp_set1_float32_m1(0.5f);")
+            c_args.append("vd2")
             
     c99_lines.append("")
     c99_lines.append("    // 2. Execute C99 MIPP function")
@@ -811,8 +811,8 @@ def generate_mipp_api_data(project_root=None):
                         try:
                             rend = render_template(resolved_isa_base, cand["ff"], dt_par, dt_ret, func, lmul=0)
                             s = rend
-                            s = re.sub(r'%r<[^>]*>%', 'mipp::reg', s)
-                            s = re.sub(r'%m<[^>]*>%', 'mipp::msk', s)
+                            s = re.sub(r'%vd<[^>]*>%', 'mipp::reg', s)
+                            s = re.sub(r'%vm<[^>]*>%', 'mipp::msk', s)
                             s = re.sub(r'%([a-zA-Z0-9_]+)<[^>]*>%', r'mipp::\1', s)
                             s = re.sub(r'%', '', s)
                             s = clean_code_indentation(s)

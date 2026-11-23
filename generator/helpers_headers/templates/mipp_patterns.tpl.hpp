@@ -317,31 +317,31 @@ inline R permute(const R& r)
 }
 
 template <typename P, typename R, typename std::enable_if<details::vd_info<R>::lmul != 0, int>::type = 0>
-inline R permute2(const R& r0, const R& r1)
+inline R permute2(const R& vd0, const R& vd1)
 {
 	using T = typename details::vd_info<R>::type;
 	constexpr int LMUL = details::vd_info<R>::lmul;
 	constexpr int n = static_cast<int>(N<T, LMUL>());
 	constexpr std::array<int, n> a = details::pattern_checked<P, n, 2 * n>();
 	using U = typename details::uint_of<T>::type;
-	if constexpr (details::all_in(a, 0, n))          return mipp::permute<details::pattern_lo<P>>(r0);
-	else if constexpr (details::all_in(a, n, 2 * n)) return mipp::permute<details::pattern_hi<P>>(r1);
-	else if constexpr (details::slide_of(a) >= 0)    return mipp::slide(r0, r1, details::slide_of(a));
-	else if constexpr (details::is_ziplo(a))        return mipp::ziplo(r0, r1);
-	else if constexpr (details::is_ziphi(a))        return mipp::ziphi(r0, r1);
-	else if constexpr (details::is_unziplo(a))    return mipp::unziplo(r0, r1);
-	else if constexpr (details::is_unziphi(a))     return mipp::unziphi(r0, r1);
+	if constexpr (details::all_in(a, 0, n))          return mipp::permute<details::pattern_lo<P>>(vd0);
+	else if constexpr (details::all_in(a, n, 2 * n)) return mipp::permute<details::pattern_hi<P>>(vd1);
+	else if constexpr (details::slide_of(a) >= 0)    return mipp::slide(vd0, vd1, details::slide_of(a));
+	else if constexpr (details::is_ziplo(a))        return mipp::ziplo(vd0, vd1);
+	else if constexpr (details::is_ziphi(a))        return mipp::ziphi(vd0, vd1);
+	else if constexpr (details::is_unziplo(a))    return mipp::unziplo(vd0, vd1);
+	else if constexpr (details::is_unziphi(a))     return mipp::unziphi(vd0, vd1);
 	else if constexpr (static_cast<std::uint64_t>(2 * n) - 1 > static_cast<std::uint64_t>(static_cast<U>(~U(0))))
 	{
 		T buf[2 * n];
-		mipp::storeu(buf, r0);
-		mipp::storeu(buf + n, r1);
+		mipp::storeu(buf, vd0);
+		mipp::storeu(buf + n, vd1);
 		return details::permute_memory<T, LMUL>(buf, a);
 	}
 	else
 	{
 		static constexpr std::array<U, n> t = details::pattern_table<U>(a, 0);
-		const vd<T, LMUL> p = mipp::permute2(r0, r1, mipp::loadu<U, LMUL>(t.data()));
+		const vd<T, LMUL> p = mipp::permute2(vd0, vd1, mipp::loadu<U, LMUL>(t.data()));
 		if constexpr (!details::has_zero(a))
 			return p;
 		else

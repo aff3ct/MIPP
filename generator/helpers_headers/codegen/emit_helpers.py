@@ -29,26 +29,26 @@ def emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0, dt_par=No
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print("\tres.r = ", end="", file=file)
+            print("\tres.vd = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print("\tres.m = ", end="", file=file)
+            print("\tres.vm = ", end="", file=file)
     else:
         if funcs_for_f["proto"]["ret"]["type"] == "reg":
             print(
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print("\tres.r = ", end="", file=file)
+            print("\tres.vd = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            print("\tres.m = ", end="", file=file)
+            print("\tres.vm = ", end="", file=file)
 
 def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None,
                        imm_dispatch=None):
@@ -172,12 +172,12 @@ def gen_ldiv_structs_mask(isa, file):
         n_macro = f"MIPP_{isa['name'].upper()}_N_{d['category'].upper()}{d['n_bits']}_D2"
         if guard:
             print(f"#if {guard}", file=file)
-        print(f"typedef struct {{ {isa_dt['reg']} r; }} vd_{name}_d2_t;", file=file)
-        print(f"typedef struct {{ {isa_dt['msk']} m; }} vm_{name}_d2_t;", file=file)
+        print(f"typedef struct {{ {isa_dt['reg']} vd; }} vd_{name}_d2_t;", file=file)
+        print(f"typedef struct {{ {isa_dt['msk']} vm; }} vm_{name}_d2_t;", file=file)
         if guard:
             print("#else", file=file)
-            print(f"typedef struct {{ {d['category']}{d['n_bits']}_t r[{n_macro}]; }} vd_{name}_d2_t;", file=file)
-            print(f"typedef struct {{ uint{d['n_bits']}_t m[{n_macro}]; }} vm_{name}_d2_t;", file=file)
+            print(f"typedef struct {{ {d['category']}{d['n_bits']}_t vd[{n_macro}]; }} vd_{name}_d2_t;", file=file)
+            print(f"typedef struct {{ uint{d['n_bits']}_t vm[{n_macro}]; }} vm_{name}_d2_t;", file=file)
             print("#endif", file=file)
 
 def gen_ldiv_defines_mask(isa, file):

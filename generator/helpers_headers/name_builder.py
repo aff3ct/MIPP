@@ -153,8 +153,8 @@ def resolve_ret_lmul(ret, lmul):
     return LMUL_LADDER[idx]
 
 def proto_arg_names(proto):
-    """Names of the parameters as given by build_proto (r0, r1, m0, s0, p0, ...)."""
-    prefix = {"reg": "r", "msk": "m", "val": "s", "ptr": "p"}
+    """Names of the parameters as given by build_proto (vd0, vd1, vm0, s0, p0, ...)."""
+    prefix = {"reg": "vd", "msk": "vm", "val": "s", "ptr": "p"}
     count = {}
     names = []
     for arg in proto["args"]:
@@ -343,11 +343,11 @@ def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
 
-        # set0 has no other args, but masked forms still take m0 (and maybe rsrc)
+        # set0 has no other args, but masked forms still take vm0 (and maybe vdsrc)
         if masked_version in ("mask", "maskz"):
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_ret}_t,{lmul}, {isa_type}> m0"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_ret}_t,{lmul}, {isa_type}> vm0"
         elif masked_version == "masks":
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_ret}_t,{lmul}, {isa_type}> m0, const {reg_type}<{dt_ret}_t,{lmul}, {isa_type}> rsrc"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_ret}_t,{lmul}, {isa_type}> vm0, const {reg_type}<{dt_ret}_t,{lmul}, {isa_type}> vdsrc"
 
     # unmasked (unchanged)
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
@@ -387,14 +387,14 @@ def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, ma
         if masked_version in ("mask", "maskz"):
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> vm0, "
                 f"const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
             )
         elif masked_version == "masks":
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
-                f"const vd<{dt_par},{lmul}, {isa_type}> rsrc, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> vm0, "
+                f"const vd<{dt_par},{lmul}, {isa_type}> vdsrc, "
                 f"const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
             )
 
@@ -432,14 +432,14 @@ def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
         if masked_version in ("mask", "maskz"):
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> vm0, "
                 f"const {dt_par} s0"
             )
         elif masked_version == "masks":
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
-                f"const vd<{dt_par},{lmul}, {isa_type}> rsrc, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> vm0, "
+                f"const vd<{dt_par},{lmul}, {isa_type}> vdsrc, "
                 f"const {dt_par} s0"
             )
 
@@ -468,11 +468,11 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
   
     if masked_version:
         if masked_version == "mask" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> vm0, const {dt_par}* p0"
         elif masked_version == "maskz" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> vm0, const {dt_par}* p0"
         elif masked_version == "masks" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> m0, const vd<{dt_par},{lmul}, {isa_type}> rsrc, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> vm0, const vd<{dt_par},{lmul}, {isa_type}> vdsrc, const {dt_par}* p0"
         else : 
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
@@ -487,7 +487,7 @@ def _idx_lmul_str(dt_par, dt_ret, lmul):
 
 def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     """
-    C++ masked gather: vd<T, LMUL> gather<V, T, T_IDX, LMUL>(m0, [rsrc,] const T* p0, idx). The pair is
+    C++ masked gather: vd<T, LMUL> gather<V, T, T_IDX, LMUL>(vm0, [vdsrc,] const T* p0, idx). The pair is
     "data,index" (dt_par, dt_ret); the mask has the type of the data, the index its own LMUL (`"lmul": "ratio"`).
     """
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
@@ -499,13 +499,13 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
         sys.exit(1)
         exit(-1)
     template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
-    p = f"inline vd<{t}, {lmul}, {isa_type}> {func_name}{template}(const vm<{t},{lmul}, {isa_type}> m0"
+    p = f"inline vd<{t}, {lmul}, {isa_type}> {func_name}{template}(const vm<{t},{lmul}, {isa_type}> vm0"
     if masked_version == "masks":
-        p += f", const vd<{t},{lmul}, {isa_type}> rsrc"
-    return p + f", const {t}* p0, const vd<{t_idx},{l_idx}, {isa_type}> r0"
+        p += f", const vd<{t},{lmul}, {isa_type}> vdsrc"
+    return p + f", const {t}* p0, const vd<{t_idx},{l_idx}, {isa_type}> vd0"
 
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
-    """C++ masked scatter: void scatter<V, T, T_IDX, LMUL>(m0, T* p0, idx, r1), as build_proto_gather."""
+    """C++ masked scatter: void scatter<V, T, T_IDX, LMUL>(vm0, T* p0, idx, vd1), as build_proto_gather."""
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
     isa_type = isa["name"].upper() if isa_name else "DEFAULT_ISA"
     t, t_idx, l_idx = f"{dt_par}_t", f"{dt_ret}_t", _idx_lmul_str(dt_par, dt_ret, lmul)
@@ -515,10 +515,10 @@ def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, 
         sys.exit(1)
         exit(-1)
     template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
-    p = f"inline void {func_name}{template}(const vm<{t},{lmul}, {isa_type}> m0"
+    p = f"inline void {func_name}{template}(const vm<{t},{lmul}, {isa_type}> vm0"
     if masked_version == "masks":
-        p += f", const vd<{t},{lmul}, {isa_type}> rsrc"
-    return p + f", {t}* p0, const vd<{t_idx},{l_idx}, {isa_type}> r0, const vd<{t},{lmul}, {isa_type}> r1"
+        p += f", const vd<{t},{lmul}, {isa_type}> vdsrc"
+    return p + f", {t}* p0, const vd<{t_idx},{l_idx}, {isa_type}> vd0, const vd<{t},{lmul}, {isa_type}> vd1"
 
 #function message error set functions
 def gen_set_func_error(func_name, file):
@@ -561,16 +561,16 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
     cnt_ptr = 0
     is_first = True
     
-    #add m0 as first argument for masked version of function
+    #add vm0 as first argument for masked version of function
     if masked_version:
         # the mask has the datatype of the function (gather / scatter: the one of the data)
         msk_dt = tools.datatypes[dt_par]
 
         if masked_version == "mask" or masked_version == "maskz":
-            p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
+            p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " vm0"
         elif masked_version == "masks" :
-            p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " m0"
-            p += ", const " + build_reg(tools.datatypes[dt_par], isa, lmul, isa_name, cpp) + " rsrc"
+            p += "const " + build_msk(msk_dt, isa, lmul, isa_name, cpp) + " vm0"
+            p += ", const " + build_reg(tools.datatypes[dt_par], isa, lmul, isa_name, cpp) + " vdsrc"
         cnt_msk = cnt_msk + 1		
         is_first = False
 
@@ -582,10 +582,10 @@ def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cp
             p += "const "
         p += build_type(arg["type"], realdatatype, isa, resolve_arg_lmul(arg, lmul, dt_par, dt_ret), isa_name, cpp)
         if arg["type"] == "reg":
-            p += " r" + str(cnt_reg)
+            p += " vd" + str(cnt_reg)
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "msk":
-            p += " m" + str(cnt_msk)
+            p += " vm" + str(cnt_msk)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
             p += " s" + str(cnt_val)
@@ -625,10 +625,10 @@ def build_proto_object(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=F
 
         p += build_class_type(arg["type"], realdatatype, isa, resolve_arg_lmul(arg, lmul, dt_par, dt_ret), isa_name, cpp)
         if arg["type"] == "reg":
-            p += " r" + str(cnt_reg)
+            p += " vd" + str(cnt_reg)
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "msk":
-            p += " m" + str(cnt_msk)
+            p += " vm" + str(cnt_msk)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
             p += " s" + str(cnt_val)
@@ -655,19 +655,19 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, mas
  
     if masked_version:
         if masked_version == "mask" or masked_version == "maskz":
-            p += "m0"
+            p += "vm0"
         elif masked_version == "masks" :
-            p += "m0, rsrc"
+            p += "vm0, vdsrc"
         cnt_msk = cnt_msk + 1		
         is_first = False
     for arg in proto["args"]:
         if not is_first:
             p += ", "
         if arg["type"] == "reg":
-            p += "r" + str(cnt_reg)
+            p += "vd" + str(cnt_reg)
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "msk":
-            p += "m" + str(cnt_msk)
+            p += "vm" + str(cnt_msk)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
             p += "s" + str(cnt_val)
@@ -682,13 +682,18 @@ def build_call(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, mas
         is_first = False
     return p + ")"
 
+def _half(part):
+    """Half of a software LMUL group: `lo` (part 1) or `hi` (part 2)."""
+    return "lo" if int(part) == 1 else "hi"
+
+
 # build call function  
 def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_version=False, isa_name=True):
     p = ""
     if proto["ret"]["type"] == "reg":
-        p += "res.r" + str(int(part)) + " = "
+        p += "res." + _half(part) + " = "
     elif proto["ret"]["type"] == "msk":
-        p += "msk.m"  + str(int(part))+ " = "
+        p += "msk." + _half(part) + " = "
   
     p += func_name + "("
     cnt_reg = 0
@@ -699,9 +704,9 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
  
     if masked_version:
         if masked_version == "mask" or masked_version == "maskz":
-            p += "m0.m" + str(int(part))
+            p += "vm0." + _half(part)
         elif masked_version == "masks" :
-            p += "m0.m" + str(int(part)) + ", rsrc.r" + str(int(part))
+            p += "vm0." + _half(part) + ", vdsrc." + _half(part)
         cnt_msk = cnt_msk + 1		
         is_first = False
 
@@ -712,17 +717,17 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
             # index of gather / scatter: half of the register of its own LMUL (2 * lmul for the whole data)
             idx_lmul = resolve_arg_lmul(arg, 2 * int(lmul), dt_par, dt_ret)
             if idx_lmul >= 2:
-                p += "r" + str(cnt_reg) + ".r" + str(int(part))
+                p += "vd" + str(cnt_reg) + "." + _half(part)
             else:
                 # a register of LMUL 1 (or less): its lower / upper half with lo / hi
                 half = "lo" if int(part) == 1 else "hi"
-                p += build_func_name_short(isa, dt_ret, half, isa_name, lmul=idx_lmul) + "(r" + str(cnt_reg) + ")"
+                p += build_func_name_short(isa, dt_ret, half, isa_name, lmul=idx_lmul) + "(vd" + str(cnt_reg) + ")"
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "reg":
-            p += "r" + str(cnt_reg) + ".r" + str(int(part))
+            p += "vd" + str(cnt_reg) + "." + _half(part)
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "msk":
-            p += "m" + str(cnt_msk) + ".m" + str(int(part))
+            p += "vm" + str(cnt_msk) + "." + _half(part)
             cnt_msk = cnt_msk + 1
         elif arg["type"] == "val":
             p += "s" + str(cnt_val)

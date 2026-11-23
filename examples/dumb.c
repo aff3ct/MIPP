@@ -29,13 +29,13 @@ int main()
 		a2[i] = (float32_t)rand() / (float32_t)RAND_MAX;
 	}
 
-	vd_float32_t r1 = mipp_loadu_float32(a1); // stack arrays: no alignment guarantee
-	vd_float32_t r2 = mipp_loadu_float32(a2);
-	vd_float32_t r3 = mipp_add_float32(r1, r2);
+	vd_float32_t vd1 = mipp_loadu_float32(a1); // stack arrays: no alignment guarantee
+	vd_float32_t vd2 = mipp_loadu_float32(a2);
+	vd_float32_t vd3 = mipp_add_float32(vd1, vd2);
 
-	// printf("result: %f\n", mipp_get_float32(r3, 0));
+	// printf("result: %f\n", mipp_get_float32(vd3, 0));
 	float32_t a3[MIPP_N_FLOAT32];
-	mipp_storeu_float32(a3, r3);
+	mipp_storeu_float32(a3, vd3);
 	print_v(a3, "result");
 
 	return 0;

@@ -97,7 +97,7 @@ def _emit_short_format_prologue_scalar(funcs_for_f, dt_ret, isa, file, lmul=0, d
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
                 file=file,
             )
-            # print("\tres.r = ", end="", file=file)
+            # print("\tres.vd = ", end="", file=file)
         elif funcs_for_f["proto"]["ret"]["type"] == "msk":
             print(
                 "\t" + build_type(funcs_for_f["proto"]["ret"]["type"], datatypes[ret_dt_name], isa, lmul=lmul) + " res;",
@@ -187,11 +187,11 @@ def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0, include_mana
             pre_rendering = pre_rendering.replace(" %!pred_alt!%", "")
             pre_rendering = pre_rendering.replace("%!pred_alt!%", "")
         else:
-            pre_rendering = pre_rendering.replace("%!pred_cond!% ", "m0.m[i] ? (")
-            pre_rendering = pre_rendering.replace("%!pred_cond!%", "m0.m[i] ? (")
+            pre_rendering = pre_rendering.replace("%!pred_cond!% ", "vm0.vm[i] ? (")
+            pre_rendering = pre_rendering.replace("%!pred_cond!%", "vm0.vm[i] ? (")
             if mask_variant == "mask":
-                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : r0.r[i]")
-                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : r0.r[i]")
+                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : vd0.vd[i]")
+                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : vd0.vd[i]")
             elif mask_variant == "maskz":
                 if f == "hmax" or f == "hmin":
                     pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : resv")
@@ -201,8 +201,8 @@ def gen_c_functions_scalar_one(isa, file, funcs, f, ff, dt, lmul=0, include_mana
                     pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : 0")
                     pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : 0")
             elif mask_variant == "masks":
-                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : rsrc.r[i]")
-                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : rsrc.r[i]")
+                pre_rendering = pre_rendering.replace(" %!pred_alt!%", ") : vdsrc.vd[i]")
+                pre_rendering = pre_rendering.replace("%!pred_alt!%", ") : vdsrc.vd[i]")
 
         ph_ret = _parse_placeholders_or_skip_scalar(
             pre_rendering=pre_rendering,
@@ -363,13 +363,13 @@ def gen_c_structures_scalar(isa, file):
     """
     Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
     """
-    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
 
     template_alt = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) {
 #if {{ isa_datatype.if }}
-    {{ isa_datatype.reg }} r;
+    {{ isa_datatype.reg }} vd;
 #else
-    int r; // this is a hack to compile when the datatype is not suported by the SIMD extension
+    int vd; // this is a hack to compile when the datatype is not suported by the SIMD extension
 #endif // {{ isa_datatype.if }}
 } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
     j2_template_alt = Template(template_alt, undefined=StrictUndefined)
@@ -390,7 +390,7 @@ def gen_c_structures_scalar(isa, file):
             print(j2_template_alt.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt], isa_name_upper=isa["name"].upper()), file=file)
 
 
-    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
 
     for dt in isa["datatypes"]:
@@ -405,8 +405,8 @@ def gen_c_structures_scalar(isa, file):
             file=file)
         
     for lmul in all_lmul:
-        template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
-        template_msk = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
+        template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
+        template_msk = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
         if lmul == 1:
             # the type without suffix is an alias of the LMUL 1 type (as for the other ISAs), so that both can be mixed
             template = """typedef vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
@@ -440,8 +440,8 @@ def gen_c_structures_scalar(isa, file):
             )
 
     ldiv = 2
-    template = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE) / {{ldiv}}))) { {{ isa_datatype.reg }} r[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
-    template_msk = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE) / {{ldiv}}))) { {{ isa_datatype.msk }} m[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
+    template = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE) / {{ldiv}}))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
+    template_msk = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE) / {{ldiv}}))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
     
     j2_template = Template(template, undefined=StrictUndefined)
     j2_template_msk = Template(template_msk, undefined=StrictUndefined)

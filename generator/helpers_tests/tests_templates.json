@@ -228,21 +228,21 @@
                 "\t{"
             ],
             "load_1arg": [
-                "\t\t%reg_type<T,LMUL>% r1(&inputs1[0]);",
+                "\t\t%reg_type<T,LMUL>% vd1(&inputs1[0]);",
                 "\t\tauto s1 = %scalar_load<T,LMUL>(inputs1)%;"
             ],
             "load_2args": [
-                "\t\t%reg_type<T,LMUL>% r1(&inputs1[0]);",
+                "\t\t%reg_type<T,LMUL>% vd1(&inputs1[0]);",
                 "\t\tauto s1 = %scalar_load<T,LMUL>(inputs1)%;",
-                "\t\t%reg_type<T,LMUL>% r2(&inputs2[0]);",
+                "\t\t%reg_type<T,LMUL>% vd2(&inputs2[0]);",
                 "\t\tauto s2 = %scalar_load<T,LMUL>(inputs2)%;"
             ],
             "load_3args": [
-                "\t\t%reg_type<T,LMUL>% r1(&inputs1[0]);",
+                "\t\t%reg_type<T,LMUL>% vd1(&inputs1[0]);",
                 "\t\tauto s1 = %scalar_load<T,LMUL>(inputs1)%;",
-                "\t\t%reg_type<T,LMUL>% r2(&inputs2[0]);",
+                "\t\t%reg_type<T,LMUL>% vd2(&inputs2[0]);",
                 "\t\tauto s2 = %scalar_load<T,LMUL>(inputs2)%;",
-                "\t\t%reg_type<T,LMUL>% r3(&inputs3[0]);",
+                "\t\t%reg_type<T,LMUL>% vd3(&inputs3[0]);",
                 "\t\tauto s3 = %scalar_load<T,LMUL>(inputs3)%;"
             ],
             "op_call_lambda": [

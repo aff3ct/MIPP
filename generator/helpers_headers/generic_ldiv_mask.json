@@ -3,8 +3,8 @@
         {
             "code": [
                 "{{ lanemask() }}",
-                "{{ wrap('m0') }}",
-                "return {{ call1('all', call1('orb_k', 'w_m0', call1('notb_k', 'lm'))) }};"
+                "{{ wrap('vm0') }}",
+                "return {{ call1('all', call1('orb_k', 'w_vm0', call1('notb_k', 'lm'))) }};"
             ]
         }
     ],
@@ -12,8 +12,8 @@
         {
             "code": [
                 "{{ lanemask() }}",
-                "{{ wrap('m0') }}",
-                "return {{ call1('any', call1('andb_k', 'w_m0', 'lm')) }};"
+                "{{ wrap('vm0') }}",
+                "return {{ call1('any', call1('andb_k', 'w_vm0', 'lm')) }};"
             ]
         }
     ],
@@ -24,12 +24,12 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "{{ wrap('r0', 'r1') }}",
+                "%vd<tr>% res;",
+                "{{ wrap('vd0', 'vd1') }}",
                 "%s<tp>% buf[2 * %N<tp|m:tp*2>%] = {0};",
-                "{{ call1('storeu', 'buf', 'w_r0') }};",
-                "{{ call1('storeu', 'buf + %N<tp>%', 'w_r1') }};",
-                "res.r = {{ call1('loadu', 'buf') }}.r;",
+                "{{ call1('storeu', 'buf', 'w_vd0') }};",
+                "{{ call1('storeu', 'buf + %N<tp>%', 'w_vd1') }};",
+                "res.vd = {{ call1('loadu', 'buf') }}.vd;",
                 "return res;"
             ]
         }
@@ -41,12 +41,12 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "{{ wrap('m0', 'm1') }}",
+                "%vm<tr>% res;",
+                "{{ wrap('vm0', 'vm1') }}",
                 "int32_t buf[%N<tp|m:tp*2>%];",
                 "for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
-                "\tbuf[i] = (i < %N<tp>%) ? (int32_t){{ call1('get_k', 'w_m0', 'i') }} : (int32_t){{ call1('get_k', 'w_m1', 'i - %N<tp>%') }};",
-                "res.m = {{ call1('set_k', 'buf') }}.m;",
+                "\tbuf[i] = (i < %N<tp>%) ? (int32_t){{ call1('get_k', 'w_vm0', 'i') }} : (int32_t){{ call1('get_k', 'w_vm1', 'i - %N<tp>%') }};",
+                "res.vm = {{ call1('set_k', 'buf') }}.vm;",
                 "return res;"
             ]
         }
@@ -55,8 +55,8 @@
         {
             "code": [
                 "{{ lanemask() }}",
-                "{{ wrap('m0') }}",
-                "return {{ call1('count', call1('andb_k', 'w_m0', 'lm')) }};"
+                "{{ wrap('vm0') }}",
+                "return {{ call1('count', call1('andb_k', 'w_vm0', 'lm')) }};"
             ]
         }
     ],
@@ -67,10 +67,10 @@
                 "u"
             ],
             "code": [
-                "{{ wrap('r0') }}",
+                "{{ wrap('vd0') }}",
                 "%s<tp|c:uint>% idx[%N<tp|m:tp*2>%];",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
+                "{{ call1('storeu', 'idx', 'w_vd0', dt=UI) }};",
                 "for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
                 "\tbuf[i] = (i < %N<tp>%) ? p0[idx[i]] : 0;",
                 "{{ ret_d2(call1('loadu', 'buf')) }}"
@@ -83,14 +83,14 @@
                 "s"
             ],
             "code": [
-                "{% if mask_kind == 'masks' %}{{ wrap('m0', 'rsrc', 'r0') }}{% else %}{{ wrap('m0', 'r0') }}{% endif %}",
+                "{% if mask_kind == 'masks' %}{{ wrap('vm0', 'vdsrc', 'vd0') }}{% else %}{{ wrap('vm0', 'vd0') }}{% endif %}",
                 "%s<tp|c:uint>% idx[%N<tp|m:tp*2>%];",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
-                "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_rsrc') }};{% else %}for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
+                "{{ call1('storeu', 'idx', 'w_vd0', dt=UI) }};",
+                "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_vdsrc') }};{% else %}for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
                 "\tbuf[i] = 0;{% endif %}",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\tif ({{ call1('get_k', 'w_vm0', 'i') }})",
                 "\t\tbuf[i] = p0[idx[i]];",
                 "{{ ret_d2(call1('loadu', 'buf')) }}"
             ]
@@ -104,10 +104,10 @@
             ],
             "code": [
                 "{{ lanemask() }}",
-                "{% if mask_kind == 'maskz' %}{{ wrap('m0', 'r0') }}{% else %}{{ wrap('r0') }}{% endif %}",
-                "{% if mask_kind == 'maskz' %}lm = {{ call1('andb_k', 'w_m0', 'lm') }};{% endif %}",
-                "%r<tp|m:tp*2>% neutral = {{ call1('set1', ctx.neutral(f)) }};",
-                "%r<tp|m:tp*2>% sel = {{ call1('select', 'lm', 'w_r0', 'neutral') }};",
+                "{% if mask_kind == 'maskz' %}{{ wrap('vm0', 'vd0') }}{% else %}{{ wrap('vd0') }}{% endif %}",
+                "{% if mask_kind == 'maskz' %}lm = {{ call1('andb_k', 'w_vm0', 'lm') }};{% endif %}",
+                "%vd<tp|m:tp*2>% neutral = {{ call1('set1', ctx.neutral(f)) }};",
+                "%vd<tp|m:tp*2>% sel = {{ call1('select', 'lm', 'w_vd0', 'neutral') }};",
                 "return {{ call1(f, 'sel') }};"
             ]
         }
@@ -119,11 +119,11 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "{{ wrap('r0') }}",
+                "%vd<tr>% res;",
+                "{{ wrap('vd0') }}",
                 "%s<tp>% buf[%N<tp|m:tp*2>%] = {0};",
-                "{{ call1('storeu', 'buf', 'w_r0') }};",
-                "res.r = {{ call1('loadu', 'buf + %N<tp|m:tp/2>%') }}.r;",
+                "{{ call1('storeu', 'buf', 'w_vd0') }};",
+                "res.vd = {{ call1('loadu', 'buf + %N<tp|m:tp/2>%') }}.vd;",
                 "return res;"
             ]
         }
@@ -135,12 +135,12 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "{{ wrap('m0') }}",
+                "%vm<tr>% res;",
+                "{{ wrap('vm0') }}",
                 "int32_t buf[%N<tp>%];",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tbuf[i] = (i < %N<tp|m:tp/2>%) ? (int32_t){{ call1('get_k', 'w_m0', 'i + %N<tp|m:tp/2>%') }} : 0;",
-                "res.m = {{ call1('set_k', 'buf') }}.m;",
+                "\tbuf[i] = (i < %N<tp|m:tp/2>%) ? (int32_t){{ call1('get_k', 'w_vm0', 'i + %N<tp|m:tp/2>%') }} : 0;",
+                "res.vm = {{ call1('set_k', 'buf') }}.vm;",
                 "return res;"
             ]
         }
@@ -152,8 +152,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = r0.r;",
+                "%vd<tr>% res;",
+                "res.vd = vd0.vd;",
                 "return res;"
             ]
         }
@@ -165,8 +165,8 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "res.m = m0.m;",
+                "%vm<tr>% res;",
+                "res.vm = vm0.vm;",
                 "return res;"
             ]
         }
@@ -191,12 +191,12 @@
                 "s"
             ],
             "code": [
-                "{% if mask_kind == 'masks' %}{{ wrap('m0', 'rsrc') }}{% else %}{{ wrap('m0') }}{% endif %}",
+                "{% if mask_kind == 'masks' %}{{ wrap('vm0', 'vdsrc') }}{% else %}{{ wrap('vm0') }}{% endif %}",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_rsrc') }};{% else %}for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
+                "{% if mask_kind == 'masks' %}{{ call1('storeu', 'buf', 'w_vdsrc') }};{% else %}for (unsigned i = 0; i < %N<tp|m:tp*2>%; i++)",
                 "\tbuf[i] = 0;{% endif %}",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\tif ({{ call1('get_k', 'w_vm0', 'i') }})",
                 "\t\tbuf[i] = p0[i];",
                 "{{ ret_d2(call1('loadu', 'buf')) }}"
             ]
@@ -209,14 +209,14 @@
                 "u"
             ],
             "code": [
-                "{{ wrap('r0') }}",
+                "{{ wrap('vd0') }}",
                 "%s<tp>% bs[%N<tp>%];",
-                "{{ call1('storeu', 'bs', 'w_r0') }};",
+                "{{ call1('storeu', 'bs', 'w_vd0') }};",
                 "%s<tr>% bd[%N<tr|m:tr*2>%] = {0};",
                 "for (unsigned i = 0; i < %N<tr>%; i++)",
                 "\tbd[i] = (%s<tr>%)bs[i];",
-                "%r<tr>% res;",
-                "res.r = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.r;",
+                "%vd<tr>% res;",
+                "res.vd = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.vd;",
                 "return res;"
             ]
         }
@@ -229,15 +229,15 @@
             ],
             "code": [
                 "{% set D = ctx.dt_ret | upper %}",
-                "{{ wrap('r0') }}",
+                "{{ wrap('vd0') }}",
                 "%s<tp>% bs[%N<tp>%];",
-                "{{ call1('storeu', 'bs', 'w_r0') }};",
+                "{{ call1('storeu', 'bs', 'w_vd0') }};",
                 "%s<tr>% bd[%N<tr|m:tr*2>%] = {0};",
                 "for (unsigned i = 0; i < %N<tr>%; i++)",
                 "{% if ctx.dt_ret.startswith('u') %}\tbd[i] = (%s<tr>%)(bs[i] > {{ D }}_MAX ? {{ D }}_MAX : bs[i]);",
                 "{% else %}\tbd[i] = (%s<tr>%)(bs[i] < {{ D }}_MIN ? {{ D }}_MIN : (bs[i] > {{ D }}_MAX ? {{ D }}_MAX : bs[i]));{% endif %}",
-                "%r<tr>% res;",
-                "res.r = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.r;",
+                "%vd<tr>% res;",
+                "res.vd = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.vd;",
                 "return res;"
             ]
         }
@@ -246,8 +246,8 @@
         {
             "code": [
                 "{{ lanemask() }}",
-                "{{ wrap('m0') }}",
-                "return {{ call1('none', call1('andb_k', 'w_m0', 'lm')) }};"
+                "{{ wrap('vm0') }}",
+                "return {{ call1('none', call1('andb_k', 'w_vm0', 'lm')) }};"
             ]
         }
     ],
@@ -258,11 +258,11 @@
                 "u"
             ],
             "code": [
-                "{{ wrap('r0', 'r1') }}",
+                "{{ wrap('vd0', 'vd1') }}",
                 "%s<tp|c:uint>% idx[%N<tp|m:tp*2>%];",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
-                "{{ call1('storeu', 'buf', 'w_r1') }};",
+                "{{ call1('storeu', 'idx', 'w_vd0', dt=UI) }};",
+                "{{ call1('storeu', 'buf', 'w_vd1') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
                 "\tp0[idx[i]] = buf[i];"
             ]
@@ -273,13 +273,13 @@
                 "m"
             ],
             "code": [
-                "{{ wrap('m0', 'r0', 'r1') }}",
+                "{{ wrap('vm0', 'vd0', 'vd1') }}",
                 "%s<tp|c:uint>% idx[%N<tp|m:tp*2>%];",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
-                "{{ call1('storeu', 'buf', 'w_r1') }};",
+                "{{ call1('storeu', 'idx', 'w_vd0', dt=UI) }};",
+                "{{ call1('storeu', 'buf', 'w_vd1') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\tif ({{ call1('get_k', 'w_vm0', 'i') }})",
                 "\t\tp0[idx[i]] = buf[i];"
             ]
         },
@@ -289,13 +289,13 @@
                 "z"
             ],
             "code": [
-                "{{ wrap('m0', 'r0', 'r1') }}",
+                "{{ wrap('vm0', 'vd0', 'vd1') }}",
                 "%s<tp|c:uint>% idx[%N<tp|m:tp*2>%];",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'idx', 'w_r0', dt=UI) }};",
-                "{{ call1('storeu', 'buf', 'w_r1') }};",
+                "{{ call1('storeu', 'idx', 'w_vd0', dt=UI) }};",
+                "{{ call1('storeu', 'buf', 'w_vd1') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tp0[idx[i]] = {{ call1('get_k', 'w_m0', 'i') }} ? buf[i] : 0;"
+                "\tp0[idx[i]] = {{ call1('get_k', 'w_vm0', 'i') }} ? buf[i] : 0;"
             ]
         }
     ],
@@ -328,9 +328,9 @@
                 "u"
             ],
             "code": [
-                "{{ wrap('r0') }}",
+                "{{ wrap('vd0') }}",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'buf', 'w_r0') }};",
+                "{{ call1('storeu', 'buf', 'w_vd0') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
                 "\tp0[i] = buf[i];"
             ]
@@ -341,11 +341,11 @@
                 "m"
             ],
             "code": [
-                "{{ wrap('m0', 'r0') }}",
+                "{{ wrap('vm0', 'vd0') }}",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'buf', 'w_r0') }};",
+                "{{ call1('storeu', 'buf', 'w_vd0') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\tif ({{ call1('get_k', 'w_vm0', 'i') }})",
                 "\t\tp0[i] = buf[i];"
             ]
         },
@@ -355,11 +355,11 @@
                 "z"
             ],
             "code": [
-                "{{ wrap('m0', 'r0') }}",
+                "{{ wrap('vm0', 'vd0') }}",
                 "%s<tp>% buf[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'buf', 'w_r0') }};",
+                "{{ call1('storeu', 'buf', 'w_vd0') }};",
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
-                "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
+                "\tif ({{ call1('get_k', 'w_vm0', 'i') }})",
                 "\t\tp0[i] = buf[i];\n\telse\n\t\tp0[i] = 0;"
             ]
         }
@@ -368,8 +368,8 @@
         {
             "code": [
                 "{{ lanemask() }}",
-                "{{ wrap('m0', 'm1') }}",
-                "return {{ call1('testz', call1('andb_k', 'w_m0', 'lm'), 'w_m1') }};"
+                "{{ wrap('vm0', 'vm1') }}",
+                "return {{ call1('testz', call1('andb_k', 'w_vm0', 'lm'), 'w_vm1') }};"
             ]
         }
     ],
@@ -380,14 +380,14 @@
                 "u"
             ],
             "code": [
-                "{{ wrap('r0') }}",
+                "{{ wrap('vd0') }}",
                 "%s<tp>% bs[%N<tp|m:tp*2>%];",
-                "{{ call1('storeu', 'bs', 'w_r0') }};",
+                "{{ call1('storeu', 'bs', 'w_vd0') }};",
                 "%s<tr>% bd[%N<tr>%];",
                 "for (unsigned i = 0; i < %N<tr>%; i++)",
                 "\tbd[i] = (%s<tr>%)bs[i];",
-                "%r<tr>% res;",
-                "res.r = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.r;",
+                "%vd<tr>% res;",
+                "res.vd = {{ call1('loadu', 'bd', dt=ctx.dt_ret) }}.vd;",
                 "return res;"
             ]
         }

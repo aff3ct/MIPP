@@ -105,7 +105,7 @@ TEST_CASE("utils - sum and pack", "[utils]")
 	for (int i = 0; i < MIPP_N_FLOAT32; i++)
 		in[i] = static_cast<float>(i) * 0.5f;
 	const mipp::Vd<float> rf(in);
-	REQUIRE(mipp::sum(rf.r) == mipp::hadd(rf.r));
+	REQUIRE(mipp::sum(rf.vd) == mipp::hadd(rf.vd));
 	REQUIRE(mipp::sum(rf) == mipp::hadd(rf));
 
 	// pack<int8_t>: the lanes of a, then the lanes of b, saturated to [-128, 127]
@@ -135,10 +135,10 @@ TEST_CASE("utils - reduce", "[utils]")
 	const int32_t mn = *std::min_element(data.begin(), data.end());
 
 	// one register, several LMULs
-	const mipp::Vd<int32_t, 2> r2(data.data());
-	REQUIRE(mipp::reduce(r2, mipp::op::add()) == std::accumulate(data.begin(), data.begin() + r2.N(), 0));
-	const mipp::Vd<int32_t> r1(data.data());
-	REQUIRE(mipp::reduce(r1, mipp::op::max()) == *std::max_element(data.begin(), data.begin() + r1.N()));
+	const mipp::Vd<int32_t, 2> vd2(data.data());
+	REQUIRE(mipp::reduce(vd2, mipp::op::add()) == std::accumulate(data.begin(), data.begin() + vd2.N(), 0));
+	const mipp::Vd<int32_t> vd1(data.data());
+	REQUIRE(mipp::reduce(vd1, mipp::op::max()) == *std::max_element(data.begin(), data.begin() + vd1.N()));
 
 	// arrays: a length that is not a multiple of the register, and shorter than a register
 	REQUIRE(mipp::reduce(data.data(), data.size(), mipp::op::add()) == sum);

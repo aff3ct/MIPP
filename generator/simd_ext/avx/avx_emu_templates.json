@@ -4,15 +4,15 @@
         "code": [
             "{%- set ones = '_mm256_set1_epi32(-1)' -%}",
             "{%- if isa_dt_par.data_ext_msk == 'ps' %}{% set ones = '_mm256_castsi256_ps(' ~ ones ~ ')' %}{% elif isa_dt_par.data_ext_msk == 'pd' %}{% set ones = '_mm256_castsi256_pd(' ~ ones ~ ')' %}{% endif -%}",
-            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, {{ ones }});"
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(vm0.vm, {{ ones }});"
         ]
     },
     "complex_cmul": {
         "format": "long",
         "code": [
             "// (re, re) * b -/+ (im, im) * swapped b",
-            "%r<tp>% res;",
-            "res.r = _mm256_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_moveldup_ps(r0.r){% else %}_mm256_movedup_pd(r0.r){% endif %}, r1.r, _mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_movehdup_ps(r0.r){% else %}_mm256_permute_pd(r0.r, 0xF){% endif %}, {% if dt_par.n_bits == 32 %}_mm256_permute_ps(r1.r, 0xB1){% else %}_mm256_permute_pd(r1.r, 0x5){% endif %}));",
+            "%vd<tp>% res;",
+            "res.vd = _mm256_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_moveldup_ps(vd0.vd){% else %}_mm256_movedup_pd(vd0.vd){% endif %}, vd1.vd, _mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_movehdup_ps(vd0.vd){% else %}_mm256_permute_pd(vd0.vd, 0xF){% endif %}, {% if dt_par.n_bits == 32 %}_mm256_permute_ps(vd1.vd, 0xB1){% else %}_mm256_permute_pd(vd1.vd, 0x5){% endif %}));",
             "return res;"
         ]
     },
@@ -20,88 +20,88 @@
         "format": "long",
         "code": [
             "// (re, re) * b -/+ (im, im) * swapped b",
-            "%r<tp>% res;",
-            "res.r = _mm256_addsub_{{ isa_dt_par.data_ext }}(_mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_moveldup_ps(r0.r){% else %}_mm256_movedup_pd(r0.r){% endif %}, r1.r), _mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_movehdup_ps(r0.r){% else %}_mm256_permute_pd(r0.r, 0xF){% endif %}, {% if dt_par.n_bits == 32 %}_mm256_permute_ps(r1.r, 0xB1){% else %}_mm256_permute_pd(r1.r, 0x5){% endif %}));",
+            "%vd<tp>% res;",
+            "res.vd = _mm256_addsub_{{ isa_dt_par.data_ext }}(_mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_moveldup_ps(vd0.vd){% else %}_mm256_movedup_pd(vd0.vd){% endif %}, vd1.vd), _mm256_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm256_movehdup_ps(vd0.vd){% else %}_mm256_permute_pd(vd0.vd, 0xF){% endif %}, {% if dt_par.n_bits == 32 %}_mm256_permute_ps(vd1.vd, 0xB1){% else %}_mm256_permute_pd(vd1.vd, 0x5){% endif %}));",
             "return res;"
         ]
     },
     "cvt_f32_u32": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
+            "%vd<tr>% res;",
             "__m256 two31 = _mm256_set1_ps(2147483648.0f);",
-            "__m256 big = _mm256_cmp_ps(r0.r, two31, _CMP_GE_OQ);",
-            "__m256 lo = _mm256_castsi256_ps(_mm256_cvttps_epi32(r0.r));",
-            "__m256 hi = _mm256_xor_ps(_mm256_castsi256_ps(_mm256_cvttps_epi32(_mm256_sub_ps(r0.r, two31))), _mm256_castsi256_ps(_mm256_set1_epi32((int32_t)0x80000000)));",
-            "res.r = _mm256_castps_si256(_mm256_blendv_ps(lo, hi, big));",
+            "__m256 big = _mm256_cmp_ps(vd0.vd, two31, _CMP_GE_OQ);",
+            "__m256 lo = _mm256_castsi256_ps(_mm256_cvttps_epi32(vd0.vd));",
+            "__m256 hi = _mm256_xor_ps(_mm256_castsi256_ps(_mm256_cvttps_epi32(_mm256_sub_ps(vd0.vd, two31))), _mm256_castsi256_ps(_mm256_set1_epi32((int32_t)0x80000000)));",
+            "res.vd = _mm256_castps_si256(_mm256_blendv_ps(lo, hi, big));",
             "return res;"
         ]
     },
     "cvt_f64_i64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "%r<tp>% t = %trunc<tp>%(r0);",
-            "%r<tp>% y;",
-            "y.r = _mm256_mul_pd(t.r, _mm256_set1_pd(2.3283064365386962890625e-10));",
-            "%r<tp>% ty = %trunc<tp>%(y);",
-            "__m256d hi_d = _mm256_sub_pd(ty.r, _mm256_and_pd(_mm256_cmp_pd(ty.r, y.r, _CMP_GT_OQ), _mm256_set1_pd(1.0)));",
-            "__m256d lo_d = _mm256_sub_pd(t.r, _mm256_mul_pd(hi_d, _mm256_set1_pd(4294967296.0)));",
+            "%vd<tr>% res;",
+            "%vd<tp>% t = %trunc<tp>%(vd0);",
+            "%vd<tp>% y;",
+            "y.vd = _mm256_mul_pd(t.vd, _mm256_set1_pd(2.3283064365386962890625e-10));",
+            "%vd<tp>% ty = %trunc<tp>%(y);",
+            "__m256d hi_d = _mm256_sub_pd(ty.vd, _mm256_and_pd(_mm256_cmp_pd(ty.vd, y.vd, _CMP_GT_OQ), _mm256_set1_pd(1.0)));",
+            "__m256d lo_d = _mm256_sub_pd(t.vd, _mm256_mul_pd(hi_d, _mm256_set1_pd(4294967296.0)));",
             "__m128i flip = _mm_set1_epi32((int32_t)0x80000000);",
             "__m128i lo_u = _mm_xor_si128(_mm256_cvttpd_epi32(_mm256_sub_pd(lo_d, _mm256_set1_pd(2147483648.0))), flip);",
             "{% if dt_ret.category == 'uint' %}__m128i hi_i = _mm_xor_si128(_mm256_cvttpd_epi32(_mm256_sub_pd(hi_d, _mm256_set1_pd(2147483648.0))), flip);",
             "{% else %}__m128i hi_i = _mm256_cvttpd_epi32(hi_d);{% endif %}",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_unpacklo_epi32(lo_u, hi_i)), _mm_unpackhi_epi32(lo_u, hi_i), 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_unpacklo_epi32(lo_u, hi_i)), _mm_unpackhi_epi32(lo_u, hi_i), 1);",
             "return res;"
         ]
     },
     "cvt_i64_f64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "%vd<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
             "__m128i mask32 = _mm_set1_epi64x(0xFFFFFFFFLL), magic = _mm_set1_epi64x(0x4330000000000000LL);",
             "__m128d m52 = _mm_set1_pd(4503599627370496.0), two32 = _mm_set1_pd(4294967296.0);",
             "__m128d lo_lo = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_lo, mask32), magic)), m52);",
             "__m128d lo_hi = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_hi, mask32), magic)), m52);",
             "__m128d hi_lo = _mm_cvtepi32_pd(_mm_shuffle_epi32(r0_lo, _MM_SHUFFLE(3, 1, 3, 1)));",
             "__m128d hi_hi = _mm_cvtepi32_pd(_mm_shuffle_epi32(r0_hi, _MM_SHUFFLE(3, 1, 3, 1)));",
-            "res.r = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_add_pd(_mm_mul_pd(hi_lo, two32), lo_lo)), _mm_add_pd(_mm_mul_pd(hi_hi, two32), lo_hi), 1);",
+            "res.vd = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_add_pd(_mm_mul_pd(hi_lo, two32), lo_lo)), _mm_add_pd(_mm_mul_pd(hi_hi, two32), lo_hi), 1);",
             "return res;"
         ]
     },
     "cvt_u32_f32": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "__m256 x = _mm256_castsi256_ps(r0.r);",
+            "%vd<tr>% res;",
+            "__m256 x = _mm256_castsi256_ps(vd0.vd);",
             "__m256i lo = _mm256_castps_si256(_mm256_and_ps(x, _mm256_castsi256_ps(_mm256_set1_epi32(0x0000FFFF))));",
             "__m256i hi = _mm256_castps_si256(_mm256_and_ps(x, _mm256_castsi256_ps(_mm256_set1_epi32((int32_t)0xFFFF0000))));",
             "__m256 hi_f = _mm256_cvtepi32_ps(hi);  // signed: + 2^32 when the top bit is set",
             "hi_f = _mm256_add_ps(hi_f, _mm256_and_ps(_mm256_cmp_ps(hi_f, _mm256_setzero_ps(), _CMP_LT_OQ), _mm256_set1_ps(4294967296.0f)));",
-            "res.r = _mm256_add_ps(hi_f, _mm256_cvtepi32_ps(lo));",
+            "res.vd = _mm256_add_ps(hi_f, _mm256_cvtepi32_ps(lo));",
             "return res;"
         ]
     },
     "cvt_u64_f64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "%vd<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
             "__m128i mask32 = _mm_set1_epi64x(0xFFFFFFFFLL), magic = _mm_set1_epi64x(0x4330000000000000LL);",
             "__m128d m52 = _mm_set1_pd(4503599627370496.0), two32 = _mm_set1_pd(4294967296.0);",
             "__m128d lo_lo = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_lo, mask32), magic)), m52);",
             "__m128d lo_hi = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_and_si128(r0_hi, mask32), magic)), m52);",
             "__m128d hi_lo = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_srli_epi64(r0_lo, 32), magic)), m52);",
             "__m128d hi_hi = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(_mm_srli_epi64(r0_hi, 32), magic)), m52);",
-            "res.r = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_add_pd(_mm_mul_pd(hi_lo, two32), lo_lo)), _mm_add_pd(_mm_mul_pd(hi_hi, two32), lo_hi), 1);",
+            "res.vd = _mm256_insertf128_pd(_mm256_castpd128_pd256(_mm_add_pd(_mm_mul_pd(hi_lo, two32), lo_lo)), _mm_add_pd(_mm_mul_pd(hi_hi, two32), lo_hi), 1);",
             "return res;"
         ]
     },
     "exp_f32": {
         "format": "long",
         "code": [
-            "__m256 x = r0.r;",
+            "__m256 x = vd0.vd;",
             "__m256 tmp = _mm256_setzero_ps(), fx;",
             "__m256i imm0;",
             "__m256 one = _mm256_set1_ps(1.0f);",
@@ -163,7 +163,7 @@
             "y = _mm256_mul_ps(y, pow2n);",
             "",
             "vd_avx_float32_t res;",
-            "res.r = y;",
+            "res.vd = y;",
             "return res;",
             ""
         ]
@@ -171,35 +171,35 @@
     "gather_i32_64_maskz_f": {
         "format": "short",
         "code": [
-            "_mm256_mask_i32gather_pd(_mm256_setzero_pd(), p0, r0.r, m0.m, 8);"
+            "_mm256_mask_i32gather_pd(_mm256_setzero_pd(), p0, vd0.vd, vm0.vm, 8);"
         ]
     },
     "gather_i32_64_maskz_i": {
         "format": "short",
         "code": [
-            "_mm256_mask_i32gather_epi64(_mm256_setzero_si256(), (const long long*)p0, r0.r, m0.m, 8);"
+            "_mm256_mask_i32gather_epi64(_mm256_setzero_si256(), (const long long*)p0, vd0.vd, vm0.vm, 8);"
         ]
     },
     "gather_maskz_f32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,4);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,4);"
     },
     "gather_maskz_f64": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,8);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,8);"
     },
     "gather_maskz_i32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,p0,r0.r,m0.m,4);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,4);"
     },
     "gather_maskz_i64": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().r,(long long*)p0,r0.r,m0.m,8);"
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,(long long*)p0,vd0.vd,vm0.vm,8);"
     },
     "log_f32": {
         "format": "long",
         "code": [
-            "__m256 x = r0.r;",
+            "__m256 x = vd0.vd;",
             "__m256i imm0;",
             "__m256 one = _mm256_set1_ps(1.0f);",
             "__m256 half = _mm256_set1_ps(0.5f);",
@@ -280,7 +280,7 @@
             "x = _mm256_add_ps(x, tmp);",
             "x = _mm256_or_ps(x, invalid_mask); // negative arg will be NAN",
             "vd_avx_float32_t res;",
-            "res.r = x;",
+            "res.vd = x;",
             "return res;",
             ""
         ]
@@ -288,56 +288,56 @@
     "lshift8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = _mm256_and_si256(_mm256_slli_epi16(r0.r, s0), _mm256_set1_epi8((char)(0xFF << s0)));",
+            "%vd<tp>% res;",
+            "res.vd = _mm256_and_si256(_mm256_slli_epi16(vd0.vd, s0), _mm256_set1_epi8((char)(0xFF << s0)));",
             "return res;"
         ]
     },
     "maskload_s": {
         "format": "long",
         "code": [
-            "%r<tp>% ld;",
-            "ld.r = _mm256_maskload_{% if dt_par.category == 'float' %}{{ isa_dt_par.data_ext }}{% else %}epi{{ dt_par.n_bits }}{% endif %}(({% if dt_par.n_bits == 64 and dt_par.category != 'float' %}long long{% elif dt_par.category != 'float' %}int{% else %}{{ isa_dt_par.to_ptr }}{% endif %}*)p0, {% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(m0.m){% else %}m0.m{% endif %});",
-            "return %select<tp>%(m0, ld, rsrc);"
+            "%vd<tp>% ld;",
+            "ld.vd = _mm256_maskload_{% if dt_par.category == 'float' %}{{ isa_dt_par.data_ext }}{% else %}epi{{ dt_par.n_bits }}{% endif %}(({% if dt_par.n_bits == 64 and dt_par.category != 'float' %}long long{% elif dt_par.category != 'float' %}int{% else %}{{ isa_dt_par.to_ptr }}{% endif %}*)p0, {% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(vm0.vm){% else %}vm0.vm{% endif %});",
+            "return %select<tp>%(vm0, ld, vdsrc);"
         ]
     },
     "mul64": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m256i lo = _mm256_mul_epu32(r0.r, r1.r);",
-            "__m256i t1 = _mm256_mul_epu32(_mm256_srli_epi64(r0.r, 32), r1.r);",
-            "__m256i t2 = _mm256_mul_epu32(r0.r, _mm256_srli_epi64(r1.r, 32));",
-            "res.r = _mm256_add_epi64(lo, _mm256_slli_epi64(_mm256_add_epi64(t1, t2), 32));",
+            "%vd<tp>% res;",
+            "__m256i lo = _mm256_mul_epu32(vd0.vd, vd1.vd);",
+            "__m256i t1 = _mm256_mul_epu32(_mm256_srli_epi64(vd0.vd, 32), vd1.vd);",
+            "__m256i t2 = _mm256_mul_epu32(vd0.vd, _mm256_srli_epi64(vd1.vd, 32));",
+            "res.vd = _mm256_add_epi64(lo, _mm256_slli_epi64(_mm256_add_epi64(t1, t2), 32));",
             "return res;"
         ]
     },
     "mul8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m256i even = _mm256_mullo_epi16(r0.r, r1.r);",
-            "__m256i odd = _mm256_mullo_epi16(_mm256_srli_epi16(r0.r, 8), _mm256_srli_epi16(r1.r, 8));",
-            "res.r = _mm256_or_si256(_mm256_slli_epi16(odd, 8), _mm256_and_si256(even, _mm256_set1_epi16(0x00FF)));",
+            "%vd<tp>% res;",
+            "__m256i even = _mm256_mullo_epi16(vd0.vd, vd1.vd);",
+            "__m256i odd = _mm256_mullo_epi16(_mm256_srli_epi16(vd0.vd, 8), _mm256_srli_epi16(vd1.vd, 8));",
+            "res.vd = _mm256_or_si256(_mm256_slli_epi16(odd, 8), _mm256_and_si256(even, _mm256_set1_epi16(0x00FF)));",
             "return res;"
         ]
     },
     "notb_k_xor": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
+            "%vm<tr>% res;",
             "__m256 ones = _mm256_castsi256_ps(_mm256_set1_epi32(-1));",
-            "{% if isa_dt_par.data_ext_msk == 'ps' %}res.m = _mm256_xor_ps(m0.m, ones);",
-            "{% elif isa_dt_par.data_ext_msk == 'pd' %}res.m = _mm256_xor_pd(m0.m, _mm256_castps_pd(ones));",
-            "{% else %}res.m = _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(m0.m), ones));{% endif %}",
+            "{% if isa_dt_par.data_ext_msk == 'ps' %}res.vm = _mm256_xor_ps(vm0.vm, ones);",
+            "{% elif isa_dt_par.data_ext_msk == 'pd' %}res.vm = _mm256_xor_pd(vm0.vm, _mm256_castps_pd(ones));",
+            "{% else %}res.vm = _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(vm0.vm), ones));{% endif %}",
             "return res;"
         ]
     },
     "pow2_sllv": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = _mm256_sllv_epi{{ dt_par.n_bits }}(_mm256_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(1), r0.r);",
+            "%vd<tp>% res;",
+            "res.vd = _mm256_sllv_epi{{ dt_par.n_bits }}(_mm256_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(1), vd0.vd);",
             "return res;"
         ]
     },
@@ -346,12 +346,12 @@
         "code": [
             "// lane indices of the active lanes (uint8 each), indexed by the movemask, then the lanes after the count zeroed",
             "static const uint8_t lut[256][8] = {{ compress_lut(lanes=8, units=1) }};",
-            "const int mm = _mm256_movemask_ps({% if dt_par.category == 'float' %}m0.m{% else %}_mm256_castsi256_ps(m0.m){% endif %});",
+            "const int mm = _mm256_movemask_ps({% if dt_par.category == 'float' %}vm0.vm{% else %}_mm256_castsi256_ps(vm0.vm){% endif %});",
             "__m256i idx = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i_u*)lut[mm]));",
             "__m256i keep = _mm256_cmpgt_epi32(_mm256_set1_epi32(__builtin_popcount((unsigned)mm)), _mm256_setr_epi32(0, 1, 2, 3, 4, 5, 6, 7));",
-            "__m256 p = _mm256_and_ps(_mm256_permutevar8x32_ps({% if dt_par.category == 'float' %}r0.r{% else %}_mm256_castsi256_ps(r0.r){% endif %}, idx), _mm256_castsi256_ps(keep));",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}p{% else %}_mm256_castps_si256(p){% endif %};",
+            "__m256 p = _mm256_and_ps(_mm256_permutevar8x32_ps({% if dt_par.category == 'float' %}vd0.vd{% else %}_mm256_castsi256_ps(vd0.vd){% endif %}, idx), _mm256_castsi256_ps(keep));",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}p{% else %}_mm256_castps_si256(p){% endif %};",
             "return res;"
         ]
     },
@@ -360,36 +360,36 @@
         "code": [
             "// 32-bit lane indices of the active 64-bit lanes, indexed by the movemask, then the lanes after the count zeroed",
             "static const uint8_t lut[16][8] = {{ compress_lut(lanes=4, units=2) }};",
-            "const int mm = _mm256_movemask_pd({% if dt_par.category == 'float' %}m0.m{% else %}_mm256_castsi256_pd(m0.m){% endif %});",
+            "const int mm = _mm256_movemask_pd({% if dt_par.category == 'float' %}vm0.vm{% else %}_mm256_castsi256_pd(vm0.vm){% endif %});",
             "__m256i idx = _mm256_cvtepu8_epi32(_mm_loadl_epi64((const __m128i_u*)lut[mm]));",
             "__m256i keep = _mm256_cmpgt_epi64(_mm256_set1_epi64x(__builtin_popcount((unsigned)mm)), _mm256_setr_epi64x(0, 1, 2, 3));",
-            "__m256 p = _mm256_and_ps(_mm256_permutevar8x32_ps({% if dt_par.category == 'float' %}_mm256_castpd_ps(r0.r){% else %}_mm256_castsi256_ps(r0.r){% endif %}, idx), _mm256_castsi256_ps(keep));",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm256_castps_pd(p){% else %}_mm256_castps_si256(p){% endif %};",
+            "__m256 p = _mm256_and_ps(_mm256_permutevar8x32_ps({% if dt_par.category == 'float' %}_mm256_castpd_ps(vd0.vd){% else %}_mm256_castsi256_ps(vd0.vd){% endif %}, idx), _mm256_castsi256_ps(keep));",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm256_castps_pd(p){% else %}_mm256_castps_si256(p){% endif %};",
             "return res;"
         ]
     },
     "rea_count_epi8": {
         "format": "long",
         "code": [
-            "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_epi8(m0.m)) / {{ dt_par.n_bits // 8 }});"
+            "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_epi8(vm0.vm)) / {{ dt_par.n_bits // 8 }});"
         ]
     },
     "rea_count_ps": {
         "format": "long",
         "code": [
-            "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}({% if dt_par.category == 'float' %}m0.m{% else %}{{ isa.prefix }}_castsi256_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}(m0.m){% endif %})));"
+            "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}({% if dt_par.category == 'float' %}vm0.vm{% else %}{{ isa.prefix }}_castsi256_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}(vm0.vm){% endif %})));"
         ]
     },
     "rea_permute2_32": {
         "format": "long",
         "code": [
-            "// both registers permuted, the lanes of r1 where the index has its bit 3 set",
-            "__m256 x = {{ isa.prefix }}_permutevar8x32_ps({% if dt_par.category == 'float' %}r0.r{% else %}{{ isa.prefix }}_castsi256_ps(r0.r){% endif %}, r2.r);",
-            "__m256 y = {{ isa.prefix }}_permutevar8x32_ps({% if dt_par.category == 'float' %}r1.r{% else %}{{ isa.prefix }}_castsi256_ps(r1.r){% endif %}, r2.r);",
-            "__m256 z = {{ isa.prefix }}_blendv_ps(x, y, {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_slli_epi32(r2.r, 28)));",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}z{% else %}{{ isa.prefix }}_castps_si256(z){% endif %};",
+            "// both registers permuted, the lanes of vd1 where the index has its bit 3 set",
+            "__m256 x = {{ isa.prefix }}_permutevar8x32_ps({% if dt_par.category == 'float' %}vd0.vd{% else %}{{ isa.prefix }}_castsi256_ps(vd0.vd){% endif %}, vd2.vd);",
+            "__m256 y = {{ isa.prefix }}_permutevar8x32_ps({% if dt_par.category == 'float' %}vd1.vd{% else %}{{ isa.prefix }}_castsi256_ps(vd1.vd){% endif %}, vd2.vd);",
+            "__m256 z = {{ isa.prefix }}_blendv_ps(x, y, {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_slli_epi32(vd2.vd, 28)));",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}z{% else %}{{ isa.prefix }}_castps_si256(z){% endif %};",
             "return res;"
         ]
     },
@@ -397,145 +397,145 @@
         "format": "long",
         "code": [
             "// the 64-bit index k as the 32-bit indices 2k and 2k + 1",
-            "__m256i t = {{ isa.prefix }}_slli_epi64(r1.r, 1);",
+            "__m256i t = {{ isa.prefix }}_slli_epi64(vd1.vd, 1);",
             "__m256i i32 = {{ isa.prefix }}_or_si256(t, {{ isa.prefix }}_slli_epi64({{ isa.prefix }}_add_epi64(t, {{ isa.prefix }}_set1_epi64x(1)), 32));",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}{{ isa.prefix }}_castps_pd({{ isa.prefix }}_permutevar8x32_ps({{ isa.prefix }}_castpd_ps(r0.r), i32)){% else %}{{ isa.prefix }}_permutevar8x32_epi32(r0.r, i32){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}{{ isa.prefix }}_castps_pd({{ isa.prefix }}_permutevar8x32_ps({{ isa.prefix }}_castpd_ps(vd0.vd), i32)){% else %}{{ isa.prefix }}_permutevar8x32_epi32(vd0.vd, i32){% endif %};",
             "return res;"
         ]
     },
     "rea_reverse_b128_epi16": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm256_setr_epi8(14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1, 14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1));"
+        "code": "{{ isa.prefix }}_shuffle_epi8(vd0.vd, _mm256_setr_epi8(14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1, 14, 15, 12, 13, 10, 11, 8, 9, 6, 7, 4, 5, 2, 3, 0, 1));"
     },
     "rea_reverse_b128_epi8": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm256_setr_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));"
+        "code": "{{ isa.prefix }}_shuffle_epi8(vd0.vd, _mm256_setr_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));"
     },
     "rea_reverse_epi32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permutevar8x32_epi32(r0.r, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
+        "code": "{{ isa.prefix }}_permutevar8x32_epi32(vd0.vd, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
     },
     "rea_reverse_ps": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permutevar8x32_ps(r0.r, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
+        "code": "{{ isa.prefix }}_permutevar8x32_ps(vd0.vd, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
     },
     "rea_slide_b128_pshufb": {
         "format": "long",
         "code": [
-            "// pshufb works in each block of 128 bits: the bytes b + k of the block of r0 (b + k < 16), then of r1 (low 4 bits",
+            "// pshufb works in each block of 128 bits: the bytes b + k of the block of vd0 (b + k < 16), then of vd1 (low 4 bits",
             "// of b + k), with k = s0 * sizeof(T) bytes",
             "const __m256i ib = _mm256_add_epi8(_mm256_setr_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), _mm256_set1_epi8((char)(s0 * (int32_t)sizeof(%s<tp>%))));",
             "const __m256i hi = _mm256_cmpgt_epi8(ib, _mm256_set1_epi8(15));",
-            "const __m256i x = _mm256_shuffle_epi8({% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(r0.r){% else %}r0.r{% endif %}, ib);",
-            "const __m256i y = _mm256_shuffle_epi8({% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(r1.r){% else %}r1.r{% endif %}, ib);",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}(_mm256_blendv_epi8(x, y, hi)){% else %}_mm256_blendv_epi8(x, y, hi){% endif %};",
+            "const __m256i x = _mm256_shuffle_epi8({% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(vd0.vd){% else %}vd0.vd{% endif %}, ib);",
+            "const __m256i y = _mm256_shuffle_epi8({% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(vd1.vd){% else %}vd1.vd{% endif %}, ib);",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}(_mm256_blendv_epi8(x, y, hi)){% else %}_mm256_blendv_epi8(x, y, hi){% endif %};",
             "return res;"
         ]
     },
     "rea_unzip_epi32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_castps_si256({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi256_ps(r0.r), {{ isa.prefix }}_castsi256_ps(r1.r), {{ instr_name }})), 0xD8);"
+        "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_castps_si256({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi256_ps(vd0.vd), {{ isa.prefix }}_castsi256_ps(vd1.vd), {{ instr_name }})), 0xD8);"
     },
     "rea_unzip_epi64": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_{{ instr_name }}_epi64(r0.r, r1.r), 0xD8);"
+        "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_{{ instr_name }}_epi64(vd0.vd, vd1.vd), 0xD8);"
     },
     "rea_unzip_pd": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permute4x64_pd({{ isa.prefix }}_{{ instr_name }}_pd(r0.r, r1.r), 0xD8);"
+        "code": "{{ isa.prefix }}_permute4x64_pd({{ isa.prefix }}_{{ instr_name }}_pd(vd0.vd, vd1.vd), 0xD8);"
     },
     "rea_unzip_ps": {
         "format": "short",
-        "code": "{{ isa.prefix }}_castpd_ps({{ isa.prefix }}_permute4x64_pd({{ isa.prefix }}_castps_pd({{ isa.prefix }}_shuffle_ps(r0.r, r1.r, {{ instr_name }})), 0xD8));"
+        "code": "{{ isa.prefix }}_castpd_ps({{ isa.prefix }}_permute4x64_pd({{ isa.prefix }}_castps_pd({{ isa.prefix }}_shuffle_ps(vd0.vd, vd1.vd, {{ instr_name }})), 0xD8));"
     },
     "rea_zip_f": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_permute2f128_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_unpacklo_{{ isa_dt_par.data_ext }}(r0.r, r1.r), {{ isa.prefix }}_unpackhi_{{ isa_dt_par.data_ext }}(r0.r, r1.r), {{ instr_name }});",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_permute2f128_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_unpacklo_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd), {{ isa.prefix }}_unpackhi_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd), {{ instr_name }});",
             "return res;"
         ]
     },
     "rea_zip_i": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_permute2x128_si256({{ isa.prefix }}_unpacklo_epi{{ dt_par.n_bits }}(r0.r, r1.r), {{ isa.prefix }}_unpackhi_epi{{ dt_par.n_bits }}(r0.r, r1.r), {{ instr_name }});",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_permute2x128_si256({{ isa.prefix }}_unpacklo_epi{{ dt_par.n_bits }}(vd0.vd, vd1.vd), {{ isa.prefix }}_unpackhi_epi{{ dt_par.n_bits }}(vd0.vd, vd1.vd), {{ instr_name }});",
             "return res;"
         ]
     },
     "reduce_16": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% rsf;",
-            "rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));",
-            "%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "%vd<c:float|b:32>% rsf;",
+            "rsf.vd = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(vd0).vd, %cast<tp,c:float|b:32>%(vd0).vd, _MM_SHUFFLE(0,0,0,1));",
+            "%vd<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs1.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, rs1.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs1);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));",
-            "%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(1,0,3,2));",
+            "%vd<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs2.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.vd, rs2.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs2);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));",
-            "%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
-            "%r<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(2,3,0,1));",
+            "%vd<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs3.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.vd, rs3.vd);",
+            "%vd<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);",
             "__m256i mask_16 = _mm256_set_epi8(29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2);",
-            "rsi.r = _mm256_shuffle_epi8(rsi.r, mask_16);",
-            "%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);",
-            "rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);",
+            "rsi.vd = _mm256_shuffle_epi8(rsi.vd, mask_16);",
+            "%vd<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);",
+            "rs4.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.vd, rs4.vd);",
             "return %getfirst<tp>%(rs4);"
         ]
     },
     "reduce_32": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% rsf;",
-            "rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));",
-            "%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "%vd<c:float|b:32>% rsf;",
+            "rsf.vd = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(vd0).vd, %cast<tp,c:float|b:32>%(vd0).vd, _MM_SHUFFLE(0,0,0,1));",
+            "%vd<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs1.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, rs1.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs1);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));",
-            "%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(1,0,3,2));",
+            "%vd<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs2.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.vd, rs2.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs2);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));",
-            "%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(2,3,0,1));",
+            "%vd<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs3.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.vd, rs3.vd);",
             "return %getfirst<tp>%(rs3);"
         ]
     },
     "reduce_32_u": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% rsf;",
-            "rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));",
-            "%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs1.r = {{ isa.prefix }}_{{ instr_name }}_epi32(r0.r, rs1.r);",
+            "%vd<c:float|b:32>% rsf;",
+            "rsf.vd = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(vd0).vd, %cast<tp,c:float|b:32>%(vd0).vd, _MM_SHUFFLE(0,0,0,1));",
+            "%vd<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs1.vd = {{ isa.prefix }}_{{ instr_name }}_epi32(vd0.vd, rs1.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs1);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));",
-            "%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs2.r = {{ isa.prefix }}_{{ instr_name }}_epi32(rs1.r, rs2.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(1,0,3,2));",
+            "%vd<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs2.vd = {{ isa.prefix }}_{{ instr_name }}_epi32(rs1.vd, rs2.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs2);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));",
-            "%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs3.r = {{ isa.prefix }}_{{ instr_name }}_epi32(rs2.r, rs3.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(2,3,0,1));",
+            "%vd<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs3.vd = {{ isa.prefix }}_{{ instr_name }}_epi32(rs2.vd, rs3.vd);",
             "return %getfirst<tp>%(rs3);"
         ]
     },
     "reduce_64": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% rsf;",
-            "rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));",
-            "%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "%vd<c:float|b:32>% rsf;",
+            "rsf.vd = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(vd0).vd, %cast<tp,c:float|b:32>%(vd0).vd, _MM_SHUFFLE(0,0,0,1));",
+            "%vd<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs1.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, rs1.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs1);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));",
-            "%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(1,0,3,2));",
+            "%vd<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs2.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.vd, rs2.vd);",
             "// extract lane 0 and return it.",
             "return %getfirst<tp>%(rs2);"
         ]
@@ -543,54 +543,54 @@
     "reduce_64_u": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% rsf;",
-            "rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));",
-            "%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs1.r = {{ isa.prefix }}_{{ instr_name }}_epi64(r0.r, rs1.r);",
+            "%vd<c:float|b:32>% rsf;",
+            "rsf.vd = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(vd0).vd, %cast<tp,c:float|b:32>%(vd0).vd, _MM_SHUFFLE(0,0,0,1));",
+            "%vd<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs1.vd = {{ isa.prefix }}_{{ instr_name }}_epi64(vd0.vd, rs1.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs1);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));",
-            "%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs2.r = {{ isa.prefix }}_{{ instr_name }}_epi64(rs1.r, rs2.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(1,0,3,2));",
+            "%vd<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs2.vd = {{ isa.prefix }}_{{ instr_name }}_epi64(rs1.vd, rs2.vd);",
             "return %getfirst<tp>%(rs2);"
         ]
     },
     "reduce_8": {
         "format": "long",
         "code": [
-            "%r<c:float|b:32>% rsf;",
-            "rsf.r = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(r0).r, %cast<tp,c:float|b:32>%(r0).r, _MM_SHUFFLE(0,0,0,1));",
-            "%r<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs1.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, rs1.r);",
+            "%vd<c:float|b:32>% rsf;",
+            "rsf.vd = _mm256_permute2f128_ps(%cast<tp,c:float|b:32>%(vd0).vd, %cast<tp,c:float|b:32>%(vd0).vd, _MM_SHUFFLE(0,0,0,1));",
+            "%vd<tp>% rs1 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs1.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, rs1.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs1);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(1,0,3,2));",
-            "%r<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs2.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.r, rs2.r);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(1,0,3,2));",
+            "%vd<tp>% rs2 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs2.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs1.vd, rs2.vd);",
             "rsf = %cast<tp,c:float|b:32>%(rs2);",
-            "rsf.r = _mm256_shuffle_ps(rsf.r, rsf.r, _MM_SHUFFLE(2,3,0,1));",
-            "%r<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
-            "rs3.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.r, rs3.r);",
-            "%r<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);",
+            "rsf.vd = _mm256_shuffle_ps(rsf.vd, rsf.vd, _MM_SHUFFLE(2,3,0,1));",
+            "%vd<tp>% rs3 = %cast<c:float|b:32,tp>%(rsf);",
+            "rs3.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs2.vd, rs3.vd);",
+            "%vd<c:int|b:8>% rsi = %cast<tp,c:int|b:8>%(rs3);",
             "__m256i mask_16 = _mm256_set_epi8(29,28,31,30,25,24,27,26,21,20,23,22,17,16,19,18,13,12,15,14,9,8,11,10,5,4,7,6,1,0,3,2);",
-            "rsi.r = _mm256_shuffle_epi8(rsi.r, mask_16);",
-            "%r<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);",
-            "rs4.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.r, rs4.r);",
+            "rsi.vd = _mm256_shuffle_epi8(rsi.vd, mask_16);",
+            "%vd<tp>% rs4 = %cast<c:int|b:8,tp>%(rsi);",
+            "rs4.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs3.vd, rs4.vd);",
             "rsi = %cast<tp,c:int|b:8>%(rs4);",
             "__m256i mask_8 = _mm256_set_epi8(30,31,28,29,26,27,24,25,22,23,20,21,18,19,16,17,14,15,12,13,10,11,8,9,6,7,4,5,2,3,0,1);",
-            "rsi.r = _mm256_shuffle_epi8(rsi.r, mask_8);",
-            "%r<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);",
-            "rs5.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.r, rs5.r);",
+            "rsi.vd = _mm256_shuffle_epi8(rsi.vd, mask_8);",
+            "%vd<tp>% rs5 = %cast<c:int|b:8,tp>%(rsi);",
+            "rs5.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(rs4.vd, rs5.vd);",
             "return %getfirst<tp>%(rs5);"
         ]
     },
     "reduce_shift": {
         "format": "long",
         "code": [
-            "%r<tp>% v = r0;",
-            "%r<c:uint|b:8>% b = %cast<tp,c:uint|b:8>%(v);",
-            "b.r = _mm256_permute2x128_si256(b.r, b.r, 0x01);",
+            "%vd<tp>% v = vd0;",
+            "%vd<c:uint|b:8>% b = %cast<tp,c:uint|b:8>%(v);",
+            "b.vd = _mm256_permute2x128_si256(b.vd, b.vd, 0x01);",
             "v = %{{ instr_name }}<tp>%(v, %cast<c:uint|b:8,tp>%(b));",
             "{% for sh in [8, 4, 2, 1] %}{% if sh * 8 >= dt_par.n_bits %}b = %cast<tp,c:uint|b:8>%(v);",
-            "b.r = _mm256_srli_si256(b.r, {{ sh }});",
+            "b.vd = _mm256_srli_si256(b.vd, {{ sh }});",
             "v = %{{ instr_name }}<tp>%(v, %cast<c:uint|b:8,tp>%(b));",
             "{% endif %}{% endfor %}return %getfirst<tp>%(v);"
         ]
@@ -598,56 +598,56 @@
     "rshift_i64": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m256i sign = _mm256_srai_epi32(_mm256_shuffle_epi32(r0.r, _MM_SHUFFLE(3, 3, 1, 1)), 31);",
-            "res.r = _mm256_or_si256(_mm256_srli_epi64(r0.r, s0), _mm256_slli_epi64(sign, 64 - s0));",
+            "%vd<tp>% res;",
+            "__m256i sign = _mm256_srai_epi32(_mm256_shuffle_epi32(vd0.vd, _MM_SHUFFLE(3, 3, 1, 1)), 31);",
+            "res.vd = _mm256_or_si256(_mm256_srli_epi64(vd0.vd, s0), _mm256_slli_epi64(sign, 64 - s0));",
             "return res;"
         ]
     },
     "rshift_i8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m256i u = _mm256_xor_si256(r0.r, _mm256_set1_epi8((char)0x80));",
+            "%vd<tp>% res;",
+            "__m256i u = _mm256_xor_si256(vd0.vd, _mm256_set1_epi8((char)0x80));",
             "u = _mm256_and_si256(_mm256_srli_epi16(u, s0), _mm256_set1_epi8((char)(0xFF >> s0)));",
-            "res.r = _mm256_sub_epi8(u, _mm256_set1_epi8((char)(0x80 >> s0)));",
+            "res.vd = _mm256_sub_epi8(u, _mm256_set1_epi8((char)(0x80 >> s0)));",
             "return res;"
         ]
     },
     "rshift_u8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = _mm256_and_si256(_mm256_srli_epi16(r0.r, s0), _mm256_set1_epi8((char)(0xFF >> s0)));",
+            "%vd<tp>% res;",
+            "res.vd = _mm256_and_si256(_mm256_srli_epi16(vd0.vd, s0), _mm256_set1_epi8((char)(0xFF >> s0)));",
             "return res;"
         ]
     },
     "split_1arg": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi), 1);",
+            "%vd<tp>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi), 1);",
             "return res;"
         ]
     },
     "split_2args": {
         "format": "long",
         "code": [
-            "{% set sfx = (('epu' if dt_par.category == 'uint' else 'epi') if instr_name in ['min', 'max', 'adds', 'subs'] else 'epi') ~ dt_par.n_bits %}%r<tp>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "__m128i r1_lo = _mm256_castsi256_si128(r1.r), r1_hi = _mm256_extractf128_si256(r1.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_{{ sfx }}(r0_lo, r1_lo)), _mm_{{ instr_name }}_{{ sfx }}(r0_hi, r1_hi), 1);",
+            "{% set sfx = (('epu' if dt_par.category == 'uint' else 'epi') if instr_name in ['min', 'max', 'adds', 'subs'] else 'epi') ~ dt_par.n_bits %}%vd<tp>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "__m128i r1_lo = _mm256_castsi256_si128(vd1.vd), r1_hi = _mm256_extractf128_si256(vd1.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_{{ sfx }}(r0_lo, r1_lo)), _mm_{{ instr_name }}_{{ sfx }}(r0_hi, r1_hi), 1);",
             "return res;"
         ]
     },
     "split_cmp": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "__m128i r1_lo = _mm256_castsi256_si128(r1.r), r1_hi = _mm256_extractf128_si256(r1.r, 1);",
-            "res.m = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo, r1_lo)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi, r1_hi), 1);",
+            "%vm<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "__m128i r1_lo = _mm256_castsi256_si128(vd1.vd), r1_hi = _mm256_extractf128_si256(vd1.vd, 1);",
+            "res.vm = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo, r1_lo)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi, r1_hi), 1);",
             "return res;"
         ]
     },
@@ -655,9 +655,9 @@
         "format": "long",
         "code": [
             "{% macro F(a) %}_mm_and_si128(_mm_slli_epi16({{ a }}, s0), _mm_set1_epi8((char)(0xFF << s0))){% endmacro %}",
-            "%r<tp>% res;",
-            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "%vd<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(vd0.vd), a_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
             "return res;"
         ]
     },
@@ -665,10 +665,10 @@
         "format": "long",
         "code": [
             "{% macro F(a, b) %}_mm_add_epi64(_mm_mul_epu32({{ a }}, {{ b }}), _mm_slli_epi64(_mm_add_epi64(_mm_mul_epu32(_mm_srli_epi64({{ a }}, 32), {{ b }}), _mm_mul_epu32({{ a }}, _mm_srli_epi64({{ b }}, 32))), 32)){% endmacro %}",
-            "%r<tp>% res;",
-            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "__m128i b_lo = _mm256_castsi256_si128(r1.r), b_hi = _mm256_extractf128_si256(r1.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo', 'b_lo') }}), {{ F('a_hi', 'b_hi') }}, 1);",
+            "%vd<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(vd0.vd), a_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "__m128i b_lo = _mm256_castsi256_si128(vd1.vd), b_hi = _mm256_extractf128_si256(vd1.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo', 'b_lo') }}), {{ F('a_hi', 'b_hi') }}, 1);",
             "return res;"
         ]
     },
@@ -676,10 +676,10 @@
         "format": "long",
         "code": [
             "{% macro F(a, b) %}_mm_or_si128(_mm_slli_epi16(_mm_mullo_epi16(_mm_srli_epi16({{ a }}, 8), _mm_srli_epi16({{ b }}, 8)), 8), _mm_and_si128(_mm_mullo_epi16({{ a }}, {{ b }}), _mm_set1_epi16(0x00FF))){% endmacro %}",
-            "%r<tp>% res;",
-            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "__m128i b_lo = _mm256_castsi256_si128(r1.r), b_hi = _mm256_extractf128_si256(r1.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo', 'b_lo') }}), {{ F('a_hi', 'b_hi') }}, 1);",
+            "%vd<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(vd0.vd), a_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "__m128i b_lo = _mm256_castsi256_si128(vd1.vd), b_hi = _mm256_extractf128_si256(vd1.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo', 'b_lo') }}), {{ F('a_hi', 'b_hi') }}, 1);",
             "return res;"
         ]
     },
@@ -687,7 +687,7 @@
         "format": "long",
         "code": [
             "{% set sfx = (('epu' if dt_par.category == 'uint' else 'epi') if instr_name in ['min', 'max', 'adds', 'subs'] else 'epi') ~ dt_par.n_bits %}",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
             "__m128i v = _mm_{{ instr_name }}_{{ sfx }}(r0_lo, r0_hi);",
             "{% for sh in [8, 4, 2, 1] %}{% if sh * 8 >= dt_par.n_bits %}v = _mm_{{ instr_name }}_{{ sfx }}(v, _mm_srli_si128(v, {{ sh }}));",
             "{% endif %}{% endfor %}return ({{ cstdint_ret }}){{ '_mm_cvtsi128_si64' if dt_par.n_bits == 64 else '_mm_cvtsi128_si32' }}(v);"
@@ -697,9 +697,9 @@
         "format": "long",
         "code": [
             "{% macro F(a) %}_mm_or_si128(_mm_srli_epi64({{ a }}, s0), _mm_slli_epi64(_mm_srai_epi32(_mm_shuffle_epi32({{ a }}, _MM_SHUFFLE(3, 3, 1, 1)), 31), 64 - s0)){% endmacro %}",
-            "%r<tp>% res;",
-            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "%vd<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(vd0.vd), a_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
             "return res;"
         ]
     },
@@ -707,9 +707,9 @@
         "format": "long",
         "code": [
             "{% macro F(a) %}_mm_sub_epi8(_mm_and_si128(_mm_srli_epi16(_mm_xor_si128({{ a }}, _mm_set1_epi8((char)0x80)), s0), _mm_set1_epi8((char)(0xFF >> s0))), _mm_set1_epi8((char)(0x80 >> s0))){% endmacro %}",
-            "%r<tp>% res;",
-            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "%vd<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(vd0.vd), a_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
             "return res;"
         ]
     },
@@ -717,28 +717,28 @@
         "format": "long",
         "code": [
             "{% macro F(a) %}_mm_and_si128(_mm_srli_epi16({{ a }}, s0), _mm_set1_epi8((char)(0xFF >> s0))){% endmacro %}",
-            "%r<tp>% res;",
-            "__m128i a_lo = _mm256_castsi256_si128(r0.r), a_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
+            "%vd<tp>% res;",
+            "__m128i a_lo = _mm256_castsi256_si128(vd0.vd), a_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256({{ F('a_lo') }}), {{ F('a_hi') }}, 1);",
             "return res;"
         ]
     },
     "split_shift": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
-            "res.r = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo, s0)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi, s0), 1);",
+            "%vd<tp>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
+            "res.vd = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_lo, s0)), _mm_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0_hi, s0), 1);",
             "return res;"
         ]
     },
     "split_tovm": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "__m128i r0_lo = _mm256_castsi256_si128(r0.r), r0_hi = _mm256_extractf128_si256(r0.r, 1);",
+            "%vm<tr>% res;",
+            "__m128i r0_lo = _mm256_castsi256_si128(vd0.vd), r0_hi = _mm256_extractf128_si256(vd0.vd, 1);",
             "__m128i zero = _mm_setzero_si128(), ones = _mm_cmpeq_epi32(zero, zero);",
-            "res.m = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_xor_si128(_mm_cmpeq_epi{{ dt_par.n_bits }}(r0_lo, zero), ones)), _mm_xor_si128(_mm_cmpeq_epi{{ dt_par.n_bits }}(r0_hi, zero), ones), 1);",
+            "res.vm = _mm256_insertf128_si256(_mm256_castsi128_si256(_mm_xor_si128(_mm_cmpeq_epi{{ dt_par.n_bits }}(r0_lo, zero), ones)), _mm_xor_si128(_mm_cmpeq_epi{{ dt_par.n_bits }}(r0_hi, zero), ones), 1);",
             "return res;"
         ]
     },
@@ -746,18 +746,18 @@
         "format": "long",
         "code": [
             "// bitwise test: a lane is active if at least one bit is set (-0.0f is active)",
-            "%m<tr>% res;",
+            "%vm<tr>% res;",
             "#if defined(__AVX2__)",
             "__m256i zero = _mm256_setzero_si256();",
-            "__m256i eq_zero = _mm256_cmpeq_epi32({{ isa.prefix }}_castps_si256(r0.r), zero);",
-            "res.m = {{ isa.prefix }}_castsi256_ps(_mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero)));",
+            "__m256i eq_zero = _mm256_cmpeq_epi32({{ isa.prefix }}_castps_si256(vd0.vd), zero);",
+            "res.vm = {{ isa.prefix }}_castsi256_ps(_mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero)));",
             "#else",
-            "__m256i bits = {{ isa.prefix }}_castps_si256(r0.r);",
+            "__m256i bits = {{ isa.prefix }}_castps_si256(vd0.vd);",
             "__m128i zero = _mm_setzero_si128();",
             "__m128i lo = _mm_cmpeq_epi32({{ isa.prefix }}_castsi256_si128(bits), zero);",
             "__m128i hi = _mm_cmpeq_epi32({{ isa.prefix }}_extractf128_si256(bits, 1), zero);",
             "__m256 eq_zero = {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_insertf128_si256({{ isa.prefix }}_castsi128_si256(lo), hi, 1));",
-            "res.m = {{ isa.prefix }}_xor_ps(eq_zero, {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_set1_epi32(-1)));",
+            "res.vm = {{ isa.prefix }}_xor_ps(eq_zero, {{ isa.prefix }}_castsi256_ps({{ isa.prefix }}_set1_epi32(-1)));",
             "#endif",
             "return res;"
         ]
@@ -766,18 +766,18 @@
         "format": "long",
         "code": [
             "// bitwise test: a lane is active if at least one bit is set (-0.0 is active)",
-            "%m<tr>% res;",
+            "%vm<tr>% res;",
             "#if defined(__AVX2__)",
             "__m256i zero = _mm256_setzero_si256();",
-            "__m256i eq_zero = _mm256_cmpeq_epi64({{ isa.prefix }}_castpd_si256(r0.r), zero);",
-            "res.m = {{ isa.prefix }}_castsi256_pd(_mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero)));",
+            "__m256i eq_zero = _mm256_cmpeq_epi64({{ isa.prefix }}_castpd_si256(vd0.vd), zero);",
+            "res.vm = {{ isa.prefix }}_castsi256_pd(_mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero)));",
             "#else",
-            "__m256i bits = {{ isa.prefix }}_castpd_si256(r0.r);",
+            "__m256i bits = {{ isa.prefix }}_castpd_si256(vd0.vd);",
             "__m128i zero = _mm_setzero_si128();",
             "__m128i lo = _mm_cmpeq_epi64({{ isa.prefix }}_castsi256_si128(bits), zero);",
             "__m128i hi = _mm_cmpeq_epi64({{ isa.prefix }}_extractf128_si256(bits, 1), zero);",
             "__m256d eq_zero = {{ isa.prefix }}_castsi256_pd({{ isa.prefix }}_insertf128_si256({{ isa.prefix }}_castsi128_si256(lo), hi, 1));",
-            "res.m = {{ isa.prefix }}_xor_pd(eq_zero, {{ isa.prefix }}_castsi256_pd({{ isa.prefix }}_set1_epi32(-1)));",
+            "res.vm = {{ isa.prefix }}_xor_pd(eq_zero, {{ isa.prefix }}_castsi256_pd({{ isa.prefix }}_set1_epi32(-1)));",
             "#endif",
             "return res;"
         ]
@@ -785,10 +785,10 @@
     "tovm_int": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
+            "%vm<tr>% res;",
             "__m256i zero = _mm256_setzero_si256();",
-            "__m256i eq_zero = {{ isa.prefix }}_cmpeq_{{ isa_dt_par.data_ext_var }}(r0.r, zero);",
-            "res.m = _mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero));",
+            "__m256i eq_zero = {{ isa.prefix }}_cmpeq_{{ isa_dt_par.data_ext_var }}(vd0.vd, zero);",
+            "res.vm = _mm256_xor_si256(eq_zero, _mm256_cmpeq_epi32(zero, zero));",
             "return res;"
         ]
     }

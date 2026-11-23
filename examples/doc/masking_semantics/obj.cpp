@@ -66,23 +66,23 @@ static void mask_algebra()
 {
     mipp::Vd<float> va(A), vb(B), vc(C);
     // --8<-- [start:mask_algebra]
-    mipp::Vm<float> m1 = (va < vb);
-    mipp::Vm<float> m2 = (va > vc);
+    mipp::Vm<float> vm1 = (va < vb);
+    mipp::Vm<float> vm2 = (va > vc);
 
-    // Logical AND (m1 AND m2):
-    mipp::Vm<float> m_and = m1 & m2;
+    // Logical AND (vm1 AND vm2):
+    mipp::Vm<float> m_and = vm1 & vm2;
 
-    // Logical OR (m1 OR m2):
-    mipp::Vm<float> m_or  = m1 | m2;
+    // Logical OR (vm1 OR vm2):
+    mipp::Vm<float> m_or  = vm1 | vm2;
 
-    // Logical XOR (m1 XOR m2):
-    mipp::Vm<float> m_xor = m1 ^ m2;
+    // Logical XOR (vm1 XOR vm2):
+    mipp::Vm<float> m_xor = vm1 ^ vm2;
 
-    // Logical NOT (~m1):
-    mipp::Vm<float> m_not = ~m1;
+    // Logical NOT (~vm1):
+    mipp::Vm<float> m_not = ~vm1;
 
-    // Logical AND-NOT ((NOT m1) AND m2):
-    mipp::Vm<float> m_andn = mipp::andnb(m1, m2);
+    // Logical AND-NOT ((NOT vm1) AND vm2):
+    mipp::Vm<float> m_andn = mipp::andnb(vm1, vm2);
     // --8<-- [end:mask_algebra]
     for (int i = 0; i < mipp::Vm<float>::N(); i++) {
         const bool a = A[i] < B[i], b = A[i] > C[i];

@@ -73,7 +73,7 @@ void check_value()
 		MIPP_CHECK_IMM(slideup, a);
 		MIPP_CHECK_IMM(slidedown, a);
 		INFO("obj slide: S = " << S << ", LMUL = " << LMUL);
-		require_same<T, LMUL>(mipp::slide<S>(oa, ob).r, mipp::slide(a, b, v));
+		require_same<T, LMUL>(mipp::slide<S>(oa, ob).vd, mipp::slide(a, b, v));
 	}
 	if constexpr (S < n)
 	{

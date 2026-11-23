@@ -27,7 +27,7 @@
     ],
     "cfmadd": [
         {
-            "instr_name": "r2.r|90|r0.r|r1.r",
+            "instr_name": "vd2.vd|90|vd0.vd|vd1.vd",
             "datatypes": "all_float",
             "template": "complex_cmla",
             "if": "defined(__ARM_FEATURE_COMPLEX)"
@@ -56,7 +56,7 @@
     ],
     "cmul": [
         {
-            "instr_name": "ZERO|90|r0.r|r1.r",
+            "instr_name": "ZERO|90|vd0.vd|vd1.vd",
             "datatypes": "all_float",
             "template": "complex_cmla",
             "if": "defined(__ARM_FEATURE_COMPLEX)"
@@ -64,7 +64,7 @@
     ],
     "cmulconj": [
         {
-            "instr_name": "ZERO|270|r1.r|r0.r",
+            "instr_name": "ZERO|270|vd1.vd|vd0.vd",
             "datatypes": "all_float",
             "template": "complex_cmla",
             "if": "defined(__ARM_FEATURE_COMPLEX)"

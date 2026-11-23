@@ -2,41 +2,41 @@
     "binary_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %select<tp>%(m0, op, r0);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vd0);",
             "return res;"
         ]
     },
     "binary_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "binary_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %tovd<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+            "%vd<tp>% tmp = %tovd<tp>%(vm0);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     },
     "cmp_2args": {
         "format": "long",
         "code": [
-            "%m<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%m<tp>% res = %andb_k<tp>%(op, m0);",
+            "%vm<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+            "%vm<tp>% res = %andb_k<tp>%(op, vm0);",
             "return res;"
         ]
     },
     "hadd_maskz": {
         "format": "long",
         "code": [
-            "%r<tp>% zero = %set0<tp>%();",
-            "%r<tp>% blended = %select<tp>%(m0, r0, zero);",
+            "%vd<tp>% zero = %set0<tp>%();",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, zero);",
             "%s<tp>% op = %hadd<tp>%(blended);",
             "return op;"
         ]
@@ -44,8 +44,8 @@
     "hmax_maskz_f32": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(-FLT_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(-FLT_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
@@ -53,8 +53,8 @@
     "hmax_maskz_f64": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(-DBL_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(-DBL_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
@@ -62,8 +62,8 @@
     "hmax_maskz_i16": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(INT16_MIN);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(INT16_MIN);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
@@ -71,8 +71,8 @@
     "hmax_maskz_i32": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(INT32_MIN);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(INT32_MIN);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
@@ -80,8 +80,8 @@
     "hmax_maskz_i64": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(INT64_MIN);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(INT64_MIN);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
@@ -89,8 +89,8 @@
     "hmax_maskz_i8": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(INT8_MIN);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(INT8_MIN);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op;"
         ]
@@ -98,8 +98,8 @@
     "hmax_maskz_u": {
         "format": "long",
         "code": [
-            "%r<tp>% min = %set1<tp>%(0u);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, min);",
+            "%vd<tp>% min = %set1<tp>%(0u);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, min);",
             "%s<tp>% op = %hmax<tp>%(blended);",
             "return op; "
         ]
@@ -107,8 +107,8 @@
     "hmin_maskz_f32": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(FLT_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(FLT_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -116,8 +116,8 @@
     "hmin_maskz_f64": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(DBL_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(DBL_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -125,8 +125,8 @@
     "hmin_maskz_i16": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(INT16_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(INT16_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -134,8 +134,8 @@
     "hmin_maskz_i32": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(INT32_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(INT32_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -143,8 +143,8 @@
     "hmin_maskz_i64": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(INT64_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(INT64_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -152,8 +152,8 @@
     "hmin_maskz_i8": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(INT8_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(INT8_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -161,8 +161,8 @@
     "hmin_maskz_u16": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(UINT16_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(UINT16_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -170,8 +170,8 @@
     "hmin_maskz_u32": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(UINT32_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(UINT32_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -179,8 +179,8 @@
     "hmin_maskz_u64": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(UINT64_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(UINT64_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -188,8 +188,8 @@
     "hmin_maskz_u8": {
         "format": "long",
         "code": [
-            "%r<tp>% max = %set1<tp>%(UINT8_MAX);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, max);",
+            "%vd<tp>% max = %set1<tp>%(UINT8_MAX);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, max);",
             "%s<tp>% op = %hmin<tp>%(blended);",
             "return op;"
         ]
@@ -197,8 +197,8 @@
     "hmul_maskz": {
         "format": "long",
         "code": [
-            "%r<tp>% ones = %set1<tp>%(1);",
-            "%r<tp>% blended = %select<tp>%(m0, r0, ones);",
+            "%vd<tp>% ones = %set1<tp>%(1);",
+            "%vd<tp>% blended = %select<tp>%(vm0, vd0, ones);",
             "%s<tp>% op = %hmul<tp>%(blended);",
             "return op;"
         ]
@@ -209,10 +209,10 @@
             "// we want to guarantee that load doesn't touch the memory of masked out elems",
             "%s<tp>% buff[%N<tp>%];",
             "for(unsigned i = 0; i < %N<tp>%; i++){",
-            "\tif(%get_k<tp>%(m0, i))",
+            "\tif(%get_k<tp>%(vm0, i))",
             "\t\tbuff[i] = p0[i];",
             "\telse",
-            "\t\tbuff[i] = %get<tp>%(rsrc, i);",
+            "\t\tbuff[i] = %get<tp>%(vdsrc, i);",
             "}",
             "return %loadu<tp>%(buff);"
         ]
@@ -223,7 +223,7 @@
             "// we want to guarantee that load doesn't touch the memory of masked out elems",
             "%s<tp>% buff[%N<tp>%];",
             "for (unsigned i = 0; i < %N<tp>%; i++) {",
-            "\tif (%get_k<tp>%(m0, i))",
+            "\tif (%get_k<tp>%(vm0, i))",
             "\t\tbuff[i] = p0[i];",
             "\telse",
             "\t\tbuff[i] = 0;",
@@ -234,71 +234,71 @@
     "lshift_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
-            "%r<tp>% res = %select<tp>%(m0, op, r0);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, s0);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vd0);",
             "return res;"
         ]
     },
     "lshift_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, s0);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "lshift_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
-            "%r<tp>% tmp = %tovd<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, s0);",
+            "%vd<tp>% tmp = %tovd<tp>%(vm0);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     },
     "set0_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %set0<tp>%();",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %set0<tp>%();",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "set1_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %set1<tp>%(s0);",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %set1<tp>%(s0);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "set_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %set<tp>%(vals);",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %set<tp>%(vals);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "slide_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
-            "return %select<tp>%(m0, op, r0);"
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1, s0);",
+            "return %select<tp>%(vm0, op, vd0);"
         ]
     },
     "slide_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
-            "return %select<tp>%(m0, op, rsrc);"
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1, s0);",
+            "return %select<tp>%(vm0, op, vdsrc);"
         ]
     },
     "slide_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
-            "%r<tp>% tmp = %tovd<tp>%(m0);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1, s0);",
+            "%vd<tp>% tmp = %tovd<tp>%(vm0);",
             "return %andb<tp>%(op, tmp);"
         ]
     },
@@ -306,8 +306,8 @@
         "format": "long",
         "code": [
             "for (unsigned i = 0; i < %N<tp>%; i++) {",
-            "\tif (%get_k<tp>%(m0, i))",
-            "\t\tp0[i] = %get<tp>%(r0, i);",
+            "\tif (%get_k<tp>%(vm0, i))",
+            "\t\tp0[i] = %get<tp>%(vd0, i);",
             "}"
         ]
     },
@@ -315,8 +315,8 @@
         "format": "long",
         "code": [
             "for(unsigned i = 0; i < %N<tp>%; i++) {",
-            "\tif (%get_k<tp>%(m0, i))",
-            "\t\tp0[i] = %get<tp>%(r0, i);",
+            "\tif (%get_k<tp>%(vm0, i))",
+            "\t\tp0[i] = %get<tp>%(vd0, i);",
             "\telse",
             "\t\tp0[i] = 0;",
             "}"
@@ -325,7 +325,7 @@
     "store_mskz_vec": {
         "format": "long",
         "code": [
-            "%{{ func_name }}<tp>%(p0, %andb<tp>%(r0, %tovd<tp>%(m0)));"
+            "%{{ func_name }}<tp>%(p0, %andb<tp>%(vd0, %tovd<tp>%(vm0)));"
         ]
     },
     "storeu_msk": {
@@ -333,9 +333,9 @@
         "code": [
             "%s<tp>% buff[%N<tp>%];",
             "%s<tp>% mask_buff[%N<tp>%];",
-            "%r<tp>% msk_reg = %tovd<tp>%(m0);",
+            "%vd<tp>% msk_reg = %tovd<tp>%(vm0);",
             "",
-            "%storeu<tp>%(buff, r0);",
+            "%storeu<tp>%(buff, vd0);",
             "%storeu<tp>%(mask_buff, msk_reg);",
             "for (unsigned i = 0; i < %N<tp>%; i++)",
             "\tif (mask_buff[i])",
@@ -347,9 +347,9 @@
         "code": [
             "%s<tp>% buff[%N<tp>%];",
             "%s<tp>% mask_buff[%N<tp>%];",
-            "%r<tp>% msk_reg = %tovd<tp>%(m0);",
+            "%vd<tp>% msk_reg = %tovd<tp>%(vm0);",
             "",
-            "%storeu<tp>%(buff, r0);",
+            "%storeu<tp>%(buff, vd0);",
             "%storeu<tp>%(mask_buff, msk_reg);",
             "for (unsigned i = 0; i < %N<tp>%; i++)",
             "\tif (mask_buff[i])",
@@ -361,50 +361,50 @@
     "ternary_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %select<tp>%(m0, op, r0);",
+            "%vd<tp>% op = %{{func_name}}<tp>%( vd0, vd1, vd2);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vd0);",
             "return res;"
         ]
     },
     "ternary_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %{{func_name}}<tp>%( vd0, vd1, vd2);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "ternary_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %tovd<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% op = %{{func_name}}<tp>%( vd0, vd1, vd2);",
+            "%vd<tp>% tmp = %tovd<tp>%(vm0);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     },
     "unary_mask_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %select<tp>%(m0, op, r0);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vd0);",
             "return res;"
         ]
     },
     "unary_masks_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% res = %select<tp>%(m0, op, rsrc);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0);",
+            "%vd<tp>% res = %select<tp>%(vm0, op, vdsrc);",
             "return res;"
         ]
     },
     "unary_maskz_all_datatypes": {
         "format": "long",
         "code": [
-            "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %tovd<tp>%(m0);",
-            "%r<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% op = %{{func_name}}<tp>%(vd0);",
+            "%vd<tp>% tmp = %tovd<tp>%(vm0);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
     }

@@ -1,23 +1,23 @@
 {
   "abs": {
     "description": "Computes the absolute value of each element in a vector register.",
-    "latex": "\\text{res}_i = |r0_i|"
+    "latex": "\\text{res}_i = |vd0_i|"
   },
   "acos": {
     "description": "Computes the arc cosine of each floating-point element in radians.",
-    "latex": "\\text{res}_i = \\arccos(r0_i)"
+    "latex": "\\text{res}_i = \\arccos(vd0_i)"
   },
   "acosh": {
     "description": "Computes the inverse hyperbolic cosine of each floating-point element.",
-    "latex": "\\text{res}_i = \\operatorname{arcosh}(r0_i)"
+    "latex": "\\text{res}_i = \\operatorname{arcosh}(vd0_i)"
   },
   "add": {
     "description": "Adds two vector registers element-wise.",
-    "latex": "\\text{res}_i = r0_i + r1_i"
+    "latex": "\\text{res}_i = vd0_i + vd1_i"
   },
   "adds": {
     "description": "Adds two integer vector registers element-wise with saturation to [MIN, MAX] on underflow/overflow.",
-    "latex": "\\text{res}_i = \\operatorname{saturate}(r0_i + r1_i)"
+    "latex": "\\text{res}_i = \\operatorname{saturate}(vd0_i + vd1_i)"
   },
   "all": {
     "description": "Tests if every element of a mask register is active (returns 1 if all active, 0 otherwise).",
@@ -25,7 +25,7 @@
   },
   "andb": {
     "description": "Computes the bitwise AND of two vector registers.",
-    "latex": "\\text{res}_i = r0_i \\ \\& \\ r1_i"
+    "latex": "\\text{res}_i = vd0_i \\ \\& \\ vd1_i"
   },
   "andb_k": {
     "description": "Computes the bitwise AND of two mask registers.",
@@ -33,10 +33,10 @@
   },
   "andnb": {
     "description": "Computes the bitwise AND-NOT of two vector registers (~a & b).",
-    "latex": "\\text{res}_i = (\\sim r0_i) \\ \\& \\ r1_i"
+    "latex": "\\text{res}_i = (\\sim vd0_i) \\ \\& \\ vd1_i"
   },
   "andnb_k": {
-    "description": "Computes the bitwise AND-NOT of two mask registers (~m0 & m1).",
+    "description": "Computes the bitwise AND-NOT of two mask registers (~vm0 & vm1).",
     "latex": "m_{\\text{res}, i} = (\\sim m_{0, i}) \\ \\& \\ m_{1, i}"
   },
   "any": {
@@ -45,31 +45,31 @@
   },
   "asin": {
     "description": "Computes the arc sine of each floating-point element in radians.",
-    "latex": "\\text{res}_i = \\arcsin(r0_i)"
+    "latex": "\\text{res}_i = \\arcsin(vd0_i)"
   },
   "asinh": {
     "description": "Computes the inverse hyperbolic sine of each floating-point element.",
-    "latex": "\\text{res}_i = \\operatorname{arsinh}(r0_i)"
+    "latex": "\\text{res}_i = \\operatorname{arsinh}(vd0_i)"
   },
   "atan": {
     "description": "Computes the arc tangent of each floating-point element in radians.",
-    "latex": "\\text{res}_i = \\arctan(r0_i)"
+    "latex": "\\text{res}_i = \\arctan(vd0_i)"
   },
   "atan2": {
     "description": "Computes the four-quadrant arc tangent of y and x floating-point vector elements.",
-    "latex": "\\text{res}_i = \\operatorname{atan2}(r0_i, r1_i)"
+    "latex": "\\text{res}_i = \\operatorname{atan2}(vd0_i, vd1_i)"
   },
   "atanh": {
     "description": "Computes the inverse hyperbolic tangent of each floating-point element.",
-    "latex": "\\text{res}_i = \\operatorname{artanh}(r0_i)"
+    "latex": "\\text{res}_i = \\operatorname{artanh}(vd0_i)"
   },
   "bcast": {
     "description": "Copies the lane `s0` to every lane (0 <= s0 < N, the number of lanes of the LMUL group; other values are undefined behavior).",
-    "latex": "\\text{res}_i = r0_{s0}"
+    "latex": "\\text{res}_i = vd0_{s0}"
   },
   "bcast_b128": {
     "description": "Copies the lane `s0` of each block of 128 bits to the lanes of the block (0 <= s0 < number of lanes of a block).",
-    "latex": "\\text{res}_{b+l} = r0_{b + s0}"
+    "latex": "\\text{res}_{b+l} = vd0_{b + s0}"
   },
   "cabs": {
     "description": "Modulus of the complex numbers (interleaved layout), in both lanes of each pair, without intermediate overflow: computed as m sqrt((a_r/m)^2 + (a_i/m)^2) with m the largest absolute value of the two parts.",
@@ -77,54 +77,54 @@
   },
   "cast": {
     "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",
-    "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{vd}\\langle T_{\\text{dst}}\\rangle \\rangle(r0)"
+    "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{vd}\\langle T_{\\text{dst}}\\rangle \\rangle(vd0)"
   },
   "cast_k": {
     "description": "In-register bitcast/reinterpretation of a mask register to another datatype of identical bitwidth with zero runtime instructions.",
-    "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{vm}\\langle T_{\\text{dst}}\\rangle \\rangle(m0)"
+    "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{vm}\\langle T_{\\text{dst}}\\rangle \\rangle(vm0)"
   },
   "cdiv": {
-    "description": "Complex division of the complex numbers of r0 by the ones of r1 (interleaved layout), with the algorithm of Smith: the division by the part of the largest absolute value avoids the overflows and the losses of br^2 + bi^2.",
+    "description": "Complex division of the complex numbers of vd0 by the ones of vd1 (interleaved layout), with the algorithm of Smith: the division by the part of the largest absolute value avoids the overflows and the losses of br^2 + bi^2.",
     "latex": "\\frac{a}{b} = \\frac{(a_r b_r + a_i b_i) + i (a_i b_r - a_r b_i)}{b_r^2 + b_i^2}"
   },
   "cfmadd": {
-    "description": "Complex fused multiply-add: r0 * r1 + r2, with complex numbers in the interleaved layout.",
+    "description": "Complex fused multiply-add: vd0 * vd1 + vd2, with complex numbers in the interleaved layout.",
     "latex": "a b + c"
   },
   "clamp": {
-    "description": "Clamps each element between the elements of the same lane of the second (lower bound) and third (upper bound) registers: `min(max(r0, r1), r2)`. With bounds such that lo > hi, the result is hi. The form `vss` takes scalar bounds: `clamp(r, lo, hi)`.",
-    "latex": "\\text{res}_i = \\min(\\max(r0_i, r1_i), r2_i)"
+    "description": "Clamps each element between the elements of the same lane of the second (lower bound) and third (upper bound) registers: `min(max(vd0, vd1), vd2)`. With bounds such that lo > hi, the result is hi. The form `vss` takes scalar bounds: `clamp(r, lo, hi)`.",
+    "latex": "\\text{res}_i = \\min(\\max(vd0_i, vd1_i), vd2_i)"
   },
   "cmpeq": {
     "description": "Compares two vector registers element-wise for equality (a == b).",
-    "latex": "m_i = (r0_i == r1_i)"
+    "latex": "m_i = (vd0_i == vd1_i)"
   },
   "cmpge": {
     "description": "Compares two vector registers element-wise for greater-than-or-equal (a >= b).",
-    "latex": "m_i = (r0_i \\ge r1_i)"
+    "latex": "m_i = (vd0_i \\ge vd1_i)"
   },
   "cmpgt": {
     "description": "Compares two vector registers element-wise for greater-than (a > b).",
-    "latex": "m_i = (r0_i > r1_i)"
+    "latex": "m_i = (vd0_i > vd1_i)"
   },
   "cmple": {
     "description": "Compares two vector registers element-wise for less-than-or-equal (a <= b).",
-    "latex": "m_i = (r0_i \\le r1_i)"
+    "latex": "m_i = (vd0_i \\le vd1_i)"
   },
   "cmplt": {
     "description": "Compares two vector registers element-wise for less-than (a < b).",
-    "latex": "m_i = (r0_i < r1_i)"
+    "latex": "m_i = (vd0_i < vd1_i)"
   },
   "cmpneq": {
     "description": "Compares two vector registers element-wise for inequality (a != b).",
-    "latex": "m_i = (r0_i \\neq r1_i)"
+    "latex": "m_i = (vd0_i \\neq vd1_i)"
   },
   "cmul": {
     "description": "Complex product of the complex numbers (re, im) of the pairs of lanes of the two registers (interleaved layout: the real part in the even lane, the imaginary part in the odd lane).",
     "latex": "(a_r + i a_i)(b_r + i b_i) = (a_r b_r - a_i b_i) + i (a_r b_i + a_i b_r)"
   },
   "cmulconj": {
-    "description": "Complex product of the complex numbers of r0 by the conjugates of the complex numbers of r1 (interleaved layout).",
+    "description": "Complex product of the complex numbers of vd0 by the conjugates of the complex numbers of vd1 (interleaved layout).",
     "latex": "a \\bar{b} = (a_r b_r + a_i b_i) + i (a_i b_r - a_r b_i)"
   },
   "cnorm": {
@@ -133,23 +133,23 @@
   },
   "combine": {
     "description": "Joins two vector registers into a register of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
-    "latex": "\\text{res}_i = \\begin{cases} r0_i & \\text{if } i < N \\\\ r1_{i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
+    "latex": "\\text{res}_i = \\begin{cases} vd0_i & \\text{if } i < N \\\\ vd1_{i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
   },
   "combine_k": {
     "description": "Joins two mask registers into a mask of the LMUL above (d2 to m1, m1 to m2, ...): the first one gives the lower half, the second one the upper half.",
     "latex": "m_{\\text{res}, i} = \\begin{cases} m_{0, i} & \\text{if } i < N \\\\ m_{1, i - N} & \\text{otherwise} \\end{cases}, \\quad 0 \\le i < 2N"
   },
   "compress": {
-    "description": "The active lanes of r0 (mask m0), in order, packed at the beginning of the register; the other lanes are zero.",
-    "latex": "\\text{res} = (r0_i)_{m0_i \\neq 0},\\ 0, \\ldots"
+    "description": "The active lanes of vd0 (mask vm0), in order, packed at the beginning of the register; the other lanes are zero.",
+    "latex": "\\text{res} = (vd0_i)_{vm0_i \\neq 0},\\ 0, \\ldots"
   },
   "storeu_compress": {
-    "description": "Stores the active lanes of r0 (mask m0), in order, at p0 (no alignment required) and returns their number. Exactly this number of elements is written.",
-    "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
+    "description": "Stores the active lanes of vd0 (mask vm0), in order, at p0 (no alignment required) and returns their number. Exactly this number of elements is written.",
+    "latex": "p0_k = vd0_{i_k},\\ \\text{res} = \\#\\{i \\mid vm0_i \\neq 0\\}"
   },
   "storeuf_compress": {
-    "description": "`storeu_compress` that may write a whole register: the active lanes of r0 at p0, then up to N - count unspecified elements (the memory of N elements from p0 must be writable). Faster than `storeu_compress` without a native masked store: a filter loop overwrites the unspecified elements with the next call (keep N elements of margin at the end of the output).",
-    "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
+    "description": "`storeu_compress` that may write a whole register: the active lanes of vd0 at p0, then up to N - count unspecified elements (the memory of N elements from p0 must be writable). Faster than `storeu_compress` without a native masked store: a filter loop overwrites the unspecified elements with the next call (keep N elements of margin at the end of the output).",
+    "latex": "p0_k = vd0_{i_k},\\ \\text{res} = \\#\\{i \\mid vm0_i \\neq 0\\}"
   },
   "conj": {
     "description": "Complex conjugate: the imaginary parts (odd lanes) negated (interleaved layout).",
@@ -157,103 +157,103 @@
   },
   "copysign": {
     "description": "Builds each element with the magnitude of the first register and the sign of the second one (IEEE copysign).",
-    "latex": "\\text{res}_i = \\text{sign}(r1_i) \\cdot |r0_i|"
+    "latex": "\\text{res}_i = \\text{sign}(vd1_i) \\cdot |vd0_i|"
   },
   "cos": {
     "description": "Computes the trigonometric cosine of each floating-point element in radians.",
-    "latex": "\\text{res}_i = \\cos(r0_i)"
+    "latex": "\\text{res}_i = \\cos(vd0_i)"
   },
   "cosh": {
     "description": "Computes the hyperbolic cosine of each floating-point element.",
-    "latex": "\\text{res}_i = \\cosh(r0_i)"
+    "latex": "\\text{res}_i = \\cosh(vd0_i)"
   },
   "count": {
     "description": "Number of active lanes of a mask register.",
-    "latex": "\\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
+    "latex": "\\text{res} = \\#\\{i \\mid vm0_i \\neq 0\\}"
   },
   "cvt": {
     "description": "Converts elements of a vector register to another datatype with numerical casting.",
-    "latex": "\\text{res}_i = (T_{\\text{dst}}) r0_i"
+    "latex": "\\text{res}_i = (T_{\\text{dst}}) vd0_i"
   },
   "unzip": {
     "description": "Separates the even and the odd lanes: the even lanes in the lower half, the odd lanes in the upper half (interleaved to planar layout, MIPPv1 `deinterleave`).",
-    "latex": "\\text{res}_k = r0_{2k},\\ \\text{res}_{N/2+k} = r0_{2k+1}"
+    "latex": "\\text{res}_k = vd0_{2k},\\ \\text{res}_{N/2+k} = vd0_{2k+1}"
   },
   "div": {
     "description": "Divides the first vector register by the second element-wise.",
-    "latex": "\\text{res}_i = \\frac{r0_i}{r1_i}"
+    "latex": "\\text{res}_i = \\frac{vd0_i}{vd1_i}"
   },
   "div2": {
     "description": "Divides each element of a vector register by 2 (via arithmetic shift for integers or multiplication/division for floats).",
-    "latex": "\\text{res}_i = \\frac{r0_i}{2}"
+    "latex": "\\text{res}_i = \\frac{vd0_i}{2}"
   },
   "div4": {
     "description": "Divides each element of a vector register by 4 (via arithmetic shift for integers or multiplication/division for floats).",
-    "latex": "\\text{res}_i = \\frac{r0_i}{4}"
+    "latex": "\\text{res}_i = \\frac{vd0_i}{4}"
   },
   "dupeven": {
     "description": "Copies each even lane to the next odd lane: lanes 2k and 2k+1 both receive the lane 2k.",
-    "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = r0_{2k}"
+    "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = vd0_{2k}"
   },
   "dupodd": {
     "description": "Copies each odd lane to the previous even lane: lanes 2k and 2k+1 both receive the lane 2k+1. A register of a single lane is unchanged.",
-    "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = r0_{2k+1}"
+    "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = vd0_{2k+1}"
   },
   "exp": {
     "description": "Computes the base-e exponential of each floating-point element.",
-    "latex": "\\text{res}_i = e^{r0_i}"
+    "latex": "\\text{res}_i = e^{vd0_i}"
   },
   "expand": {
-    "description": "The inverse of `compress`: the first lanes of r0, in order, go to the active lanes (mask m0); the inactive lanes are zero.",
-    "latex": "\\text{res}_i = m0_i\\ ?\\ r0_{\\#\\{j < i \\mid m0_j\\}} : 0"
+    "description": "The inverse of `compress`: the first lanes of vd0, in order, go to the active lanes (mask vm0); the inactive lanes are zero.",
+    "latex": "\\text{res}_i = vm0_i\\ ?\\ vd0_{\\#\\{j < i \\mid vm0_j\\}} : 0"
   },
   "loadu_expand": {
-    "description": "Loads as many elements from p0 (no alignment required) as there are active lanes (mask m0) and puts them in the active lanes, in order; the inactive lanes are zero. Only these elements are read.",
-    "latex": "\\text{res}_i = m0_i\\ ?\\ p0_{\\#\\{j < i \\mid m0_j\\}} : 0"
+    "description": "Loads as many elements from p0 (no alignment required) as there are active lanes (mask vm0) and puts them in the active lanes, in order; the inactive lanes are zero. Only these elements are read.",
+    "latex": "\\text{res}_i = vm0_i\\ ?\\ p0_{\\#\\{j < i \\mid vm0_j\\}} : 0"
   },
   "fmadd": {
     "description": "Computes the fused multiply-add of three vector registers ((a * b) + c).",
-    "latex": "\\text{res}_i = (r0_i \\cdot r1_i) + r2_i"
+    "latex": "\\text{res}_i = (vd0_i \\cdot vd1_i) + vd2_i"
   },
   "fmsub": {
     "description": "Computes the fused multiply-subtract of three vector registers ((a * b) - c).",
-    "latex": "\\text{res}_i = (r0_i \\cdot r1_i) - r2_i"
+    "latex": "\\text{res}_i = (vd0_i \\cdot vd1_i) - vd2_i"
   },
   "fnmadd": {
     "description": "Computes the fused negative multiply-add of three vector registers (-(a * b) + c).",
-    "latex": "\\text{res}_i = -(r0_i \\cdot r1_i) + r2_i"
+    "latex": "\\text{res}_i = -(vd0_i \\cdot vd1_i) + vd2_i"
   },
   "fnmsub": {
     "description": "Computes the fused negative multiply-subtract of three vector registers (-(a * b) - c).",
-    "latex": "\\text{res}_i = -(r0_i \\cdot r1_i) - r2_i"
+    "latex": "\\text{res}_i = -(vd0_i \\cdot vd1_i) - vd2_i"
   },
   "gather": {
     "description": "Loads elements from non-contiguous memory locations into a vector register using an index vector (unsigned indices counted in elements, of the width of the data or 32/64-bit: then at their own LMUL; 32-bit indices lower than 2^31, and than 2^30 on RVV for 32-bit data).",
-    "latex": "\\text{res}_i = \\text{p0}[r0_i]"
+    "latex": "\\text{res}_i = \\text{p0}[vd0_i]"
   },
   "get": {
     "description": "Extracts a single scalar element at index idx from a vector register.",
-    "latex": "\\text{res} = r0[\\text{idx}]"
+    "latex": "\\text{res} = vd0[\\text{idx}]"
   },
   "get_k": {
     "description": "Extracts the boolean truthiness of a single mask element at index idx.",
-    "latex": "\\text{res} = m0[\\text{idx}]"
+    "latex": "\\text{res} = vm0[\\text{idx}]"
   },
   "getfirst": {
     "description": "Extracts the first scalar element (element 0) from a vector register with minimal latency.",
-    "latex": "\\text{res} = r0[0]"
+    "latex": "\\text{res} = vd0[0]"
   },
   "hadd": {
     "description": "Computes the horizontal addition (reduction sum) of all elements in a vector register.",
-    "latex": "\\text{res} = \\sum_{i=0}^{N-1} r0_i"
+    "latex": "\\text{res} = \\sum_{i=0}^{N-1} vd0_i"
   },
   "hadds": {
     "description": "Computes the horizontal addition with saturation of all elements in a vector register.",
-    "latex": "\\text{res} = \\operatorname{saturate}\\left(\\sum_{i=0}^{N-1} r0_i\\right)"
+    "latex": "\\text{res} = \\operatorname{saturate}\\left(\\sum_{i=0}^{N-1} vd0_i\\right)"
   },
   "hi": {
     "description": "Returns the upper half of a vector register as a register of the LMUL below (m2 to m1, m1 to d2, ...).",
-    "latex": "\\text{res}_i = r0_{i + N/2}, \\quad 0 \\le i < N / 2"
+    "latex": "\\text{res}_i = vd0_{i + N/2}, \\quad 0 \\le i < N / 2"
   },
   "hi_k": {
     "description": "Returns the upper half of a mask register as a mask of the LMUL below (m2 to m1, m1 to d2, ...).",
@@ -261,19 +261,19 @@
   },
   "hmax": {
     "description": "Computes the horizontal maximum (reduction maximum) of all elements in a vector register.",
-    "latex": "\\text{res} = \\max_{i=0}^{N-1} r0_i"
+    "latex": "\\text{res} = \\max_{i=0}^{N-1} vd0_i"
   },
   "hmin": {
     "description": "Computes the horizontal minimum (reduction minimum) of all elements in a vector register.",
-    "latex": "\\text{res} = \\min_{i=0}^{N-1} r0_i"
+    "latex": "\\text{res} = \\min_{i=0}^{N-1} vd0_i"
   },
   "hmul": {
     "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register.",
-    "latex": "\\text{res} = \\prod_{i=0}^{N-1} r0_i"
+    "latex": "\\text{res} = \\prod_{i=0}^{N-1} vd0_i"
   },
   "zip": {
     "description": "Interleaves the two halves of the register: the lane 2k receives the lane k, the lane 2k+1 the lane N/2 + k (planar to interleaved layout, MIPPv1 `interleave`; the inverse of `unzip`).",
-    "latex": "\\text{res}_{2k} = r0_k,\\ \\text{res}_{2k+1} = r0_{N/2+k}"
+    "latex": "\\text{res}_{2k} = vd0_k,\\ \\text{res}_{2k+1} = vd0_{N/2+k}"
   },
   "load": {
     "description": "Loads elements from an aligned memory address into a vector register.",
@@ -289,11 +289,11 @@
   },
   "log": {
     "description": "Computes the natural (base-e) logarithm of each floating-point element.",
-    "latex": "\\text{res}_i = \\ln(r0_i)"
+    "latex": "\\text{res}_i = \\ln(vd0_i)"
   },
   "lo": {
     "description": "Returns the lower half of a vector register as a register of the LMUL below (m2 to m1, m1 to d2, ...).",
-    "latex": "\\text{res}_i = r0_i, \\quad 0 \\le i < N / 2"
+    "latex": "\\text{res}_i = vd0_i, \\quad 0 \\le i < N / 2"
   },
   "lo_k": {
     "description": "Returns the lower half of a mask register as a mask of the LMUL below (m2 to m1, m1 to d2, ...).",
@@ -301,39 +301,39 @@
   },
   "lshift": {
     "description": "Shifts each element left by the number of bits of the same lane of the second register (from 0 to the number of bits of the type minus 1; any other count is undefined behavior). The shift by the same count for every lane is `lshift_vs` (`mipp::lshift(r, n)` in C++).",
-    "latex": "\\text{res}_i = r0_i \\ll r1_i"
+    "latex": "\\text{res}_i = vd0_i \\ll vd1_i"
   },
   "lshift_vs": {
     "description": "Shifts every element left by the same number of bits `s0` (scalar form `vs` of `lshift`; `mipp::lshift(r, n)` in C++). The bits of the floating-point elements are shifted as an integer of the same size.",
-    "latex": "\\text{res}_i = r0_i \\ll s0"
+    "latex": "\\text{res}_i = vd0_i \\ll s0"
   },
   "max": {
     "description": "Selects the maximum value element-wise between two vector registers.",
-    "latex": "\\text{res}_i = \\max(r0_i, r1_i)"
+    "latex": "\\text{res}_i = \\max(vd0_i, vd1_i)"
   },
   "min": {
     "description": "Selects the minimum value element-wise between two vector registers.",
-    "latex": "\\text{res}_i = \\min(r0_i, r1_i)"
+    "latex": "\\text{res}_i = \\min(vd0_i, vd1_i)"
   },
   "msb": {
     "description": "Masks out all bits except the most significant bit (sign bit) for each vector element.",
-    "latex": "\\text{res}_i = r0_i \\ \\& \\ \\text{MSB_MASK}"
+    "latex": "\\text{res}_i = vd0_i \\ \\& \\ \\text{MSB_MASK}"
   },
   "mul": {
     "description": "Multiplies two vector registers element-wise.",
-    "latex": "\\text{res}_i = r0_i \\cdot r1_i"
+    "latex": "\\text{res}_i = vd0_i \\cdot vd1_i"
   },
   "ncvt": {
     "description": "Narrowing conversion: converts vector elements to a narrower datatype, keeping the lanes in a register one LMUL below. The value is truncated (modulo for integers), not saturated.",
-    "latex": "\\text{res}_i = (T_{\\text{narrow}}) r0_i"
+    "latex": "\\text{res}_i = (T_{\\text{narrow}}) vd0_i"
   },
   "ncvts": {
     "description": "Converts each integer element to the type twice as narrow with saturation to its range; the result has the next LMUL down.",
-    "latex": "\\text{res}_i = \\min(\\max(r0_i, \\text{MIN}), \\text{MAX})"
+    "latex": "\\text{res}_i = \\min(\\max(vd0_i, \\text{MIN}), \\text{MAX})"
   },
   "neg": {
     "description": "Negates each element of a vector register.",
-    "latex": "\\text{res}_i = -r0_i"
+    "latex": "\\text{res}_i = -vd0_i"
   },
   "none": {
     "description": "Tests if every element in a mask register is zero (returns 1 if all inactive, 0 otherwise).",
@@ -341,7 +341,7 @@
   },
   "notb": {
     "description": "Computes the bitwise NOT (inversion) of a vector register.",
-    "latex": "\\text{res}_i = \\sim r0_i"
+    "latex": "\\text{res}_i = \\sim vd0_i"
   },
   "notb_k": {
     "description": "Computes the bitwise NOT (inversion) of a mask register.",
@@ -349,71 +349,71 @@
   },
   "orb": {
     "description": "Computes the bitwise OR of two vector registers.",
-    "latex": "\\text{res}_i = r0_i \\mid r1_i"
+    "latex": "\\text{res}_i = vd0_i \\mid vd1_i"
   },
   "orb_k": {
     "description": "Computes the bitwise OR of two mask registers.",
     "latex": "m_{\\text{res}, i} = m_{0, i} \\mid m_{1, i}"
   },
   "permute": {
-    "description": "Lane i receives the lane `r1[i]` of r0 (`r1`: unsigned indices of the width of the elements, each below N, the number of lanes of the LMUL group; other values are undefined behavior).",
-    "latex": "\\text{res}_i = r0_{r1_i}"
+    "description": "Lane i receives the lane `vd1[i]` of vd0 (`vd1`: unsigned indices of the width of the elements, each below N, the number of lanes of the LMUL group; other values are undefined behavior).",
+    "latex": "\\text{res}_i = vd0_{vd1_i}"
   },
   "permute2": {
-    "description": "Lane i receives the lane `r2[i]` of the concatenation of r0 and r1 (indices below 2N; other values are undefined behavior).",
-    "latex": "\\text{res}_i = (r0 \\| r1)_{r2_i}"
+    "description": "Lane i receives the lane `vd2[i]` of the concatenation of vd0 and vd1 (indices below 2N; other values are undefined behavior).",
+    "latex": "\\text{res}_i = (vd0 \\| vd1)_{vd2_i}"
   },
   "permute_b128": {
-    "description": "`permute` in each block of 128 bits: lane i receives the lane `r1[i]` of its block (indices below the number of lanes of a block; x86 `vpermilps`, `pshufb`).",
-    "latex": "\\text{res}_{b+l} = r0_{b + r1_{b+l}}"
+    "description": "`permute` in each block of 128 bits: lane i receives the lane `vd1[i]` of its block (indices below the number of lanes of a block; x86 `vpermilps`, `pshufb`).",
+    "latex": "\\text{res}_{b+l} = vd0_{b + vd1_{b+l}}"
   },
   "pow": {
     "description": "Computes the first vector register raised to the power of the second element-wise.",
-    "latex": "\\text{res}_i = r0_i^{r1_i}"
+    "latex": "\\text{res}_i = vd0_i^{vd1_i}"
   },
   "pow2": {
     "description": "Computes 2 raised to the power of each vector element.",
-    "latex": "\\text{res}_i = 2^{r0_i}"
+    "latex": "\\text{res}_i = 2^{vd0_i}"
   },
   "reverse": {
     "description": "Reverses the order of the lanes of the register (of the whole LMUL group).",
-    "latex": "\\text{res}_i = r0_{N-1-i}"
+    "latex": "\\text{res}_i = vd0_{N-1-i}"
   },
   "reverse_b128": {
     "description": "Reverses the order of the lanes in each block of 128 bits (the whole register when it is smaller).",
-    "latex": "\\text{res}_{b+l} = r0_{b + n_b - 1 - l}"
+    "latex": "\\text{res}_{b+l} = vd0_{b + n_b - 1 - l}"
   },
   "rotate": {
     "description": "Rotates the lanes down by `s0` (0 <= s0 < N): the lane i receives the lane (i + s0) mod N.",
-    "latex": "\\text{res}_i = r0_{(i + s0) \\bmod N}"
+    "latex": "\\text{res}_i = vd0_{(i + s0) \\bmod N}"
   },
   "rotate_b128": {
     "description": "`rotate` in each block of 128 bits (0 <= s0 < number of lanes of a block).",
-    "latex": "\\text{res}_{b+l} = r0_{b + (l + s0) \\bmod n_b}"
+    "latex": "\\text{res}_{b+l} = vd0_{b + (l + s0) \\bmod n_b}"
   },
   "round": {
     "description": "Rounds each floating-point element to the nearest integer.",
-    "latex": "\\text{res}_i = \\operatorname{round}(r0_i)"
+    "latex": "\\text{res}_i = \\operatorname{round}(vd0_i)"
   },
   "rshift": {
     "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(r, n)` in C++).",
-    "latex": "\\text{res}_i = r0_i \\gg r1_i"
+    "latex": "\\text{res}_i = vd0_i \\gg vd1_i"
   },
   "rshift_vs": {
     "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshift`; `mipp::rshift(r, n)` in C++): arithmetic shift for the signed types, logical shift for the unsigned ones. The bits of the floating-point elements are shifted as an unsigned integer of the same size.",
-    "latex": "\\text{res}_i = r0_i \\gg s0"
+    "latex": "\\text{res}_i = vd0_i \\gg s0"
   },
   "rsqrt": {
     "description": "Computes the reciprocal square root of each floating-point element (1 / sqrt(a)).",
-    "latex": "\\text{res}_i = \\frac{1}{\\sqrt{r0_i}}"
+    "latex": "\\text{res}_i = \\frac{1}{\\sqrt{vd0_i}}"
   },
   "scatter": {
     "description": "Stores vector elements into non-contiguous memory locations using an index vector (unsigned indices counted in elements, of the width of the data or 32/64-bit: then at their own LMUL; 32-bit indices lower than 2^31, and than 2^30 on RVV for 32-bit data).",
-    "latex": "\\text{p0}[r0_i] = r1_i"
+    "latex": "\\text{p0}[vd0_i] = vd1_i"
   },
   "select": {
-    "description": "Selects elements between two vector registers based on a mask (r0 when m=1, r1 when m=0).",
-    "latex": "\\text{res}_i = m_i ? r0_i : r1_i"
+    "description": "Selects elements between two vector registers based on a mask (vd0 when m=1, vd1 when m=0).",
+    "latex": "\\text{res}_i = m_i ? vd0_i : vd1_i"
   },
   "set": {
     "description": "Initializes a vector register from a scalar array.",
@@ -441,75 +441,75 @@
   },
   "signbit": {
     "description": "Returns the mask of the elements whose sign bit is set (negative values, including -0.0 for the floating-point types).",
-    "latex": "m_{\\text{res}, i} = (r0_i < 0)"
+    "latex": "m_{\\text{res}, i} = (vd0_i < 0)"
   },
   "sin": {
     "description": "Computes the trigonometric sine of each floating-point element in radians.",
-    "latex": "\\text{res}_i = \\sin(r0_i)"
+    "latex": "\\text{res}_i = \\sin(vd0_i)"
   },
   "sinh": {
     "description": "Computes the hyperbolic sine of each floating-point element.",
-    "latex": "\\text{res}_i = \\sinh(r0_i)"
+    "latex": "\\text{res}_i = \\sinh(vd0_i)"
   },
   "slide": {
-    "description": "Window of N lanes at the position `s0` (0 <= s0 <= N) of the concatenation of the two registers: the lanes s0 to N-1 of r0, then the lanes 0 to s0-1 of r1 (MIPPv1 `combine<S>`; x86 `alignr`, ARM `ext`).",
-    "latex": "\\text{res}_i = (r0 \\| r1)_{i + s0}"
+    "description": "Window of N lanes at the position `s0` (0 <= s0 <= N) of the concatenation of the two registers: the lanes s0 to N-1 of vd0, then the lanes 0 to s0-1 of vd1 (MIPPv1 `combine<S>`; x86 `alignr`, ARM `ext`).",
+    "latex": "\\text{res}_i = (vd0 \\| vd1)_{i + s0}"
   },
   "slide_b128": {
-    "description": "`slide` in each block of 128 bits: the window at `s0` of the concatenation of the blocks of r0 and r1 (0 <= s0 <= number of lanes of a block; x86 `alignr`).",
-    "latex": "\\text{res}_{b+l} = (r0_b \\| r1_b)_{l + s0}"
+    "description": "`slide` in each block of 128 bits: the window at `s0` of the concatenation of the blocks of vd0 and vd1 (0 <= s0 <= number of lanes of a block; x86 `alignr`).",
+    "latex": "\\text{res}_{b+l} = (vd0_b \\| vd1_b)_{l + s0}"
   },
   "slidedown": {
     "description": "Moves the lanes down by `s0` (0 <= s0 <= N): the lane i receives the lane i + s0, the lanes from N - s0 are zero.",
-    "latex": "\\text{res}_i = i + s0 < N\\ ?\\ r0_{i + s0} : 0"
+    "latex": "\\text{res}_i = i + s0 < N\\ ?\\ vd0_{i + s0} : 0"
   },
   "slidedown_b128": {
     "description": "`slidedown` in each block of 128 bits, zeros entering at the top of each block (x86 `psrldq`).",
-    "latex": "\\text{res}_{b+l} = l + s0 < n_b\\ ?\\ r0_{b+l+s0} : 0"
+    "latex": "\\text{res}_{b+l} = l + s0 < n_b\\ ?\\ vd0_{b+l+s0} : 0"
   },
   "slideup": {
     "description": "Moves the lanes up by `s0` (0 <= s0 <= N): the lane i receives the lane i - s0, the lanes below s0 are zero.",
-    "latex": "\\text{res}_i = i \\ge s0\\ ?\\ r0_{i - s0} : 0"
+    "latex": "\\text{res}_i = i \\ge s0\\ ?\\ vd0_{i - s0} : 0"
   },
   "slideup_b128": {
     "description": "`slideup` in each block of 128 bits, zeros entering at the bottom of each block (x86 `pslldq`).",
-    "latex": "\\text{res}_{b+l} = l \\ge s0\\ ?\\ r0_{b+l-s0} : 0"
+    "latex": "\\text{res}_{b+l} = l \\ge s0\\ ?\\ vd0_{b+l-s0} : 0"
   },
   "sqrt": {
     "description": "Computes the square root of each element in a vector register.",
-    "latex": "\\text{res}_i = \\sqrt{r0_i}"
+    "latex": "\\text{res}_i = \\sqrt{vd0_i}"
   },
   "store": {
     "description": "Stores vector elements into an aligned memory address.",
-    "latex": "\\text{p0}[i] = r0_i"
+    "latex": "\\text{p0}[i] = vd0_i"
   },
   "storeu_zip": {
     "description": "Interleaves the two halves of the register and stores the N elements (no alignment required): `storeu(p, zip(r))`, the inverse of `loadu_unzip` (ARM `vst2`).",
-    "latex": "p_{2k} = r0_k,\\ p_{2k+1} = r0_{N/2+k}"
+    "latex": "p_{2k} = vd0_k,\\ p_{2k+1} = vd0_{N/2+k}"
   },
   "storeu": {
     "description": "Stores vector elements into an unaligned memory address.",
-    "latex": "\\text{p0}[i] = r0_i"
+    "latex": "\\text{p0}[i] = vd0_i"
   },
   "sub": {
     "description": "Subtracts the second vector register from the first element-wise.",
-    "latex": "\\text{res}_i = r0_i - r1_i"
+    "latex": "\\text{res}_i = vd0_i - vd1_i"
   },
   "subs": {
     "description": "Subtracts two integer vector registers element-wise with saturation to [MIN, MAX] on underflow/overflow.",
-    "latex": "\\text{res}_i = \\operatorname{saturate}(r0_i - r1_i)"
+    "latex": "\\text{res}_i = \\operatorname{saturate}(vd0_i - vd1_i)"
   },
   "swap2": {
     "description": "Swaps the lanes of each pair (lanes 2k and 2k+1). A register of a single lane is unchanged.",
-    "latex": "\\text{res}_i = r0_{i \\oplus 1}"
+    "latex": "\\text{res}_i = vd0_{i \\oplus 1}"
   },
   "tan": {
     "description": "Computes the trigonometric tangent of each floating-point element in radians.",
-    "latex": "\\text{res}_i = \\tan(r0_i)"
+    "latex": "\\text{res}_i = \\tan(vd0_i)"
   },
   "tanh": {
     "description": "Computes the hyperbolic tangent of each floating-point element.",
-    "latex": "\\text{res}_i = \\tanh(r0_i)"
+    "latex": "\\text{res}_i = \\tanh(vd0_i)"
   },
   "testz": {
     "description": "Tests if the bitwise AND of two mask registers is all zero (returns 1 if disjoint/all zero, 0 otherwise).",
@@ -521,35 +521,35 @@
   },
   "tovm": {
     "description": "Converts vector elements to mask elements: a lane is active when its element has at least one non-zero bit (so -0.0 is active), and the resulting mask lane has all its bits set.",
-    "latex": "m_i = (\\text{bits}(r0_i) \\neq 0)"
+    "latex": "m_i = (\\text{bits}(vd0_i) \\neq 0)"
   },
   "trunc": {
     "description": "Truncates each floating-point element toward zero.",
-    "latex": "\\text{res}_i = \\operatorname{trunc}(r0_i)"
+    "latex": "\\text{res}_i = \\operatorname{trunc}(vd0_i)"
   },
   "unziplo": {
-    "description": "Even lanes of the concatenation of the two registers: r0[0], r0[2]... then r1[0], r1[2]... (with `lo` / `hi`, the even lanes of a register of twice the LMUL; ARM `uzp1`).",
-    "latex": "\\text{res}_i = (r0 \\| r1)_{2i}"
+    "description": "Even lanes of the concatenation of the two registers: vd0[0], vd0[2]... then vd1[0], vd1[2]... (with `lo` / `hi`, the even lanes of a register of twice the LMUL; ARM `uzp1`).",
+    "latex": "\\text{res}_i = (vd0 \\| vd1)_{2i}"
   },
   "unziplo_b128": {
     "description": "`unziplo` in each block of 128 bits (x86 `shufps` with the even lanes).",
-    "latex": "\\text{res}_{b+l} = (r0_b \\| r1_b)_{2l}"
+    "latex": "\\text{res}_{b+l} = (vd0_b \\| vd1_b)_{2l}"
   },
   "unziphi": {
-    "description": "Odd lanes of the concatenation of the two registers: r0[1], r0[3]... then r1[1], r1[3]... (ARM `uzp2`).",
-    "latex": "\\text{res}_i = (r0 \\| r1)_{2i+1}"
+    "description": "Odd lanes of the concatenation of the two registers: vd0[1], vd0[3]... then vd1[1], vd1[3]... (ARM `uzp2`).",
+    "latex": "\\text{res}_i = (vd0 \\| vd1)_{2i+1}"
   },
   "unziphi_b128": {
     "description": "`unziphi` in each block of 128 bits.",
-    "latex": "\\text{res}_{b+l} = (r0_b \\| r1_b)_{2l+1}"
+    "latex": "\\text{res}_{b+l} = (vd0_b \\| vd1_b)_{2l+1}"
   },
   "wcvt": {
     "description": "Widening conversion: converts vector elements to a wider datatype.",
-    "latex": "\\text{res}_i = (T_{\\text{wide}}) r0_i"
+    "latex": "\\text{res}_i = (T_{\\text{wide}}) vd0_i"
   },
   "xorb": {
     "description": "Computes the bitwise XOR of two vector registers.",
-    "latex": "\\text{res}_i = r0_i \\oplus r1_i"
+    "latex": "\\text{res}_i = vd0_i \\oplus vd1_i"
   },
   "xorb_k": {
     "description": "Computes the bitwise XOR of two mask registers.",
@@ -557,22 +557,22 @@
   },
   "xorsign": {
     "description": "Negates each element of the first register where the element of the second register is negative (sign bit set).",
-    "latex": "\\text{res}_i = \\begin{cases} -r0_i & \\text{if } r1_i < 0 \\\\ r0_i & \\text{otherwise} \\end{cases}"
+    "latex": "\\text{res}_i = \\begin{cases} -vd0_i & \\text{if } vd1_i < 0 \\\\ vd0_i & \\text{otherwise} \\end{cases}"
   },
   "ziphi": {
-    "description": "Interleaves the lanes of the upper halves of the two registers: r0[N/2], r1[N/2], r0[N/2+1]... (the second half of `zip`).",
-    "latex": "\\text{res}_{2k} = r0_{N/2+k},\\ \\text{res}_{2k+1} = r1_{N/2+k}"
+    "description": "Interleaves the lanes of the upper halves of the two registers: vd0[N/2], vd1[N/2], vd0[N/2+1]... (the second half of `zip`).",
+    "latex": "\\text{res}_{2k} = vd0_{N/2+k},\\ \\text{res}_{2k+1} = vd1_{N/2+k}"
   },
   "ziphi_b128": {
     "description": "`ziphi` in each block of 128 bits: interleaves the lanes of the upper halves of the blocks (x86 `unpackhi`).",
-    "latex": "\\text{res}_{b+2k} = r0_{b+n_b/2+k},\\ \\text{res}_{b+2k+1} = r1_{b+n_b/2+k}"
+    "latex": "\\text{res}_{b+2k} = vd0_{b+n_b/2+k},\\ \\text{res}_{b+2k+1} = vd1_{b+n_b/2+k}"
   },
   "ziplo": {
-    "description": "Interleaves the lanes of the lower halves of the two registers: r0[0], r1[0], r0[1], r1[1]... (the first half of `zip`).",
-    "latex": "\\text{res}_{2k} = r0_k,\\ \\text{res}_{2k+1} = r1_k"
+    "description": "Interleaves the lanes of the lower halves of the two registers: vd0[0], vd1[0], vd0[1], vd1[1]... (the first half of `zip`).",
+    "latex": "\\text{res}_{2k} = vd0_k,\\ \\text{res}_{2k+1} = vd1_k"
   },
   "ziplo_b128": {
     "description": "`ziplo` in each block of 128 bits: interleaves the lanes of the lower halves of the blocks (x86 `unpacklo`).",
-    "latex": "\\text{res}_{b+2k} = r0_{b+k},\\ \\text{res}_{b+2k+1} = r1_{b+k}"
+    "latex": "\\text{res}_{b+2k} = vd0_{b+k},\\ \\text{res}_{b+2k+1} = vd1_{b+k}"
   }
 }

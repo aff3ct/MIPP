@@ -47,20 +47,20 @@ _OBJ_PARTNERS = {
 _OBJ_MEMBER_OPS = {
     "loadu": ("vd_loadu_op", "vd<T, {L}>", "const T* p0", "mipp::loadu<T, {L}>(p0)"),
     "set1": ("vd_set1_op", "vd<T, {L}>", "const T s0", "mipp::set1<T, {L}>(s0)"),
-    "get": ("vd_get_op", "T", "const vd<T, {L}>& r0, const size_t idx", "mipp::get(r0, idx)"),
+    "get": ("vd_get_op", "T", "const vd<T, {L}>& vd0, const size_t idx", "mipp::get(vd0, idx)"),
     "set1_k": ("vm_set1_k_op", "vm<T, {L}>", "const int32_t s0", "mipp::set1_k<T, {L}>(s0)"),
     "set_k": ("vm_set_k_op", "vm<T, {L}>", "const int32_t* vals", "mipp::set_k<T, {L}>(vals)"),
-    "get_k": ("vm_get_k_op", "bool", "const vm<T, {L}>& m0, const size_t idx",
-              "mask_get_val<T>(mipp::get(m0, idx), typename std::is_floating_point<T>::type())"),
+    "get_k": ("vm_get_k_op", "bool", "const vm<T, {L}>& vm0, const size_t idx",
+              "mask_get_val<T>(mipp::get(vm0, idx), typename std::is_floating_point<T>::type())"),
     # lo / hi / combine: `{D}` / `{U}` are the LMULs below / above `{L}`. The functions are called by their
     # (unqualified) name: the cpp granule of the LMUL is included before, and the register types of the ISAs are
     # not always in namespace mipp (so argument-dependent lookup cannot be relied on).
-    "lo": ("vd_lo_op", "Vd<T, {D}>", "const vd<T, {L}>& r0", "lo(r0)"),
-    "hi": ("vd_hi_op", "Vd<T, {D}>", "const vd<T, {L}>& r0", "hi(r0)"),
-    "combine": ("vd_combine_op", "Vd<T, {U}>", "const vd<T, {L}>& r0, const vd<T, {L}>& r1", "combine(r0, r1)"),
-    "lo_k": ("vm_lo_op", "Vm<T, {D}>", "const vm<T, {L}>& m0", "lo(m0)"),
-    "hi_k": ("vm_hi_op", "Vm<T, {D}>", "const vm<T, {L}>& m0", "hi(m0)"),
-    "combine_k": ("vm_combine_op", "Vm<T, {U}>", "const vm<T, {L}>& m0, const vm<T, {L}>& m1", "combine(m0, m1)"),
+    "lo": ("vd_lo_op", "Vd<T, {D}>", "const vd<T, {L}>& vd0", "lo(vd0)"),
+    "hi": ("vd_hi_op", "Vd<T, {D}>", "const vd<T, {L}>& vd0", "hi(vd0)"),
+    "combine": ("vd_combine_op", "Vd<T, {U}>", "const vd<T, {L}>& vd0, const vd<T, {L}>& vd1", "combine(vd0, vd1)"),
+    "lo_k": ("vm_lo_op", "Vm<T, {D}>", "const vm<T, {L}>& vm0", "lo(vm0)"),
+    "hi_k": ("vm_hi_op", "Vm<T, {D}>", "const vm<T, {L}>& vm0", "hi(vm0)"),
+    "combine_k": ("vm_combine_op", "Vm<T, {U}>", "const vm<T, {L}>& vm0, const vm<T, {L}>& vm1", "combine(vm0, vm1)"),
 }
 
 
@@ -126,48 +126,48 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("")
         if is_maskzable:
             lines.append("template <VARIANT V = Z, typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> {fn}_obj(const Vm<T, LMUL>& m0, const T* p0)")
-            lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, p0)); }}")
+            lines.append(f"inline Vd<T, LMUL> {fn}_obj(const Vm<T, LMUL>& vm0, const T* p0)")
+            lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(vm0.vm, p0)); }}")
             lines.append("")
         if is_masksable:
             lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> {fn}_obj(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& rsrc, const T* p0)")
-            lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, p0)); }}")
+            lines.append(f"inline Vd<T, LMUL> {fn}_obj(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vdsrc, const T* p0)")
+            lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(vm0.vm, vdsrc.vd, p0)); }}")
             lines.append("")
 
     # Category 1c: lanes moved by a register of indices (unsigned, of the width of T) and by a mask (compress...)
     elif fn in ("permute", "permute_b128", "permute2"):
         idx_t = "Vd<typename details::uint_of<T>::type, LMUL>"
-        regs = ["r0"] if fn != "permute2" else ["r0", "r1"]
-        idx = "r1" if fn != "permute2" else "r2"
+        regs = ["vd0"] if fn != "permute2" else ["vd0", "vd1"]
+        idx = "vd1" if fn != "permute2" else "vd2"
         typed = ", ".join([f"const Vd<T, LMUL>& {r}" for r in regs] + [f"const {idx_t}& {idx}"])
-        raw = ", ".join([f"{r}.r" for r in regs] + [f"{idx}.r"])
+        raw = ", ".join([f"{r}.vd" for r in regs] + [f"{idx}.vd"])
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline Vd<T, LMUL> {fn}({typed})")
         lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}({raw})); }}")
         lines.append("")
         lines.append("template <VARIANT V = M, typename T, int LMUL = 1>")
-        lines.append(f"inline Vd<T, LMUL> {fn}(const Vm<T, LMUL>& m0, {typed})")
-        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, {raw})); }}")
+        lines.append(f"inline Vd<T, LMUL> {fn}(const Vm<T, LMUL>& vm0, {typed})")
+        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(vm0.vm, {raw})); }}")
         lines.append("")
         lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
-        lines.append(f"inline Vd<T, LMUL> {fn}(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& rsrc, {typed})")
-        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, rsrc.r, {raw})); }}")
+        lines.append(f"inline Vd<T, LMUL> {fn}(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vdsrc, {typed})")
+        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}<V, T, LMUL>(vm0.vm, vdsrc.vd, {raw})); }}")
         lines.append("")
     elif fn in ("compress", "expand"):
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vd<T, LMUL> {fn}(const Vd<T, LMUL>& r0, const Vm<T, LMUL>& m0)")
-        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}(r0.r, m0.m)); }}")
+        lines.append(f"inline Vd<T, LMUL> {fn}(const Vd<T, LMUL>& vd0, const Vm<T, LMUL>& vm0)")
+        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}(vd0.vd, vm0.vm)); }}")
         lines.append("")
     elif fn in ("storeu_compress", "storeuf_compress"):
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline int32_t {fn}(T* p0, const Vd<T, LMUL>& r0, const Vm<T, LMUL>& m0)")
-        lines.append(f"{{ return mipp::{fn}(p0, r0.r, m0.m); }}")
+        lines.append(f"inline int32_t {fn}(T* p0, const Vd<T, LMUL>& vd0, const Vm<T, LMUL>& vm0)")
+        lines.append(f"{{ return mipp::{fn}(p0, vd0.vd, vm0.vm); }}")
         lines.append("")
     elif fn == "loadu_expand":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vd<T, LMUL> {fn}(const T* p0, const Vm<T, LMUL>& m0)")
-        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}(p0, m0.m)); }}")
+        lines.append(f"inline Vd<T, LMUL> {fn}(const T* p0, const Vm<T, LMUL>& vm0)")
+        lines.append(f"{{ return Vd<T, LMUL>(mipp::{fn}(p0, vm0.vm)); }}")
         lines.append("")
 
     # Category 1a: scalar forms (`sub_vs`, `sub_sv`, `fmadd_vsv`, `cmplt_vs`, `select_vs`... see forms.py): overloads
@@ -181,11 +181,11 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             i = cnt[a_type]
             cnt[a_type] += 1
             if a_type == "reg":
-                typed_args.append(f"const Vd<T, LMUL>& r{i}")
-                raw_args.append(f"r{i}.r")
+                typed_args.append(f"const Vd<T, LMUL>& vd{i}")
+                raw_args.append(f"vd{i}.vd")
             elif a_type == "msk":
-                typed_args.append(f"const Vm<T, LMUL>& m{i}")
-                raw_args.append(f"m{i}.m")
+                typed_args.append(f"const Vm<T, LMUL>& vm{i}")
+                raw_args.append(f"vm{i}.vm")
             else:
                 typed_args.append(f"const T s{i}")
                 raw_args.append(f"s{i}")
@@ -198,19 +198,19 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             # one overload for the merge and zero masking (V = M or Z), the default is the first variant
             mk = "M" if is_maskable else "Z"
             lines.append(f"template <VARIANT V = {mk}, typename T, int LMUL = 1>")
-            lines.append(f"inline {ret} {cpp_fn}(const Vm<T, LMUL>& m0, {typed_str})")
-            lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(m0.m, {raw_str})); }}")
+            lines.append(f"inline {ret} {cpp_fn}(const Vm<T, LMUL>& vm0, {typed_str})")
+            lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(vm0.vm, {raw_str})); }}")
             lines.append("")
         if is_masksable:
             lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
-            lines.append(f"inline {ret} {cpp_fn}(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& rsrc, {typed_str})")
-            lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
+            lines.append(f"inline {ret} {cpp_fn}(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vdsrc, {typed_str})")
+            lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(vm0.vm, vdsrc.vd, {raw_str})); }}")
             lines.append("")
 
     # Category 1b: lo / hi / combine (the LMUL of the result differs from the one of the arguments)
     elif fn in ("lo", "hi", "lo_k", "hi_k"):
         cls = "Vm" if fn.endswith("_k") else "Vd"
-        mem = "m" if cls == "Vm" else "r"
+        mem = "vm" if cls == "Vm" else "vd"
         call = "lo" if fn.startswith("lo") else "hi"
         ret = f"{cls}<T, details::lmul_down(LMUL)>"
         lines.append("template <typename T, int LMUL = 1>")
@@ -219,7 +219,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("")
     elif fn in ("combine", "combine_k"):
         cls = "Vm" if fn.endswith("_k") else "Vd"
-        mem = "m" if cls == "Vm" else "r"
+        mem = "vm" if cls == "Vm" else "vd"
         ret = f"{cls}<T, details::lmul_up(LMUL)>"
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline {ret} {cpp_fn}(const {cls}<T, LMUL>& {mem}0, const {cls}<T, LMUL>& {mem}1)")
@@ -265,14 +265,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
     # Category 2: Store / Memory operations
     elif fn in ("store", "storeu", "storeu_zip"):
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline void {fn}(T* p0, const Vd<T, LMUL>& r0)")
-        lines.append(f"{{ mipp::{fn}(p0, r0.r); }}")
+        lines.append(f"inline void {fn}(T* p0, const Vd<T, LMUL>& vd0)")
+        lines.append(f"{{ mipp::{fn}(p0, vd0.vd); }}")
         lines.append("")
         if is_maskable or is_maskzable:
             mk = "M" if is_maskable else "Z"
             lines.append(f"template <VARIANT V = {mk}, typename T, int LMUL = 1>")
-            lines.append(f"inline void {fn}(const Vm<T, LMUL>& m0, T* p0, const Vd<T, LMUL>& r0)")
-            lines.append(f"{{ mipp::{fn}<V, T, LMUL>(m0.m, p0, r0.r); }}")
+            lines.append(f"inline void {fn}(const Vm<T, LMUL>& vm0, T* p0, const Vd<T, LMUL>& vd0)")
+            lines.append(f"{{ mipp::{fn}<V, T, LMUL>(vm0.vm, p0, vd0.vd); }}")
             lines.append("")
     # gather / scatter: the index (T_IDX, unsigned) has one lane per lane of the data, so its own LMUL when its
     # width differs from the one of the data (32-bit indices of 64-bit data at LMUL 1: LMUL_IDX = -2). The mask has
@@ -280,61 +280,61 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
     elif fn == "gather":
         lines.append("template <typename T, typename T_IDX, int LMUL_IDX = 1>")
         lines.append("inline Vd<T, details::data_lmul<T, T_IDX>(LMUL_IDX)> gather(const T* p0, const Vd<T_IDX, LMUL_IDX>& vi)")
-        lines.append("{ return Vd<T, details::data_lmul<T, T_IDX>(LMUL_IDX)>(mipp::gather(p0, vi.r)); }")
+        lines.append("{ return Vd<T, details::data_lmul<T, T_IDX>(LMUL_IDX)>(mipp::gather(p0, vi.vd)); }")
         lines.append("")
         if is_maskzable:
             lines.append("template <VARIANT V = Z, typename T, typename T_IDX, int LMUL = 1>")
-            lines.append("inline Vd<T, LMUL> gather(const Vm<T, LMUL>& m0, const T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi)")
-            lines.append("{ return Vd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(m0.m, p0, vi.r)); }")
+            lines.append("inline Vd<T, LMUL> gather(const Vm<T, LMUL>& vm0, const T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi)")
+            lines.append("{ return Vd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(vm0.vm, p0, vi.vd)); }")
             lines.append("")
         if is_masksable:
             lines.append("template <VARIANT V = S, typename T, typename T_IDX, int LMUL = 1>")
-            lines.append("inline Vd<T, LMUL> gather(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& rsrc, const T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi)")
-            lines.append("{ return Vd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(m0.m, rsrc.r, p0, vi.r)); }")
+            lines.append("inline Vd<T, LMUL> gather(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vdsrc, const T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi)")
+            lines.append("{ return Vd<T, LMUL>(mipp::gather<V, T, T_IDX, LMUL>(vm0.vm, vdsrc.vd, p0, vi.vd)); }")
             lines.append("")
     elif fn == "scatter":
         lines.append("template <typename T, typename T_IDX, int LMUL = 1>")
-        lines.append("inline void scatter(T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi, const Vd<T, LMUL>& r0)")
-        lines.append("{ mipp::scatter(p0, vi.r, r0.r); }")
+        lines.append("inline void scatter(T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi, const Vd<T, LMUL>& vd0)")
+        lines.append("{ mipp::scatter(p0, vi.vd, vd0.vd); }")
         lines.append("")
         if is_maskable or is_maskzable:
             mk = "M" if is_maskable else "Z"
             lines.append(f"template <VARIANT V = {mk}, typename T, typename T_IDX, int LMUL = 1>")
-            lines.append("inline void scatter(const Vm<T, LMUL>& m0, T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi, const Vd<T, LMUL>& r0)")
-            lines.append("{ mipp::scatter<V, T, T_IDX, LMUL>(m0.m, p0, vi.r, r0.r); }")
+            lines.append("inline void scatter(const Vm<T, LMUL>& vm0, T* p0, const Vd<T_IDX, details::idx_lmul<T, T_IDX>(LMUL)>& vi, const Vd<T, LMUL>& vd0)")
+            lines.append("{ mipp::scatter<V, T, T_IDX, LMUL>(vm0.vm, p0, vi.vd, vd0.vd); }")
             lines.append("")
     elif fn == "get":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline T get(const Vd<T, LMUL>& r0, const size_t idx)")
-        lines.append("{ return mipp::get(r0.r, idx); }")
+        lines.append("inline T get(const Vd<T, LMUL>& vd0, const size_t idx)")
+        lines.append("{ return mipp::get(vd0.vd, idx); }")
         lines.append("")
     elif fn == "get_k":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline bool get(const Vm<T, LMUL>& m0, const size_t idx)")
-        lines.append("{ return details::mask_get_val<T>(mipp::get(m0.m, idx), typename std::is_floating_point<T>::type()); }")
+        lines.append("inline bool get(const Vm<T, LMUL>& vm0, const size_t idx)")
+        lines.append("{ return details::mask_get_val<T>(mipp::get(vm0.vm, idx), typename std::is_floating_point<T>::type()); }")
         lines.append("")
     elif fn == "getfirst":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline T getfirst(const Vd<T, LMUL>& r0)")
-        lines.append("{ return mipp::getfirst(r0.r); }")
+        lines.append("inline T getfirst(const Vd<T, LMUL>& vd0)")
+        lines.append("{ return mipp::getfirst(vd0.vd); }")
         lines.append("")
 
     # Category 3: Selection (select)
     elif fn == "select":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Vd<T, LMUL> select(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-        lines.append("{ return Vd<T, LMUL>(mipp::select(m0.m, r0.r, r1.r)); }")
+        lines.append("inline Vd<T, LMUL> select(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+        lines.append("{ return Vd<T, LMUL>(mipp::select(vm0.vm, vd0.vd, vd1.vd)); }")
         lines.append("")
 
     # Category 4: Pure mask operations
     elif args == ["msk", "msk"]:
         lines.append("template <typename T, int LMUL = 1>")
         if fn.startswith("testz"):
-            lines.append(f"inline int32_t {fn}(const Vm<T, LMUL>& m0, const Vm<T, LMUL>& m1)")
-            lines.append(f"{{ return mipp::{cpp_fn}(m0.m, m1.m); }}")
+            lines.append(f"inline int32_t {fn}(const Vm<T, LMUL>& vm0, const Vm<T, LMUL>& vm1)")
+            lines.append(f"{{ return mipp::{cpp_fn}(vm0.vm, vm1.vm); }}")
         else:
-            lines.append(f"inline Vm<T, LMUL> {cpp_fn}(const Vm<T, LMUL>& m0, const Vm<T, LMUL>& m1)")
-            lines.append(f"{{ return Vm<T, LMUL>(mipp::{cpp_fn}(m0.m, m1.m)); }}")
+            lines.append(f"inline Vm<T, LMUL> {cpp_fn}(const Vm<T, LMUL>& vm0, const Vm<T, LMUL>& vm1)")
+            lines.append(f"{{ return Vm<T, LMUL>(mipp::{cpp_fn}(vm0.vm, vm1.vm)); }}")
         lines.append("")
 
         mask_ops = {
@@ -345,89 +345,89 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         if fn in mask_ops:
             op, op_assign = mask_ops[fn]
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vm<T, LMUL> operator{op}(const Vm<T, LMUL>& m0, const Vm<T, LMUL>& m1)")
-            lines.append(f"{{ return mipp::{cpp_fn}(m0, m1); }}")
+            lines.append(f"inline Vm<T, LMUL> operator{op}(const Vm<T, LMUL>& vm0, const Vm<T, LMUL>& vm1)")
+            lines.append(f"{{ return mipp::{cpp_fn}(vm0, vm1); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vm<T, LMUL>& operator{op_assign}(Vm<T, LMUL>& m0, const Vm<T, LMUL>& m1)")
-            lines.append(f"{{ m0 = m0 {op} m1; return m0; }}")
+            lines.append(f"inline Vm<T, LMUL>& operator{op_assign}(Vm<T, LMUL>& vm0, const Vm<T, LMUL>& vm1)")
+            lines.append(f"{{ vm0 = vm0 {op} vm1; return vm0; }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vm<T, LMUL> operator{op}(const Vm<T, LMUL>& m0, const bool val)")
-            lines.append(f"{{ return m0 {op} Vm<T, LMUL>(val); }}")
+            lines.append(f"inline Vm<T, LMUL> operator{op}(const Vm<T, LMUL>& vm0, const bool val)")
+            lines.append(f"{{ return vm0 {op} Vm<T, LMUL>(val); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vm<T, LMUL> operator{op}(const bool val, const Vm<T, LMUL>& m1)")
-            lines.append(f"{{ return Vm<T, LMUL>(val) {op} m1; }}")
+            lines.append(f"inline Vm<T, LMUL> operator{op}(const bool val, const Vm<T, LMUL>& vm1)")
+            lines.append(f"{{ return Vm<T, LMUL>(val) {op} vm1; }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vm<T, LMUL>& operator{op_assign}(Vm<T, LMUL>& m0, const bool val)")
-            lines.append(f"{{ m0 = m0 {op} Vm<T, LMUL>(val); return m0; }}")
+            lines.append(f"inline Vm<T, LMUL>& operator{op_assign}(Vm<T, LMUL>& vm0, const bool val)")
+            lines.append(f"{{ vm0 = vm0 {op} Vm<T, LMUL>(val); return vm0; }}")
             lines.append("")
 
     elif args == ["msk"] and fn in ("notb_k", "none", "any", "all", "count"):
         lines.append("template <typename T, int LMUL = 1>")
         ret_t = "int32_t" if fn in ("none", "any", "all", "count") else "Vm<T, LMUL>"
-        lines.append(f"inline {ret_t} {cpp_fn}(const Vm<T, LMUL>& m0)")
-        lines.append(f"{{ return {ret_t if ret_t == 'int32_t' else 'Vm<T, LMUL>'}(mipp::{cpp_fn}(m0.m)); }}")
+        lines.append(f"inline {ret_t} {cpp_fn}(const Vm<T, LMUL>& vm0)")
+        lines.append(f"{{ return {ret_t if ret_t == 'int32_t' else 'Vm<T, LMUL>'}(mipp::{cpp_fn}(vm0.vm)); }}")
         lines.append("")
         if fn == "notb_k":
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append("inline Vm<T, LMUL> operator~(const Vm<T, LMUL>& m0)")
-            lines.append(f"{{ return mipp::{cpp_fn}(m0); }}")
+            lines.append("inline Vm<T, LMUL> operator~(const Vm<T, LMUL>& vm0)")
+            lines.append(f"{{ return mipp::{cpp_fn}(vm0); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append("inline Vm<T, LMUL> operator!(const Vm<T, LMUL>& m0)")
-            lines.append(f"{{ return mipp::{cpp_fn}(m0); }}")
+            lines.append("inline Vm<T, LMUL> operator!(const Vm<T, LMUL>& vm0)")
+            lines.append(f"{{ return mipp::{cpp_fn}(vm0); }}")
             lines.append("")
 
     # Category 5: Reductions (hadd, hadds, hmin, hmax, hmul)
     elif cat == "reduction" and args == ["reg"]:
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline auto {fn}(const Vd<T, LMUL>& r0) -> decltype(mipp::{fn}(r0.r))")
-        lines.append(f"{{ return mipp::{fn}(r0.r); }}")
+        lines.append(f"inline auto {fn}(const Vd<T, LMUL>& vd0) -> decltype(mipp::{fn}(vd0.vd))")
+        lines.append(f"{{ return mipp::{fn}(vd0.vd); }}")
         lines.append("")
         if is_maskzable:
             lines.append("template <VARIANT V = Z, typename T, int LMUL = 1>")
-            lines.append(f"inline auto {fn}(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& r0) -> decltype(mipp::{fn}<V, T, LMUL>(m0.m, r0.r))")
-            lines.append(f"{{ return mipp::{fn}<V, T, LMUL>(m0.m, r0.r); }}")
+            lines.append(f"inline auto {fn}(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vd0) -> decltype(mipp::{fn}<V, T, LMUL>(vm0.vm, vd0.vd))")
+            lines.append(f"{{ return mipp::{fn}<V, T, LMUL>(vm0.vm, vd0.vd); }}")
             lines.append("")
 
     # Category 6: Comparisons (cmpeq, cmplt, ...) -> return Vm
     elif fn in operators_order:
         op = operators_order[fn]["operation"]
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vm<T, LMUL> {fn}(const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-        lines.append(f"{{ return Vm<T, LMUL>(mipp::{fn}(r0.r, r1.r)); }}")
+        lines.append(f"inline Vm<T, LMUL> {fn}(const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+        lines.append(f"{{ return Vm<T, LMUL>(mipp::{fn}(vd0.vd, vd1.vd)); }}")
         lines.append("")
         if is_maskzable:
             lines.append("template <VARIANT V = Z, typename T, int LMUL = 1>")
-            lines.append(f"inline Vm<T, LMUL> {fn}(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-            lines.append(f"{{ return Vm<T, LMUL>(mipp::{fn}<V, T, LMUL>(m0.m, r0.r, r1.r)); }}")
+            lines.append(f"inline Vm<T, LMUL> {fn}(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+            lines.append(f"{{ return Vm<T, LMUL>(mipp::{fn}<V, T, LMUL>(vm0.vm, vd0.vd, vd1.vd)); }}")
             lines.append("")
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vm<T, LMUL> operator{op}(const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-        lines.append(f"{{ return mipp::{fn}(r0, r1); }}")
+        lines.append(f"inline Vm<T, LMUL> operator{op}(const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+        lines.append(f"{{ return mipp::{fn}(vd0, vd1); }}")
         lines.append("")
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vm<T, LMUL> operator{op}(const Vd<T, LMUL>& r0, const T val)")
-        lines.append(f"{{ return r0 {op} Vd<T, LMUL>(val); }}")
+        lines.append(f"inline Vm<T, LMUL> operator{op}(const Vd<T, LMUL>& vd0, const T val)")
+        lines.append(f"{{ return vd0 {op} Vd<T, LMUL>(val); }}")
         lines.append("")
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vm<T, LMUL> operator{op}(const T val, const Vd<T, LMUL>& r1)")
-        lines.append(f"{{ return Vd<T, LMUL>(val) {op} r1; }}")
+        lines.append(f"inline Vm<T, LMUL> operator{op}(const T val, const Vd<T, LMUL>& vd1)")
+        lines.append(f"{{ return Vd<T, LMUL>(val) {op} vd1; }}")
         lines.append("")
 
     # Category 7: Conversions & reinterprets
     elif fn == "tovd":
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append("inline Vd<T, LMUL> tovd(const Vm<T, LMUL>& m0)")
-        lines.append("{ return Vd<T, LMUL>(mipp::tovd(m0.m)); }")
+        lines.append("inline Vd<T, LMUL> tovd(const Vm<T, LMUL>& vm0)")
+        lines.append("{ return Vd<T, LMUL>(mipp::tovd(vm0.vm)); }")
         lines.append("")
     elif fn in ("tovm", "signbit"):
         lines.append("template <typename T, int LMUL = 1>")
-        lines.append(f"inline Vm<T, LMUL> {fn}(const Vd<T, LMUL>& r0)")
-        lines.append(f"{{ return Vm<T, LMUL>(mipp::{fn}(r0.r)); }}")
+        lines.append(f"inline Vm<T, LMUL> {fn}(const Vd<T, LMUL>& vd0)")
+        lines.append(f"{{ return Vm<T, LMUL>(mipp::{fn}(vd0.vd)); }}")
         lines.append("")
     elif fn == "cast":
         lines.append("namespace details")
@@ -450,14 +450,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         for c_t, f_suffix in types_map:
             lines.append(f"template <> struct cast_vd_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
-            lines.append(f"\tstatic inline Vd<{c_t}, LMUL> apply(const Vd<T_SRC, LMUL>& r0)")
-            lines.append(f"\t{{ return Vd<{c_t}, LMUL>(mipp::cast_{f_suffix}(r0.r)); }}")
+            lines.append(f"\tstatic inline Vd<{c_t}, LMUL> apply(const Vd<T_SRC, LMUL>& vd0)")
+            lines.append(f"\t{{ return Vd<{c_t}, LMUL>(mipp::cast_{f_suffix}(vd0.vd)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append("inline Vd<T_DST, LMUL> cast(const Vd<T_SRC, LMUL>& r0)")
-        lines.append("{ return details::cast_vd_helper<T_DST>::apply(r0); }")
+        lines.append("inline Vd<T_DST, LMUL> cast(const Vd<T_SRC, LMUL>& vd0)")
+        lines.append("{ return details::cast_vd_helper<T_DST>::apply(vd0); }")
         lines.append("")
     elif fn == "cast_k":
         lines.append("namespace details")
@@ -480,14 +480,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         for c_t, f_suffix in types_map:
             lines.append(f"template <> struct cast_vm_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
-            lines.append(f"\tstatic inline Vm<{c_t}, LMUL> apply(const Vm<T_SRC, LMUL>& m0)")
-            lines.append(f"\t{{ return Vm<{c_t}, LMUL>(mipp::cast_{f_suffix}(m0.m)); }}")
+            lines.append(f"\tstatic inline Vm<{c_t}, LMUL> apply(const Vm<T_SRC, LMUL>& vm0)")
+            lines.append(f"\t{{ return Vm<{c_t}, LMUL>(mipp::cast_{f_suffix}(vm0.vm)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append("inline Vm<T_DST, LMUL> cast(const Vm<T_SRC, LMUL>& m0)")
-        lines.append("{ return details::cast_vm_helper<T_DST>::apply(m0); }")
+        lines.append("inline Vm<T_DST, LMUL> cast(const Vm<T_SRC, LMUL>& vm0)")
+        lines.append("{ return details::cast_vm_helper<T_DST>::apply(vm0); }")
         lines.append("")
     elif fn == "cvt":
         lines.append("namespace details")
@@ -510,14 +510,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         for c_t, f_suffix in types_map:
             lines.append(f"template <> struct cvt_vd_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
-            lines.append(f"\tstatic inline Vd<{c_t}, LMUL> apply(const Vd<T_SRC, LMUL>& r0)")
-            lines.append(f"\t{{ return Vd<{c_t}, LMUL>(mipp::cvt_{f_suffix}(r0.r)); }}")
+            lines.append(f"\tstatic inline Vd<{c_t}, LMUL> apply(const Vd<T_SRC, LMUL>& vd0)")
+            lines.append(f"\t{{ return Vd<{c_t}, LMUL>(mipp::cvt_{f_suffix}(vd0.vd)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append("inline Vd<T_DST, LMUL> cvt(const Vd<T_SRC, LMUL>& r0)")
-        lines.append("{ return details::cvt_vd_helper<T_DST>::apply(r0); }")
+        lines.append("inline Vd<T_DST, LMUL> cvt(const Vd<T_SRC, LMUL>& vd0)")
+        lines.append("{ return details::cvt_vd_helper<T_DST>::apply(vd0); }")
         lines.append("")
     elif fn == "wcvt":
         lines.append("namespace details")
@@ -537,14 +537,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         for c_t, f_suffix in types_map:
             lines.append(f"template <> struct wcvt_vd_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
-            lines.append(f"\tstatic inline Vd<{c_t}, details::lmul_up(LMUL)> apply(const Vd<T_SRC, LMUL>& r0)")
-            lines.append(f"\t{{ return Vd<{c_t}, details::lmul_up(LMUL)>(mipp::wcvt_{f_suffix}(r0.r)); }}")
+            lines.append(f"\tstatic inline Vd<{c_t}, details::lmul_up(LMUL)> apply(const Vd<T_SRC, LMUL>& vd0)")
+            lines.append(f"\t{{ return Vd<{c_t}, details::lmul_up(LMUL)>(mipp::wcvt_{f_suffix}(vd0.vd)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append("inline Vd<T_DST, details::lmul_up(LMUL)> wcvt(const Vd<T_SRC, LMUL>& r0)")
-        lines.append("{ return details::wcvt_vd_helper<T_DST>::apply(r0); }")
+        lines.append("inline Vd<T_DST, details::lmul_up(LMUL)> wcvt(const Vd<T_SRC, LMUL>& vd0)")
+        lines.append("{ return details::wcvt_vd_helper<T_DST>::apply(vd0); }")
         lines.append("")
 
     elif fn in ("ncvt", "ncvts"):
@@ -569,14 +569,14 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         for c_t, f_suffix in types_map:
             lines.append(f"template <> struct {fn}_vd_helper<{c_t}> {{")
             lines.append(f"\ttemplate <typename T_SRC, int LMUL>")
-            lines.append(f"\tstatic inline Vd<{c_t}, details::lmul_down(LMUL)> apply(const Vd<T_SRC, LMUL>& r0)")
-            lines.append(f"\t{{ return Vd<{c_t}, details::lmul_down(LMUL)>(mipp::{fn}_{f_suffix}(r0.r)); }}")
+            lines.append(f"\tstatic inline Vd<{c_t}, details::lmul_down(LMUL)> apply(const Vd<T_SRC, LMUL>& vd0)")
+            lines.append(f"\t{{ return Vd<{c_t}, details::lmul_down(LMUL)>(mipp::{fn}_{f_suffix}(vd0.vd)); }}")
             lines.append("};")
         lines.append("} // namespace details")
         lines.append("")
         lines.append("template <typename T_DST, typename T_SRC, int LMUL = 1>")
-        lines.append(f"inline Vd<T_DST, details::lmul_down(LMUL)> {fn}(const Vd<T_SRC, LMUL>& r0)")
-        lines.append(f"{{ return details::{fn}_vd_helper<T_DST>::apply(r0); }}")
+        lines.append(f"inline Vd<T_DST, details::lmul_down(LMUL)> {fn}(const Vd<T_SRC, LMUL>& vd0)")
+        lines.append(f"{{ return details::{fn}_vd_helper<T_DST>::apply(vd0); }}")
         lines.append("")
 
     # Category 8: General Register Operations (1-arg, 2-arg, 3-arg, shifts)
@@ -587,10 +587,10 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         raw_args = []
         for a_type in args:
             if a_type == "reg":
-                arg_name = f"r{cnt_reg}"
+                arg_name = f"vd{cnt_reg}"
                 cnt_reg += 1
                 typed_args.append(f"const Vd<T, LMUL>& {arg_name}")
-                raw_args.append(f"{arg_name}.r")
+                raw_args.append(f"{arg_name}.vd")
             elif a_type == "val":
                 arg_name = f"s{cnt_val}"
                 cnt_val += 1
@@ -609,13 +609,13 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         # 2. Masked overloads
         if is_maskable:
             lines.append("template <VARIANT V = M, typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> {cpp_fn}(const Vm<T, LMUL>& m0, {typed_str})")
-            lines.append(f"{{ return Vd<T, LMUL>(mipp::{cpp_fn}<V, T, LMUL>(m0.m, {raw_str})); }}")
+            lines.append(f"inline Vd<T, LMUL> {cpp_fn}(const Vm<T, LMUL>& vm0, {typed_str})")
+            lines.append(f"{{ return Vd<T, LMUL>(mipp::{cpp_fn}<V, T, LMUL>(vm0.vm, {raw_str})); }}")
             lines.append("")
         if is_masksable:
             lines.append("template <VARIANT V = S, typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> {cpp_fn}(const Vm<T, LMUL>& m0, const Vd<T, LMUL>& rsrc, {typed_str})")
-            lines.append(f"{{ return Vd<T, LMUL>(mipp::{cpp_fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
+            lines.append(f"inline Vd<T, LMUL> {cpp_fn}(const Vm<T, LMUL>& vm0, const Vd<T, LMUL>& vdsrc, {typed_str})")
+            lines.append(f"{{ return Vd<T, LMUL>(mipp::{cpp_fn}<V, T, LMUL>(vm0.vm, vdsrc.vd, {raw_str})); }}")
             lines.append("")
 
         # 3. Operators
@@ -625,60 +625,60 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             op_assign = op_info["option"]
 
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-            lines.append(f"{{ return mipp::{fn}(r0, r1); }}")
+            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+            lines.append(f"{{ return mipp::{fn}(vd0, vd1); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL>& operator{op_assign}(Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-            lines.append(f"{{ r0 = r0 {op} r1; return r0; }}")
+            lines.append(f"inline Vd<T, LMUL>& operator{op_assign}(Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+            lines.append(f"{{ vd0 = vd0 {op} vd1; return vd0; }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& r0, const T val)")
-            lines.append(f"{{ return r0 {op} Vd<T, LMUL>(val); }}")
+            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& vd0, const T val)")
+            lines.append(f"{{ return vd0 {op} Vd<T, LMUL>(val); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> operator{op}(const T val, const Vd<T, LMUL>& r1)")
-            lines.append(f"{{ return Vd<T, LMUL>(val) {op} r1; }}")
+            lines.append(f"inline Vd<T, LMUL> operator{op}(const T val, const Vd<T, LMUL>& vd1)")
+            lines.append(f"{{ return Vd<T, LMUL>(val) {op} vd1; }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL>& operator{op_assign}(Vd<T, LMUL>& r0, const T val)")
-            lines.append(f"{{ r0 = r0 {op} Vd<T, LMUL>(val); return r0; }}")
+            lines.append(f"inline Vd<T, LMUL>& operator{op_assign}(Vd<T, LMUL>& vd0, const T val)")
+            lines.append(f"{{ vd0 = vd0 {op} Vd<T, LMUL>(val); return vd0; }}")
             lines.append("")
 
         elif fn in ("lshift_vs", "rshift_vs"):
             # same count for every lane: `r << 3`
             op = "<<" if fn == "lshift_vs" else ">>"
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& r0, const int32_t val)")
-            lines.append(f"{{ return mipp::{cpp_fn}(r0, val); }}")
+            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& vd0, const int32_t val)")
+            lines.append(f"{{ return mipp::{cpp_fn}(vd0, val); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL>& operator{op}=(Vd<T, LMUL>& r0, const int32_t val)")
-            lines.append(f"{{ r0 = r0 {op} val; return r0; }}")
+            lines.append(f"inline Vd<T, LMUL>& operator{op}=(Vd<T, LMUL>& vd0, const int32_t val)")
+            lines.append(f"{{ vd0 = vd0 {op} val; return vd0; }}")
             lines.append("")
 
         elif fn in ("lshift", "rshift"):
             # count of each lane in a register: `r << n`
             op = "<<" if fn == "lshift" else ">>"
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-            lines.append(f"{{ return mipp::{fn}(r0, r1); }}")
+            lines.append(f"inline Vd<T, LMUL> operator{op}(const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+            lines.append(f"{{ return mipp::{fn}(vd0, vd1); }}")
             lines.append("")
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append(f"inline Vd<T, LMUL>& operator{op}=(Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)")
-            lines.append(f"{{ r0 = r0 {op} r1; return r0; }}")
+            lines.append(f"inline Vd<T, LMUL>& operator{op}=(Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)")
+            lines.append(f"{{ vd0 = vd0 {op} vd1; return vd0; }}")
             lines.append("")
 
         elif fn == "neg":
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append("inline Vd<T, LMUL> operator-(const Vd<T, LMUL>& r0)")
-            lines.append("{ return mipp::neg(r0); }")
+            lines.append("inline Vd<T, LMUL> operator-(const Vd<T, LMUL>& vd0)")
+            lines.append("{ return mipp::neg(vd0); }")
             lines.append("")
 
         elif fn == "notb":
             lines.append("template <typename T, int LMUL = 1>")
-            lines.append("inline Vd<T, LMUL> operator~(const Vd<T, LMUL>& r0)")
-            lines.append("{ return mipp::notb(r0); }")
+            lines.append("inline Vd<T, LMUL> operator~(const Vd<T, LMUL>& vd0)")
+            lines.append("{ return mipp::notb(vd0); }")
             lines.append("")
 
     # Immediate version (`"imm"` of the registry, see codegen/imm.py): `mipp::slide<3>(a, b)`, the C++ Functional
@@ -688,10 +688,10 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         typed, raw, cnt = [], [], {"reg": 0, "msk": 0}
         for a in args:  # the registers and masks; the integer argument is the template parameter
             if a in cnt:
-                name = ("r" if a == "reg" else "m") + str(cnt[a])
+                name = ("vd" if a == "reg" else "vm") + str(cnt[a])
                 cnt[a] += 1
                 typed.append(f"const {'Vd' if a == 'reg' else 'Vm'}<T, LMUL>& {name}")
-                raw.append(f"{name}.{'r' if a == 'reg' else 'm'}")
+                raw.append(f"{name}.{'vd' if a == 'reg' else 'vm'}")
         typed, raw = ", ".join(typed), ", ".join(raw)
         call = f"mipp::{cpp_fn}<S>({raw})"
         lines.append("template <int S, typename T, int LMUL = 1>")
@@ -746,7 +746,7 @@ def _write_fine_granules(fn, cat, body, output_dir):
     """
     Fine-grained obj layer for one function. For each (variant, LMUL) granule, writes a self-contained header:
 
-      - it includes ONLY the cpp granule it calls, FIRST, so that the qualified calls `mipp::fn(r.r)` of the
+      - it includes ONLY the cpp granule it calls, FIRST, so that the qualified calls `mipp::fn(r.vd)` of the
         overloads (resolved at definition time) see the right cpp declaration;
       - it defines only the overloads of that variant. The overloads keep the generic signature
         (`int LMUL = 1`) and are selected with `enable_if<LMUL == X>`, so every call form stays valid
@@ -813,7 +813,7 @@ def _write_fine_granules(fn, cat, body, output_dir):
                         cond = f"LMUL == {val}"
                         if line.startswith("template <VARIANT V = "):
                             # U (mask ignored) is hosted by the same granule as its cpp specialization:
-                            # m (or z if the function is not maskable) for the m0 form, s for the rsrc form
+                            # m (or z if the function is not maskable) for the vm0 form, s for the vdsrc form
                             hosts_u = v == "s" or v == "m" or (v == "z" and "m" not in variants)
                             if hosts_u:
                                 cond += f" && (V == {vname[v]} || V == U)"

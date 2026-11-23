@@ -2,227 +2,227 @@
     "all_kortest": {
         "format": "long",
         "code": [
-            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);"
+            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(vm0.vm, vm0.vm);"
         ]
     },
     "andb_k_emu": {
         "format": "long",
         "code": [
-            "%m<tp>% ret; ",
-            "ret.m = m0.m & m1.m;",
+            "%vm<tp>% ret; ",
+            "ret.vm = vm0.vm & vm1.vm;",
             "return ret;"
         ]
     },
     "any_kortest": {
         "format": "long",
         "code": [
-            "return !(int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);"
+            "return !(int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(vm0.vm, vm0.vm);"
         ]
     },
     "arith_1arg": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd);"
         ]
     },
     "arith_2args": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd);"
         ]
     },
     "arith_2args_int": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, r1.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vd0.vd, vd1.vd);"
         ]
     },
     "arith_2args_msk": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r0.r, r1.r);"
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vm0.vm, vd0.vd, vd1.vd);"
         ]
     },
     "arith_2args_mskz": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r);"
+            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd, vd1.vd);"
         ]
     },
     "arith_3args": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd, vd2.vd);"
         ]
     },
     "arith_3args_msk": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, m0.m, r1.r, r2.r);"
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vm0.vm, vd1.vd, vd2.vd);"
         ]
     },
     "arith_3args_mskz": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r, r2.r);"
+            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd, vd1.vd, vd2.vd);"
         ]
     },
     "bitwise_1arg": {
         "format": "short",
         "code": [
-            "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m);"
+            "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(vm0.vm);"
         ]
     },
     "bitwise_2args": {
         "format": "short",
         "code": [
-            "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(m0.m, m1.m);"
+            "_{{ instr_name }}_{{ isa_dt_par.msk_short }}(vm0.vm, vm1.vm);"
         ]
     },
     "cast": {
         "format": "short",
         "code": [
-            "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(r0.r);{% else -%} r0.r;{% endif %}"
+            "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{isa_dt_par.data_ext_logi}}_{{isa_dt_ret.data_ext_logi}}(vd0.vd);{% else -%} vd0.vd;{% endif %}"
         ]
     },
     "cast_k": {
         "format": "short",
         "code": [
-            "{% if isa_dt_par.msk != isa_dt_ret.msk -%}({{ isa_dt_ret.msk }})m0.m;{% else -%}m0.m;{% endif %}"
+            "{% if isa_dt_par.msk != isa_dt_ret.msk -%}({{ isa_dt_ret.msk }})vm0.vm;{% else -%}vm0.vm;{% endif %}"
         ]
     },
     "cmp_float_z_cmpeq": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r, _CMP_EQ_OQ);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_EQ_OQ);"
     },
     "cmp_float_z_cmpge": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r, _CMP_GE_OS);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_GE_OS);"
     },
     "cmp_float_z_cmpgt": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r, _CMP_GT_OS);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_GT_OS);"
     },
     "cmp_float_z_cmple": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r, _CMP_LE_OS);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_LE_OS);"
     },
     "cmp_float_z_cmplt": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r, _CMP_LT_OS);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_LT_OS);"
     },
     "cmp_float_z_cmpneq": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r, _CMP_NEQ_OQ);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_NEQ_OQ);"
     },
     "cmp_int": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd);"
         ]
     },
     "cmp_int_z": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd);"
     },
     "cmpeq_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_EQ_OQ);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_EQ_OQ);"
         ]
     },
     "cmpge_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GE_OS);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_GE_OS);"
         ]
     },
     "cmpgt_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_GT_OS);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_GT_OS);"
         ]
     },
     "cmple_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_LE_OS);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_LE_OS);"
         ]
     },
     "cmplt_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_LT_OS);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_LT_OS);"
         ]
     },
     "cmpneq_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(r0.r, r1.r, _CMP_NEQ_OQ);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_NEQ_OQ);"
         ]
     },
     "cvt": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+            "{{ isa.prefix }}_{{ instr_name }}(vd0.vd);"
         ]
     },
     "gather": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, p0, {{dt_par.n_bits//8}});"
+            "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, p0, {{dt_par.n_bits//8}});"
         ]
     },
     "gather_i32_64_f": {
         "format": "short",
         "code": [
-            "_mm512_i32gather_pd(r0.r, p0, 8);"
+            "_mm512_i32gather_pd(vd0.vd, p0, 8);"
         ]
     },
     "gather_i32_64_i": {
         "format": "short",
         "code": [
-            "_mm512_i32gather_epi64(r0.r, p0, 8);"
+            "_mm512_i32gather_epi64(vd0.vd, p0, 8);"
         ]
     },
     "gather_i32_64_masks_f": {
         "format": "short",
         "code": [
-            "_mm512_mask_i32gather_pd(rsrc.r, m0.m, r0.r, p0, 8);"
+            "_mm512_mask_i32gather_pd(vdsrc.vd, vm0.vm, vd0.vd, p0, 8);"
         ]
     },
     "gather_i32_64_masks_i": {
         "format": "short",
         "code": [
-            "_mm512_mask_i32gather_epi64(rsrc.r, m0.m, r0.r, p0, 8);"
+            "_mm512_mask_i32gather_epi64(vdsrc.vd, vm0.vm, vd0.vd, p0, 8);"
         ]
     },
     "gather_masks_32": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,4);"
+            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vdsrc.vd,vm0.vm, vd0.vd, p0,4);"
         ]
     },
     "gather_masks_64": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(rsrc.r,m0.m, r0.r, p0,8);"
+            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vdsrc.vd,vm0.vm, vd0.vd, p0,8);"
         ]
     },
     "gather_var": {
         "format": "short",
-        "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, p0, {{ dt_par.n_bits // 8 }});"
+        "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vd0.vd, p0, {{ dt_par.n_bits // 8 }});"
     },
     "getfirst": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}(r0.r);"
+            "return {{ isa.prefix }}_{{ instr_name }}(vd0.vd);"
         ]
     },
     "getfirst-hack32": {
         "format": "long",
         "code": [
-            "float32_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(r0).r);",
+            "float32_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(vd0).vd);",
             "void* tmp2 = (void*)(&tmp1);",
             "return *({{isa_dt_ret.to_ptr}}*)tmp2;"
         ]
@@ -230,7 +230,7 @@
     "getfirst-hack64": {
         "format": "long",
         "code": [
-            "float64_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(r0).r);",
+            "float64_t tmp1 = {{ isa.prefix }}_{{ instr_name }}(%cast<tp,c:float>%(vd0).vd);",
             "void* tmp2 = (void*)(&tmp1);",
             "return *({{isa_dt_ret.to_ptr}}*)tmp2;"
         ]
@@ -238,7 +238,7 @@
     "getfirst_si_low": {
         "format": "long",
         "code": [
-            "return ({{ cstdint_ret }})_mm_cvtsi128_si32(_mm512_castsi512_si128(r0.r));"
+            "return ({{ cstdint_ret }})_mm_cvtsi128_si32(_mm512_castsi512_si128(vd0.vd));"
         ]
     },
     "load": {
@@ -250,190 +250,190 @@
     "load_msks": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(rsrc.r, m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vdsrc.vd, vm0.vm, ({{ isa_dt_par.to_ptr }}*) p0);"
         ]
     },
     "load_mskz": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
+            "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vm0.vm, ({{ isa_dt_par.to_ptr }}*) p0);"
         ]
     },
     "logi_2args": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(vd0.vd, vd1.vd);"
         ]
     },
     "logi_2args_si512": {
         "format": "short",
-        "code": "{{ isa.prefix }}_castsi512_{{ isa_dt_par.data_ext_logi }}({{ isa.prefix }}_{{ instr_name }}_si512({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si512(r0.r), {{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si512(r1.r)));"
+        "code": "{{ isa.prefix }}_castsi512_{{ isa_dt_par.data_ext_logi }}({{ isa.prefix }}_{{ instr_name }}_si512({{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si512(vd0.vd), {{ isa.prefix }}_cast{{ isa_dt_par.data_ext_logi }}_si512(vd1.vd)));"
     },
     "m1": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vd0.vd);"
     },
     "m1_m": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(r0.r, m0.m, r0.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vd0.vd, vm0.vm, vd0.vd);"
     },
     "m1_s": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(rsrc.r, m0.m, r0.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vdsrc.vd, vm0.vm, vd0.vd);"
     },
     "m1_z": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(m0.m, r0.r);"
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vm0.vm, vd0.vd);"
     },
     "m2_m": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(r0.r, m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vd0.vd, vm0.vm, vd0.vd, vd1.vd);"
     },
     "m2_s": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(rsrc.r, m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vdsrc.vd, vm0.vm, vd0.vd, vd1.vd);"
     },
     "m2_z": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{% if dt_par.category == 'float' or instr_name in ['min', 'max', 'adds', 'subs'] %}{{ isa_dt_par.data_ext }}{% else %}{{ isa_dt_par.data_ext_var }}{% endif %}(vm0.vm, vd0.vd, vd1.vd);"
     },
     "m3_z": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r, r1.r, r2.r);"
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd, vd1.vd, vd2.vd);"
     },
     "rea_count": {
         "format": "long",
         "code": [
-            "return (int32_t)(__builtin_popcountll((unsigned long long)m0.m));"
+            "return (int32_t)(__builtin_popcountll((unsigned long long)vm0.vm));"
         ]
     },
     "rea_dup_f": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}(vd0.vd);"
     },
     "rea_expandloadu": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_expandloadu_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(m0.m, p0);"
+        "code": "{{ isa.prefix }}_maskz_expandloadu_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vm0.vm, p0);"
     },
     "rea_maskz_op": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(m0.m, r0.r);"
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vm0.vm, vd0.vd);"
     },
     "rea_permute_b128": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(r0.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(vd0.vd, {{ instr_name }});"
     },
     "rea_permute_self": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(r0.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_permute_{{ isa_dt_par.data_ext }}(vd0.vd, {{ instr_name }});"
     },
     "rea_permutevar_b128_f": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permutevar_ps(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_permutevar_ps(vd0.vd, vd1.vd);"
     },
     "rea_permutevar_b128_ps": {
         "format": "short",
-        "code": "{{ isa.prefix }}_castps_si512({{ isa.prefix }}_permutevar_ps({{ isa.prefix }}_castsi512_ps(r0.r), r1.r));"
+        "code": "{{ isa.prefix }}_castps_si512({{ isa.prefix }}_permutevar_ps({{ isa.prefix }}_castsi512_ps(vd0.vd), vd1.vd));"
     },
     "rea_permutex2var": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r2.r, r1.r);"
+        "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vd0.vd, vd2.vd, vd1.vd);"
     },
     "rea_permutexvar": {
         "format": "short",
-        "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r1.r, r0.r);"
+        "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vd1.vd, vd0.vd);"
     },
     "rea_shuffle_epi32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, (_MM_PERM_ENUM){{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_epi32(vd0.vd, (_MM_PERM_ENUM){{ instr_name }});"
     },
     "rea_shuffle_epi32_b128": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, (_MM_PERM_ENUM){{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_epi32(vd0.vd, (_MM_PERM_ENUM){{ instr_name }});"
     },
     "rea_shuffle_epi8_b128": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_shuffle_epi8(vd0.vd, vd1.vd);"
     },
     "rea_shufps2": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_ps(r0.r, r1.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_ps(vd0.vd, vd1.vd, {{ instr_name }});"
     },
     "rea_shufps2_i": {
         "format": "short",
-        "code": "{{ isa.prefix }}_castps_si512({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi512_ps(r0.r), {{ isa.prefix }}_castsi512_ps(r1.r), {{ instr_name }}));"
+        "code": "{{ isa.prefix }}_castps_si512({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi512_ps(vd0.vd), {{ isa.prefix }}_castsi512_ps(vd1.vd), {{ instr_name }}));"
     },
     "rea_unpack_b128": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vd0.vd, vd1.vd);"
     },
     "rea_unpack_self": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_epi64(r0.r, r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi64(vd0.vd, vd0.vd);"
     },
     "reduce_intrin": {
         "format": "long",
         "code": [
-            "return ({{ cstdint_ret }}){{ isa.prefix }}_reduce_{{ instr_name }}_{{ 'epu' if dt_par.category == 'uint' and instr_name in ['max', 'min'] else 'epi' }}{{ dt_par.n_bits }}(r0.r);"
+            "return ({{ cstdint_ret }}){{ isa.prefix }}_reduce_{{ instr_name }}_{{ 'epu' if dt_par.category == 'uint' and instr_name in ['max', 'min'] else 'epi' }}{{ dt_par.n_bits }}(vd0.vd);"
         ]
     },
     "scatter": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,r0.r, r1.r, {{dt_par.n_bits//8}});"
+            "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0,vd0.vd, vd1.vd, {{dt_par.n_bits//8}});"
         ]
     },
     "scatter_i32_64_f": {
         "format": "short",
         "code": [
-            "_mm512_i32scatter_pd(p0, r0.r, r1.r, 8);"
+            "_mm512_i32scatter_pd(p0, vd0.vd, vd1.vd, 8);"
         ]
     },
     "scatter_i32_64_i": {
         "format": "short",
         "code": [
-            "_mm512_i32scatter_epi64(p0, r0.r, r1.r, 8);"
+            "_mm512_i32scatter_epi64(p0, vd0.vd, vd1.vd, 8);"
         ]
     },
     "scatter_i32_64_mask_f": {
         "format": "short",
         "code": [
-            "_mm512_mask_i32scatter_pd(p0, m0.m, r0.r, r1.r, 8);"
+            "_mm512_mask_i32scatter_pd(p0, vm0.vm, vd0.vd, vd1.vd, 8);"
         ]
     },
     "scatter_i32_64_mask_i": {
         "format": "short",
         "code": [
-            "_mm512_mask_i32scatter_epi64(p0, m0.m, r0.r, r1.r, 8);"
+            "_mm512_mask_i32scatter_epi64(p0, vm0.vm, vd0.vd, vd1.vd, 8);"
         ]
     },
     "scatter_mask_32": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 4);"
+            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, vm0.vm, vd0.vd, vd1.vd, 4);"
         ]
     },
     "scatter_mask_64": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, m0.m, r0.r, r1.r, 8);"
+            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(p0, vm0.vm, vd0.vd, vd1.vd, 8);"
         ]
     },
     "scatter_var": {
         "format": "short",
-        "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(p0, r0.r, r1.r, {{ dt_par.n_bits // 8 }});"
+        "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(p0, vd0.vd, vd1.vd, {{ dt_par.n_bits // 8 }});"
     },
     "select": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r1.r, r0.r);"
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vm0.vm, vd1.vd, vd0.vd);"
         ]
     },
     "set-16": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
             "\tvals[31], vals[30], vals[29], vals[28],",
             "\tvals[27], vals[26], vals[25], vals[24],",
             "\tvals[23], vals[22], vals[21], vals[20],",
@@ -448,8 +448,8 @@
     "set-32": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
             "\tvals[15], vals[14], vals[13], vals[12],vals[11], vals[10], vals[ 9], vals[ 8],",
             "\tvals[ 7], vals[ 6], vals[ 5], vals[ 4],vals[ 3], vals[ 2], vals[ 1], vals[ 0]);",
             "return res;"
@@ -458,16 +458,16 @@
     "set-64": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vals[7], vals[6], vals[5], vals[4], vals[3], vals[2], vals[1], vals[0]);",
             "return res;"
         ]
     },
     "set-8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(",
             "\tvals[63], vals[62], vals[61], vals[60],",
             "\tvals[59], vals[58], vals[57], vals[56],",
             "\tvals[55], vals[54], vals[53], vals[52],",
@@ -496,8 +496,8 @@
     "set0_k": {
         "format": "long",
         "code": [
-            "%m<tp>% m;",
-            "m.m = 0;",
+            "%vm<tp>% m;",
+            "m.vm = 0;",
             "return m;"
         ]
     },
@@ -509,76 +509,76 @@
     },
     "sh_m": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, m0.m, r0.r, s0);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vd0.vd, vm0.vm, vd0.vd, s0);"
     },
     "sh_s": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(rsrc.r, m0.m, r0.r, s0);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vdsrc.vd, vm0.vm, vd0.vd, s0);"
     },
     "sh_z": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(m0.m, r0.r, s0);"
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vm0.vm, vd0.vd, s0);"
     },
     "shv_vv": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(vd0.vd, vd1.vd);"
     },
     "shv_vv_m": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_epi{{ dt_par.n_bits }}(vd0.vd, vm0.vm, vd0.vd, vd1.vd);"
     },
     "shv_vv_s": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_epi{{ dt_par.n_bits }}(rsrc.r, m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_mask_{{ instr_name }}_epi{{ dt_par.n_bits }}(vdsrc.vd, vm0.vm, vd0.vd, vd1.vd);"
     },
     "shv_vv_z": {
         "format": "short",
-        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_epi{{ dt_par.n_bits }}(m0.m, r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_maskz_{{ instr_name }}_epi{{ dt_par.n_bits }}(vm0.vm, vd0.vd, vd1.vd);"
     },
     "store": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}*) p0, vd0.vd);"
         ]
     },
     "store_msk": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(({{ isa_dt_par.to_ptr }}*) p0, m0.m, r0.r);"
+            "{{ isa.prefix }}_mask_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(({{ isa_dt_par.to_ptr }}*) p0, vm0.vm, vd0.vd);"
         ]
     },
     "sxl": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, s0);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vd0.vd, s0);"
         ]
     },
     "sxl_var": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(r0.r, s0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_var }}(vd0.vd, s0);"
     },
     "testz_1arg": {
         "format": "long",
         "code": [
-            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m0.m);"
+            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(vm0.vm, vm0.vm);"
         ]
     },
     "testz_2args": {
         "format": "long",
         "code": [
-            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(m0.m, m1.m);"
+            "return (int32_t)_{{ instr_name }}_{{ isa_dt_par.msk_short }}_u8(vm0.vm, vm1.vm);"
         ]
     },
     "trunc": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC);"
         ]
     },
     "truncf": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, _MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC, _MM_EXPADJ_NONE);"
         ]
     }
 }

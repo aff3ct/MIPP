@@ -50,7 +50,7 @@ void check1()
 		REQUIRE(r[i] == (k < 0 ? T(0) : a[k]));
 	}
 	mipp::Vd<T, LMUL> o(a); // Object API
-	mipp::storeu(r, mipp::permute<P>(o).r);
+	mipp::storeu(r, mipp::permute<P>(o).vd);
 	for (int i = 0; i < n; i++)
 		REQUIRE(r[i] == (P::get(i, n) < 0 ? T(0) : a[P::get(i, n)]));
 }

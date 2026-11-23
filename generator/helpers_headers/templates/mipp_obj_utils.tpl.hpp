@@ -24,7 +24,7 @@ template <typename T, int LMUL>
 inline std::ostream& operator<<(std::ostream& os, const Vd<T, LMUL>& r)
 {
 	T buf[Vd<T, LMUL>::N()];
-	mipp::storeu(buf, r.r);
+	mipp::storeu(buf, r.vd);
 	details::print_lanes(os, buf, Vd<T, LMUL>::N(), false);
 	return os;
 }
@@ -33,7 +33,7 @@ template <typename T, int LMUL>
 inline std::ostream& operator<<(std::ostream& os, const Vm<T, LMUL>& m)
 {
 	T buf[Vd<T, LMUL>::N()];
-	mipp::storeu(buf, mipp::tovd(m.m));
+	mipp::storeu(buf, mipp::tovd(m.vm));
 	details::print_lanes(os, buf, Vd<T, LMUL>::N(), true);
 	return os;
 }
@@ -42,7 +42,7 @@ inline std::ostream& operator<<(std::ostream& os, const Vm<T, LMUL>& m)
 template <typename T_DST, typename T, int LMUL>
 inline Vd<T_DST, LMUL> pack(const Vd<T, LMUL>& a, const Vd<T, LMUL>& b)
 {
-	return Vd<T_DST, LMUL>(mipp::pack<T_DST>(a.r, b.r));
+	return Vd<T_DST, LMUL>(mipp::pack<T_DST>(a.vd, b.vd));
 }
 
 // ---------------------------------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ template <typename T, int LMUL, typename OP>
 inline T reduce_vd(const Vd<T, LMUL>& r, OP op, std::true_type /* smallest LMUL */)
 {
 	T buf[Vd<T, LMUL>::N()];
-	mipp::storeu(buf, r.r);
+	mipp::storeu(buf, r.vd);
 	T acc = buf[0];
 	for (std::size_t i = 1; i < Vd<T, LMUL>::N(); i++)
 		acc = op(Vd<T, LMUL>(acc), Vd<T, LMUL>(buf[i]))[0];

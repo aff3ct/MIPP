@@ -82,16 +82,16 @@ On SIMD architectures without hardware register grouping (SSE, AVX, AVX-512, NEO
 
 ```c
 /* Base Level: LMUL = 1 (Single hardware vector) */
-typedef struct { __m256 r; } vd_avx_float32_m1_t;
+typedef struct { __m256 vd; } vd_avx_float32_m1_t;
 
 /* Multiplied Level: LMUL = 2 (Pair of LMUL=1 structs) */
-typedef struct { vd_avx_float32_m1_t r1, r2; } vd_avx_float32_m2_t;
+typedef struct { vd_avx_float32_m1_t lo, hi; } vd_avx_float32_m2_t;
 
 /* Multiplied Level: LMUL = 4 (Pair of LMUL=2 structs) */
-typedef struct { vd_avx_float32_m2_t r1, r2; } vd_avx_float32_m4_t;
+typedef struct { vd_avx_float32_m2_t lo, hi; } vd_avx_float32_m4_t;
 
 /* Multiplied Level: LMUL = 8 (Pair of LMUL=4 structs) */
-typedef struct { vd_avx_float32_m4_t r1, r2; } vd_avx_float32_m8_t;
+typedef struct { vd_avx_float32_m4_t lo, hi; } vd_avx_float32_m8_t;
 ```
 
 #### Compilation & Zero-Overhead Execution
@@ -101,17 +101,17 @@ When calling an operation on a multiplied vector (e.g., `mipp::add(va, vb)` on `
 
 ```c
 static inline vd_avx_float32_m2_t mipp_avx_add_float32_m2(
-    const vd_avx_float32_m2_t r0,
-    const vd_avx_float32_m2_t r1)
+    const vd_avx_float32_m2_t vd0,
+    const vd_avx_float32_m2_t vd1)
 {
     vd_avx_float32_m2_t res;
-    res.r1 = mipp_avx_add_float32_m1(r0.r1, r1.r1); // _mm256_add_ps
-    res.r2 = mipp_avx_add_float32_m1(r0.r2, r1.r2); // _mm256_add_ps
+    res.lo = mipp_avx_add_float32_m1(vd0.lo, vd1.lo); // _mm256_add_ps
+    res.hi = mipp_avx_add_float32_m1(vd0.hi, vd1.hi); // _mm256_add_ps
     return res;
 }
 ```
 
-The compiler places `r1` and `r2` into separate CPU vector registers (e.g., `%ymm0` and `%ymm1`), inlining the calls into dual-issue instructions without memory round-trips.
+The compiler places `vd1` and `vd2` into separate CPU vector registers (e.g., `%ymm0` and `%ymm1`), inlining the calls into dual-issue instructions without memory round-trips.
 
 ### 3.3. Flattened Array Representation (Scalar Target)
 In the scalar fallback backend, multi-register vectors are represented as flat arrays sized by the total capacity:
@@ -119,10 +119,10 @@ In the scalar fallback backend, multi-register vectors are represented as flat a
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M1]; } vd_scalar_float32_m1_t;
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M2]; } vd_scalar_float32_m2_t;
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M4]; } vd_scalar_float32_m4_t;
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M8]; } vd_scalar_float32_m8_t;
+typedef struct { float32_t vd[MIPP_SCALAR_N_FLOAT32_M1]; } vd_scalar_float32_m1_t;
+typedef struct { float32_t vd[MIPP_SCALAR_N_FLOAT32_M2]; } vd_scalar_float32_m2_t;
+typedef struct { float32_t vd[MIPP_SCALAR_N_FLOAT32_M4]; } vd_scalar_float32_m4_t;
+typedef struct { float32_t vd[MIPP_SCALAR_N_FLOAT32_M8]; } vd_scalar_float32_m8_t;
 ```
 
 Scalar operations execute flat sequential loops over all $N \times \text{LMUL}$ elements.

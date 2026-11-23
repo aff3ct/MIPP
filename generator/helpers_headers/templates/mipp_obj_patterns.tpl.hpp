@@ -11,11 +11,11 @@
 namespace mipp
 {
 template <typename P, typename T, int LMUL>
-inline Vd<T, LMUL> permute(const Vd<T, LMUL>& r) { return Vd<T, LMUL>(mipp::permute<P>(r.r)); }
+inline Vd<T, LMUL> permute(const Vd<T, LMUL>& r) { return Vd<T, LMUL>(mipp::permute<P>(r.vd)); }
 
 template <typename P, typename T, int LMUL>
-inline Vd<T, LMUL> permute2(const Vd<T, LMUL>& r0, const Vd<T, LMUL>& r1)
-{ return Vd<T, LMUL>(mipp::permute2<P>(r0.r, r1.r)); }
+inline Vd<T, LMUL> permute2(const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1)
+{ return Vd<T, LMUL>(mipp::permute2<P>(vd0.vd, vd1.vd)); }
 } // namespace mipp
 
 #endif // __cplusplus >= 201703L

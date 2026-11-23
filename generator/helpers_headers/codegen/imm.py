@@ -7,7 +7,7 @@ take a constant, encoded in the instruction (an immediate: `palignr`, `vext`, `p
 static inline function cannot pass its parameter to them (clang checks the immediate before inlining). The generated
 function therefore keeps its dynamic body and starts with a dispatch, used when the compiler knows the value:
 
-    static inline vd_sse_float32_m1_t mipp_sse_slide_float32_m1(const vd_sse_float32_m1_t r0, ..., const int32_t s0) {
+    static inline vd_sse_float32_m1_t mipp_sse_slide_float32_m1(const vd_sse_float32_m1_t vd0, ..., const int32_t s0) {
         // Level 2 (Generic Emulation)
     #if defined(__OPTIMIZE__) && (defined(__SSSE3__))
         if (__builtin_constant_p(s0)) { // immediate when s0 is a constant: alignr
@@ -32,7 +32,7 @@ Sources:
   emulation files (`datatypes`, `if`, `template`, `instr_name`). The template is rendered for each value with the
   Jinja variables of the other templates plus `imm` (the value), `lanes` (the number of lanes) and `block` (the number
   of lanes of a block of 128 bits); a body that renders to nothing is not a case (the dynamic body is used for this
-  value). The bodies use intrinsics and the types of the DSL (`%r<tp>%`...) only: a call to a MIPP function would not
+  value). The bodies use intrinsics and the types of the DSL (`%vd<tp>%`...) only: a call to a MIPP function would not
   be seen by the include resolution.
 
 Only the unmasked functions of LMUL 1 of the ISAs with a fixed register size get a dispatch: the masked variants and

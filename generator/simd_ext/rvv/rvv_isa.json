@@ -359,8 +359,8 @@
         "defines_template": "#define MIPP_RVV_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
         "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}})));",
         "mask_typedef_template": "typedef {{isa_datatype.msk}} fixed_{{lsuffix_mipp}}_bool{{n_bits}}_t __attribute__((riscv_rvv_vector_bits({{vla_size}}{{lmul_expr}}/(8*sizeof({{isa_datatype.to_ptr}})))));",
-        "vd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } vd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
-        "vm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool{{datatype.n_bits}}_t m; } vm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
+        "vd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} vd; } vd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
+        "vm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool{{datatype.n_bits}}_t vm; } vm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
     },
     "ldiv_modes": [
         {

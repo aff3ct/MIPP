@@ -2,59 +2,59 @@
     "all_movemask": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m) == {% if isa_dt_par.data_ext_logi == 'ps' %}0xF{% elif isa_dt_par.data_ext_logi == 'pd' %}0x3{% else %}0xFFFF{% endif %};"
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(vm0.vm) == {% if isa_dt_par.data_ext_logi == 'ps' %}0xF{% elif isa_dt_par.data_ext_logi == 'pd' %}0x3{% else %}0xFFFF{% endif %};"
         ]
     },
     "any_movemask": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m) != 0;"
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(vm0.vm) != 0;"
         ]
     },
     "arith_1arg": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd);"
     },
     "arith_2args": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd);"
     },
     "arith_2args_epi": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(vd0.vd, vd1.vd);"
     },
     "arith_3args": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r, r2.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd, vd2.vd);"
     },
     "cast": {
         "format": "short",
-        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext_logi }}_{{ isa_dt_ret.data_ext_logi }}(r0.r);{% else -%} r0.r;{% endif %}"
+        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext_logi }}_{{ isa_dt_ret.data_ext_logi }}(vd0.vd);{% else -%} vd0.vd;{% endif %}"
     },
     "cast_k": {
         "format": "short",
-        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext_logi }}_{{ isa_dt_ret.data_ext_logi }}(m0.m);{% else -%} m0.m;{% endif %}"
+        "code": "{% if isa_dt_par.data_ext_logi != isa_dt_ret.data_ext_logi -%}{{ isa.prefix }}_{{ instr_name }}{{ isa_dt_par.data_ext_logi }}_{{ isa_dt_ret.data_ext_logi }}(vm0.vm);{% else -%} vm0.vm;{% endif %}"
     },
     "cvt": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}(r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}(vd0.vd);"
     },
     "getfirst_pd": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}_f64(r0.r);"
+            "return {{ isa.prefix }}_{{ instr_name }}_f64(vd0.vd);"
         ]
     },
     "getfirst_ps": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}_f32(r0.r);"
+            "return {{ isa.prefix }}_{{ instr_name }}_f32(vd0.vd);"
         ]
     },
     "getfirst_si": {
         "format": "long",
         "code": [
-            "return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}(r0.r);"
+            "return ({{ cstdint_ret }}){{ isa.prefix }}_{{ instr_name }}(vd0.vd);"
         ]
     },
     "load": {
@@ -63,57 +63,57 @@
     },
     "logi_2args": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(vd0.vd, vd1.vd);"
     },
     "logi_2args_si128": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_si128(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_si128(vd0.vd, vd1.vd);"
     },
     "logi_m_2args": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_msk }}(vm0.vm, vm1.vm);"
     },
     "logi_m_2args_si128": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_si128(m0.m, m1.m);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_si128(vm0.vm, vm1.vm);"
     },
     "none_movemask": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m) == 0;"
+            "return {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(vm0.vm) == 0;"
         ]
     },
     "rea_shuf_epi32": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi32(r0.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_epi32(vd0.vd, {{ instr_name }});"
     },
     "rea_shuf_pd": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_pd(r0.r, r0.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_pd(vd0.vd, vd0.vd, {{ instr_name }});"
     },
     "rea_shuf_ps": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_ps(r0.r, r0.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_ps(vd0.vd, vd0.vd, {{ instr_name }});"
     },
     "rea_shufps2": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_ps(r0.r, r1.r, {{ instr_name }});"
+        "code": "{{ isa.prefix }}_shuffle_ps(vd0.vd, vd1.vd, {{ instr_name }});"
     },
     "rea_shufps2_i": {
         "format": "short",
-        "code": "{{ isa.prefix }}_castps_si128({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi128_ps(r0.r), {{ isa.prefix }}_castsi128_ps(r1.r), {{ instr_name }}));"
+        "code": "{{ isa.prefix }}_castps_si128({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi128_ps(vd0.vd), {{ isa.prefix }}_castsi128_ps(vd1.vd), {{ instr_name }}));"
     },
     "rea_unpack": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vd0.vd, vd1.vd);"
     },
     "rea_unpack_self": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(r0.r, r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vd0.vd, vd0.vd);"
     },
     "select_blendv": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(r1.r, r0.r, m0.m);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(vd1.vd, vd0.vd, vm0.vm);"
     },
     "set-16": {
         "format": "short",
@@ -172,8 +172,8 @@
     "set1_k_float": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "res.m = _mm_castsi128_{{ isa_dt_par.data_ext_logi }}(_mm_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(s0 ? -1 : 0));",
+            "%vm<tr>% res;",
+            "res.vm = _mm_castsi128_{{ isa_dt_par.data_ext_logi }}(_mm_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(s0 ? -1 : 0));",
             "return res;"
         ]
     },
@@ -223,34 +223,34 @@
     },
     "shv_vv": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, r1.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(vd0.vd, vd1.vd);"
     },
     "store": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}{{ '_u' if instr_name in ('loadu', 'storeu') and isa_dt_par.to_ptr.startswith('__m') else '' }}*) p0, r0.r);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi }}(({{ isa_dt_par.to_ptr }}{{ '_u' if instr_name in ('loadu', 'storeu') and isa_dt_par.to_ptr.startswith('__m') else '' }}*) p0, vd0.vd);"
     },
     "sxl_epi": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(r0.r, s0);"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_epi{{ dt_par.n_bits }}(vd0.vd, s0);"
     },
     "testz_cast": {
         "format": "long",
         "code": [
-            "return _mm_testz_si128(_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(m0.m), _mm_cast{{ isa_dt_par.data_ext_logi }}_si128(m1.m));"
+            "return _mm_testz_si128(_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(vm0.vm), _mm_cast{{ isa_dt_par.data_ext_logi }}_si128(vm1.vm));"
         ]
     },
     "testz_si128": {
         "format": "long",
         "code": [
-            "return {{ isa.prefix }}_{{ instr_name }}_si128(m0.m, m1.m);"
+            "return {{ isa.prefix }}_{{ instr_name }}_si128(vm0.vm, vm1.vm);"
         ]
     },
     "tovd": {
         "format": "short",
-        "code": "m0.m;"
+        "code": "vm0.vm;"
     },
     "trunc_float": {
         "format": "short",
-        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, (_MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC));"
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, (_MM_FROUND_TO_ZERO | _MM_FROUND_NO_EXC));"
     }
 }

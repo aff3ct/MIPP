@@ -237,13 +237,13 @@ def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
         low = build_func_name_short(isa, dt_par, "lo", True, lmul=1)
         high = build_func_name_short(isa, dt_par, "hi", True, lmul=1)
         conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=-2)
-        print(f"\tres.r1 = {conv}({low}(r0));", file=file)
-        print(f"\tres.r2 = {conv}({high}(r0));", file=file)
+        print(f"\tres.lo = {conv}({low}(vd0));", file=file)
+        print(f"\tres.hi = {conv}({high}(vd0));", file=file)
         callees = [("lo", "m1"), ("hi", "m1"), (f, "d2")]
     else:
         conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=lmul // 2)
-        print(f"\tres.r1 = {conv}(r0.r1);", file=file)
-        print(f"\tres.r2 = {conv}(r0.r2);", file=file)
+        print(f"\tres.lo = {conv}(vd0.lo);", file=file)
+        print(f"\tres.hi = {conv}(vd0.hi);", file=file)
         callees = [(f, f"m{lmul // 2}")]
     print("\treturn res;", file=file)
     print("}", file=file)
@@ -270,14 +270,14 @@ def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul
         print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, conv, lmul=1, isa_name=True) + ";", file=file)
         print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
         print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
-        print(f"\treturn {comb}({conv}(r0.r1), {conv}(r0.r2));", file=file)
+        print(f"\treturn {comb}({conv}(vd0.lo), {conv}(vd0.hi));", file=file)
         callees = [(f, "m1"), ("combine", "d2")]
     else:
         print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
         print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
         print(f"\t{res_type} res;", file=file)
-        print(f"\tres.r1 = {conv}(r0.r1);", file=file)
-        print(f"\tres.r2 = {conv}(r0.r2);", file=file)
+        print(f"\tres.lo = {conv}(vd0.lo);", file=file)
+        print(f"\tres.hi = {conv}(vd0.hi);", file=file)
         print("\treturn res;", file=file)
         callees = [(f, f"m{lmul // 2}")]
     print("}", file=file)
@@ -287,8 +287,7 @@ def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul
 
 def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager=None):
     """
-    lo / hi / combine on a software LMUL register (a struct of two halves 'r1' and 'r2', or
-    'm1' and 'm2' for masks): no intrinsic, the result is one of the halves or the pair of arguments.
+    lo / hi / combine on a software LMUL register (a struct of two halves 'lo' and 'hi'): no intrinsic, the result is one of the halves or the pair of arguments.
     """
     proto = funcs[f]["proto"]
     if is_narrowing(proto):
@@ -303,8 +302,7 @@ def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
         # half-vectors (d2) are provided by the representation of the ISA
         return
     kind = proto["ret"]["type"]
-    member = "r" if kind == "reg" else "m"
-    arg = "r" if kind == "reg" else "m"
+    arg = "vd" if kind == "reg" else "vm"
     base = f[:-2] if f.endswith("_k") else f
     emit_lmul_banner(isa["name"], f, file, "emulated")
     if lmul == 1:
@@ -312,14 +310,14 @@ def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
     print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
     print("\t// Level 0 (Native Hardware): half of the software LMUL register", file=file)
     if base == "lo":
-        print(f"\treturn {arg}0.{member}1;", file=file)
+        print(f"\treturn {arg}0.lo;", file=file)
     elif base == "hi":
-        print(f"\treturn {arg}0.{member}2;", file=file)
+        print(f"\treturn {arg}0.hi;", file=file)
     else:
         res_type = build_type(kind, datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
         print(f"\t{res_type} res;", file=file)
-        print(f"\tres.{member}1 = {arg}0;", file=file)
-        print(f"\tres.{member}2 = {arg}1;", file=file)
+        print(f"\tres.lo = {arg}0;", file=file)
+        print(f"\tres.hi = {arg}1;", file=file)
         print("\treturn res;", file=file)
     print("}", file=file)
 

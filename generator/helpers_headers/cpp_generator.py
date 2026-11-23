@@ -290,7 +290,7 @@ def _cpp_close_namespace():
 
 
 # -------------------------------------------------------------------------------------------------
-# Masked C++ wrappers (proto-driven: correct names m0/rsrc/r0..., correct arity)
+# Masked C++ wrappers (proto-driven: correct names vm0/vdsrc/vd0..., correct arity)
 # -------------------------------------------------------------------------------------------------
 def _masked_c_symbol(dt_par, dt_ret, f, is_cast, isa=None, isa_name=False):
     # Base C symbol without lmul suffix.
@@ -345,10 +345,10 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
 
     # the mask has the type of the data (T); the index (U) has its own LMUL (one lane per lane of the data)
     if mask_kind in ("mask", "maskz"):
-        s += "vm<T,LMUL,ISA_TYPE> m0"
+        s += "vm<T,LMUL,ISA_TYPE> vm0"
         is_first = False
     elif mask_kind == "masks":
-        s += "const vm<T,LMUL,ISA_TYPE> m0, vd<T,LMUL,ISA_TYPE> rsrc"
+        s += "const vm<T,LMUL,ISA_TYPE> vm0, vd<T,LMUL,ISA_TYPE> vdsrc"
         is_first = False
     for args in proto["args"]:
 
@@ -361,13 +361,13 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         A = _tpl_scalar_for_arg(args)
 
         if args["type"] == "reg" and args.get("lmul", "same") == "ratio":
-            tmp_str += "vd<{{A}},details::idx_lmul<T,{{A}}>(LMUL),ISA_TYPE> r" + str(cnt_reg)
+            tmp_str += "vd<{{A}},details::idx_lmul<T,{{A}}>(LMUL),ISA_TYPE> vd" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "reg":
-            tmp_str += "vd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
+            tmp_str += "vd<{{A}},LMUL,ISA_TYPE> vd" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "msk":
-            tmp_str += "vm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
+            tmp_str += "vm<{{A}},LMUL,ISA_TYPE> vm" + str(cnt_msk)
             cnt_msk += 1
         elif args["type"] == "val":
             tmp_str += "{{A}} s" + str(cnt_val)
@@ -397,13 +397,13 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
     
 def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
     """
-    Emit a generic template declaration with correct *names* (m0/rsrc/r0/s0/p0...),
+    Emit a generic template declaration with correct *names* (vm0/vdsrc/vd0/s0/p0...),
     but *types* expressed in terms of T and LMUL.
 
     mask_kind:
-      - "mask": prepend 'vm<T,LMUL> m0', default variant M (merge-maskable function)
+      - "mask": prepend 'vm<T,LMUL> vm0', default variant M (merge-maskable function)
       - "maskz": same signature, default variant Z (zero-mask only, e.g. load / loadu)
-      - "masks": prepend 'const vm<T,LMUL> m0, vd<T,LMUL> rsrc'
+      - "masks": prepend 'const vm<T,LMUL> vm0, vd<T,LMUL> vdsrc'
     """
 
     if "gather" in cpp_func_name or "scatter" in cpp_func_name:
@@ -432,10 +432,10 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 
     # masked prefix args (names must match build_call expectations)
     if mask_kind in ("mask", "maskz"):
-        s += "vm<T,LMUL,ISA_TYPE> m0"
+        s += "vm<T,LMUL,ISA_TYPE> vm0"
         is_first = False
     elif mask_kind == "masks":
-        s += "const vm<T,LMUL,ISA_TYPE> m0, vd<T,LMUL,ISA_TYPE> rsrc"
+        s += "const vm<T,LMUL,ISA_TYPE> vm0, vd<T,LMUL,ISA_TYPE> vdsrc"
         is_first = False
 
     for arg in proto["args"]:
@@ -448,10 +448,10 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
         A = _tpl_scalar_for_arg(arg)
 
         if arg["type"] == "reg":
-            s += f"vd<{A},LMUL,ISA_TYPE> r{cnt_reg}"
+            s += f"vd<{A},LMUL,ISA_TYPE> vd{cnt_reg}"
             cnt_reg += 1
         elif arg["type"] == "msk":
-            s += f"vm<{A},LMUL,ISA_TYPE> m{cnt_msk}"
+            s += f"vm<{A},LMUL,ISA_TYPE> vm{cnt_msk}"
             cnt_msk += 1
         elif arg["type"] == "val":
             s += f"{A} s{cnt_val}"
@@ -478,12 +478,12 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
 
     Example (storeu, uint32_t, LMUL=2):
       template <>
-      inline void storeu<M, uint32_t, 2>(vm<uint32_t,2> m0, uint32_t* p0, const vd<uint32_t,2> r0) {
-          mipp_storeu_uint32_mask_m2(m0, p0, r0);
+      inline void storeu<M, uint32_t, 2>(vm<uint32_t,2> vm0, uint32_t* p0, const vd<uint32_t,2> vd0) {
+          mipp_storeu_uint32_mask_m2(vm0, p0, vd0);
       }
 
     With ignore_mask=True (used for the U variant), the signature is the one of
-    `mask_kind` but the mask (and rsrc) are ignored and the unmasked C kernel is
+    `mask_kind` but the mask (and vdsrc) are ignored and the unmasked C kernel is
     called, so that `f<U>(m, ...)` behaves exactly like `f(...)`.
     """
     Tret = datatypes[dt_ret]["cstd"]
@@ -524,9 +524,9 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
     if lmul < 0: 
         lmul_str = "d" + str(-lmul)
     if ignore_mask:
-        print("\t(void)m0;", file=file)
+        print("\t(void)vm0;", file=file)
         if mask_kind == "masks":
-            print("\t(void)rsrc;", file=file)
+            print("\t(void)vdsrc;", file=file)
         c_symbol = f"{c_base}_{lmul_str}"
         call = build_call(proto, dt_par, dt_ret, isa, c_symbol, lmul, isa_name=isa_name, masked_version=False)
     else:
@@ -543,8 +543,8 @@ def _emit_mask_specs(get_file, proto, dt_par, dt_ret, cpp_func_name, c_base, mas
     variant directory ("m", "z" or "s").
 
     U ignores the mask: it is emitted for each generic masked template that
-    exists (the `m0` form when the function is maskable or maskzable, the
-    `m0, rsrc` form when it is masksable).
+    exists (the `vm0` form when the function is maskable or maskzable, the
+    `vm0, vdsrc` form when it is masksable).
     """
     if mask_status.is_maskable():
         _mask_tpl_spec(get_file("m"), proto, dt_par, dt_ret, cpp_func_name, c_base, "M", "mask", lmul=lmul, isa=isa, isa_name=True)

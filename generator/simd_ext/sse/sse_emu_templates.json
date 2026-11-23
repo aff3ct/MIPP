@@ -2,23 +2,23 @@
     "cmpeq64_sse2": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "__m128i eq32 = _mm_cmpeq_epi32(r0.r, r1.r);",
-            "res.m = _mm_and_si128(eq32, _mm_shuffle_epi32(eq32, _MM_SHUFFLE(2, 3, 0, 1)));",
+            "%vm<tr>% res;",
+            "__m128i eq32 = _mm_cmpeq_epi32(vd0.vd, vd1.vd);",
+            "res.vm = _mm_and_si128(eq32, _mm_shuffle_epi32(eq32, _MM_SHUFFLE(2, 3, 0, 1)));",
             "return res;"
         ]
     },
     "cmpgt64_sse2": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
+            "%vm<tr>% res;",
             "__m128i flip = _mm_set_epi32(0, (int32_t)0x80000000, 0, (int32_t)0x80000000);",
-            "__m128i a = _mm_xor_si128(r0.r, flip);",
-            "__m128i b = _mm_xor_si128(r1.r, flip);",
+            "__m128i a = _mm_xor_si128(vd0.vd, flip);",
+            "__m128i b = _mm_xor_si128(vd1.vd, flip);",
             "__m128i gt = _mm_cmpgt_epi32(a, b);",
             "__m128i eq = _mm_cmpeq_epi32(a, b);",
             "__m128i gt_lo = _mm_shuffle_epi32(gt, _MM_SHUFFLE(2, 2, 0, 0));",
-            "res.m = _mm_shuffle_epi32(_mm_or_si128(gt, _mm_and_si128(eq, gt_lo)), _MM_SHUFFLE(3, 3, 1, 1));",
+            "res.vm = _mm_shuffle_epi32(_mm_or_si128(gt, _mm_and_si128(eq, gt_lo)), _MM_SHUFFLE(3, 3, 1, 1));",
             "return res;"
         ]
     },
@@ -26,8 +26,8 @@
         "format": "long",
         "code": [
             "// (re, re) * b -/+ (im, im) * swapped b",
-            "%r<tp>% res;",
-            "res.r = _mm_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_moveldup_ps(r0.r){% else %}_mm_movedup_pd(r0.r){% endif %}, r1.r, _mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_movehdup_ps(r0.r){% else %}_mm_unpackhi_pd(r0.r, r0.r){% endif %}, {% if dt_par.n_bits == 32 %}_mm_shuffle_ps(r1.r, r1.r, 0xB1){% else %}_mm_shuffle_pd(r1.r, r1.r, 1){% endif %}));",
+            "%vd<tp>% res;",
+            "res.vd = _mm_fmaddsub_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_moveldup_ps(vd0.vd){% else %}_mm_movedup_pd(vd0.vd){% endif %}, vd1.vd, _mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_movehdup_ps(vd0.vd){% else %}_mm_unpackhi_pd(vd0.vd, vd0.vd){% endif %}, {% if dt_par.n_bits == 32 %}_mm_shuffle_ps(vd1.vd, vd1.vd, 0xB1){% else %}_mm_shuffle_pd(vd1.vd, vd1.vd, 1){% endif %}));",
             "return res;"
         ]
     },
@@ -35,137 +35,137 @@
         "format": "long",
         "code": [
             "// (re, re) * b -/+ (im, im) * swapped b",
-            "%r<tp>% res;",
-            "res.r = _mm_addsub_{{ isa_dt_par.data_ext }}(_mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_moveldup_ps(r0.r){% else %}_mm_movedup_pd(r0.r){% endif %}, r1.r), _mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_movehdup_ps(r0.r){% else %}_mm_unpackhi_pd(r0.r, r0.r){% endif %}, {% if dt_par.n_bits == 32 %}_mm_shuffle_ps(r1.r, r1.r, 0xB1){% else %}_mm_shuffle_pd(r1.r, r1.r, 1){% endif %}));",
+            "%vd<tp>% res;",
+            "res.vd = _mm_addsub_{{ isa_dt_par.data_ext }}(_mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_moveldup_ps(vd0.vd){% else %}_mm_movedup_pd(vd0.vd){% endif %}, vd1.vd), _mm_mul_{{ isa_dt_par.data_ext }}({% if dt_par.n_bits == 32 %}_mm_movehdup_ps(vd0.vd){% else %}_mm_unpackhi_pd(vd0.vd, vd0.vd){% endif %}, {% if dt_par.n_bits == 32 %}_mm_shuffle_ps(vd1.vd, vd1.vd, 0xB1){% else %}_mm_shuffle_pd(vd1.vd, vd1.vd, 1){% endif %}));",
             "return res;"
         ]
     },
     "cvt_f32_u32": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
+            "%vd<tr>% res;",
             "__m128 two31 = _mm_set1_ps(2147483648.0f);",
-            "__m128i big = _mm_castps_si128(_mm_cmpge_ps(r0.r, two31));",
-            "__m128i lo = _mm_cvttps_epi32(r0.r);",
-            "__m128i hi = _mm_xor_si128(_mm_cvttps_epi32(_mm_sub_ps(r0.r, two31)), _mm_set1_epi32((int32_t)0x80000000));",
-            "res.r = _mm_or_si128(_mm_and_si128(big, hi), _mm_andnot_si128(big, lo));",
+            "__m128i big = _mm_castps_si128(_mm_cmpge_ps(vd0.vd, two31));",
+            "__m128i lo = _mm_cvttps_epi32(vd0.vd);",
+            "__m128i hi = _mm_xor_si128(_mm_cvttps_epi32(_mm_sub_ps(vd0.vd, two31)), _mm_set1_epi32((int32_t)0x80000000));",
+            "res.vd = _mm_or_si128(_mm_and_si128(big, hi), _mm_andnot_si128(big, lo));",
             "return res;"
         ]
     },
     "cvt_f64_i64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "%r<tp>% t = %trunc<tp>%(r0);",
-            "%r<tp>% y;",
-            "y.r = _mm_mul_pd(t.r, _mm_set1_pd(2.3283064365386962890625e-10));",
-            "%r<tp>% ty = %trunc<tp>%(y);",
-            "__m128d hi_d = _mm_sub_pd(ty.r, _mm_and_pd(_mm_cmpgt_pd(ty.r, y.r), _mm_set1_pd(1.0)));",
-            "__m128d lo_d = _mm_sub_pd(t.r, _mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)));",
+            "%vd<tr>% res;",
+            "%vd<tp>% t = %trunc<tp>%(vd0);",
+            "%vd<tp>% y;",
+            "y.vd = _mm_mul_pd(t.vd, _mm_set1_pd(2.3283064365386962890625e-10));",
+            "%vd<tp>% ty = %trunc<tp>%(y);",
+            "__m128d hi_d = _mm_sub_pd(ty.vd, _mm_and_pd(_mm_cmpgt_pd(ty.vd, y.vd), _mm_set1_pd(1.0)));",
+            "__m128d lo_d = _mm_sub_pd(t.vd, _mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)));",
             "__m128d two31 = _mm_set1_pd(2147483648.0);",
             "__m128i flip = _mm_set1_epi32((int32_t)0x80000000);",
             "__m128i lo_u = _mm_xor_si128(_mm_cvttpd_epi32(_mm_sub_pd(lo_d, two31)), flip);",
             "__m128i hi_i = _mm_cvttpd_epi32(hi_d);",
-            "res.r = _mm_unpacklo_epi32(lo_u, hi_i);",
+            "res.vd = _mm_unpacklo_epi32(lo_u, hi_i);",
             "return res;"
         ]
     },
     "cvt_f64_u64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "%r<tp>% t = %trunc<tp>%(r0);",
-            "%r<tp>% y;",
-            "y.r = _mm_mul_pd(t.r, _mm_set1_pd(2.3283064365386962890625e-10));",
-            "%r<tp>% ty = %trunc<tp>%(y);",
-            "__m128d hi_d = _mm_sub_pd(ty.r, _mm_and_pd(_mm_cmpgt_pd(ty.r, y.r), _mm_set1_pd(1.0)));",
-            "__m128d lo_d = _mm_sub_pd(t.r, _mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)));",
+            "%vd<tr>% res;",
+            "%vd<tp>% t = %trunc<tp>%(vd0);",
+            "%vd<tp>% y;",
+            "y.vd = _mm_mul_pd(t.vd, _mm_set1_pd(2.3283064365386962890625e-10));",
+            "%vd<tp>% ty = %trunc<tp>%(y);",
+            "__m128d hi_d = _mm_sub_pd(ty.vd, _mm_and_pd(_mm_cmpgt_pd(ty.vd, y.vd), _mm_set1_pd(1.0)));",
+            "__m128d lo_d = _mm_sub_pd(t.vd, _mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)));",
             "__m128d two31 = _mm_set1_pd(2147483648.0);",
             "__m128i flip = _mm_set1_epi32((int32_t)0x80000000);",
             "__m128i lo_u = _mm_xor_si128(_mm_cvttpd_epi32(_mm_sub_pd(lo_d, two31)), flip);",
             "__m128i hi_u = _mm_xor_si128(_mm_cvttpd_epi32(_mm_sub_pd(hi_d, two31)), flip);",
-            "res.r = _mm_unpacklo_epi32(lo_u, hi_u);",
+            "res.vd = _mm_unpacklo_epi32(lo_u, hi_u);",
             "return res;"
         ]
     },
     "cvt_i64_f64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "__m128i lo = _mm_and_si128(r0.r, _mm_set1_epi64x(0xFFFFFFFFLL));",
+            "%vd<tr>% res;",
+            "__m128i lo = _mm_and_si128(vd0.vd, _mm_set1_epi64x(0xFFFFFFFFLL));",
             "__m128d lo_d = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(lo, _mm_set1_epi64x(0x4330000000000000LL))), _mm_set1_pd(4503599627370496.0));",
-            "__m128d hi_d = _mm_cvtepi32_pd(_mm_shuffle_epi32(r0.r, _MM_SHUFFLE(3, 1, 3, 1)));",
-            "res.r = _mm_add_pd(_mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)), lo_d);",
+            "__m128d hi_d = _mm_cvtepi32_pd(_mm_shuffle_epi32(vd0.vd, _MM_SHUFFLE(3, 1, 3, 1)));",
+            "res.vd = _mm_add_pd(_mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)), lo_d);",
             "return res;"
         ]
     },
     "cvt_u32_f32": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "__m128i lo = _mm_and_si128(r0.r, _mm_set1_epi32(0xFFFF));",
-            "__m128i hi = _mm_srli_epi32(r0.r, 16);",
-            "res.r = _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(hi), _mm_set1_ps(65536.0f)), _mm_cvtepi32_ps(lo));",
+            "%vd<tr>% res;",
+            "__m128i lo = _mm_and_si128(vd0.vd, _mm_set1_epi32(0xFFFF));",
+            "__m128i hi = _mm_srli_epi32(vd0.vd, 16);",
+            "res.vd = _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(hi), _mm_set1_ps(65536.0f)), _mm_cvtepi32_ps(lo));",
             "return res;"
         ]
     },
     "cvt_u64_f64": {
         "format": "long",
         "code": [
-            "%r<tr>% res;",
-            "__m128i lo = _mm_and_si128(r0.r, _mm_set1_epi64x(0xFFFFFFFFLL));",
+            "%vd<tr>% res;",
+            "__m128i lo = _mm_and_si128(vd0.vd, _mm_set1_epi64x(0xFFFFFFFFLL));",
             "__m128d lo_d = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(lo, _mm_set1_epi64x(0x4330000000000000LL))), _mm_set1_pd(4503599627370496.0));",
-            "__m128i hi = _mm_srli_epi64(r0.r, 32);",
+            "__m128i hi = _mm_srli_epi64(vd0.vd, 32);",
             "__m128d hi_d = _mm_sub_pd(_mm_castsi128_pd(_mm_or_si128(hi, _mm_set1_epi64x(0x4330000000000000LL))), _mm_set1_pd(4503599627370496.0));",
-            "res.r = _mm_add_pd(_mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)), lo_d);",
+            "res.vd = _mm_add_pd(_mm_mul_pd(hi_d, _mm_set1_pd(4294967296.0)), lo_d);",
             "return res;"
         ]
     },
     "lshift8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = _mm_and_si128(_mm_slli_epi16(r0.r, s0), _mm_set1_epi8((char)(0xFF << s0)));",
+            "%vd<tp>% res;",
+            "res.vd = _mm_and_si128(_mm_slli_epi16(vd0.vd, s0), _mm_set1_epi8((char)(0xFF << s0)));",
             "return res;"
         ]
     },
     "mul32_sse2": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i p02 = _mm_mul_epu32(r0.r, r1.r);",
-            "__m128i p13 = _mm_mul_epu32(_mm_srli_si128(r0.r, 4), _mm_srli_si128(r1.r, 4));",
-            "res.r = _mm_unpacklo_epi32(_mm_shuffle_epi32(p02, _MM_SHUFFLE(0, 0, 2, 0)), _mm_shuffle_epi32(p13, _MM_SHUFFLE(0, 0, 2, 0)));",
+            "%vd<tp>% res;",
+            "__m128i p02 = _mm_mul_epu32(vd0.vd, vd1.vd);",
+            "__m128i p13 = _mm_mul_epu32(_mm_srli_si128(vd0.vd, 4), _mm_srli_si128(vd1.vd, 4));",
+            "res.vd = _mm_unpacklo_epi32(_mm_shuffle_epi32(p02, _MM_SHUFFLE(0, 0, 2, 0)), _mm_shuffle_epi32(p13, _MM_SHUFFLE(0, 0, 2, 0)));",
             "return res;"
         ]
     },
     "mul64_sse2": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i lo = _mm_mul_epu32(r0.r, r1.r);",
-            "__m128i t1 = _mm_mul_epu32(_mm_srli_epi64(r0.r, 32), r1.r);",
-            "__m128i t2 = _mm_mul_epu32(r0.r, _mm_srli_epi64(r1.r, 32));",
-            "res.r = _mm_add_epi64(lo, _mm_slli_epi64(_mm_add_epi64(t1, t2), 32));",
+            "%vd<tp>% res;",
+            "__m128i lo = _mm_mul_epu32(vd0.vd, vd1.vd);",
+            "__m128i t1 = _mm_mul_epu32(_mm_srli_epi64(vd0.vd, 32), vd1.vd);",
+            "__m128i t2 = _mm_mul_epu32(vd0.vd, _mm_srli_epi64(vd1.vd, 32));",
+            "res.vd = _mm_add_epi64(lo, _mm_slli_epi64(_mm_add_epi64(t1, t2), 32));",
             "return res;"
         ]
     },
     "mul8_sse2": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i even = _mm_mullo_epi16(r0.r, r1.r);",
-            "__m128i odd = _mm_mullo_epi16(_mm_srli_epi16(r0.r, 8), _mm_srli_epi16(r1.r, 8));",
-            "res.r = _mm_or_si128(_mm_slli_epi16(odd, 8), _mm_and_si128(even, _mm_set1_epi16(0x00FF)));",
+            "%vd<tp>% res;",
+            "__m128i even = _mm_mullo_epi16(vd0.vd, vd1.vd);",
+            "__m128i odd = _mm_mullo_epi16(_mm_srli_epi16(vd0.vd, 8), _mm_srli_epi16(vd1.vd, 8));",
+            "res.vd = _mm_or_si128(_mm_slli_epi16(odd, 8), _mm_and_si128(even, _mm_set1_epi16(0x00FF)));",
             "return res;"
         ]
     },
     "notb_k_xor": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
+            "%vm<tr>% res;",
             "__m128i ones = _mm_set1_epi32(-1);",
-            "res.m = {% if isa_dt_par.data_ext_logi == 'si128' %}_mm_xor_si128({% if isa_dt_par.data_ext_logi == 'si128' %}m0.m{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(m0.m){% endif %}, ones){% else %}_mm_castsi128_{{ isa_dt_par.data_ext_logi }}(_mm_xor_si128({% if isa_dt_par.data_ext_logi == 'si128' %}m0.m{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(m0.m){% endif %}, ones)){% endif %};",
+            "res.vm = {% if isa_dt_par.data_ext_logi == 'si128' %}_mm_xor_si128({% if isa_dt_par.data_ext_logi == 'si128' %}vm0.vm{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(vm0.vm){% endif %}, ones){% else %}_mm_castsi128_{{ isa_dt_par.data_ext_logi }}(_mm_xor_si128({% if isa_dt_par.data_ext_logi == 'si128' %}vm0.vm{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(vm0.vm){% endif %}, ones)){% endif %};",
             "return res;"
         ]
     },
@@ -173,77 +173,77 @@
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %bcast<tp>%(r0, s0);"
+            "return %bcast<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_permute": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %permute<tp>%(r0, r1);"
+            "return %permute<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_reverse": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %reverse<tp>%(r0);"
+            "return %reverse<tp>%(vd0);"
         ]
     },
     "rea_b128_rotate": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %rotate<tp>%(r0, s0);"
+            "return %rotate<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_slide": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slide<tp>%(r0, r1, s0);"
+            "return %slide<tp>%(vd0, vd1, s0);"
         ]
     },
     "rea_b128_slidedown": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slidedown<tp>%(r0, s0);"
+            "return %slidedown<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_slideup": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slideup<tp>%(r0, s0);"
+            "return %slideup<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_unziphi": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %unziphi<tp>%(r0, r1);"
+            "return %unziphi<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_unziplo": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %unziplo<tp>%(r0, r1);"
+            "return %unziplo<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_ziphi": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %ziphi<tp>%(r0, r1);"
+            "return %ziphi<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_ziplo": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %ziplo<tp>%(r0, r1);"
+            "return %ziplo<tp>%(vd0, vd1);"
         ]
     },
     "rea_compress_32": {
@@ -251,10 +251,10 @@
         "code": [
             "// bytes of the active lanes, then zeros (pshufb gives 0 for 0x80), indexed by the movemask of the mask",
             "static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=128) }};",
-            "const int mm = _mm_movemask_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}({% if dt_par.category == 'float' %}m0.m{% else %}_mm_castsi128_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}(m0.m){% endif %});",
+            "const int mm = _mm_movemask_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}({% if dt_par.category == 'float' %}vm0.vm{% else %}_mm_castsi128_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}(vm0.vm){% endif %});",
             "__m128i b = _mm_loadu_si128((const __m128i_u*)lut[mm]);",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_shuffle_epi8(_mm_cast{{ isa_dt_par.data_ext }}_si128(r0.r), b)){% else %}_mm_shuffle_epi8(r0.r, b){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_shuffle_epi8(_mm_cast{{ isa_dt_par.data_ext }}_si128(vd0.vd), b)){% else %}_mm_shuffle_epi8(vd0.vd, b){% endif %};",
             "return res;"
         ]
     },
@@ -263,47 +263,47 @@
         "code": [
             "// bytes of the active lanes, then zeros (pshufb gives 0 for 0x80), indexed by the movemask of the mask",
             "static const uint8_t lut[4][16] = {{ compress_lut(lanes=2, units=8, fill=128) }};",
-            "const int mm = _mm_movemask_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}({% if dt_par.category == 'float' %}m0.m{% else %}_mm_castsi128_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}(m0.m){% endif %});",
+            "const int mm = _mm_movemask_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}({% if dt_par.category == 'float' %}vm0.vm{% else %}_mm_castsi128_{{ 'ps' if dt_par.n_bits == 32 else 'pd' }}(vm0.vm){% endif %});",
             "__m128i b = _mm_loadu_si128((const __m128i_u*)lut[mm]);",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_shuffle_epi8(_mm_cast{{ isa_dt_par.data_ext }}_si128(r0.r), b)){% else %}_mm_shuffle_epi8(r0.r, b){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_shuffle_epi8(_mm_cast{{ isa_dt_par.data_ext }}_si128(vd0.vd), b)){% else %}_mm_shuffle_epi8(vd0.vd, b){% endif %};",
             "return res;"
         ]
     },
     "rea_count": {
         "format": "long",
         "code": [
-            "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m)) / {{ (dt_par.n_bits // 8) if isa_dt_par.data_ext_logi == 'si128' else 1 }});"
+            "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(vm0.vm)) / {{ (dt_par.n_bits // 8) if isa_dt_par.data_ext_logi == 'si128' else 1 }});"
         ]
     },
     "rea_dupeven_epi8": {
         "format": "long",
         "code": [
-            "__m128i x = {{ isa.prefix }}_and_si128(r0.r, {{ isa.prefix }}_set1_epi16(0x00FF));",
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_or_si128(x, {{ isa.prefix }}_slli_epi16(x, 8));",
+            "__m128i x = {{ isa.prefix }}_and_si128(vd0.vd, {{ isa.prefix }}_set1_epi16(0x00FF));",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_or_si128(x, {{ isa.prefix }}_slli_epi16(x, 8));",
             "return res;"
         ]
     },
     "rea_dupodd_epi8": {
         "format": "long",
         "code": [
-            "__m128i x = {{ isa.prefix }}_and_si128(r0.r, {{ isa.prefix }}_set1_epi16((short)0xFF00));",
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}_or_si128(x, {{ isa.prefix }}_srli_epi16(x, 8));",
+            "__m128i x = {{ isa.prefix }}_and_si128(vd0.vd, {{ isa.prefix }}_set1_epi16((short)0xFF00));",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_or_si128(x, {{ isa.prefix }}_srli_epi16(x, 8));",
             "return res;"
         ]
     },
     "rea_permute2_pshufb": {
         "format": "long",
         "code": [
-            "// byte indices in the 32 bytes of the two registers: pshufb of both (low 4 bits), then the bytes of r1 for the bit 4",
-            "{% if dt_par.n_bits == 8 %}__m128i ib = r2.r;{% elif dt_par.n_bits == 16 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi16(r2.r, 1), _mm_setr_epi8(0, 0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14)), _mm_set1_epi16(0x0100));{% elif dt_par.n_bits == 32 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi32(r2.r, 2), _mm_setr_epi8(0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12)), _mm_set1_epi32(0x03020100));{% else %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi64(r2.r, 3), _mm_setr_epi8(0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8)), _mm_set_epi8(7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0));{% endif %}",
+            "// byte indices in the 32 bytes of the two registers: pshufb of both (low 4 bits), then the bytes of vd1 for the bit 4",
+            "{% if dt_par.n_bits == 8 %}__m128i ib = vd2.vd;{% elif dt_par.n_bits == 16 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi16(vd2.vd, 1), _mm_setr_epi8(0, 0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14)), _mm_set1_epi16(0x0100));{% elif dt_par.n_bits == 32 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi32(vd2.vd, 2), _mm_setr_epi8(0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12)), _mm_set1_epi32(0x03020100));{% else %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi64(vd2.vd, 3), _mm_setr_epi8(0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8)), _mm_set_epi8(7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0));{% endif %}",
             "__m128i hi = _mm_cmpgt_epi8(ib, _mm_set1_epi8(15));",
-            "__m128i x = _mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(r0.r){% else %}r0.r{% endif %}, ib);",
-            "__m128i y = _mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(r1.r){% else %}r1.r{% endif %}, ib);",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_or_si128(_mm_and_si128(hi, y), _mm_andnot_si128(hi, x))){% else %}_mm_or_si128(_mm_and_si128(hi, y), _mm_andnot_si128(hi, x)){% endif %};",
+            "__m128i x = _mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(vd0.vd){% else %}vd0.vd{% endif %}, ib);",
+            "__m128i y = _mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(vd1.vd){% else %}vd1.vd{% endif %}, ib);",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_or_si128(_mm_and_si128(hi, y), _mm_andnot_si128(hi, x))){% else %}_mm_or_si128(_mm_and_si128(hi, y), _mm_andnot_si128(hi, x)){% endif %};",
             "return res;"
         ]
     },
@@ -311,35 +311,35 @@
         "format": "long",
         "code": [
             "// byte indices of the lanes (k * size + 0 .. size - 1), then pshufb",
-            "{% if dt_par.n_bits == 8 %}__m128i ib = r1.r;{% elif dt_par.n_bits == 16 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi16(r1.r, 1), _mm_setr_epi8(0, 0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14)), _mm_set1_epi16(0x0100));{% elif dt_par.n_bits == 32 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi32(r1.r, 2), _mm_setr_epi8(0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12)), _mm_set1_epi32(0x03020100));{% else %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi64(r1.r, 3), _mm_setr_epi8(0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8)), _mm_set_epi8(7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0));{% endif %}",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(r0.r){% else %}r0.r{% endif %}, ib)){% else %}_mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(r0.r){% else %}r0.r{% endif %}, ib){% endif %};",
+            "{% if dt_par.n_bits == 8 %}__m128i ib = vd1.vd;{% elif dt_par.n_bits == 16 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi16(vd1.vd, 1), _mm_setr_epi8(0, 0, 2, 2, 4, 4, 6, 6, 8, 8, 10, 10, 12, 12, 14, 14)), _mm_set1_epi16(0x0100));{% elif dt_par.n_bits == 32 %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi32(vd1.vd, 2), _mm_setr_epi8(0, 0, 0, 0, 4, 4, 4, 4, 8, 8, 8, 8, 12, 12, 12, 12)), _mm_set1_epi32(0x03020100));{% else %}__m128i ib = _mm_add_epi8(_mm_shuffle_epi8(_mm_slli_epi64(vd1.vd, 3), _mm_setr_epi8(0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8)), _mm_set_epi8(7, 6, 5, 4, 3, 2, 1, 0, 7, 6, 5, 4, 3, 2, 1, 0));{% endif %}",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}(_mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(vd0.vd){% else %}vd0.vd{% endif %}, ib)){% else %}_mm_shuffle_epi8({% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128(vd0.vd){% else %}vd0.vd{% endif %}, ib){% endif %};",
             "return res;"
         ]
     },
     "rea_reverse_epi16": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shufflehi_epi16({{ isa.prefix }}_shufflelo_epi16({{ isa.prefix }}_shuffle_epi32(r0.r, 0x4E), 0x1B), 0x1B);"
+        "code": "{{ isa.prefix }}_shufflehi_epi16({{ isa.prefix }}_shufflelo_epi16({{ isa.prefix }}_shuffle_epi32(vd0.vd, 0x4E), 0x1B), 0x1B);"
     },
     "rea_reverse_epi8": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, {{ isa.prefix }}_setr_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));"
+        "code": "{{ isa.prefix }}_shuffle_epi8(vd0.vd, {{ isa.prefix }}_setr_epi8(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0));"
     },
     "rea_shuf_epi16": {
         "format": "short",
-        "code": "{{ isa.prefix }}_shufflehi_epi16({{ isa.prefix }}_shufflelo_epi16(r0.r, {{ instr_name }}), {{ instr_name }});"
+        "code": "{{ isa.prefix }}_shufflehi_epi16({{ isa.prefix }}_shufflelo_epi16(vd0.vd, {{ instr_name }}), {{ instr_name }});"
     },
     "rea_swap_epi8": {
         "format": "short",
-        "code": "{{ isa.prefix }}_or_si128({{ isa.prefix }}_slli_epi16(r0.r, 8), {{ isa.prefix }}_srli_epi16(r0.r, 8));"
+        "code": "{{ isa.prefix }}_or_si128({{ isa.prefix }}_slli_epi16(vd0.vd, 8), {{ isa.prefix }}_srli_epi16(vd0.vd, 8));"
     },
     "reduce_shift": {
         "format": "long",
         "code": [
-            "%r<tp>% v = r0;",
-            "%r<c:uint|b:8>% b;",
+            "%vd<tp>% v = vd0;",
+            "%vd<c:uint|b:8>% b;",
             "{% for sh in [8, 4, 2, 1] %}{% if sh * 8 >= dt_par.n_bits %}b = %cast<tp,c:uint|b:8>%(v);",
-            "b.r = _mm_srli_si128(b.r, {{ sh }});",
+            "b.vd = _mm_srli_si128(b.vd, {{ sh }});",
             "v = %{{ instr_name }}<tp>%(v, %cast<c:uint|b:8,tp>%(b));",
             "{% endif %}{% endfor %}return %getfirst<tp>%(v);"
         ]
@@ -347,81 +347,81 @@
     "rshift_i64": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i sign = _mm_srai_epi32(_mm_shuffle_epi32(r0.r, _MM_SHUFFLE(3, 3, 1, 1)), 31);",
-            "res.r = _mm_or_si128(_mm_srli_epi64(r0.r, s0), _mm_slli_epi64(sign, 64 - s0));",
+            "%vd<tp>% res;",
+            "__m128i sign = _mm_srai_epi32(_mm_shuffle_epi32(vd0.vd, _MM_SHUFFLE(3, 3, 1, 1)), 31);",
+            "res.vd = _mm_or_si128(_mm_srli_epi64(vd0.vd, s0), _mm_slli_epi64(sign, 64 - s0));",
             "return res;"
         ]
     },
     "rshift_i8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "__m128i u = _mm_xor_si128(r0.r, _mm_set1_epi8((char)0x80));",
+            "%vd<tp>% res;",
+            "__m128i u = _mm_xor_si128(vd0.vd, _mm_set1_epi8((char)0x80));",
             "u = _mm_and_si128(_mm_srli_epi16(u, s0), _mm_set1_epi8((char)(0xFF >> s0)));",
-            "res.r = _mm_sub_epi8(u, _mm_set1_epi8((char)(0x80 >> s0)));",
+            "res.vd = _mm_sub_epi8(u, _mm_set1_epi8((char)(0x80 >> s0)));",
             "return res;"
         ]
     },
     "rshift_u8": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = _mm_and_si128(_mm_srli_epi16(r0.r, s0), _mm_set1_epi8((char)(0xFF >> s0)));",
+            "%vd<tp>% res;",
+            "res.vd = _mm_and_si128(_mm_srli_epi16(vd0.vd, s0), _mm_set1_epi8((char)(0xFF >> s0)));",
             "return res;"
         ]
     },
     "select_logic": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = _mm_or_{{ isa_dt_par.data_ext_logi }}(_mm_and_{{ isa_dt_par.data_ext_logi }}(m0.m, r0.r), _mm_andnot_{{ isa_dt_par.data_ext_logi }}(m0.m, r1.r));",
+            "%vd<tp>% res;",
+            "res.vd = _mm_or_{{ isa_dt_par.data_ext_logi }}(_mm_and_{{ isa_dt_par.data_ext_logi }}(vm0.vm, vd0.vd), _mm_andnot_{{ isa_dt_par.data_ext_logi }}(vm0.vm, vd1.vd));",
             "return res;"
         ]
     },
     "testz_movemask": {
         "format": "long",
         "code": [
-            "return _mm_movemask_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(_mm_and_{{ isa_dt_par.data_ext_logi }}(m0.m, m1.m)) == 0;"
+            "return _mm_movemask_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(_mm_and_{{ isa_dt_par.data_ext_logi }}(vm0.vm, vm1.vm)) == 0;"
         ]
     },
     "tovm_cmp": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "__m128i x = {% if isa_dt_par.data_ext_logi == 'si128' %}r0.r{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(r0.r){% endif %};",
+            "%vm<tr>% res;",
+            "__m128i x = {% if isa_dt_par.data_ext_logi == 'si128' %}vd0.vd{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(vd0.vd){% endif %};",
             "__m128i zero = _mm_setzero_si128();",
             "__m128i eq = _mm_cmpeq_epi{{ dt_par.n_bits }}(x, zero);",
             "__m128i nz = _mm_xor_si128(eq, _mm_cmpeq_epi32(zero, zero));",
-            "res.m = {% if isa_dt_par.data_ext_logi == 'si128' %}nz{% else %}_mm_castsi128_{{ isa_dt_par.data_ext_logi }}(nz){% endif %};",
+            "res.vm = {% if isa_dt_par.data_ext_logi == 'si128' %}nz{% else %}_mm_castsi128_{{ isa_dt_par.data_ext_logi }}(nz){% endif %};",
             "return res;"
         ]
     },
     "tovm_cmp64_sse2": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "__m128i x = {% if isa_dt_par.data_ext_logi == 'si128' %}r0.r{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(r0.r){% endif %};",
+            "%vm<tr>% res;",
+            "__m128i x = {% if isa_dt_par.data_ext_logi == 'si128' %}vd0.vd{% else %}_mm_cast{{ isa_dt_par.data_ext_logi }}_si128(vd0.vd){% endif %};",
             "__m128i zero = _mm_setzero_si128();",
             "__m128i eq32 = _mm_cmpeq_epi32(x, zero);",
             "__m128i eq = _mm_and_si128(eq32, _mm_shuffle_epi32(eq32, _MM_SHUFFLE(2, 3, 0, 1)));",
             "__m128i nz = _mm_xor_si128(eq, _mm_cmpeq_epi32(zero, zero));",
-            "res.m = {% if isa_dt_par.data_ext_logi == 'si128' %}nz{% else %}_mm_castsi128_{{ isa_dt_par.data_ext_logi }}(nz){% endif %};",
+            "res.vm = {% if isa_dt_par.data_ext_logi == 'si128' %}nz{% else %}_mm_castsi128_{{ isa_dt_par.data_ext_logi }}(nz){% endif %};",
             "return res;"
         ]
     },
     "trunc_magic": {
         "format": "long",
         "code": [
-            "{% set s = 'ps' if dt_par.n_bits == 32 else 'pd' %}{% set mg = '8388608.0f' if dt_par.n_bits == 32 else '4503599627370496.0' %}{% set one = '1.0f' if dt_par.n_bits == 32 else '1.0' %}%r<tp>% res;",
-            "{{ isa_dt_par.reg }} sign = _mm_and_{{ s }}(r0.r, _mm_set1_{{ s }}(-0.0));",
-            "{{ isa_dt_par.reg }} ax = _mm_xor_{{ s }}(r0.r, sign);",
+            "{% set s = 'ps' if dt_par.n_bits == 32 else 'pd' %}{% set mg = '8388608.0f' if dt_par.n_bits == 32 else '4503599627370496.0' %}{% set one = '1.0f' if dt_par.n_bits == 32 else '1.0' %}%vd<tp>% res;",
+            "{{ isa_dt_par.reg }} sign = _mm_and_{{ s }}(vd0.vd, _mm_set1_{{ s }}(-0.0));",
+            "{{ isa_dt_par.reg }} ax = _mm_xor_{{ s }}(vd0.vd, sign);",
             "{{ isa_dt_par.reg }} magic = _mm_set1_{{ s }}({{ mg }});",
             "{{ isa_dt_par.reg }} t = _mm_sub_{{ s }}(_mm_add_{{ s }}(ax, magic), magic);",
             "t = _mm_sub_{{ s }}(t, _mm_and_{{ s }}(_mm_cmpgt_{{ s }}(t, ax), _mm_set1_{{ s }}({{ one }})));",
             "{{ isa_dt_par.reg }} small = _mm_cmplt_{{ s }}(ax, magic);",
             "t = _mm_or_{{ s }}(_mm_and_{{ s }}(small, t), _mm_andnot_{{ s }}(small, ax));",
-            "res.r = _mm_or_{{ s }}(t, sign);",
+            "res.vd = _mm_or_{{ s }}(t, sign);",
             "return res;"
         ]
     }

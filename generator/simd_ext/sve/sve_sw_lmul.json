@@ -3,16 +3,16 @@
         {
             "datatypes": ["int16", "int32", "int64", "uint16", "uint32", "uint64"],
             "code": [
-                "{% set d = isa.datatypes[ctx.dt_ret].data_ext %}{% set s = isa_dt.data_ext %}%r<tr>% res;",
-                "res.r = svuzp1_{{ d }}(svreinterpret_{{ d }}_{{ s }}(r0.r1.r), svreinterpret_{{ d }}_{{ s }}(r0.r2.r));",
+                "{% set d = isa.datatypes[ctx.dt_ret].data_ext %}{% set s = isa_dt.data_ext %}%vd<tr>% res;",
+                "res.vd = svuzp1_{{ d }}(svreinterpret_{{ d }}_{{ s }}(vd0.lo.vd), svreinterpret_{{ d }}_{{ s }}(vd0.hi.vd));",
                 "return res;"
             ]
         },
         {
             "datatypes": ["float64"],
             "code": [
-                "%r<tr>% res;",
-                "res.r = svuzp1_f32(svcvt_f32_f64_x(svptrue_b64(), r0.r1.r), svcvt_f32_f64_x(svptrue_b64(), r0.r2.r));",
+                "%vd<tr>% res;",
+                "res.vd = svuzp1_f32(svcvt_f32_f64_x(svptrue_b64(), vd0.lo.vd), svcvt_f32_f64_x(svptrue_b64(), vd0.hi.vd));",
                 "return res;"
             ]
         }
@@ -21,18 +21,18 @@
         {
             "datatypes": ["int8", "int16", "int32", "uint8", "uint16", "uint32"],
             "code": [
-                "%r<tr>% res;",
-                "res.r1.r = svunpklo_{{ isa.datatypes[ctx.dt_ret].data_ext }}(r0.r);",
-                "res.r2.r = svunpkhi_{{ isa.datatypes[ctx.dt_ret].data_ext }}(r0.r);",
+                "%vd<tr>% res;",
+                "res.lo.vd = svunpklo_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vd0.vd);",
+                "res.hi.vd = svunpkhi_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vd0.vd);",
                 "return res;"
             ]
         },
         {
             "datatypes": ["float32"],
             "code": [
-                "%r<tr>% res;",
-                "res.r1.r = svcvt_f64_f32_x(svptrue_b64(), svzip1_f32(r0.r, r0.r));",
-                "res.r2.r = svcvt_f64_f32_x(svptrue_b64(), svzip2_f32(r0.r, r0.r));",
+                "%vd<tr>% res;",
+                "res.lo.vd = svcvt_f64_f32_x(svptrue_b64(), svzip1_f32(vd0.vd, vd0.vd));",
+                "res.hi.vd = svcvt_f64_f32_x(svptrue_b64(), svzip2_f32(vd0.vd, vd0.vd));",
                 "return res;"
             ]
         }

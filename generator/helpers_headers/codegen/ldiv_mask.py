@@ -99,15 +99,15 @@ def _params(proto, dt_par, isa, mask_kind, dt_ret=None):
     if mask_kind:
         # the mask has the datatype of the function (gather / scatter: the one of the data)
         msk_dt = datatypes[dt_par]
-        params.append({"name": "m0", "kind": "msk", "dt": msk_dt})
+        params.append({"name": "vm0", "kind": "msk", "dt": msk_dt})
         if mask_kind == "masks":
-            params.append({"name": "rsrc", "kind": "reg", "dt": datatypes[dt_par]})
+            params.append({"name": "vdsrc", "kind": "reg", "dt": datatypes[dt_par]})
     cnt = {"reg": 0, "msk": 0 if not mask_kind else 1, "val": 0, "ptr": 0}
     for arg in proto["args"]:
         realdatatype = resolve_param_datatype(arg, dt_par, dt_ret or dt_par)
         kind = arg["type"]
         if kind in cnt:
-            name = {"reg": "r", "msk": "m", "val": "s", "ptr": "p"}[kind] + str(cnt[kind])
+            name = {"reg": "vd", "msk": "vm", "val": "s", "ptr": "p"}[kind] + str(cnt[kind])
             cnt[kind] += 1
         elif kind == "vindex":
             name = "vi"
@@ -184,7 +184,7 @@ class _Ctx:
         for p in self.params:
             if p["name"] in names:
                 m1 = build_type(p["kind"] if p["kind"] != "vindex" else "reg", p["dt"], self.isa, 0, True, False)
-                member = "m" if p["kind"] == "msk" else "r"
+                member = "vm" if p["kind"] == "msk" else "vd"
                 lines.append(f"{m1} w_{p['name']}; w_{p['name']}.{member} = {p['name']}.{member};")
         return "\n".join(lines)
 
@@ -195,7 +195,7 @@ class _Ctx:
             return f"return {expr};"
         realdt = resolve_param_datatype(ret, self.dt_par, self.dt_ret, is_ret=True)
         d2 = build_type(ret["type"], realdt, self.isa, -2, True, False)
-        member = "r" if ret["type"] == "reg" else "m"
+        member = "vd" if ret["type"] == "reg" else "vm"
         return f"{d2} res;\nres.{member} = ({expr}).{member};\nreturn res;"
 
     def lanemask(self, name="lm"):
@@ -295,16 +295,16 @@ def _lane_crossing_body(ctx, params):
     d2 = lambda name, dt=None: build_func_name_internal(ctx.isa, ctx.dt, dt or ctx.dt_par, dt or ctx.dt_ret, name,
                                                          lmul=-2)
     if ctx.mask_kind:
-        args = [p["name"] for p in params if p["name"] not in ("m0", "rsrc")]
+        args = [p["name"] for p in params if p["name"] not in ("vm0", "vdsrc")]
         unmasked = build_func_name_internal(ctx.isa, ctx.dt, ctx.dt_par, ctx.dt_ret, ctx.f, lmul=-2)
         ctx.calls.add((ctx.f, "u"))
         ctx.calls.add(("select", "u"))
         lines.append(f"{ctx.ret_type()} t = {unmasked}({', '.join(args)});")
-        other = {"mask": "r0", "masks": "rsrc"}.get(ctx.mask_kind)
+        other = {"mask": "vd0", "masks": "vdsrc"}.get(ctx.mask_kind)
         if other is None:
             ctx.calls.add(("set0", "u"))
             other = f"{d2('set0')}()"
-        lines.append(f"return {d2('select')}(m0, t, {other});")
+        lines.append(f"return {d2('select')}(vm0, t, {other});")
         return "\n".join(lines)
     args = []
     for p in params:
@@ -396,7 +396,7 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
             call1=ctx.call1, wrap=ctx.wrap, ret_d2=ctx.ret_d2, lanemask=ctx.lanemask, neutral=ctx.neutral,
             UI="uint" + str(datatypes[dt_par]["n_bits"]),
         )
-        # mini-DSL (%r<tp>%, %N<tp>%...) relative to the LMUL of the function: d2, or m1 for lo / hi
+        # mini-DSL (%vd<tp>%, %N<tp>%...) relative to the LMUL of the function: d2, or m1 for lo / hi
         body = parse_placeholders(body, isa, funcs, f, dt_par, dt_ret, lmul=lmul_in, isa_name=True)["converted_ir"]
         if "level" in entry:
             lvl = entry["level"]

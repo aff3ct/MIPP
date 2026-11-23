@@ -10,7 +10,7 @@
                     "datatypes": "all_defs",
                     "variants": [],
                     "implem": [
-                        "res.r[i] = %!pred_cond!% (r0.r[i] > r1.r[i] ? r0.r[i] - r1.r[i] : r1.r[i] - r0.r[i]) %!pred_alt!%;"
+                        "res.vd[i] = %!pred_cond!% (vd0.vd[i] > vd1.vd[i] ? vd0.vd[i] - vd1.vd[i] : vd1.vd[i] - vd0.vd[i]) %!pred_alt!%;"
                     ]
                 }
             ]
@@ -23,7 +23,7 @@
             "type": "object",
             "properties": {
                 "type": {
-                    "description": "`element-wide`: `implem` is the body of a loop over the lanes, written by the generator (`i` is the lane index, `r0.r[i]` a lane of the first argument, `res.r[i]` a lane of the result). `vector-wide`: `implem` is the whole body of the function (reductions, permutations).",
+                    "description": "`element-wide`: `implem` is the body of a loop over the lanes, written by the generator (`i` is the lane index, `vd0.vd[i]` a lane of the first argument, `res.vd[i]` a lane of the result). `vector-wide`: `implem` is the whole body of the function (reductions, permutations).",
                     "type": "string"
                 },
                 "datatypes": {

@@ -2,40 +2,40 @@
     "slide_alignr": {
         "format": "long",
         "code": [
-            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}{% set t = '_mm256_permute2x128_si256(' ~ ci('r0.r') ~ ', ' ~ ci('r1.r') ~ ', 0x21)' %}%r<tp>% res;",
-            "{% if k == 0 %}res.r = r0.r;{% elif k == 32 %}res.r = r1.r;{% elif k == 16 %}res.r = {{ co(t) }};{% elif k < 16 %}res.r = {{ co('_mm256_alignr_epi8(' ~ t ~ ', ' ~ ci('r0.r') ~ ', ' ~ k ~ ')') }};{% else %}res.r = {{ co('_mm256_alignr_epi8(' ~ ci('r1.r') ~ ', ' ~ t ~ ', ' ~ (k - 16) ~ ')') }};{% endif %}",
+            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}{% set t = '_mm256_permute2x128_si256(' ~ ci('vd0.vd') ~ ', ' ~ ci('vd1.vd') ~ ', 0x21)' %}%vd<tp>% res;",
+            "{% if k == 0 %}res.vd = vd0.vd;{% elif k == 32 %}res.vd = vd1.vd;{% elif k == 16 %}res.vd = {{ co(t) }};{% elif k < 16 %}res.vd = {{ co('_mm256_alignr_epi8(' ~ t ~ ', ' ~ ci('vd0.vd') ~ ', ' ~ k ~ ')') }};{% else %}res.vd = {{ co('_mm256_alignr_epi8(' ~ ci('vd1.vd') ~ ', ' ~ t ~ ', ' ~ (k - 16) ~ ')') }};{% endif %}",
             "return res;"
         ]
     },
     "slide_b128_alignr": {
         "format": "long",
         "code": [
-            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}%r<tp>% res;",
-            "res.r = {{ co('_mm256_alignr_epi8(' ~ ci('r1.r') ~ ', ' ~ ci('r0.r') ~ ', ' ~ k ~ ')') }};",
+            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}%vd<tp>% res;",
+            "res.vd = {{ co('_mm256_alignr_epi8(' ~ ci('vd1.vd') ~ ', ' ~ ci('vd0.vd') ~ ', ' ~ k ~ ')') }};",
             "return res;"
         ]
     },
     "broadcast_b128_permute": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.name == 'float32' %}_mm256_permute_ps(r0.r, {{ imm * 85 }}){% else %}_mm256_permute_pd(r0.r, {{ 15 if imm else 0 }}){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.name == 'float32' %}_mm256_permute_ps(vd0.vd, {{ imm * 85 }}){% else %}_mm256_permute_pd(vd0.vd, {{ 15 if imm else 0 }}){% endif %};",
             "return res;"
         ]
     },
     "broadcast_b128_shuffle": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.n_bits == 32 %}_mm256_shuffle_epi32(r0.r, {{ imm * 85 }}){% elif dt_par.n_bits == 64 %}_mm256_shuffle_epi32(r0.r, {{ 238 if imm else 68 }}){% elif dt_par.n_bits == 16 %}_mm256_shuffle_epi8(r0.r, _mm256_set1_epi16({{ (2 * imm) + 256 * (2 * imm + 1) }})){% else %}_mm256_shuffle_epi8(r0.r, _mm256_set1_epi8({{ imm }})){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.n_bits == 32 %}_mm256_shuffle_epi32(vd0.vd, {{ imm * 85 }}){% elif dt_par.n_bits == 64 %}_mm256_shuffle_epi32(vd0.vd, {{ 238 if imm else 68 }}){% elif dt_par.n_bits == 16 %}_mm256_shuffle_epi8(vd0.vd, _mm256_set1_epi16({{ (2 * imm) + 256 * (2 * imm + 1) }})){% else %}_mm256_shuffle_epi8(vd0.vd, _mm256_set1_epi8({{ imm }})){% endif %};",
             "return res;"
         ]
     },
     "broadcast_permute4x64": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'float' %}_mm256_permute4x64_pd(r0.r, {{ imm * 85 }}){% else %}_mm256_permute4x64_epi64(r0.r, {{ imm * 85 }}){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'float' %}_mm256_permute4x64_pd(vd0.vd, {{ imm * 85 }}){% else %}_mm256_permute4x64_epi64(vd0.vd, {{ imm * 85 }}){% endif %};",
             "return res;"
         ]
     }

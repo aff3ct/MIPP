@@ -5,8 +5,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vcombine_{{ isa_dt.data_ext }}(vget_low_{{ isa_dt.data_ext }}(r0.r), vget_low_{{ isa_dt.data_ext }}(r1.r));",
+                "%vd<tr>% res;",
+                "res.vd = vcombine_{{ isa_dt.data_ext }}(vget_low_{{ isa_dt.data_ext }}(vd0.vd), vget_low_{{ isa_dt.data_ext }}(vd1.vd));",
                 "return res;"
             ]
         }
@@ -17,8 +17,8 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "res.m = vcombine_{{ isa_dt.data_ext_msk }}(vget_low_{{ isa_dt.data_ext_msk }}(m0.m), vget_low_{{ isa_dt.data_ext_msk }}(m1.m));",
+                "%vm<tr>% res;",
+                "res.vm = vcombine_{{ isa_dt.data_ext_msk }}(vget_low_{{ isa_dt.data_ext_msk }}(vm0.vm), vget_low_{{ isa_dt.data_ext_msk }}(vm1.vm));",
                 "return res;"
             ]
         }
@@ -29,8 +29,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vextq_{{ isa_dt.data_ext }}(r0.r, r0.r, %N<tp|m:tp/2>%);",
+                "%vd<tr>% res;",
+                "res.vd = vextq_{{ isa_dt.data_ext }}(vd0.vd, vd0.vd, %N<tp|m:tp/2>%);",
                 "return res;"
             ]
         }
@@ -41,8 +41,8 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "res.m = vextq_{{ isa_dt.data_ext_msk }}(m0.m, m0.m, %N<tp|m:tp/2>%);",
+                "%vm<tr>% res;",
+                "res.vm = vextq_{{ isa_dt.data_ext_msk }}(vm0.vm, vm0.vm, %N<tp|m:tp/2>%);",
                 "return res;"
             ]
         }
@@ -53,8 +53,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = r0.r;",
+                "%vd<tr>% res;",
+                "res.vd = vd0.vd;",
                 "return res;"
             ]
         }
@@ -65,8 +65,8 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "res.m = m0.m;",
+                "%vm<tr>% res;",
+                "res.vm = vm0.vm;",
                 "return res;"
             ]
         }
@@ -77,8 +77,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vcombine_{{ isa_dt.data_ext }}(vld1_{{ isa_dt.data_ext }}(p0), vdup_n_{{ isa_dt.data_ext }}(0));",
+                "%vd<tr>% res;",
+                "res.vd = vcombine_{{ isa_dt.data_ext }}(vld1_{{ isa_dt.data_ext }}(p0), vdup_n_{{ isa_dt.data_ext }}(0));",
                 "return res;"
             ]
         }
@@ -97,8 +97,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vcombine_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vmovn_{{ isa_dt.data_ext }}(r0.r), vdup_n_{{ isa.datatypes[ctx.dt_ret].data_ext }}(0));",
+                "%vd<tr>% res;",
+                "res.vd = vcombine_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vmovn_{{ isa_dt.data_ext }}(vd0.vd), vdup_n_{{ isa.datatypes[ctx.dt_ret].data_ext }}(0));",
                 "return res;"
             ]
         },
@@ -110,8 +110,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vcombine_f32(vcvt_f32_f64(r0.r), vdup_n_f32(0));",
+                "%vd<tr>% res;",
+                "res.vd = vcombine_f32(vcvt_f32_f64(vd0.vd), vdup_n_f32(0));",
                 "return res;"
             ]
         }
@@ -130,8 +130,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vcombine_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vqmovn_{{ isa_dt.data_ext }}(r0.r), vdup_n_{{ isa.datatypes[ctx.dt_ret].data_ext }}(0));",
+                "%vd<tr>% res;",
+                "res.vd = vcombine_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vqmovn_{{ isa_dt.data_ext }}(vd0.vd), vdup_n_{{ isa.datatypes[ctx.dt_ret].data_ext }}(0));",
                 "return res;"
             ]
         }
@@ -142,7 +142,7 @@
                 "u"
             ],
             "code": [
-                "vst1_{{ isa_dt.data_ext }}(p0, vget_low_{{ isa_dt.data_ext }}(r0.r));"
+                "vst1_{{ isa_dt.data_ext }}(p0, vget_low_{{ isa_dt.data_ext }}(vd0.vd));"
             ]
         }
     ],
@@ -160,8 +160,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vmovl_{{ isa_dt.data_ext }}(vget_low_{{ isa_dt.data_ext }}(r0.r));",
+                "%vd<tr>% res;",
+                "res.vd = vmovl_{{ isa_dt.data_ext }}(vget_low_{{ isa_dt.data_ext }}(vd0.vd));",
                 "return res;"
             ]
         },
@@ -173,8 +173,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = vcvt_f64_f32(vget_low_f32(r0.r));",
+                "%vd<tr>% res;",
+                "res.vd = vcvt_f64_f32(vget_low_f32(vd0.vd));",
                 "return res;"
             ]
         }

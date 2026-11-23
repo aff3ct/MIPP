@@ -38,8 +38,8 @@ int main(int argc, char** argv)
 
 	// vd1.load(a1); // does not exist yet in mipp_obj.hpp
 	// vd2.load(a2); // does not exist yet in mipp_obj.hpp
-	vd1.r = mipp::load<float32_t,LMUL>(a1);
-	vd2.r = mipp::load<float32_t,LMUL>(a2);
+	vd1.vd = mipp::load<float32_t,LMUL>(a1);
+	vd2.vd = mipp::load<float32_t,LMUL>(a2);
 
 	vd3 = vd1 + vd2;
 

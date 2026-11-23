@@ -106,7 +106,7 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
                 
         if is_special_bitfield:
             pre_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")
-            pre_statements.append(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;")
+            pre_statements.append(f"\t\ts_{arg_name}.vm[i] = ({arg_name}.vm & (1ULL << i)) ? ~0 : 0;")
             pre_statements.append(f"\t}}")
         else:
             tovd_func = build_func_name_internal(isa, msk_dt_name, msk_dt_name, msk_dt_name, "tovd", lmul=lmul)
@@ -141,10 +141,10 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
         tovd_scalar_func = build_func_name_internal(scalar_isa, dt_ret_name, dt_ret_name, dt_ret_name, "tovd", lmul=lmul)
         if isa.get("hw_mask_is_bitfield", False) and f in ["tovd", "tovm", "cast_k"]:
             post_statements.append(f"\t{vector_ret_type} res;")
-            post_statements.append(f"\tres.m = 0;")
+            post_statements.append(f"\tres.vm = 0;")
             n_elements = isa["size"] // get_dt_par_size(dt_ret_name)
             post_statements.append(f"\tfor (int i = 0; i < {n_elements}; ++i) {{")
-            post_statements.append(f"\t\tif (sres.m[i]) res.m |= (1ULL << i);")
+            post_statements.append(f"\t\tif (sres.vm[i]) res.vm |= (1ULL << i);")
             post_statements.append(f"\t}}")
         else:
             if "if_lmul" in isa["datatypes"].get(dt_ret_name, {}):
@@ -205,22 +205,22 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
         msk_dt = datatypes[dt_par]
         if funcs[f]["proto"]["ret"].get("fixeddatatype") not in (False, None, "par", "ret"):
             msk_dt = datatypes[funcs[f]["proto"]["ret"]["fixeddatatype"]]
-        _prepare_mask_variable(pre_statements, isa, msk_dt, "m0", cond, target_scalar_lmul, f, is_initial_mask=True)
-        call_args.append("s_m0")
+        _prepare_mask_variable(pre_statements, isa, msk_dt, "vm0", cond, target_scalar_lmul, f, is_initial_mask=True)
+        call_args.append("s_vm0")
         cnt_msk += 1
 
         if mask_kind == "masks":
-            rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, target_scalar_lmul, True, False)
-            rsrc_vector_type = build_reg(datatypes[dt_par], isa, lmul, True, False)
-            _register_to_scalar(pre_statements, "rsrc", rsrc_vector_type, rsrc_scalar_type)
-            call_args.append("s_rsrc.s")
+            vdsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, target_scalar_lmul, True, False)
+            vdsrc_vector_type = build_reg(datatypes[dt_par], isa, lmul, True, False)
+            _register_to_scalar(pre_statements, "vdsrc", vdsrc_vector_type, vdsrc_scalar_type)
+            call_args.append("s_vdsrc.s")
 
     for arg in proto["args"]:
         arg_type_name = arg["type"]
         realdatatype = _resolve_arg_datatype(arg, dt_par, dt_ret)
 
         if arg_type_name == "reg" or arg_type_name == "ret":
-            arg_name = f"r{cnt_reg}"
+            arg_name = f"vd{cnt_reg}"
             cnt_reg += 1
             arg_lmul = resolve_arg_lmul(arg, target_scalar_lmul, dt_par, dt_ret)
             scalar_type = build_type("reg", realdatatype, scalar_isa, arg_lmul, True, False)
@@ -228,7 +228,7 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
             _register_to_scalar(pre_statements, arg_name, vector_type, scalar_type)
             call_args.append(f"s_{arg_name}.s")
         elif arg_type_name == "msk":
-            arg_name = f"m{cnt_msk}"
+            arg_name = f"vm{cnt_msk}"
             cnt_msk += 1
             _prepare_mask_variable(pre_statements, isa, realdatatype, arg_name, cond, target_scalar_lmul, f, is_initial_mask=False)
             call_args.append(f"s_{arg_name}")

@@ -51,10 +51,10 @@ Every generated implementation in `include/mipp/internal/simd_ext/<isa>/c/functi
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-static inline vd_avx_float32_m1_t mipp_avx_add_float32_m1(const vd_avx_float32_m1_t r0, const vd_avx_float32_m1_t r1) {
+static inline vd_avx_float32_m1_t mipp_avx_add_float32_m1(const vd_avx_float32_m1_t vd0, const vd_avx_float32_m1_t vd1) {
     // Level 0 (Native Hardware)
     vd_avx_float32_m1_t res;
-    res.r = _mm256_add_ps(r0.r, r1.r);
+    res.vd = _mm256_add_ps(vd0.vd, vd1.vd);
     return res;
 }
 ```
@@ -64,13 +64,13 @@ NEON has no 64-bit integer multiplication, so `mul` on `int64` falls back to the
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-static inline vd_neon_int64_m1_t mipp_neon_mul_int64_m1(const vd_neon_int64_m1_t r0, const vd_neon_int64_m1_t r1) {
+static inline vd_neon_int64_m1_t mipp_neon_mul_int64_m1(const vd_neon_int64_m1_t vd0, const vd_neon_int64_m1_t vd1) {
     // Level 3 (Scalar Fallback)
-    vd_scalar_int64_m1_t s_r0 = {0};
-    memcpy(&s_r0, &r0, sizeof(r0));
-    vd_scalar_int64_m1_t s_r1 = {0};
-    memcpy(&s_r1, &r1, sizeof(r1));
-    vd_scalar_int64_m1_t sres = mipp_scalar_mul_int64_m1(s_r0, s_r1);
+    vd_scalar_int64_m1_t s_vd0 = {0};
+    memcpy(&s_vd0, &vd0, sizeof(vd0));
+    vd_scalar_int64_m1_t s_vd1 = {0};
+    memcpy(&s_vd1, &vd1, sizeof(vd1));
+    vd_scalar_int64_m1_t sres = mipp_scalar_mul_int64_m1(s_vd0, s_vd1);
     vd_neon_int64_m1_t res;
     memcpy(&res, &sres, sizeof(res));
     return res;

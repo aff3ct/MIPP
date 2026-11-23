@@ -40,7 +40,7 @@ function contextNotes(isa, lmul, mask, maskBySelect) {
   } else if (l !== "1") {
     notes.push(isa === "rvv"
       ? `<strong>LMUL ${l}</strong>: one group of ${l} hardware registers (RVV register grouping), handled by the instructions themselves. <a href="${DOCS}vector_types_and_lmul/" target="_blank">Vector types &amp; LMUL</a>`
-      : `<strong>LMUL ${l}</strong>: ${l} registers (<code>r1</code>, <code>r2</code>, ...) processed one after the other by the LMUL ${Number(l) / 2} function. <a href="${DOCS}vector_types_and_lmul/" target="_blank">Vector types &amp; LMUL</a>`);
+      : `<strong>LMUL ${l}</strong>: two halves (<code>lo</code>, <code>hi</code>) processed one after the other by the LMUL ${Number(l) / 2} function. <a href="${DOCS}vector_types_and_lmul/" target="_blank">Vector types &amp; LMUL</a>`);
   }
   const maskText = {
     mask: "<strong>mask</strong> (merge): the inactive lanes keep the value of the first operand",

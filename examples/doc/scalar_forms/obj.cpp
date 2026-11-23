@@ -24,22 +24,22 @@ static void forms()
     // --8<-- [start:forms]
     mipp::Vd<float> va(A);
     mipp::Vd<float> vb(B);
-    mipp::Vd<float> r1 = va - 1.f;                   // a - 1
-    mipp::Vd<float> r2 = 10.f - va;                  // 10 - a
-    mipp::Vd<float> r3 = mipp::fmadd(va, 2.f, vb);   // a * 2 + b
+    mipp::Vd<float> vd1 = va - 1.f;                  // a - 1
+    mipp::Vd<float> vd2 = 10.f - va;                 // 10 - a
+    mipp::Vd<float> vd3 = mipp::fmadd(va, 2.f, vb);  // a * 2 + b
     mipp::Vm<float> m = va < 0.f;                    // a < 0
     // --8<-- [end:forms]
     const int n = (int)mipp::N<float>();
-    for (int i = 0; i < n; i++) DOC_CHECK(r1[i] == A[i] - 1.f);
-    for (int i = 0; i < n; i++) DOC_CHECK(r2[i] == 10.f - A[i]);
-    for (int i = 0; i < n; i++) DOC_CHECK(r3[i] == A[i] * 2.f + B[i]);
+    for (int i = 0; i < n; i++) DOC_CHECK(vd1[i] == A[i] - 1.f);
+    for (int i = 0; i < n; i++) DOC_CHECK(vd2[i] == 10.f - A[i]);
+    for (int i = 0; i < n; i++) DOC_CHECK(vd3[i] == A[i] * 2.f + B[i]);
     for (int i = 0; i < n; i++) DOC_CHECK(m[i] == (A[i] < 0.f));
 
     // --8<-- [start:masked]
     // merge masking keeps the register operand: m ? 10 - a : a
-    mipp::Vd<float> r4 = mipp::sub<mipp::M>(m, 10.f, va);
+    mipp::Vd<float> vd4 = mipp::sub<mipp::M>(m, 10.f, va);
     // --8<-- [end:masked]
-    for (int i = 0; i < n; i++) DOC_CHECK(r4[i] == (A[i] < 0.f ? 10.f - A[i] : A[i]));
+    for (int i = 0; i < n; i++) DOC_CHECK(vd4[i] == (A[i] < 0.f ? 10.f - A[i] : A[i]));
 }
 
 // §4: shifts

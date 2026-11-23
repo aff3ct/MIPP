@@ -26,26 +26,26 @@ static void forms()
     // --8<-- [start:forms]
     mipp::vd<float> va = mipp::load<float>(A);
     mipp::vd<float> vb = mipp::load<float>(B);
-    mipp::vd<float> r1 = mipp::sub(va, 1.f);         // a - 1
-    mipp::vd<float> r2 = mipp::sub(10.f, va);        // 10 - a
-    mipp::vd<float> r3 = mipp::fmadd(va, 2.f, vb);   // a * 2 + b
+    mipp::vd<float> vd1 = mipp::sub(va, 1.f);        // a - 1
+    mipp::vd<float> vd2 = mipp::sub(10.f, va);       // 10 - a
+    mipp::vd<float> vd3 = mipp::fmadd(va, 2.f, vb);  // a * 2 + b
     mipp::vm<float> m = mipp::cmplt(va, 0.f);        // a < 0
     // --8<-- [end:forms]
     const int n = (int)mipp::N<float>();
-    mipp::store(OUT, r1);
+    mipp::store(OUT, vd1);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == A[i] - 1.f);
-    mipp::store(OUT, r2);
+    mipp::store(OUT, vd2);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == 10.f - A[i]);
-    mipp::store(OUT, r3);
+    mipp::store(OUT, vd3);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == A[i] * 2.f + B[i]);
     mipp::store(OUT, mipp::select(m, mipp::set1<float>(1.f), mipp::set0<float>()));
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == (A[i] < 0.f ? 1.f : 0.f));
 
     // --8<-- [start:masked]
     // merge masking keeps the register operand: m ? 10 - a : a
-    mipp::vd<float> r4 = mipp::sub<mipp::M>(m, 10.f, va);
+    mipp::vd<float> vd4 = mipp::sub<mipp::M>(m, 10.f, va);
     // --8<-- [end:masked]
-    mipp::store(OUT, r4);
+    mipp::store(OUT, vd4);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == (A[i] < 0.f ? 10.f - A[i] : A[i]));
 }
 

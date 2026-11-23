@@ -114,8 +114,8 @@
         "defines_template": "#define MIPP_SVE_N_{{type_category_upper}}{{n_bits}}_{{lsuffix_upper}} {{type_size}}",
         "vector_typedef_template": "typedef {{isa_datatype.reg}} fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} __attribute__((arm_sve_vector_bits(__ARM_FEATURE_SVE_BITS)));",
         "mask_typedef_template": "typedef svbool_t fixed_{{lsuffix_mipp}}_bool_t __attribute__((arm_sve_vector_bits(__ARM_FEATURE_SVE_BITS)));",
-        "vd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} r; } vd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
-        "vm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool_t m; } vm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
+        "vd_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_{{isa_datatype.to_ptr}} vd; } vd_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;",
+        "vm_struct_template": "typedef struct { fixed_{{lsuffix_mipp}}_bool_t vm; } vm_{{isa.name}}_{{datatype.category}}{{datatype.n_bits}}_{{lsuffix_mipp}}_t;"
     },
     "mipp_definitions": [
         "#define MIPP_FMA",

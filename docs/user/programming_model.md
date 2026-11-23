@@ -36,13 +36,13 @@ mipp_[func]_[datatype][_mask_variant][_lmul]
 
 When operating at standard vector length ($\text{LMUL}=1$), the `_m1` suffix is optional: functions without the suffix (e.g., `mipp_add_float32`) are direct aliases to their `_m1` counterparts (`mipp_add_float32_m1`).
 
-- **Standard ($\text{LMUL}=1$, unmasked)**: `mipp_add_float32(r0, r1)` or `mipp_add_float32_m1(r0, r1)`
-- **Multi-Register ($\text{LMUL}=2, 4, 8$)**: `mipp_add_float32_m2(r0, r1)`, `mipp_add_float32_m4(r0, r1)`
-- **Merge-Masked ($\text{LMUL}=1$)**: `mipp_add_float32_mask(m0, r0, r1)` or `mipp_add_float32_mask_m1(m0, r0, r1)`
-- **Zero-Masked**: `mipp_add_float32_maskz(m0, r0, r1)` or `mipp_add_float32_maskz_m1(m0, r0, r1)`
-- **Source-Masked**: `mipp_add_float32_masks(m0, rsrc, r0, r1)` or `mipp_add_float32_masks_m1(m0, rsrc, r0, r1)`
-- **Merge-Masked + Multi-Register**: `mipp_add_float32_mask_m2(m0, r0, r1)`
-- **[Half-Vector](vector_types_and_lmul.md#half-vectors)**: `mipp_add_float32_d2(r0, r1)`, `mipp_add_float32_mask_d2(m0, r0, r1)`
+- **Standard ($\text{LMUL}=1$, unmasked)**: `mipp_add_float32(vd0, vd1)` or `mipp_add_float32_m1(vd0, vd1)`
+- **Multi-Register ($\text{LMUL}=2, 4, 8$)**: `mipp_add_float32_m2(vd0, vd1)`, `mipp_add_float32_m4(vd0, vd1)`
+- **Merge-Masked ($\text{LMUL}=1$)**: `mipp_add_float32_mask(vm0, vd0, vd1)` or `mipp_add_float32_mask_m1(vm0, vd0, vd1)`
+- **Zero-Masked**: `mipp_add_float32_maskz(vm0, vd0, vd1)` or `mipp_add_float32_maskz_m1(vm0, vd0, vd1)`
+- **Source-Masked**: `mipp_add_float32_masks(vm0, vdsrc, vd0, vd1)` or `mipp_add_float32_masks_m1(vm0, vdsrc, vd0, vd1)`
+- **Merge-Masked + Multi-Register**: `mipp_add_float32_mask_m2(vm0, vd0, vd1)`
+- **[Half-Vector](vector_types_and_lmul.md#half-vectors)**: `mipp_add_float32_d2(vd0, vd1)`, `mipp_add_float32_mask_d2(vm0, vd0, vd1)`
 
 ### 2.2. Vector & Mask Datatypes (`vd` and `vm`)
 MIPP defines distinct data register (`vd`) and mask register (`vm`) types for each of the 10 supported data types across all LMUL configurations:
@@ -168,7 +168,7 @@ struct Vd {
 
     // Constructors
     Vd() = default;
-    Vd(vd<T, LMUL> r0); // Wraps a low-level vd register
+    Vd(vd<T, LMUL> vd0); // Wraps a low-level vd register
     Vd(const T val);      // Broadcasts a scalar (mipp::set1)
     Vd(const T* p0);      // Loads from memory, no alignment requirement (mipp::loadu)
     Vd(std::initializer_list<T> l); // {l0, l1, ...}: the N() lanes in order; {val}: broadcast, as Vd(val)
@@ -176,7 +176,7 @@ struct Vd {
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator vd<T, LMUL>() const;
 
-    Vd& operator=(const vd<T, LMUL>& r0); // Assignment
+    Vd& operator=(const vd<T, LMUL>& vd0); // Assignment
     Vd& operator=(const T val); // Broadcast
 
     T operator[](const size_t index) const; // Reads one element (mipp::get)
@@ -197,7 +197,7 @@ struct Vm {
 
     // Constructors
     Vm() = default;
-    Vm(vm<T, LMUL> m0);                           // Wraps a low-level vm register
+    Vm(vm<T, LMUL> vm0);                          // Wraps a low-level vm register
     Vm(const bool val);                           // All lanes active or inactive (mipp::set1_k)
     Vm(const int32_t vals[mipp::N<T, LMUL>()]);   // Lane i active iff vals[i] != 0 (mipp::set_k)
     Vm(std::initializer_list<bool> l);            // {b0, b1, ...}: the N() lanes in order; {b}: broadcast
@@ -205,7 +205,7 @@ struct Vm {
     // Implicit conversion to the low-level register (interoperability with the C++ Functional API)
     operator vm<T, LMUL>() const;
 
-    Vm& operator=(const vm<T, LMUL>& m0); // Assignment
+    Vm& operator=(const vm<T, LMUL>& vm0); // Assignment
     Vm& operator=(const bool val); // Broadcast
 
     bool operator[](const size_t index) const; // Reads one lane: true if active

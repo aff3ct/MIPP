@@ -6,7 +6,7 @@
         "variants": [],
         "implem": [
           "// do nothing, it is weird to define abs on unsigned integers...",
-          "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% vd0.vd[i] %!pred_alt!%;"
         ]
       },
       {
@@ -14,7 +14,7 @@
         "datatypes": "all_int",
         "variants": [],
         "implem": [
-          "res.r[i] = %!pred_cond!% (r0.r[i] < 0) ? -r0.r[i] : r0.r[i] %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% (vd0.vd[i] < 0) ? -vd0.vd[i] : vd0.vd[i] %!pred_alt!%;"
         ]
       },
       {
@@ -23,7 +23,7 @@
         "variants": [],
         "implem": [
           "// requires #include <math.h>",
-          "res.r[i] = %!pred_cond!% fabs(r0.r[i]) %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% fabs(vd0.vd[i]) %!pred_alt!%;"
         ]
       },
       {
@@ -32,7 +32,7 @@
         "variants": [],
         "implem": [
           "// requires #include <math.h>",
-          "res.r[i] = %!pred_cond!% fabsf(r0.r[i]) %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% fabsf(vd0.vd[i]) %!pred_alt!%;"
         ]
       }
     ],
@@ -42,7 +42,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ACOSF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ACOSF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -50,7 +50,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ACOSD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ACOSD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -60,7 +60,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ACOSHF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ACOSHF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -68,7 +68,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ACOSHD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ACOSHD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -78,7 +78,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] + r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] + vd1.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -88,15 +88,15 @@
             "datatypes": "all_int",
             "variants": [],
             "implem": [
-                "int{{ dt_par.n_bits }}_t a = r0.r[i];",
-                "int{{ dt_par.n_bits }}_t b = r1.r[i];",
+                "int{{ dt_par.n_bits }}_t a = vd0.vd[i];",
+                "int{{ dt_par.n_bits }}_t b = vd1.vd[i];",
                 "",
                 "int{{ dt_par.n_bits }}_t c =",
                 "\t(b > 0 && a > INT{{ dt_par.n_bits }}_MAX - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MAX :",
                 "\t(b < 0 && a < INT{{ dt_par.n_bits }}_MIN - b) ? (int{{ dt_par.n_bits }}_t)INT{{ dt_par.n_bits }}_MIN :",
                 "\t(int{{ dt_par.n_bits }}_t)(a + b);",
                 "",
-                "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% c %!pred_alt!%;"
             ]
         },
         {
@@ -104,14 +104,14 @@
             "datatypes": "all_uint",
             "variants": [],
             "implem": [
-                "uint{{ dt_par.n_bits }}_t a = r0.r[i];",
-                "uint{{ dt_par.n_bits }}_t b = r1.r[i];",
+                "uint{{ dt_par.n_bits }}_t a = vd0.vd[i];",
+                "uint{{ dt_par.n_bits }}_t b = vd1.vd[i];",
                 "",
                 "uint{{ dt_par.n_bits }}_t c =",
                 "\t(a > UINT{{ dt_par.n_bits }}_MAX - b) ? UINT{{ dt_par.n_bits }}_MAX :",
                 "\t(uint{{ dt_par.n_bits }}_t)(a + b);",
                 "",
-                "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% c %!pred_alt!%;"
             ]
         }
     ],
@@ -123,7 +123,7 @@
             "implem": [
                 "%s<c:int|b:32>% res = 1;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres &= m0.m[i] != 0;",
+                "\tres &= vm0.vm[i] != 0;",
                 "return res;"
             ]
         }
@@ -134,7 +134,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] & r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] & vd1.vd[i] %!pred_alt!%;"
             ]
         },
         {
@@ -143,12 +143,12 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i & r1i;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -158,7 +158,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = m0.m[i] & m1.m[i];"
+                "res.vm[i] = vm0.vm[i] & vm1.vm[i];"
             ]
         }
     ],
@@ -168,7 +168,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% (~r0.r[i]) & r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (~vd0.vd[i]) & vd1.vd[i] %!pred_alt!%;"
             ]
         },
         {
@@ -177,12 +177,12 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = (~r0i) & r1i;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -192,7 +192,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = (~m0.m[i]) & m1.m[i];"
+                "res.vm[i] = (~vm0.vm[i]) & vm1.vm[i];"
             ]
         }
     ],
@@ -204,7 +204,7 @@
             "implem": [
                 "%s<c:int|b:32>% res = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres |= m0.m[i] != 0;",
+                "\tres |= vm0.vm[i] != 0;",
                 "return res;"
             ]
         }
@@ -215,7 +215,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ASINF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ASINF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -223,7 +223,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ASIND(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ASIND(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -233,7 +233,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ASINHF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ASINHF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -241,7 +241,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ASINHD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ASINHD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -251,7 +251,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ATANF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ATANF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -259,7 +259,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ATAND(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ATAND(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -269,7 +269,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ATAN2F(r0.r[i], r1.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ATAN2F(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -277,7 +277,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ATAN2D(r0.r[i], r1.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ATAN2D(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -287,7 +287,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ATANHF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ATANHF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -295,7 +295,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% ATANHD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% ATANHD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -305,7 +305,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[s0] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[s0] %!pred_alt!%;"
             ]
         }
     ],
@@ -319,7 +319,7 @@
                 "const size_t b0 = (i / nb) * nb;",
                 "const size_t l = i - b0;",
                 "(void)l; // every lane of the block receives the same one",
-                "res.r[i] = %!pred_cond!% r0.r[b0 + (size_t)s0] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[b0 + (size_t)s0] %!pred_alt!%;"
             ]
         }
     ],
@@ -331,11 +331,11 @@
             "implem": [
                 "const size_t j = i & ~(size_t)1;",
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
-                "const %s<tp>% ar = r0.r[j] < 0 ? -r0.r[j] : r0.r[j], ai = r0.r[k] < 0 ? -r0.r[k] : r0.r[k];",
+                "const %s<tp>% ar = vd0.vd[j] < 0 ? -vd0.vd[j] : vd0.vd[j], ai = vd0.vd[k] < 0 ? -vd0.vd[k] : vd0.vd[k];",
                 "const %s<tp>% m = ar > ai ? ar : ai;",
                 "const %s<tp>% one = 1, d = m == m + m ? one : m; // 0 or +inf: divided by 1 (the result is 0, or +inf as hypot)",
                 "const %s<tp>% x = ar / d, y = ai / d;",
-                "res.r[i] = %!pred_cond!% (m * (%s<tp>%)sqrt((double)(x * x + y * y))) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (m * (%s<tp>%)sqrt((double)(x * x + y * y))) %!pred_alt!%;"
             ]
         }
     ],
@@ -345,8 +345,8 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
-                "BIT_CAST_N(res.r, r0.r, %N<tr>%);",
+                "%vd<tr>% res;",
+                "BIT_CAST_N(res.vd, vd0.vd, %N<tr>%);",
                 "return res;"
             ]
         }
@@ -357,8 +357,8 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%m<tr>% res;",
-                "BIT_CAST_N(res.m, m0.m, %N<tr>%);",
+                "%vm<tr>% res;",
+                "BIT_CAST_N(res.vm, vm0.vm, %N<tr>%);",
                 "return res;"
             ]
         }
@@ -372,7 +372,7 @@
                 "const size_t j = i & ~(size_t)1;",
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
                 "const int odd = (i & 1) != 0;",
-                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
+                "const %s<tp>% ar = vd0.vd[j], ai = vd0.vd[k], br = vd1.vd[j], bi = vd1.vd[k];",
                 "%s<tp>% re, im;",
                 "if ((br < 0 ? -br : br) >= (bi < 0 ? -bi : bi))",
                 "{",
@@ -386,7 +386,7 @@
                 "\tre = (ar * q + ai) / d;",
                 "\tim = (ai * q - ar) / d;",
                 "}",
-                "res.r[i] = %!pred_cond!% (odd ? im : re) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (odd ? im : re) %!pred_alt!%;"
             ]
         }
     ],
@@ -399,8 +399,8 @@
                 "const size_t j = i & ~(size_t)1;",
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
                 "const int odd = (i & 1) != 0;",
-                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
-                "res.r[i] = %!pred_cond!% (odd ? ar * bi + ai * br + r2.r[k] : ar * br - ai * bi + r2.r[j]) %!pred_alt!%;"
+                "const %s<tp>% ar = vd0.vd[j], ai = vd0.vd[k], br = vd1.vd[j], bi = vd1.vd[k];",
+                "res.vd[i] = %!pred_cond!% (odd ? ar * bi + ai * br + vd2.vd[k] : ar * br - ai * bi + vd2.vd[j]) %!pred_alt!%;"
             ]
         }
     ],
@@ -410,8 +410,8 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%s<tr>% lo = r0.r[i] > r1.r[i] ? r0.r[i] : r1.r[i];",
-                "res.r[i] = %!pred_cond!% (lo < r2.r[i] ? lo : r2.r[i]) %!pred_alt!%;"
+                "%s<tr>% lo = vd0.vd[i] > vd1.vd[i] ? vd0.vd[i] : vd1.vd[i];",
+                "res.vd[i] = %!pred_cond!% (lo < vd2.vd[i] ? lo : vd2.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -421,7 +421,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] == r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.vm[i] = %!pred_cond!% (vd0.vd[i] == vd1.vd[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -431,7 +431,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] >= r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.vm[i] = %!pred_cond!% (vd0.vd[i] >= vd1.vd[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -441,7 +441,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] > r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.vm[i] = %!pred_cond!% (vd0.vd[i] > vd1.vd[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -451,7 +451,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] <= r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.vm[i] = %!pred_cond!% (vd0.vd[i] <= vd1.vd[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -461,7 +461,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] < r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.vm[i] = %!pred_cond!% (vd0.vd[i] < vd1.vd[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -471,7 +471,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = %!pred_cond!% (r0.r[i] != r1.r[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
+                "res.vm[i] = %!pred_cond!% (vd0.vd[i] != vd1.vd[i]) ? (%s<c:uint|b:tr>%)-1 : 0 %!pred_alt!%;"
             ]
         }
     ],
@@ -484,8 +484,8 @@
                 "const size_t j = i & ~(size_t)1;",
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
                 "const int odd = (i & 1) != 0;",
-                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
-                "res.r[i] = %!pred_cond!% (odd ? ar * bi + ai * br : ar * br - ai * bi) %!pred_alt!%;"
+                "const %s<tp>% ar = vd0.vd[j], ai = vd0.vd[k], br = vd1.vd[j], bi = vd1.vd[k];",
+                "res.vd[i] = %!pred_cond!% (odd ? ar * bi + ai * br : ar * br - ai * bi) %!pred_alt!%;"
             ]
         }
     ],
@@ -498,8 +498,8 @@
                 "const size_t j = i & ~(size_t)1;",
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
                 "const int odd = (i & 1) != 0;",
-                "const %s<tp>% ar = r0.r[j], ai = r0.r[k], br = r1.r[j], bi = r1.r[k];",
-                "res.r[i] = %!pred_cond!% (odd ? ai * br - ar * bi : ar * br + ai * bi) %!pred_alt!%;"
+                "const %s<tp>% ar = vd0.vd[j], ai = vd0.vd[k], br = vd1.vd[j], bi = vd1.vd[k];",
+                "res.vd[i] = %!pred_cond!% (odd ? ai * br - ar * bi : ar * br + ai * bi) %!pred_alt!%;"
             ]
         }
     ],
@@ -511,8 +511,8 @@
             "implem": [
                 "const size_t j = i & ~(size_t)1;",
                 "const size_t k = j + 1 < %N<tp>% ? j + 1 : j; // (a single lane: no complex number)",
-                "const %s<tp>% ar = r0.r[j], ai = r0.r[k];",
-                "res.r[i] = %!pred_cond!% (ar * ar + ai * ai) %!pred_alt!%;"
+                "const %s<tp>% ar = vd0.vd[j], ai = vd0.vd[k];",
+                "res.vd[i] = %!pred_cond!% (ar * ar + ai * ai) %!pred_alt!%;"
             ]
         }
     ],
@@ -522,10 +522,10 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tp|m:tp*2>% res;",
+                "%vd<tp|m:tp*2>% res;",
                 "for (size_t i = 0; i < %N<tp>%; i++){",
-                "\tres.r[i] = r0.r[i];",
-                "\tres.r[i + %N<tp>%] = r1.r[i];",
+                "\tres.vd[i] = vd0.vd[i];",
+                "\tres.vd[i + %N<tp>%] = vd1.vd[i];",
                 "}",
                 "return res;"
             ]
@@ -537,10 +537,10 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%m<tp|m:tp*2>% res;",
+                "%vm<tp|m:tp*2>% res;",
                 "for (size_t i = 0; i < %N<tp>%; i++){",
-                "\tres.m[i] = m0.m[i];",
-                "\tres.m[i + %N<tp>%] = m1.m[i];",
+                "\tres.vm[i] = vm0.vm[i];",
+                "\tres.vm[i + %N<tp>%] = vm1.vm[i];",
                 "}",
                 "return res;"
             ]
@@ -552,13 +552,13 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "size_t k = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tif (m0.m[i])",
-                "\t\tres.r[k++] = r0.r[i];",
+                "\tif (vm0.vm[i])",
+                "\t\tres.vd[k++] = vd0.vd[i];",
                 "for (; k < %N<tp>%; k++)",
-                "\tres.r[k] = (%s<tr>%)0;",
+                "\tres.vd[k] = (%s<tr>%)0;",
                 "return res;"
             ]
         }
@@ -569,7 +569,7 @@
             "datatypes": "all_float",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% ((i & 1) ? -r0.r[i] : r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% ((i & 1) ? -vd0.vd[i] : vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -580,12 +580,12 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = (r0i & ~((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) | (r1i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1)));",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -595,7 +595,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% COSF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% COSF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -603,7 +603,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% COSD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% COSD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -613,7 +613,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% COSHF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% COSHF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -621,7 +621,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% COSHD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% COSHD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -633,7 +633,7 @@
             "implem": [
                 "%s<c:int|b:32>% res = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres += m0.m[i] != 0;",
+                "\tres += vm0.vm[i] != 0;",
                 "return res;"
             ]
         }
@@ -644,7 +644,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = (%s<tr>%)r0.r[i];"
+                "res.vd[i] = (%s<tr>%)vd0.vd[i];"
             ]
         }
     ],
@@ -654,7 +654,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] / r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] / vd1.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -664,7 +664,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] >> 1 %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] >> 1 %!pred_alt!%;"
             ]
         },
         {
@@ -672,7 +672,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] / 2.0 %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] / 2.0 %!pred_alt!%;"
             ]
         },
         {
@@ -680,7 +680,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] / 2.f %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] / 2.f %!pred_alt!%;"
             ]
         }
     ],
@@ -690,7 +690,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] >> 2 %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] >> 2 %!pred_alt!%;"
             ]
         },
         {
@@ -698,7 +698,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] / 4.0 %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] / 4.0 %!pred_alt!%;"
             ]
         },
         {
@@ -706,7 +706,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] / 4.f %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] / 4.f %!pred_alt!%;"
             ]
         }
     ],
@@ -716,7 +716,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i & ~(size_t)1] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i & ~(size_t)1] %!pred_alt!%;"
             ]
         }
     ],
@@ -726,7 +726,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[%N<tp>% == 1 ? 0 : (i | 1)] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[%N<tp>% == 1 ? 0 : (i | 1)] %!pred_alt!%;"
             ]
         }
     ],
@@ -736,7 +736,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% EXPF(r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% EXPF(vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -744,7 +744,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% EXPD(r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% EXPD(vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -754,10 +754,10 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "size_t k = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres.r[i] = m0.m[i] ? r0.r[k++] : (%s<tr>%)0;",
+                "\tres.vd[i] = vm0.vm[i] ? vd0.vd[k++] : (%s<tr>%)0;",
                 "return res;"
             ]
         }
@@ -768,7 +768,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] + r2.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] * vd1.vd[i] + vd2.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -778,7 +778,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] - r2.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] * vd1.vd[i] - vd2.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -788,7 +788,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% -(r0.r[i] * r1.r[i]) + r2.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% -(vd0.vd[i] * vd1.vd[i]) + vd2.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -798,7 +798,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% -(r0.r[i] * r1.r[i]) - r2.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% -(vd0.vd[i] * vd1.vd[i]) - vd2.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -808,7 +808,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% p0[r0.r[i]] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% p0[vd0.vd[i]] %!pred_alt!%;"
             ]
         }
     ],
@@ -818,7 +818,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "return r0.r[s0];"
+                "return vd0.vd[s0];"
             ]
         }
     ],
@@ -828,7 +828,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "return m0.m[s0];"
+                "return vm0.vm[s0];"
             ]
         }
     ],
@@ -838,7 +838,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "return r0.r[0];"
+                "return vd0.vd[0];"
             ]
         }
     ],
@@ -850,7 +850,7 @@
             "implem": [
                 "%s<tr>% resv = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tresv +=  %!pred_cond!%  r0.r[i] %!pred_alt!%;",
+                "\tresv +=  %!pred_cond!%  vd0.vd[i] %!pred_alt!%;",
                 "return resv;"
             ]
         }
@@ -864,7 +864,7 @@
                 "uint64_t resv64 = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tuint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tuint64_t a = %!pred_cond!% vd0.vd[i] %!pred_alt!%;",
                 "\tuint64_t b = resv64;",
                 "",
                 "\tresv64 =",
@@ -886,7 +886,7 @@
                 "uint64_t resv64 = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tresv64 += %!pred_cond!% vd0.vd[i] %!pred_alt!%;",
                 "}",
                 "return resv64 > UINT{{ dt_par.n_bits }}_MAX ? (%s<tr>%)UINT{{ dt_par.n_bits }}_MAX : (%s<tr>%)resv64;"
             ]
@@ -899,7 +899,7 @@
                 "int64_t resv64 = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tint64_t a = %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tint64_t a = %!pred_cond!% vd0.vd[i] %!pred_alt!%;",
                 "\tint64_t b = resv64;",
                 "",
                 "\tresv64 =",
@@ -921,7 +921,7 @@
             "implem": [
                 "int64_t resv64 = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++){",
-                "\tresv64 += %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tresv64 += %!pred_cond!% vd0.vd[i] %!pred_alt!%;",
                 "}",
                 "return resv64 > INT{{ dt_par.n_bits }}_MAX ? (%s<tr>%)INT{{ dt_par.n_bits }}_MAX : resv64 < INT{{ dt_par.n_bits }}_MIN ? (%s<tr>%)INT{{ dt_par.n_bits }}_MIN : (%s<tr>%)resv64;"
             ]
@@ -933,9 +933,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tp|m:tp/2>% res;",
+                "%vd<tp|m:tp/2>% res;",
                 "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.r[i] = r0.r[i + %N<tp|m:tp/2>%];",
+                "\tres.vd[i] = vd0.vd[i + %N<tp|m:tp/2>%];",
                 "}",
                 "return res;"
             ]
@@ -947,9 +947,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%m<tp|m:tp/2>% res;",
+                "%vm<tp|m:tp/2>% res;",
                 "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.m[i] = m0.m[i + %N<tp|m:tp/2>%];",
+                "\tres.vm[i] = vm0.vm[i + %N<tp|m:tp/2>%];",
                 "}",
                 "return res;"
             ]
@@ -963,7 +963,7 @@
             "implem": [
                 "%s<tr>% resv = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] > resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         },
@@ -974,7 +974,7 @@
             "implem": [
                 "%s<tr>% resv = INT{{ dt_par.n_bits }}_MIN;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] > resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         },
@@ -985,7 +985,7 @@
             "implem": [
                 "%s<tr>% resv = -FLT_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] > resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         },
@@ -996,7 +996,7 @@
             "implem": [
                 "%s<tr>% resv = -DBL_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] > resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] > resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         }
@@ -1009,7 +1009,7 @@
             "implem": [
                 "%s<tr>% resv = UINT{{ dt_par.n_bits }}_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] < resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         },
@@ -1020,7 +1020,7 @@
             "implem": [
                 "%s<tr>% resv = INT{{ dt_par.n_bits }}_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] < resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         },
@@ -1031,7 +1031,7 @@
             "implem": [
                 "%s<tr>% resv = FLT_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] < resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         },
@@ -1042,7 +1042,7 @@
             "implem": [
                 "%s<tr>% resv = DBL_MAX;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // start from 0 to ease compiler autovec",
-                "\tresv = %!pred_cond!% (r0.r[i] < resv) ? r0.r[i] : resv %!pred_alt!%;",
+                "\tresv = %!pred_cond!% (vd0.vd[i] < resv) ? vd0.vd[i] : resv %!pred_alt!%;",
                 "return resv;"
             ]
         }
@@ -1055,7 +1055,7 @@
             "implem": [
                 "%s<tr>% resv = 1;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tresv *=  %!pred_cond!% r0.r[i] %!pred_alt!%;",
+                "\tresv *=  %!pred_cond!% vd0.vd[i] %!pred_alt!%;",
                 "",
                 "return resv;"
             ]
@@ -1067,9 +1067,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tp|m:tp/2>% res;",
+                "%vd<tp|m:tp/2>% res;",
                 "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.r[i] = r0.r[i];",
+                "\tres.vd[i] = vd0.vd[i];",
                 "}",
                 "return res;"
             ]
@@ -1081,9 +1081,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%m<tp|m:tp/2>% res;",
+                "%vm<tp|m:tp/2>% res;",
                 "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.m[i] = m0.m[i];",
+                "\tres.vm[i] = vm0.vm[i];",
                 "}",
                 "return res;"
             ]
@@ -1095,7 +1095,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1105,7 +1105,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1115,10 +1115,10 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "size_t k = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres.r[i] = m0.m[i] ? p0[k++] : (%s<tr>%)0;",
+                "\tres.vd[i] = vm0.vm[i] ? p0[k++] : (%s<tr>%)0;",
                 "return res;"
             ]
         }
@@ -1130,7 +1130,7 @@
             "variants": [],
             "implem": [
                 "const size_t h = (%N<tp>% + 1) / 2;",
-                "res.r[i] = i < h ? p0[2 * i] : p0[2 * (i - h) + 1];"
+                "res.vd[i] = i < h ? p0[2 * i] : p0[2 * (i - h) + 1];"
             ]
         }
     ],
@@ -1140,7 +1140,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% LOGF(r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% LOGF(vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1148,7 +1148,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% LOGD(r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% LOGD(vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -1159,9 +1159,9 @@
             "variants": [],
             "implem": [
                 "// in the unsigned type: the left shift of a negative value is undefined in C",
-                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)r0.r[i];",
-                "%s<tr>% v = (%s<tr>%)(%s<c:uint|b:tp>%)(u0 << (unsigned)r1.r[i]);",
-                "res.r[i] = %!pred_cond!% v %!pred_alt!%;"
+                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)vd0.vd[i];",
+                "%s<tr>% v = (%s<tr>%)(%s<c:uint|b:tp>%)(u0 << (unsigned)vd1.vd[i]);",
+                "res.vd[i] = %!pred_cond!% v %!pred_alt!%;"
             ]
         }
     ],
@@ -1171,7 +1171,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] =  %!pred_cond!% r0.r[i] << (uint8_t)s0 %!pred_alt!% ;"
+                "res.vd[i] =  %!pred_cond!% vd0.vd[i] << (uint8_t)s0 %!pred_alt!% ;"
             ]
         },
         {
@@ -1180,11 +1180,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
                 "r0i <<= s0;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &r0i);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -1194,7 +1194,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] > r1.r[i] ? r0.r[i] : r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] > vd1.vd[i] ? vd0.vd[i] : vd1.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1204,7 +1204,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] < r1.r[i] ? r0.r[i] : r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] < vd1.vd[i] ? vd0.vd[i] : vd1.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1216,11 +1216,11 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x8000000000000000ULL;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
         {
@@ -1230,11 +1230,11 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x80000000;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
         {
@@ -1244,11 +1244,11 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x8000;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
         {
@@ -1258,11 +1258,11 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x80;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &r0.r[i]);",
+                "BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -1272,7 +1272,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] * r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] * vd1.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1282,9 +1282,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++){",
-                "\tres.r[i] = (%s<tr>%)r0.r[i];",
+                "\tres.vd[i] = (%s<tr>%)vd0.vd[i];",
                 "}",
                 "return res;"
             ]
@@ -1298,10 +1298,10 @@
             ],
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++) {",
-                "\t%s<tp>% v = r0.r[i];",
-                "\tres.r[i] = (%s<tr>%)(v < -128 ? -128 : (v > 127 ? 127 : v));",
+                "\t%s<tp>% v = vd0.vd[i];",
+                "\tres.vd[i] = (%s<tr>%)(v < -128 ? -128 : (v > 127 ? 127 : v));",
                 "}",
                 "return res;"
             ]
@@ -1313,10 +1313,10 @@
             ],
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++) {",
-                "\t%s<tp>% v = r0.r[i];",
-                "\tres.r[i] = (%s<tr>%)(v < -32768 ? -32768 : (v > 32767 ? 32767 : v));",
+                "\t%s<tp>% v = vd0.vd[i];",
+                "\tres.vd[i] = (%s<tr>%)(v < -32768 ? -32768 : (v > 32767 ? 32767 : v));",
                 "}",
                 "return res;"
             ]
@@ -1328,10 +1328,10 @@
             ],
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++) {",
-                "\t%s<tp>% v = r0.r[i];",
-                "\tres.r[i] = (%s<tr>%)(v < -2147483648LL ? -2147483648LL : (v > 2147483647LL ? 2147483647LL : v));",
+                "\t%s<tp>% v = vd0.vd[i];",
+                "\tres.vd[i] = (%s<tr>%)(v < -2147483648LL ? -2147483648LL : (v > 2147483647LL ? 2147483647LL : v));",
                 "}",
                 "return res;"
             ]
@@ -1343,10 +1343,10 @@
             ],
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++) {",
-                "\t%s<tp>% v = r0.r[i];",
-                "\tres.r[i] = (%s<tr>%)(v > 255 ? 255 : v);",
+                "\t%s<tp>% v = vd0.vd[i];",
+                "\tres.vd[i] = (%s<tr>%)(v > 255 ? 255 : v);",
                 "}",
                 "return res;"
             ]
@@ -1358,10 +1358,10 @@
             ],
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++) {",
-                "\t%s<tp>% v = r0.r[i];",
-                "\tres.r[i] = (%s<tr>%)(v > 65535 ? 65535 : v);",
+                "\t%s<tp>% v = vd0.vd[i];",
+                "\tres.vd[i] = (%s<tr>%)(v > 65535 ? 65535 : v);",
                 "}",
                 "return res;"
             ]
@@ -1373,10 +1373,10 @@
             ],
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++) {",
-                "\t%s<tp>% v = r0.r[i];",
-                "\tres.r[i] = (%s<tr>%)(v > 4294967295ULL ? 4294967295ULL : v);",
+                "\t%s<tp>% v = vd0.vd[i];",
+                "\tres.vd[i] = (%s<tr>%)(v > 4294967295ULL ? 4294967295ULL : v);",
                 "}",
                 "return res;"
             ]
@@ -1391,7 +1391,7 @@
             ],
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% -r0.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% -vd0.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1403,7 +1403,7 @@
             "implem": [
                 "%s<c:int|b:32>% res = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
-                "\tres += m0.m[i] == 0 ? 0 : 1;",
+                "\tres += vm0.vm[i] == 0 ? 0 : 1;",
                 "return res ? 0 : 1;"
             ]
         }
@@ -1414,7 +1414,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% ~r0.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% ~vd0.vd[i] %!pred_alt!%;"
             ]
         },
         {
@@ -1423,11 +1423,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ~r0i;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -1437,7 +1437,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = ~m0.m[i];"
+                "res.vm[i] = ~vm0.vm[i];"
             ]
         }
     ],
@@ -1447,7 +1447,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] | r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] | vd1.vd[i] %!pred_alt!%;"
             ]
         },
         {
@@ -1456,12 +1456,12 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i | r1i;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -1471,7 +1471,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = m0.m[i] | m1.m[i];"
+                "res.vm[i] = vm0.vm[i] | vm1.vm[i];"
             ]
         }
     ],
@@ -1481,7 +1481,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[r1.r[i]] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[vd1.vd[i]] %!pred_alt!%;"
             ]
         }
     ],
@@ -1491,16 +1491,16 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array (see the references of slide: GCC 13 and a choice between two registers)",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array (see the references of slide: GCC 13 and a choice between two registers)",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres.r[i] = %!pred_cond!% c[r2.r[i]] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[vd2.vd[i]] %!pred_alt!%;",
                 "return res;"
             ]
         }
@@ -1513,7 +1513,7 @@
             "implem": [
                 "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
                 "const size_t b0 = (i / nb) * nb;",
-                "res.r[i] = %!pred_cond!% r0.r[b0 + r1.r[i]] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[b0 + vd1.vd[i]] %!pred_alt!%;"
             ]
         }
     ],
@@ -1523,7 +1523,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% POWF(r0.r[i], r1.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% POWF(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1531,7 +1531,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% POWD(r0.r[i], r1.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% POWD(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1540,15 +1540,15 @@
             "variants": [],
             "implem": [
                 "%s<tp>% cur = 1;",
-                "%s<tp>% base = r0.r[i];",
-                "%s<tp>% exp = r1.r[i];",
+                "%s<tp>% base = vd0.vd[i];",
+                "%s<tp>% exp = vd1.vd[i];",
                 "while (exp > 0) {",
                 "\tif (exp & 1)",
                 "\t\tcur = (%s<tp>%)((uint64_t)cur * base);",
                 "\tbase = (%s<tp>%)((uint64_t)base * base);",
                 "\texp >>= 1;",
                 "}",
-                "res.r[i] = %!pred_cond!% cur %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% cur %!pred_alt!%;"
             ]
         }
     ],
@@ -1558,7 +1558,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% POWF(2.f, r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% POWF(2.f, vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1566,7 +1566,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% POWD(2., r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% POWD(2., vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1574,7 +1574,7 @@
             "datatypes": "all_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% 1ULL << r0.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% 1ULL << vd0.vd[i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1584,7 +1584,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[%N<tp>% - 1 - i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[%N<tp>% - 1 - i] %!pred_alt!%;"
             ]
         }
     ],
@@ -1597,7 +1597,7 @@
                 "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
                 "const size_t b0 = (i / nb) * nb;",
                 "const size_t l = i - b0;",
-                "res.r[i] = %!pred_cond!% r0.r[b0 + nb - 1 - l] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[b0 + nb - 1 - l] %!pred_alt!%;"
             ]
         }
     ],
@@ -1608,7 +1608,7 @@
             "variants": [],
             "implem": [
                 "const size_t j = i + (size_t)s0; // < 2 N (no modulo: the percent sign delimits the DSL)",
-                "res.r[i] = %!pred_cond!% r0.r[j < %N<tp>% ? j : j - %N<tp>%] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[j < %N<tp>% ? j : j - %N<tp>%] %!pred_alt!%;"
             ]
         }
     ],
@@ -1622,7 +1622,7 @@
                 "const size_t b0 = (i / nb) * nb;",
                 "const size_t l = i - b0;",
                 "const size_t j = l + (size_t)s0;",
-                "res.r[i] = %!pred_cond!% r0.r[b0 + (j < nb ? j : j - nb)] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[b0 + (j < nb ? j : j - nb)] %!pred_alt!%;"
             ]
         }
     ],
@@ -1633,7 +1633,7 @@
             "variants": [],
             "implem": [
                 "// do nothing, it is weird to define round on integers...",
-                "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] %!pred_alt!%;"
             ]
         },
         {
@@ -1642,7 +1642,7 @@
             "variants": [],
             "implem": [
                 "// requires #include <math.h>",
-                "res.r[i] = %!pred_cond!% round(r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% round(vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1651,7 +1651,7 @@
             "variants": [],
             "implem": [
                 "// requires #include <math.h>",
-                "res.r[i] = %!pred_cond!% roundf(r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% roundf(vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -1662,7 +1662,7 @@
             "variants": [],
             "implem": [
                 "// arithmetic shift for the signed types, logical for the unsigned ones",
-                "res.r[i] = %!pred_cond!% (%s<tr>%)(r0.r[i] >> (unsigned)r1.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (%s<tr>%)(vd0.vd[i] >> (unsigned)vd1.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -1672,7 +1672,7 @@
               "datatypes": "all_int_uint",
               "variants": [],
               "implem": [
-                  "res.r[i] = %!pred_cond!% r0.r[i] >> s0 %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% vd0.vd[i] >> s0 %!pred_alt!%;"
               ]
           },
           {
@@ -1681,11 +1681,11 @@
               "variants": [],
               "implem": [
                   "%s<c:uint|b:tp>% r0i;",
-                  "BIT_CAST_1(&r0i, &r0.r[i]);",
+                  "BIT_CAST_1(&r0i, &vd0.vd[i]);",
                   "r0i >>= s0;",
                   "%s<tr>% resv;",
                   "BIT_CAST_1(&resv, &r0i);",
-                  "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
               ]
           }
       ],
@@ -1696,7 +1696,7 @@
               "variants": [],
               "implem": [
                   "// requires #include <math.h>",
-                  "res.r[i] = %!pred_cond!% 1.0 / sqrt(r0.r[i]) %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% 1.0 / sqrt(vd0.vd[i]) %!pred_alt!%;"
               ]
           },
           {
@@ -1705,7 +1705,7 @@
               "variants": [],
               "implem": [
                   "// requires #include <math.h>",
-                  "res.r[i] = %!pred_cond!% 1.0f / sqrtf(r0.r[i]) %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% 1.0f / sqrtf(vd0.vd[i]) %!pred_alt!%;"
               ]
           }
       ],
@@ -1718,7 +1718,7 @@
                   "z"
               ],
               "implem": [
-                  "p0[r0.r[i]] = %!pred_cond!% r1.r[i] %!pred_alt!%;"
+                  "p0[vd0.vd[i]] = %!pred_cond!% vd1.vd[i] %!pred_alt!%;"
               ]
           },
           {
@@ -1728,7 +1728,7 @@
                   "m"
               ],
               "implem": [
-                  "if (m0.m[i]) p0[r0.r[i]] = r1.r[i];"
+                  "if (vm0.vm[i]) p0[vd0.vd[i]] = vd1.vd[i];"
               ]
           }
       ],
@@ -1738,7 +1738,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = m0.m[i] ? r0.r[i] : r1.r[i];"
+                "res.vd[i] = vm0.vm[i] ? vd0.vd[i] : vd1.vd[i];"
             ]
         }
     ],
@@ -1748,7 +1748,7 @@
               "datatypes": "all_defs",
               "variants": [],
               "implem": [
-                  "res.r[i] = %!pred_cond!% vals[i] %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% vals[i] %!pred_alt!%;"
               ]
           }
       ],
@@ -1758,7 +1758,7 @@
               "datatypes": "all_defs",
               "variants": [],
               "implem": [
-                  "res.r[i] = %!pred_cond!% 0 %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% 0 %!pred_alt!%;"
               ]
           }
       ],
@@ -1768,7 +1768,7 @@
               "datatypes": "all_defs",
               "variants": [],
               "implem": [
-                  "res.m[i] = 0;"
+                  "res.vm[i] = 0;"
               ]
           }
       ],
@@ -1778,7 +1778,7 @@
               "datatypes": "all_defs",
               "variants": [],
               "implem": [
-                  "res.r[i] = %!pred_cond!% s0 %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% s0 %!pred_alt!%;"
               ]
           }
       ],
@@ -1788,10 +1788,10 @@
               "datatypes": "all_defs",
               "variants": [],
               "implem": [
-                  "%m<tr>% res;",
+                  "%vm<tr>% res;",
                   "%s<c:int|b:tr>% m_tmp = s0 ? -1 : 0;",
                   "for (size_t i = 0; i < %N<tr>%; i++)",
-                  "\tBIT_CAST_1(&res.m[i], &m_tmp);",
+                  "\tBIT_CAST_1(&res.vm[i], &m_tmp);",
                   "return res;"
               ]
           }
@@ -1803,7 +1803,7 @@
               "variants": [],
               "implem": [
                   "%s<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;",
-                  "BIT_CAST_1(&res.m[i], &m_tmp);"
+                  "BIT_CAST_1(&res.vm[i], &m_tmp);"
               ]
           }
       ],
@@ -1814,8 +1814,8 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "res.m[i] = (r0i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) ? (%s<c:uint|b:tr>%)-1 : 0;"
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "res.vm[i] = (r0i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) ? (%s<c:uint|b:tr>%)-1 : 0;"
             ]
         },
         {
@@ -1823,7 +1823,7 @@
             "datatypes": "all_int",
             "variants": [],
             "implem": [
-                "res.m[i] = (r0.r[i] < 0) ? (%s<c:uint|b:tr>%)-1 : 0;"
+                "res.vm[i] = (vd0.vd[i] < 0) ? (%s<c:uint|b:tr>%)-1 : 0;"
             ]
         }
     ],
@@ -1833,7 +1833,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-              "res.r[i] = %!pred_cond!% SINF(r0.r[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% SINF(vd0.vd[i]) %!pred_alt!%;"
             ]
           },
           {
@@ -1841,7 +1841,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-              "res.r[i] = %!pred_cond!% SIND(r0.r[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% SIND(vd0.vd[i]) %!pred_alt!%;"
             ]
           }
       ],
@@ -1851,7 +1851,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-              "res.r[i] = %!pred_cond!% SINHF(r0.r[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% SINHF(vd0.vd[i]) %!pred_alt!%;"
             ]
           },
           {
@@ -1859,7 +1859,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-              "res.r[i] = %!pred_cond!% SINHD(r0.r[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% SINHD(vd0.vd[i]) %!pred_alt!%;"
             ]
           }
       ],
@@ -1869,18 +1869,18 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tres.r[i] = %!pred_cond!% c[i + (size_t)s0] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[i + (size_t)s0] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -1892,14 +1892,14 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
@@ -1907,7 +1907,7 @@
                 "\tconst size_t b0 = (i / nb) * nb;",
                 "\tconst size_t l = i - b0;",
                 "\tconst size_t j = l + (size_t)s0;",
-                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -1919,7 +1919,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% (i + (size_t)s0 < %N<tp>% ? r0.r[i + (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (i + (size_t)s0 < %N<tp>% ? vd0.vd[i + (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
             ]
         }
     ],
@@ -1932,7 +1932,7 @@
                 "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
                 "const size_t b0 = (i / nb) * nb;",
                 "const size_t l = i - b0;",
-                "res.r[i] = %!pred_cond!% (l + (size_t)s0 < nb ? r0.r[b0 + l + (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (l + (size_t)s0 < nb ? vd0.vd[b0 + l + (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
             ]
         }
     ],
@@ -1942,7 +1942,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% (i >= (size_t)s0 ? r0.r[i - (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (i >= (size_t)s0 ? vd0.vd[i - (size_t)s0] : (%s<tr>%)0) %!pred_alt!%;"
             ]
         }
     ],
@@ -1952,16 +1952,16 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// by block, then the zeros and the lanes of r0: the form res.r[i] = l >= n ? r0.r[i - n] : 0 (l = i mod nb) is",
-                "// compiled by riscv64 GCC 14 -O3, inlined in a caller, as a wrong code (zeros in lanes that receive a lane of r0)",
-                "%r<tr>% res;",
+                "// by block, then the zeros and the lanes of vd0: the form res.vd[i] = l >= n ? vd0.vd[i - n] : 0 (l = i mod nb) is",
+                "// compiled by riscv64 GCC 14 -O3, inlined in a caller, as a wrong code (zeros in lanes that receive a lane of vd0)",
+                "%vd<tr>% res;",
                 "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
                 "for (size_t b0 = 0; b0 < %N<tp>%; b0 += nb)",
                 "{",
                 "\tfor (size_t i = b0; i < b0 + (size_t)s0; i++)",
-                "\t\tres.r[i] = %!pred_cond!% (%s<tr>%)0 %!pred_alt!%;",
+                "\t\tres.vd[i] = %!pred_cond!% (%s<tr>%)0 %!pred_alt!%;",
                 "\tfor (size_t i = b0 + (size_t)s0; i < b0 + nb; i++)",
-                "\t\tres.r[i] = %!pred_cond!% r0.r[i - (size_t)s0] %!pred_alt!%;",
+                "\t\tres.vd[i] = %!pred_cond!% vd0.vd[i - (size_t)s0] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -1974,7 +1974,7 @@
               "variants": [],
               "implem": [
                   "// requires #include <math.h>",
-                  "res.r[i] = %!pred_cond!% sqrt(r0.r[i]) %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% sqrt(vd0.vd[i]) %!pred_alt!%;"
               ]
           },
           {
@@ -1983,7 +1983,7 @@
               "variants": [],
               "implem": [
                   "// requires #include <math.h>",
-                  "res.r[i] = %!pred_cond!% sqrtf(r0.r[i]) %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% sqrtf(vd0.vd[i]) %!pred_alt!%;"
               ]
           }
       ],
@@ -1996,7 +1996,7 @@
                   "z"
               ],
               "implem": [
-                  "p0[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+                  "p0[i] = %!pred_cond!% vd0.vd[i] %!pred_alt!%;"
               ]
           },
           {
@@ -2006,7 +2006,7 @@
                   "m"
               ],
               "implem": [
-                  "if (m0.m[i]) p0[i] = r0.r[i];"
+                  "if (vm0.vm[i]) p0[i] = vd0.vd[i];"
               ]
           }
       ],
@@ -2017,7 +2017,7 @@
             "variants": [],
             "implem": [
                 "const size_t h = (%N<tp>% + 1) / 2;",
-                "p0[i] = (i & 1) ? r0.r[h + (i >> 1)] : r0.r[i >> 1];"
+                "p0[i] = (i & 1) ? vd0.vd[h + (i >> 1)] : vd0.vd[i >> 1];"
             ]
         }
     ],
@@ -2030,7 +2030,7 @@
                   "z"
               ],
               "implem": [
-                  "p0[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+                  "p0[i] = %!pred_cond!% vd0.vd[i] %!pred_alt!%;"
               ]
           },
           {
@@ -2040,7 +2040,7 @@
                   "m"
               ],
               "implem": [
-                  "if (m0.m[i]) p0[i] = r0.r[i];"
+                  "if (vm0.vm[i]) p0[i] = vd0.vd[i];"
               ]
           }
       ],
@@ -2050,7 +2050,7 @@
               "datatypes": "all_defs",
               "variants": [],
               "implem": [
-                  "res.r[i] = %!pred_cond!% r0.r[i] - r1.r[i] %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% vd0.vd[i] - vd1.vd[i] %!pred_alt!%;"
               ]
           }
       ],
@@ -2060,15 +2060,15 @@
               "datatypes": "all_int",
               "variants": [],
               "implem": [
-                  "int{{ dt_par.n_bits }}_t a = r0.r[i];",
-                  "int{{ dt_par.n_bits }}_t b = r1.r[i];",
+                  "int{{ dt_par.n_bits }}_t a = vd0.vd[i];",
+                  "int{{ dt_par.n_bits }}_t b = vd1.vd[i];",
                   "",
                   "int{{ dt_par.n_bits }}_t c =",
                   "\t(b < 0 && a > INT{{ dt_par.n_bits }}_MAX + b) ? INT{{ dt_par.n_bits }}_MAX :",
                   "\t(b > 0 && a < INT{{ dt_par.n_bits }}_MIN + b) ? INT{{ dt_par.n_bits }}_MIN :",
                   "\t(int{{ dt_par.n_bits }}_t)(a - b);",
                   "",
-                  "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% c %!pred_alt!%;"
               ]
           },
           {
@@ -2076,14 +2076,14 @@
               "datatypes": "all_uint",
               "variants": [],
               "implem": [
-                  "uint{{ dt_par.n_bits }}_t a = r0.r[i];",
-                  "uint{{ dt_par.n_bits }}_t b = r1.r[i];",
+                  "uint{{ dt_par.n_bits }}_t a = vd0.vd[i];",
+                  "uint{{ dt_par.n_bits }}_t b = vd1.vd[i];",
                   "",
                   "uint{{ dt_par.n_bits }}_t c =",
                   "\t(a < b) ? 0 :",
                   "\t(uint{{ dt_par.n_bits }}_t)(a - b);",
                   "",
-                  "res.r[i] = %!pred_cond!% c %!pred_alt!%;"
+                  "res.vd[i] = %!pred_cond!% c %!pred_alt!%;"
               ]
           }
       ],
@@ -2093,7 +2093,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[%N<tp>% == 1 ? 0 : (i ^ 1)] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[%N<tp>% == 1 ? 0 : (i ^ 1)] %!pred_alt!%;"
             ]
         }
     ],
@@ -2103,7 +2103,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-              "res.r[i] = %!pred_cond!% TANF(r0.r[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% TANF(vd0.vd[i]) %!pred_alt!%;"
             ]
           },
           {
@@ -2111,7 +2111,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-              "res.r[i] = %!pred_cond!% TAND(r0.r[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% TAND(vd0.vd[i]) %!pred_alt!%;"
             ]
           }
       ],
@@ -2123,8 +2123,8 @@
             "implem": [
                 "%s<c:int|b:32>% k = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tif (m0.m[i])",
-                "\t\tp0[k++] = r0.r[i];",
+                "\tif (vm0.vm[i])",
+                "\t\tp0[k++] = vd0.vd[i];",
                 "return k;"
             ]
         }
@@ -2137,8 +2137,8 @@
             "implem": [
                 "%s<c:int|b:32>% k = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tif (m0.m[i])",
-                "\t\tp0[k++] = r0.r[i];",
+                "\tif (vm0.vm[i])",
+                "\t\tp0[k++] = vd0.vd[i];",
                 "return k;"
             ]
         }
@@ -2149,7 +2149,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% TANHF(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% TANHF(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -2157,7 +2157,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.r[i] = %!pred_cond!% TANHD(r0.r[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% TANHD(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -2169,7 +2169,7 @@
             "implem": [
                 "%s<c:int|b:32>% res = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++) // early termination is possible here but won't help the compiler vectorizer",
-                "\tres += (m0.m[i] & m1.m[i]) ? 1 : 0;",
+                "\tres += (vm0.vm[i] & vm1.vm[i]) ? 1 : 0;",
                 "return res ? 0 : 1;"
             ]
         }
@@ -2180,8 +2180,8 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
-                "BIT_CAST_N(res.r, m0.m, %N<tr>%);",
+                "%vd<tr>% res;",
+                "BIT_CAST_N(res.vd, vm0.vm, %N<tr>%);",
                 "return res;"
             ]
         }
@@ -2192,10 +2192,10 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%m<tr>% res;",
-                "BIT_CAST_N(res.m, r0.r, %N<tr>%);",
+                "%vm<tr>% res;",
+                "BIT_CAST_N(res.vm, vd0.vd, %N<tr>%);",
                 "for (size_t i = 0; i < %N<tr>%; i++)",
-                "\tres.m[i] = res.m[i] ? (%s<c:uint|b:tr>%)-1 : 0;",
+                "\tres.vm[i] = res.vm[i] ? (%s<c:uint|b:tr>%)-1 : 0;",
                 "return res;"
             ]
         }
@@ -2207,7 +2207,7 @@
         "variants": [],
         "implem": [
           "// do nothing, it is weird to define trunc on integers...",
-          "res.r[i] = %!pred_cond!% r0.r[i] %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% vd0.vd[i] %!pred_alt!%;"
         ]
       },
       {
@@ -2216,7 +2216,7 @@
         "variants": [],
         "implem": [
           "// requires #include <math.h>",
-          "res.r[i] = %!pred_cond!% trunc(r0.r[i]) %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% trunc(vd0.vd[i]) %!pred_alt!%;"
         ]
       },
       {
@@ -2225,7 +2225,7 @@
         "variants": [],
         "implem": [
           "// requires #include <math.h>",
-          "res.r[i] = %!pred_cond!% truncf(r0.r[i]) %!pred_alt!%;"
+          "res.vd[i] = %!pred_cond!% truncf(vd0.vd[i]) %!pred_alt!%;"
         ]
       }
     ],
@@ -2236,7 +2236,7 @@
             "variants": [],
             "implem": [
                 "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
-                "res.r[i] = %!pred_cond!% (i < h ? r0.r[2 * i] : r0.r[2 * (i - h) + 1]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (i < h ? vd0.vd[2 * i] : vd0.vd[2 * (i - h) + 1]) %!pred_alt!%;"
             ]
         }
     ],
@@ -2246,18 +2246,18 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tres.r[i] = %!pred_cond!% c[2 * i + 1] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[2 * i + 1] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2269,14 +2269,14 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
@@ -2284,7 +2284,7 @@
                 "\tconst size_t b0 = (i / nb) * nb;",
                 "\tconst size_t l = i - b0;",
                 "\tconst size_t j = 2 * l + 1;",
-                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2296,18 +2296,18 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tres.r[i] = %!pred_cond!% c[2 * i] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[2 * i] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2319,14 +2319,14 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
@@ -2334,7 +2334,7 @@
                 "\tconst size_t b0 = (i / nb) * nb;",
                 "\tconst size_t l = i - b0;",
                 "\tconst size_t j = 2 * l;",
-                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2346,9 +2346,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "for (size_t i = 0; i < %N<tr>%; i++){",
-                "\tres.r[i] = (%s<tr>%)r0.r[i];",
+                "\tres.vd[i] = (%s<tr>%)vd0.vd[i];",
                 "}",
                 "return res;"
             ]
@@ -2360,7 +2360,7 @@
             "datatypes": "all_int_uint",
             "variants": [],
             "implem": [
-                "res.r[i] = %!pred_cond!% r0.r[i] ^ r1.r[i] %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] ^ vd1.vd[i] %!pred_alt!%;"
             ]
         },
         {
@@ -2369,12 +2369,12 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i ^ r1i;",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
     ],
@@ -2384,7 +2384,7 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "res.m[i] = m0.m[i] ^ m1.m[i];"
+                "res.vm[i] = vm0.vm[i] ^ vm1.vm[i];"
             ]
         }
     ],
@@ -2395,12 +2395,12 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &r0.r[i]);",
-                "BIT_CAST_1(&r1i, &r1.r[i]);",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i ^ (r1i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1)));",
                 "%s<tr>% resv;",
                 "BIT_CAST_1(&resv, &resi);",
-                "res.r[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
         {
@@ -2409,9 +2409,9 @@
             "variants": [],
             "implem": [
                 "// negation in the unsigned type: wraps around for the minimum value, as the SIMD code",
-                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)r0.r[i];",
+                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)vd0.vd[i];",
                 "%s<tp>% neg0 = (%s<tp>%)(%s<c:uint|b:tp>%)(0u - u0);",
-                "res.r[i] = %!pred_cond!% (r1.r[i] < 0 ? neg0 : r0.r[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% (vd1.vd[i] < 0 ? neg0 : vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -2422,7 +2422,7 @@
             "variants": [],
             "implem": [
                 "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
-                "res.r[i] = %!pred_cond!% ((i & 1) ? r0.r[h + (i >> 1)] : r0.r[i >> 1]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% ((i & 1) ? vd0.vd[h + (i >> 1)] : vd0.vd[i >> 1]) %!pred_alt!%;"
             ]
         }
     ],
@@ -2432,19 +2432,19 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
                 "\tconst size_t j = %N<tp>% + i;",
-                "\tres.r[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + (j >> 1)] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + (j >> 1)] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2456,14 +2456,14 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
@@ -2471,7 +2471,7 @@
                 "\tconst size_t b0 = (i / nb) * nb;",
                 "\tconst size_t l = i - b0;",
                 "\tconst size_t j = nb + l;",
-                "\tres.r[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + b0 + (j >> 1)] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + b0 + (j >> 1)] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2483,18 +2483,18 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
-                "\tres.r[i] = %!pred_cond!% c[(i & 1) * %N<tp>% + (i >> 1)] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[(i & 1) * %N<tp>% + (i >> 1)] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
@@ -2506,14 +2506,14 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
+                "// vd0 then vd1 in one array: a choice between two registers (vd0.vd[j] / vd1.vd[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of vd0 only, and read before vd1 is written",
+                "%vd<tr>% res;",
                 "%s<tp>% c[2 * %N<tp>%];",
                 "for (size_t k = 0; k < %N<tp>%; k++)",
                 "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
+                "\tc[k] = vd0.vd[k];",
+                "\tc[%N<tp>% + k] = vd1.vd[k];",
                 "}",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "{",
@@ -2521,7 +2521,7 @@
                 "\tconst size_t b0 = (i / nb) * nb;",
                 "\tconst size_t l = i - b0;",
                 "\tconst size_t j = l;",
-                "\tres.r[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + b0 + (j >> 1)] %!pred_alt!%;",
+                "\tres.vd[i] = %!pred_cond!% c[(j & 1) * %N<tp>% + b0 + (j >> 1)] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]

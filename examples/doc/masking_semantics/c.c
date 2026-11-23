@@ -72,23 +72,23 @@ static void mask_algebra(void)
     vd_float32_t vb = mipp_load_float32(B);
     vd_float32_t vc = mipp_load_float32(C);
     /* --8<-- [start:mask_algebra] */
-    vm_float32_t m1 = mipp_cmplt_float32(va, vb);
-    vm_float32_t m2 = mipp_cmpgt_float32(va, vc);
+    vm_float32_t vm1 = mipp_cmplt_float32(va, vb);
+    vm_float32_t vm2 = mipp_cmpgt_float32(va, vc);
 
-    // Logical AND (m1 AND m2):
-    vm_float32_t m_and = mipp_andb_k_float32(m1, m2);
+    // Logical AND (vm1 AND vm2):
+    vm_float32_t m_and = mipp_andb_k_float32(vm1, vm2);
 
-    // Logical OR (m1 OR m2):
-    vm_float32_t m_or  = mipp_orb_k_float32(m1, m2);
+    // Logical OR (vm1 OR vm2):
+    vm_float32_t m_or  = mipp_orb_k_float32(vm1, vm2);
 
-    // Logical XOR (m1 XOR m2):
-    vm_float32_t m_xor = mipp_xorb_k_float32(m1, m2);
+    // Logical XOR (vm1 XOR vm2):
+    vm_float32_t m_xor = mipp_xorb_k_float32(vm1, vm2);
 
-    // Logical NOT (~m1):
-    vm_float32_t m_not = mipp_notb_k_float32(m1);
+    // Logical NOT (~vm1):
+    vm_float32_t m_not = mipp_notb_k_float32(vm1);
 
-    // Logical AND-NOT ((NOT m1) AND m2):
-    vm_float32_t m_andn = mipp_andnb_k_float32(m1, m2);
+    // Logical AND-NOT ((NOT vm1) AND vm2):
+    vm_float32_t m_andn = mipp_andnb_k_float32(vm1, vm2);
     /* --8<-- [end:mask_algebra] */
     int32_t l_and[DOC_BUF], l_or[DOC_BUF], l_xor[DOC_BUF], l_not[DOC_BUF], l_andn[DOC_BUF];
     lanes(m_and, l_and);

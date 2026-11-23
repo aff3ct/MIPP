@@ -27,7 +27,7 @@ NEON already has a template for the instructions that take two registers and ret
 ```mipp-json
 "arith_2args": {
     "format": "short",
-    "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r0.r, r1.r);"
+    "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd);"
 }
 ```
 
@@ -56,10 +56,10 @@ After `./gen_mipp_headers.py`, the NEON header contains:
 
 ```c
 #if defined(__aarch64__)
-static inline vd_neon_float64_m1_t mipp_neon_absdiff_float64_m1(const vd_neon_float64_m1_t r0, const vd_neon_float64_m1_t r1) {
+static inline vd_neon_float64_m1_t mipp_neon_absdiff_float64_m1(const vd_neon_float64_m1_t vd0, const vd_neon_float64_m1_t vd1) {
 	// Level 0 (Native Hardware)
 	vd_neon_float64_m1_t res;
-	res.r = vabdq_f64(r0.r, r1.r);
+	res.vd = vabdq_f64(vd0.vd, vd1.vd);
 	return res;
 }
 #endif
@@ -69,7 +69,7 @@ static inline vd_neon_float64_m1_t mipp_neon_absdiff_float64_m1(const vd_neon_fl
 
 A template has a `format` and a `code`:
 
-- `short`: `code` is one expression. The generator declares `res`, assigns the expression to `res.r` and returns `res`, as above.
+- `short`: `code` is one expression. The generator declares `res`, assigns the expression to `res.vd` and returns `res`, as above.
 - `long`: `code` is the whole function body, as a list of lines.
 
 The code is rendered by Jinja2 with these variables:
@@ -85,13 +85,13 @@ The code is rendered by Jinja2 with these variables:
 | `lmul`, `mask_kind` | The LMUL and the mask variant being generated. |
 | `compress_lut(lanes, units, fill)` | A function (`helpers_headers/luts.py`) that computes the constant table of a `compress` by permutation and returns its C initializer: `static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=128) }};` (SSSE3 `pshufb`, 32-bit lanes). The tables of the templates are computed there at generation time, not written in the JSON files. |
 
-The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `r0.r` is the native register wrapped by the MIPP type `vd_neon_float32_m1_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(r0, r1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
+The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `vd0.vd` is the native register wrapped by the MIPP type `vd_neon_float32_m1_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(vd0, vd1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
 
 An entry can also hold its template inline (`"template": { "format": ..., "code": ... }`) instead of a name.
 
 The bodies used when an integer argument is a constant (immediate instructions: `palignr`, `ext`, `pshufd`...) are in `<isa>_imm_templates.json` and `<isa>_imm_implems.json`, in the same format, with the variable `imm`: see [Immediate Versions](../internals/code_generation.md#53-immediate-versions).
 
-A template shared by functions that differ by more than an intrinsic name can take several fields in `instr_name`, separated by `|` (a comma would cut the arguments of a call), and read them with Jinja `set`, on a line of its own: the `%...%` markers of the [templating DSL](../reference/templating_dsl.md) must not share a line with a Jinja tag. For example, `complex_cmla` of NEON and SVE writes `cmul`, `cmulconj` and `cfmadd` as two `cmla` instructions, from `"ZERO|90|r0.r|r1.r"` (the accumulator, `ZERO` for a zero register; the rotation of the second instruction; the two operands):
+A template shared by functions that differ by more than an intrinsic name can take several fields in `instr_name`, separated by `|` (a comma would cut the arguments of a call), and read them with Jinja `set`, on a line of its own: the `%...%` markers of the [templating DSL](../reference/templating_dsl.md) must not share a line with a Jinja tag. For example, `complex_cmla` of NEON and SVE writes `cmul`, `cmulconj` and `cfmadd` as two `cmla` instructions, from `"ZERO|90|vd0.vd|vd1.vd"` (the accumulator, `ZERO` for a zero register; the rotation of the second instruction; the two operands):
 
 ```jinja
 {% set f = instr_name.split('|') -%}{%- set acc = f[0] if f[0] != 'ZERO' else (...) -%}{%- set rot, x, y = f[1], f[2], f[3] -%}
@@ -107,8 +107,8 @@ $|a - b| = \max(a, b) - \min(a, b)$ holds for every datatype, including unsigned
 "absdiff": {
     "format": "long",
     "code": [
-        "%r<tp>% hi = %max<tp>%(r0, r1);",
-        "%r<tp>% lo = %min<tp>%(r0, r1);",
+        "%vd<tp>% hi = %max<tp>%(vd0, vd1);",
+        "%vd<tp>% lo = %min<tp>%(vd0, vd1);",
         "return %sub<tp>%(hi, lo);"
     ]
 }
@@ -125,13 +125,13 @@ and the entry in `helpers_headers/generic_emu_implems.json`:
 ]
 ```
 
-`%r<tp>%` is the register type and `%max<tp>%` the `max` function of the ISA being generated, for the current datatype and LMUL. On AVX the template becomes:
+`%vd<tp>%` is the register type and `%max<tp>%` the `max` function of the ISA being generated, for the current datatype and LMUL. On AVX the template becomes:
 
 ```c
-static inline vd_avx_float32_m1_t mipp_avx_absdiff_float32_m1(const vd_avx_float32_m1_t r0, const vd_avx_float32_m1_t r1) {
+static inline vd_avx_float32_m1_t mipp_avx_absdiff_float32_m1(const vd_avx_float32_m1_t vd0, const vd_avx_float32_m1_t vd1) {
 	// Level 2 (Generic Emulation)
-	vd_avx_float32_m1_t hi = mipp_avx_max_float32_m1(r0, r1);
-	vd_avx_float32_m1_t lo = mipp_avx_min_float32_m1(r0, r1);
+	vd_avx_float32_m1_t hi = mipp_avx_max_float32_m1(vd0, vd1);
+	vd_avx_float32_m1_t lo = mipp_avx_min_float32_m1(vd0, vd1);
 	return mipp_avx_sub_float32_m1(hi, lo);
 }
 ```
@@ -161,9 +161,9 @@ At this point `mipp_neon_absdiff_float32_maskz_m1` is still <span class="mipp-is
 "binary_maskz_all_datatypes": {
     "format": "long",
     "code": [
-        "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-        "%r<tp>% tmp = %tovd<tp>%(m0);",
-        "%r<tp>% res = %andb<tp>%(op, tmp);",
+        "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+        "%vd<tp>% tmp = %tovd<tp>%(vm0);",
+        "%vd<tp>% res = %andb<tp>%(op, tmp);",
         "return res;"
     ]
 }
@@ -230,11 +230,11 @@ ARMv7 NEON has no floating-point division. `neon_emu_templates.json` computes a 
 "arith_2args_recp": {
     "format": "long",
     "code": [
-        "%r<tp>% recp;",
-        "recp.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r);",
-        "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
-        "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
-        "%r<tp>% res = %mul<tp>%(r0, recp);",
+        "%vd<tp>% recp;",
+        "recp.vd = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd1.vd);",
+        "recp.vd = vmulq_{{ isa_dt_par.data_ext }}(recp.vd, vrecpsq_{{ isa_dt_par.data_ext }}(vd1.vd, recp.vd));",
+        "recp.vd = vmulq_{{ isa_dt_par.data_ext }}(recp.vd, vrecpsq_{{ isa_dt_par.data_ext }}(vd1.vd, recp.vd));",
+        "%vd<tp>% res = %mul<tp>%(vd0, recp);",
         "return res;"
     ]
 }

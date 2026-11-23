@@ -396,7 +396,7 @@ def make_level_detector(isa):
                 if dep_name:
                     first_word = dep_name.split()[0]
                     if first_word not in ["if", "else", "endif", "for", "endfor"]:
-                        if dep_name not in ["r", "m", "s", "N", "cast", "cast_k", "tovd", "tovm"] and not dep_name.startswith("{"):
+                        if dep_name not in ["vd", "vm", "s", "N", "cast", "cast_k", "tovd", "tovm"] and not dep_name.startswith("{"):
                             deps.add(dep_name)
         return deps
 

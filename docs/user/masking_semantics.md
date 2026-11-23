@@ -213,7 +213,7 @@ Selects elements between two data vectors according to a mask ($r_0$ when $m_i =
 
 $$\text{res}_i = \begin{cases} r0_i & \text{if } m_i = 1 \\ r1_i & \text{if } m_i = 0 \end{cases}$$
 
-The mask `m` is passed as the **first argument**, and the value for the active lanes comes first: `select(m, r0, r1)` reads as `m ? r0 : r1`. The x86 intrinsic `_mm_blendv_ps(a, b, m)` uses the opposite order (`m ? b : a`).
+The mask `m` is passed as the **first argument**, and the value for the active lanes comes first: `select(m, vd0, vd1)` reads as `m ? vd0 : vd1`. The x86 intrinsic `_mm_blendv_ps(a, b, m)` uses the opposite order (`m ? b : a`).
 
 === "C API"
 
@@ -309,7 +309,7 @@ In C, $\text{LMUL}$ is part of the type and function names. In the C++ Functiona
 ### 8.2. Hardware Execution on Multi-Register Vectors
 
 - **RISC-V Vector (RVV)**: Operates directly on hardware grouped registers (`vfloat32m2_t`) governed by the corresponding fractional boolean mask register (`vbool16_t` / `vbool8_t`).
-- **Fixed-Width Architectures (x86, ARM)**: Multi-register masks (`vm_*_m2_t`) and data vectors (`vd_*_m2_t`) use recursive binary struct composition (`{ m1, m2 }` and `{ r1, r2 }`). The masked operation is applied independently to each register of the group (using the emulation strategy described in [Section 3](#3-architectural-hardware-mappings)), with no abstraction overhead once inlined.
+- **Fixed-Width Architectures (x86, ARM)**: Multi-register masks (`vm_*_m2_t`) and data vectors (`vd_*_m2_t`) use recursive binary struct composition (`{ m1, m2 }` and `{ vd1, vd2 }`). The masked operation is applied independently to each register of the group (using the emulation strategy described in [Section 3](#3-architectural-hardware-mappings)), with no abstraction overhead once inlined.
 
 ---
 
@@ -320,7 +320,7 @@ Four functions reduce masks to a scalar `int32_t` (`1` for true, `0` for false),
 | Function | C API Function | C++ Functional API | C++ Object API | Semantics |
 | :--- | :--- | :--- | :--- | :--- |
 | **None active** | `mipp_none_[type]_[lmul](m)` | `mipp::none(m)` | `mipp::none(m)` | $1$ if no lane of `m` is active, $0$ otherwise. |
-| **Disjoint** | `mipp_testz_[type]_[lmul](m0, m1)` | `mipp::testz(m0, m1)` | `mipp::testz(m0, m1)` | $1$ if `m0 & m1` has no active lane, $0$ otherwise. |
+| **Disjoint** | `mipp_testz_[type]_[lmul](vm0, vm1)` | `mipp::testz(vm0, vm1)` | `mipp::testz(vm0, vm1)` | $1$ if `vm0 & vm1` has no active lane, $0$ otherwise. |
 | **Any active** | `mipp_any_[type]_[lmul](m)` | `mipp::any(m)` | `mipp::any(m)` | $1$ if at least one lane of `m` is active, $0$ otherwise. |
 | **All active** | `mipp_all_[type]_[lmul](m)` | `mipp::all(m)` | `mipp::all(m)` | $1$ if every lane of `m` is active, $0$ otherwise. |
 

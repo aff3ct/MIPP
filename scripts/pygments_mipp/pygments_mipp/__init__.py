@@ -3,7 +3,7 @@
 Two lexers are registered through the ``pygments.lexers`` entry point, so that
 MkDocs (pymdownx.highlight) can use them as fenced code languages:
 
-- ``mipp-dsl``: C code containing DSL placeholders (``%r<tp>%``,
+- ``mipp-dsl``: C code containing DSL placeholders (``%vd<tp>%``,
   ``%add<tp|v:Z>%(...)``, ``%!pred_cond!%``) and Jinja2 delimiters.
 - ``mipp-json``: JSON registries whose string values contain DSL placeholders
   and Jinja2 delimiters (``*_templates.json``, ``registry_scalar_implems.json``).
@@ -20,7 +20,7 @@ from pygments.token import (Comment, Keyword, Name, Number, Operator,
 __all__ = ["MippDslLexer", "MippJsonLexer"]
 
 # Token prefixes that name a type or a constant instead of a MIPP function.
-_TYPE_PREFIXES = r"(?:r|m|s|N)"
+_TYPE_PREFIXES = r"(?:vd|vm|s|N)"
 _IDENT = r"[A-Za-z_][A-Za-z0-9_]*"
 
 # The '%' that open and close a DSL placeholder use the same token (and colour) as the Jinja2
@@ -36,7 +36,7 @@ _DSL = [
     # Predication markers of the scalar reference: %!pred_cond!%, %!pred_alt!%
     (r"(%)(!" + _IDENT + r"!)(%)",
      bygroups(Comment.Preproc, Name.Decorator, Comment.Preproc)),
-    # Type and constant placeholders: %r<...>%, %m<...>%, %s<...>%, %N<...>%
+    # Type and constant placeholders: %vd<...>%, %vm<...>%, %s<...>%, %N<...>%
     (r"(%)(" + _TYPE_PREFIXES + r")(<)",
      bygroups(Comment.Preproc, Keyword.Type, Punctuation), "mipp-mods"),
     # Function calls: %add<...>%, %{{func_name}}<...>%

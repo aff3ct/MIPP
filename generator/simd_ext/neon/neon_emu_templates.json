@@ -2,44 +2,44 @@
     "all_minv64": {
         "format": "long",
         "code": [
-            "return vminvq_u32(vreinterpretq_u32_u64(m0.m)) != 0;"
+            "return vminvq_u32(vreinterpretq_u32_u64(vm0.vm)) != 0;"
         ]
     },
     "any_maxv64": {
         "format": "long",
         "code": [
-            "return vmaxvq_u32(vreinterpretq_u32_u64(m0.m)) != 0;"
+            "return vmaxvq_u32(vreinterpretq_u32_u64(vm0.vm)) != 0;"
         ]
     },
     "arith_2args_recp": {
         "format": "long",
         "code": [
-            "%r<tp>% recp;",
-            "recp.r = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r1.r);",
-            "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
-            "recp.r = vmulq_{{ isa_dt_par.data_ext }}(recp.r, vrecpsq_{{ isa_dt_par.data_ext }}(r1.r, recp.r));",
-            "%r<tp>% res = %mul<tp>%(r0, recp);",
+            "%vd<tp>% recp;",
+            "recp.vd = {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd1.vd);",
+            "recp.vd = vmulq_{{ isa_dt_par.data_ext }}(recp.vd, vrecpsq_{{ isa_dt_par.data_ext }}(vd1.vd, recp.vd));",
+            "recp.vd = vmulq_{{ isa_dt_par.data_ext }}(recp.vd, vrecpsq_{{ isa_dt_par.data_ext }}(vd1.vd, recp.vd));",
+            "%vd<tp>% res = %mul<tp>%(vd0, recp);",
             "return res;"
         ]
     },
     "arith_3args_acc_neg": {
         "format": "short",
-        "code": "{{ isa.prefix }}negq_{{ isa_dt_par.data_ext }}({{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(r2.r, r0.r, r1.r));"
+        "code": "{{ isa.prefix }}negq_{{ isa_dt_par.data_ext }}({{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd2.vd, vd0.vd, vd1.vd));"
     },
     "cmpeq_64": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "uint32x4_t c = vceqq_u32(vreinterpretq_u32_{{ isa_dt_par.data_ext }}(r0.r), vreinterpretq_u32_{{ isa_dt_par.data_ext }}(r1.r));",
-            "res.m = vreinterpretq_u64_u32(vandq_u32(c, vrev64q_u32(c)));",
+            "%vm<tr>% res;",
+            "uint32x4_t c = vceqq_u32(vreinterpretq_u32_{{ isa_dt_par.data_ext }}(vd0.vd), vreinterpretq_u32_{{ isa_dt_par.data_ext }}(vd1.vd));",
+            "res.vm = vreinterpretq_u64_u32(vandq_u32(c, vrev64q_u32(c)));",
             "return res;"
         ]
     },
     "cmpgt_s64": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "res.m = vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(r1.r, r0.r), 63));",
+            "%vm<tr>% res;",
+            "res.vm = vreinterpretq_u64_s64(vshrq_n_s64(vqsubq_s64(vd1.vd, vd0.vd), 63));",
             "return res;"
         ]
     },
@@ -47,8 +47,8 @@
         "format": "long",
         "code": [
             "{% set f = instr_name.split('|') -%}{%- set acc = f[0] if f[0] != 'ZERO' else ('' ~ isa.prefix ~ 'dupq_n_' ~ isa_dt_par.data_ext ~ '(0)') -%}{%- set rot, x, y = f[1], f[2], f[3] -%}",
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}cmlaq_rot{{ rot }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}cmlaq_{{ isa_dt_par.data_ext }}({{ acc }}, {{ x }}, {{ y }}), {{ x }}, {{ y }});",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}cmlaq_rot{{ rot }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}cmlaq_{{ isa_dt_par.data_ext }}({{ acc }}, {{ x }}, {{ y }}), {{ x }}, {{ y }});",
             "return res;"
         ]
     },
@@ -56,42 +56,42 @@
         "format": "long",
         "code": [
             "{% if isa_dt_par.to_ptr == 'float64_t' or isa_dt_par.to_ptr == 'int64_t' or isa_dt_par.to_ptr == 'uint64_t' -%}",
-            "%r<tp>% r1;",
-            "r1.r = vextq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 1);",
-            "%r<tp>% res = %{{ instr_name }}<tp>%(r0, r1);",
+            "%vd<tp>% vd1;",
+            "vd1.vd = vextq_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd, 1);",
+            "%vd<tp>% res = %{{ instr_name }}<tp>%(vd0, vd1);",
             "return %get<tp>%(res, 0);",
             "{% elif isa_dt_par.to_ptr == 'float32_t' or isa_dt_par.to_ptr == 'int32_t' or isa_dt_par.to_ptr == 'uint32_t' -%}",
-            "%r<tp>% r1;",
-            "r1.r = vextq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 2);",
-            "%r<tp>% r2 = %{{ instr_name }}<tp>%(r0, r1);",
-            "%r<tp>% r3;",
-            "r3.r = vextq_{{ isa_dt_par.data_ext }}(r2.r, r2.r, 1);",
-            "%r<tp>% res = %{{ instr_name }}<tp>%(r2, r3);",
+            "%vd<tp>% vd1;",
+            "vd1.vd = vextq_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd, 2);",
+            "%vd<tp>% vd2 = %{{ instr_name }}<tp>%(vd0, vd1);",
+            "%vd<tp>% vd3;",
+            "vd3.vd = vextq_{{ isa_dt_par.data_ext }}(vd2.vd, vd2.vd, 1);",
+            "%vd<tp>% res = %{{ instr_name }}<tp>%(vd2, vd3);",
             "return %get<tp>%(res, 0);",
             "{% elif isa_dt_par.to_ptr == 'int16_t' or isa_dt_par.to_ptr == 'uint16_t' -%}",
-            "%r<tp>% r1;",
-            "r1.r = vextq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 4);",
-            "%r<tp>% r2 = %{{ instr_name }}<tp>%(r0, r1);",
-            "%r<tp>% r3;",
-            "r3.r = vextq_{{ isa_dt_par.data_ext }}(r2.r, r2.r, 2);",
-            "%r<tp>% r4 = %{{ instr_name }}<tp>%(r2, r3);",
-            "%r<tp>% r5;",
-            "r5.r = vextq_{{ isa_dt_par.data_ext }}(r4.r, r4.r, 1);",
-            "%r<tp>% res = %{{ instr_name }}<tp>%(r4, r5);",
+            "%vd<tp>% vd1;",
+            "vd1.vd = vextq_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd, 4);",
+            "%vd<tp>% vd2 = %{{ instr_name }}<tp>%(vd0, vd1);",
+            "%vd<tp>% vd3;",
+            "vd3.vd = vextq_{{ isa_dt_par.data_ext }}(vd2.vd, vd2.vd, 2);",
+            "%vd<tp>% vd4 = %{{ instr_name }}<tp>%(vd2, vd3);",
+            "%vd<tp>% vd5;",
+            "vd5.vd = vextq_{{ isa_dt_par.data_ext }}(vd4.vd, vd4.vd, 1);",
+            "%vd<tp>% res = %{{ instr_name }}<tp>%(vd4, vd5);",
             "return %get<tp>%(res, 0);",
             "{% else -%}",
-            "%r<tp>% r1;",
-            "r1.r = vextq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 8);",
-            "%r<tp>% r2 = %{{ instr_name }}<tp>%(r0, r1);",
-            "%r<tp>% r3;",
-            "r3.r = vextq_{{ isa_dt_par.data_ext }}(r2.r, r2.r, 4);",
-            "%r<tp>% r4 = %{{ instr_name }}<tp>%(r2, r3);",
-            "%r<tp>% r5;",
-            "r5.r = vextq_{{ isa_dt_par.data_ext }}(r4.r, r4.r, 2);",
-            "%r<tp>% r6 = %{{ instr_name }}<tp>%(r4, r5);",
-            "%r<tp>% r7;",
-            "r7.r = vextq_{{ isa_dt_par.data_ext }}(r6.r, r6.r, 1);",
-            "%r<tp>% res = %{{ instr_name }}<tp>%(r6, r7);",
+            "%vd<tp>% vd1;",
+            "vd1.vd = vextq_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd, 8);",
+            "%vd<tp>% vd2 = %{{ instr_name }}<tp>%(vd0, vd1);",
+            "%vd<tp>% vd3;",
+            "vd3.vd = vextq_{{ isa_dt_par.data_ext }}(vd2.vd, vd2.vd, 4);",
+            "%vd<tp>% vd4 = %{{ instr_name }}<tp>%(vd2, vd3);",
+            "%vd<tp>% vd5;",
+            "vd5.vd = vextq_{{ isa_dt_par.data_ext }}(vd4.vd, vd4.vd, 2);",
+            "%vd<tp>% vd6 = %{{ instr_name }}<tp>%(vd4, vd5);",
+            "%vd<tp>% vd7;",
+            "vd7.vd = vextq_{{ isa_dt_par.data_ext }}(vd6.vd, vd6.vd, 1);",
+            "%vd<tp>% res = %{{ instr_name }}<tp>%(vd6, vd7);",
             "return %get<tp>%(res, 0);",
             "{% endif -%}"
         ]
@@ -99,25 +99,25 @@
     "mul_64": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "{% if isa_dt_par.data_ext == 'u64' %}uint64x2_t a = r0.r, b = r1.r;{% else %}uint64x2_t a = vreinterpretq_u64_s64(r0.r), b = vreinterpretq_u64_s64(r1.r);{% endif %}",
+            "%vd<tp>% res;",
+            "{% if isa_dt_par.data_ext == 'u64' %}uint64x2_t a = vd0.vd, b = vd1.vd;{% else %}uint64x2_t a = vreinterpretq_u64_s64(vd0.vd), b = vreinterpretq_u64_s64(vd1.vd);{% endif %}",
             "uint32x4_t cross = vmulq_u32(vrev64q_u32(vreinterpretq_u32_u64(b)), vreinterpretq_u32_u64(a));",
             "uint64x2_t hi = vshlq_n_u64(vpaddlq_u32(cross), 32);",
             "uint64x2_t p = vmlal_u32(hi, vmovn_u64(a), vmovn_u64(b));",
-            "res.r = {% if isa_dt_par.data_ext == 'u64' %}p{% else %}vreinterpretq_s64_u64(p){% endif %};",
+            "res.vd = {% if isa_dt_par.data_ext == 'u64' %}p{% else %}vreinterpretq_s64_u64(p){% endif %};",
             "return res;"
         ]
     },
     "none_maxv64": {
         "format": "long",
         "code": [
-            "return vmaxvq_u32(vreinterpretq_u32_u64(m0.m)) == 0;"
+            "return vmaxvq_u32(vreinterpretq_u32_u64(vm0.vm)) == 0;"
         ]
     },
     "none_pmax": {
         "format": "long",
         "code": [
-            "uint32x4_t x = {% if isa_dt_par.data_ext_msk == 'u32' %}m0.m{% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(m0.m){% endif %};",
+            "uint32x4_t x = {% if isa_dt_par.data_ext_msk == 'u32' %}vm0.vm{% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vm0.vm){% endif %};",
             "uint32x2_t t = vorr_u32(vget_low_u32(x), vget_high_u32(x));",
             "t = vpmax_u32(t, t);",
             "return vget_lane_u32(t, 0) == 0;"
@@ -126,16 +126,16 @@
     "notb_k_64": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "res.m = vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(m0.m)));",
+            "%vm<tr>% res;",
+            "res.vm = vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(vm0.vm)));",
             "return res;"
         ]
     },
     "pow2_shl": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "res.r = vshlq_{{ isa_dt_par.data_ext }}(vdupq_n_{{ isa_dt_par.data_ext }}(1), vreinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r));",
+            "%vd<tp>% res;",
+            "res.vd = vshlq_{{ isa_dt_par.data_ext }}(vdupq_n_{{ isa_dt_par.data_ext }}(1), vreinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd));",
             "return res;"
         ]
     },
@@ -143,77 +143,77 @@
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %bcast<tp>%(r0, s0);"
+            "return %bcast<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_permute": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %permute<tp>%(r0, r1);"
+            "return %permute<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_reverse": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %reverse<tp>%(r0);"
+            "return %reverse<tp>%(vd0);"
         ]
     },
     "rea_b128_rotate": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %rotate<tp>%(r0, s0);"
+            "return %rotate<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_slide": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slide<tp>%(r0, r1, s0);"
+            "return %slide<tp>%(vd0, vd1, s0);"
         ]
     },
     "rea_b128_slidedown": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slidedown<tp>%(r0, s0);"
+            "return %slidedown<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_slideup": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slideup<tp>%(r0, s0);"
+            "return %slideup<tp>%(vd0, s0);"
         ]
     },
     "rea_b128_unziphi": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %unziphi<tp>%(r0, r1);"
+            "return %unziphi<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_unziplo": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %unziplo<tp>%(r0, r1);"
+            "return %unziplo<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_ziphi": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %ziphi<tp>%(r0, r1);"
+            "return %ziphi<tp>%(vd0, vd1);"
         ]
     },
     "rea_b128_ziplo": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %ziplo<tp>%(r0, r1);"
+            "return %ziplo<tp>%(vd0, vd1);"
         ]
     },
     "rea_compress_32": {
@@ -222,9 +222,9 @@
             "// bytes of the active lanes, then 0xFF (zero), indexed by the bits of the mask",
             "static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=255) }};",
             "static const uint32_t w[4] = {1, 2, 4, 8};",
-            "const unsigned mm = (unsigned){{ isa.prefix }}addvq_u32({{ isa.prefix }}andq_u32(m0.m, {{ isa.prefix }}ld1q_u32(w)));",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'uint' and dt_par.n_bits == 8 %}{% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u8{% endif %}({{ isa.prefix }}qtbl1q_u8({{ isa.prefix }}reinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r), {{ isa.prefix }}ld1q_u8(lut[mm])));",
+            "const unsigned mm = (unsigned){{ isa.prefix }}addvq_u32({{ isa.prefix }}andq_u32(vm0.vm, {{ isa.prefix }}ld1q_u32(w)));",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'uint' and dt_par.n_bits == 8 %}{% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u8{% endif %}({{ isa.prefix }}qtbl1q_u8({{ isa.prefix }}reinterpretq_u8_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}ld1q_u8(lut[mm])));",
             "return res;"
         ]
     },
@@ -234,28 +234,28 @@
             "// bytes of the active lanes, then 0xFF (zero), indexed by the bits of the mask",
             "static const uint8_t lut[4][16] = {{ compress_lut(lanes=2, units=8, fill=255) }};",
             "static const uint64_t w[2] = {1, 2};",
-            "const unsigned mm = (unsigned){{ isa.prefix }}addvq_u64({{ isa.prefix }}andq_u64(m0.m, {{ isa.prefix }}ld1q_u64(w)));",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.category == 'uint' and dt_par.n_bits == 8 %}{% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u8{% endif %}({{ isa.prefix }}qtbl1q_u8({{ isa.prefix }}reinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r), {{ isa.prefix }}ld1q_u8(lut[mm])));",
+            "const unsigned mm = (unsigned){{ isa.prefix }}addvq_u64({{ isa.prefix }}andq_u64(vm0.vm, {{ isa.prefix }}ld1q_u64(w)));",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.category == 'uint' and dt_par.n_bits == 8 %}{% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u8{% endif %}({{ isa.prefix }}qtbl1q_u8({{ isa.prefix }}reinterpretq_u8_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}ld1q_u8(lut[mm])));",
             "return res;"
         ]
     },
     "rea_count": {
         "format": "long",
         "code": [
-            "return (int32_t)((int32_t){{ isa.prefix }}addvq_{{ isa_dt_par.data_ext_msk }}({{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext_msk }}(m0.m, {{ dt_par.n_bits - 1 }})));"
+            "return (int32_t)((int32_t){{ isa.prefix }}addvq_{{ isa_dt_par.data_ext_msk }}({{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext_msk }}(vm0.vm, {{ dt_par.n_bits - 1 }})));"
         ]
     },
     "rea_permute2_tbl": {
         "format": "long",
         "code": [
             "// byte indices of the lanes in the 32 bytes of the two registers, then a table lookup on two registers",
-            "{% if dt_par.n_bits == 8 %}uint8x16_t ib = r2.r;{% elif dt_par.n_bits == 16 %}uint8x16_t ib = vreinterpretq_u8_u16(vmlaq_n_u16(vdupq_n_u16(0x0100), r2.r, 0x0202));{% elif dt_par.n_bits == 32 %}uint8x16_t ib = vreinterpretq_u8_u32(vmlaq_n_u32(vdupq_n_u32(0x03020100), r2.r, 0x04040404));{% else %}const uint8_t rep[16] = {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}, ofs[16] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}; uint8x16_t ib = vaddq_u8(vqtbl1q_u8(vreinterpretq_u8_u64(vshlq_n_u64(r2.r, 3)), vld1q_u8(rep)), vld1q_u8(ofs));{% endif %}",
+            "{% if dt_par.n_bits == 8 %}uint8x16_t ib = vd2.vd;{% elif dt_par.n_bits == 16 %}uint8x16_t ib = vreinterpretq_u8_u16(vmlaq_n_u16(vdupq_n_u16(0x0100), vd2.vd, 0x0202));{% elif dt_par.n_bits == 32 %}uint8x16_t ib = vreinterpretq_u8_u32(vmlaq_n_u32(vdupq_n_u32(0x03020100), vd2.vd, 0x04040404));{% else %}const uint8_t rep[16] = {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}, ofs[16] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}; uint8x16_t ib = vaddq_u8(vqtbl1q_u8(vreinterpretq_u8_u64(vshlq_n_u64(vd2.vd, 3)), vld1q_u8(rep)), vld1q_u8(ofs));{% endif %}",
             "uint8x16x2_t t;",
-            "t.val[0] = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r0.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r){% endif %};",
-            "t.val[1] = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r1.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r1.r){% endif %};",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vqtbl2q_u8(t, ib){% else %}vreinterpretq_{{ isa_dt_par.data_ext }}_u8(vqtbl2q_u8(t, ib)){% endif %};",
+            "t.val[0] = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vd0.vd{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(vd0.vd){% endif %};",
+            "t.val[1] = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vd1.vd{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(vd1.vd){% endif %};",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vqtbl2q_u8(t, ib){% else %}vreinterpretq_{{ isa_dt_par.data_ext }}_u8(vqtbl2q_u8(t, ib)){% endif %};",
             "return res;"
         ]
     },
@@ -263,9 +263,9 @@
         "format": "long",
         "code": [
             "// byte indices of the lanes (k * size + 0 .. size - 1), then a table lookup on the bytes",
-            "{% if dt_par.n_bits == 8 %}uint8x16_t ib = r1.r;{% elif dt_par.n_bits == 16 %}uint8x16_t ib = vreinterpretq_u8_u16(vmlaq_n_u16(vdupq_n_u16(0x0100), r1.r, 0x0202));{% elif dt_par.n_bits == 32 %}uint8x16_t ib = vreinterpretq_u8_u32(vmlaq_n_u32(vdupq_n_u32(0x03020100), r1.r, 0x04040404));{% else %}const uint8_t rep[16] = {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}, ofs[16] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}; uint8x16_t ib = vaddq_u8(vqtbl1q_u8(vreinterpretq_u8_u64(vshlq_n_u64(r1.r, 3)), vld1q_u8(rep)), vld1q_u8(ofs));{% endif %}",
-            "%r<tp>% res;",
-            "res.r = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vqtbl1q_u8({% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r0.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r){% endif %}, ib){% else %}vreinterpretq_{{ isa_dt_par.data_ext }}_u8(vqtbl1q_u8({% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}r0.r{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(r0.r){% endif %}, ib)){% endif %};",
+            "{% if dt_par.n_bits == 8 %}uint8x16_t ib = vd1.vd;{% elif dt_par.n_bits == 16 %}uint8x16_t ib = vreinterpretq_u8_u16(vmlaq_n_u16(vdupq_n_u16(0x0100), vd1.vd, 0x0202));{% elif dt_par.n_bits == 32 %}uint8x16_t ib = vreinterpretq_u8_u32(vmlaq_n_u32(vdupq_n_u32(0x03020100), vd1.vd, 0x04040404));{% else %}const uint8_t rep[16] = {0, 0, 0, 0, 0, 0, 0, 0, 8, 8, 8, 8, 8, 8, 8, 8}, ofs[16] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7}; uint8x16_t ib = vaddq_u8(vqtbl1q_u8(vreinterpretq_u8_u64(vshlq_n_u64(vd1.vd, 3)), vld1q_u8(rep)), vld1q_u8(ofs));{% endif %}",
+            "%vd<tp>% res;",
+            "res.vd = {% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vqtbl1q_u8({% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vd0.vd{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(vd0.vd){% endif %}, ib){% else %}vreinterpretq_{{ isa_dt_par.data_ext }}_u8(vqtbl1q_u8({% if dt_par.n_bits == 8 and dt_par.category == 'uint' %}vd0.vd{% else %}vreinterpretq_u8_{{ isa_dt_par.data_ext }}(vd0.vd){% endif %}, ib)){% endif %};",
             "return res;"
         ]
     },
@@ -273,61 +273,61 @@
         "format": "long",
         "code": [
             "// the lanes reversed in each 64-bit half, then the halves swapped",
-            "%r<tp>% t;",
-            "t.r = {{ isa.prefix }}rev64q_{{ isa_dt_par.data_ext }}(r0.r);",
-            "%r<tp>% res;",
-            "res.r = {{ isa.prefix }}extq_{{ isa_dt_par.data_ext }}(t.r, t.r, {{ 64 // dt_par.n_bits }});",
+            "%vd<tp>% t;",
+            "t.vd = {{ isa.prefix }}rev64q_{{ isa_dt_par.data_ext }}(vd0.vd);",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}extq_{{ isa_dt_par.data_ext }}(t.vd, t.vd, {{ 64 // dt_par.n_bits }});",
             "return res;"
         ]
     },
     "reduce_64": {
         "format": "long",
         "code": [
-            "%r<tp>% v = r0;",
-            "%r<tp>% s;",
-            "s.r = vextq_{{ isa_dt_par.data_ext }}(r0.r, r0.r, 1);",
+            "%vd<tp>% v = vd0;",
+            "%vd<tp>% s;",
+            "s.vd = vextq_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd, 1);",
             "v = %{{ instr_name }}<tp>%(v, s);",
             "return %getfirst<tp>%(v);"
         ]
     },
     "shift_var": {
         "format": "short",
-        "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(s0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-s0));{% endif %}"
+        "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(s0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-s0));{% endif %}"
     },
     "shv_shl_u": {
         "format": "short",
-        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r));"
+        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
     },
     "shv_shr_s": {
         "format": "short",
-        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}subq_s{{ dt_par.n_bits }}({{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(0), r1.r));"
+        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}subq_s{{ dt_par.n_bits }}({{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(0), vd1.vd));"
     },
     "shv_shr_u": {
         "format": "short",
-        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(r0.r, {{ isa.prefix }}subq_s{{ dt_par.n_bits }}({{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(0), {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r1.r)));"
+        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}subq_s{{ dt_par.n_bits }}({{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(0), {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd)));"
     },
     "sqrt_nr": {
         "format": "long",
         "code": [
-            "%r<tp>% res;",
-            "float32x4_t e = vrsqrteq_f32(r0.r);",
-            "e = vmulq_f32(e, vrsqrtsq_f32(vmulq_f32(r0.r, e), e));",
-            "e = vmulq_f32(e, vrsqrtsq_f32(vmulq_f32(r0.r, e), e));",
-            "uint32x4_t zero = vceqq_f32(r0.r, vdupq_n_f32(0.0f));",
-            "res.r = vbslq_f32(zero, r0.r, vmulq_f32(r0.r, e));",
+            "%vd<tp>% res;",
+            "float32x4_t e = vrsqrteq_f32(vd0.vd);",
+            "e = vmulq_f32(e, vrsqrtsq_f32(vmulq_f32(vd0.vd, e), e));",
+            "e = vmulq_f32(e, vrsqrtsq_f32(vmulq_f32(vd0.vd, e), e));",
+            "uint32x4_t zero = vceqq_f32(vd0.vd, vdupq_n_f32(0.0f));",
+            "res.vd = vbslq_f32(zero, vd0.vd, vmulq_f32(vd0.vd, e));",
             "return res;"
         ]
     },
     "testz_maxv": {
         "format": "long",
         "code": [
-            "return vmaxvq_u32({% if isa_dt_par.data_ext_msk == 'u32' %}vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m){% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m)){% endif %}) == 0;"
+            "return vmaxvq_u32({% if isa_dt_par.data_ext_msk == 'u32' %}vandq_{{ isa_dt_par.data_ext_msk }}(vm0.vm, vm1.vm){% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vandq_{{ isa_dt_par.data_ext_msk }}(vm0.vm, vm1.vm)){% endif %}) == 0;"
         ]
     },
     "testz_pmax": {
         "format": "long",
         "code": [
-            "uint32x4_t x = {% if isa_dt_par.data_ext_msk == 'u32' %}vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m){% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vandq_{{ isa_dt_par.data_ext_msk }}(m0.m, m1.m)){% endif %};",
+            "uint32x4_t x = {% if isa_dt_par.data_ext_msk == 'u32' %}vandq_{{ isa_dt_par.data_ext_msk }}(vm0.vm, vm1.vm){% else %}vreinterpretq_u32_{{ isa_dt_par.data_ext_msk }}(vandq_{{ isa_dt_par.data_ext_msk }}(vm0.vm, vm1.vm)){% endif %};",
             "uint32x2_t t = vorr_u32(vget_low_u32(x), vget_high_u32(x));",
             "t = vpmax_u32(t, t);",
             "return vget_lane_u32(t, 0) == 0;"
@@ -336,10 +336,10 @@
     "tovm_64": {
         "format": "long",
         "code": [
-            "%m<tr>% res;",
-            "uint32x4_t x = vreinterpretq_u32_{{ isa_dt_par.data_ext }}(r0.r);",
+            "%vm<tr>% res;",
+            "uint32x4_t x = vreinterpretq_u32_{{ isa_dt_par.data_ext }}(vd0.vd);",
             "uint32x4_t t = vtstq_u32(x, x);",
-            "res.m = vreinterpretq_u64_u32(vorrq_u32(t, vrev64q_u32(t)));",
+            "res.vm = vreinterpretq_u64_u32(vorrq_u32(t, vrev64q_u32(t)));",
             "return res;"
         ]
     }

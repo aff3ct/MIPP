@@ -16,7 +16,7 @@ _RE_PLACEHOLDER    = re.compile(r'\%([^%]*)\%')
 _RE_ANGLE          = re.compile(r'<(.*)>')
 _RE_LMUL_EXPR      = re.compile(r'^(tp|tr)([*/])(\d+)$')
 
-# Keys of the type expressions of the templating DSL (`%r<c:int|b:32|m:2|v:Z>%`):
+# Keys of the type expressions of the templating DSL (`%vd<c:int|b:32|m:2|v:Z>%`):
 # category, bit width, LMUL and masking variant. `tp` and `tr` may also appear
 # alone as a part (`%add<tp|m:2>%`).
 _DT_MODIFIER_KEYS  = ("c", "b", "m", "v")
@@ -541,7 +541,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
     for s in ar_substitute:
         item_type = s.split('<')[0]
 
-        if item_type == "r":
+        if item_type == "vd":
             dt_info = _RE_ANGLE.findall(s)[0]
             # print("dt_info: " + dt_info)
             dt_info_params = dt_info.split(",")
@@ -552,7 +552,7 @@ def parse_placeholders(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_nam
                 print("Panic: '" + dt + "' is not available.")
                 exit(-1)
             converted_ir = converted_ir.replace("%" + s + "%", build_reg(datatypes[dt], isa,lmul=_parse_lmul(dt_info, isa, dt_par, dt_ret, lmul, ret_lmul), isa_name=isa_name))
-        elif item_type == "m":
+        elif item_type == "vm":
             dt_info = _RE_ANGLE.findall(s)[0]
             dt_info_params = dt_info.split(",")
             dt = ""
@@ -637,7 +637,7 @@ def get_requirements(ir, isa, funcs, func_name, dt_par, dt_ret,lmul=0, isa_name=
     for s in ar_substitute:
         item_type = s.split('<')[0]
 
-        if item_type not in ["r", "m", "s", "N"]:
+        if item_type not in ["vd", "vm", "s", "N"]:
             f_name = item_type
             if f_name not in funcs:
                 print("Panic: '" + f_name + "' is not in the available MIPP functions.")

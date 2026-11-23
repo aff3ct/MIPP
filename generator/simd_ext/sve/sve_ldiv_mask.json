@@ -5,8 +5,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = svsplice_{{ isa_dt.data_ext }}(svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%), r0.r, r1.r);",
+                "%vd<tr>% res;",
+                "res.vd = svsplice_{{ isa_dt.data_ext }}(svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%), vd0.vd, vd1.vd);",
                 "return res;"
             ]
         }
@@ -17,11 +17,11 @@
                 "u"
             ],
             "code": [
-                "svuint{{ dt.n_bits }}_t v0 = svdup_n_u{{ dt.n_bits }}_z(m0.m, 1);",
-                "svuint{{ dt.n_bits }}_t v1 = svdup_n_u{{ dt.n_bits }}_z(m1.m, 1);",
+                "svuint{{ dt.n_bits }}_t v0 = svdup_n_u{{ dt.n_bits }}_z(vm0.vm, 1);",
+                "svuint{{ dt.n_bits }}_t v1 = svdup_n_u{{ dt.n_bits }}_z(vm1.vm, 1);",
                 "svuint{{ dt.n_bits }}_t v = svsplice_u{{ dt.n_bits }}(svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%), v0, v1);",
-                "%m<tr>% res;",
-                "res.m = svcmpne_n_u{{ dt.n_bits }}(svptrue_b{{ dt.n_bits }}(), v, 0);",
+                "%vm<tr>% res;",
+                "res.vm = svcmpne_n_u{{ dt.n_bits }}(svptrue_b{{ dt.n_bits }}(), v, 0);",
                 "return res;"
             ]
         }
@@ -32,8 +32,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = svext_{{ isa_dt.data_ext }}(r0.r, r0.r, %N<tp|m:tp/2>%);",
+                "%vd<tr>% res;",
+                "res.vd = svext_{{ isa_dt.data_ext }}(vd0.vd, vd0.vd, %N<tp|m:tp/2>%);",
                 "return res;"
             ]
         }
@@ -44,10 +44,10 @@
                 "u"
             ],
             "code": [
-                "svuint{{ dt.n_bits }}_t v = svdup_n_u{{ dt.n_bits }}_z(m0.m, 1);",
+                "svuint{{ dt.n_bits }}_t v = svdup_n_u{{ dt.n_bits }}_z(vm0.vm, 1);",
                 "v = svext_u{{ dt.n_bits }}(v, v, %N<tp|m:tp/2>%);",
-                "%m<tr>% res;",
-                "res.m = svcmpne_n_u{{ dt.n_bits }}(svptrue_b{{ dt.n_bits }}(), v, 0);",
+                "%vm<tr>% res;",
+                "res.vm = svcmpne_n_u{{ dt.n_bits }}(svptrue_b{{ dt.n_bits }}(), v, 0);",
                 "return res;"
             ]
         }
@@ -58,8 +58,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = r0.r;",
+                "%vd<tr>% res;",
+                "res.vd = vd0.vd;",
                 "return res;"
             ]
         }
@@ -70,8 +70,8 @@
                 "u"
             ],
             "code": [
-                "%m<tr>% res;",
-                "res.m = m0.m;",
+                "%vm<tr>% res;",
+                "res.vm = vm0.vm;",
                 "return res;"
             ]
         }
@@ -83,8 +83,8 @@
             ],
             "code": [
                 "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%);",
-                "%r<tr>% res;",
-                "res.r = svld1_{{ isa_dt.data_ext }}(pg, p0);",
+                "%vd<tr>% res;",
+                "res.vd = svld1_{{ isa_dt.data_ext }}(pg, p0);",
                 "return res;"
             ]
         }
@@ -103,9 +103,9 @@
                 "u"
             ],
             "code": [
-                "{% set d = isa.datatypes[ctx.dt_ret].data_ext %}{% set s = isa_dt.data_ext %}%r<tr>% res;",
-                "{{ isa.datatypes[ctx.dt_ret].reg }} x = svreinterpret_{{ d }}_{{ s }}(r0.r);",
-                "res.r = svuzp1_{{ d }}(x, x);",
+                "{% set d = isa.datatypes[ctx.dt_ret].data_ext %}{% set s = isa_dt.data_ext %}%vd<tr>% res;",
+                "{{ isa.datatypes[ctx.dt_ret].reg }} x = svreinterpret_{{ d }}_{{ s }}(vd0.vd);",
+                "res.vd = svuzp1_{{ d }}(x, x);",
                 "return res;"
             ]
         },
@@ -117,9 +117,9 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "svfloat32_t x = svcvt_f32_f64_x(svptrue_b64(), r0.r);",
-                "res.r = svuzp1_f32(x, x);",
+                "%vd<tr>% res;",
+                "svfloat32_t x = svcvt_f32_f64_x(svptrue_b64(), vd0.vd);",
+                "res.vd = svuzp1_f32(x, x);",
                 "return res;"
             ]
         }
@@ -140,11 +140,11 @@
             "code": [
                 "{% set d = isa.datatypes[ctx.dt_ret].data_ext %}{% set s = isa_dt.data_ext %}{% set D = ctx.dt_ret | upper %}",
                 "svbool_t pg = svptrue_{{ isa_dt.data_ext_logi }}();",
-                "{{ isa_dt.reg }} c = svmin_n_{{ s }}_x(pg, r0.r, {{ D }}_MAX);",
+                "{{ isa_dt.reg }} c = svmin_n_{{ s }}_x(pg, vd0.vd, {{ D }}_MAX);",
                 "{% if not ctx.dt_ret.startswith('u') %}c = svmax_n_{{ s }}_x(pg, c, {{ D }}_MIN);{% endif %}",
-                "%r<tr>% res;",
+                "%vd<tr>% res;",
                 "{{ isa.datatypes[ctx.dt_ret].reg }} x = svreinterpret_{{ d }}_{{ s }}(c);",
-                "res.r = svuzp1_{{ d }}(x, x);",
+                "res.vd = svuzp1_{{ d }}(x, x);",
                 "return res;"
             ]
         }
@@ -156,7 +156,7 @@
             ],
             "code": [
                 "svbool_t pg = svwhilelt_b{{ dt.n_bits }}_s32(0, %N<tp>%);",
-                "svst1_{{ isa_dt.data_ext }}(pg, p0, r0.r);"
+                "svst1_{{ isa_dt.data_ext }}(pg, p0, vd0.vd);"
             ]
         }
     ],
@@ -174,8 +174,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = svunpklo_{{ isa.datatypes[ctx.dt_ret].data_ext }}(r0.r);",
+                "%vd<tr>% res;",
+                "res.vd = svunpklo_{{ isa.datatypes[ctx.dt_ret].data_ext }}(vd0.vd);",
                 "return res;"
             ]
         },
@@ -187,8 +187,8 @@
                 "u"
             ],
             "code": [
-                "%r<tr>% res;",
-                "res.r = svcvt_f64_f32_x(svptrue_b64(), svzip1_f32(r0.r, r0.r));",
+                "%vd<tr>% res;",
+                "res.vd = svcvt_f64_f32_x(svptrue_b64(), svzip1_f32(vd0.vd, vd0.vd));",
                 "return res;"
             ]
         }

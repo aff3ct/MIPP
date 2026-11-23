@@ -65,9 +65,9 @@ static void masked()
     mipp::store<mipp::M>(m, out_ptr, v_z);                         // inactive lanes: memory unchanged
 
     // LMUL = 2:
-    mipp::Vm<float, 2> m2  = (wa < wlimit);
-    mipp::Vd<float, 2> w_z = mipp::loadu_obj<mipp::Z>(m2, uptr);
-    mipp::storeu<mipp::M>(m2, uout, w_z);
+    mipp::Vm<float, 2> vm2  = (wa < wlimit);
+    mipp::Vd<float, 2> w_z = mipp::loadu_obj<mipp::Z>(vm2, uptr);
+    mipp::storeu<mipp::M>(vm2, uout, w_z);
     // --8<-- [end:masked]
     for (int i = 0; i < mipp::Vd<float>::N(); i++) {
         const bool act = A[i] < 0.5f;

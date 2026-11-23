@@ -10,10 +10,10 @@
                         "u"
                     ],
                     "code": [
-                        "%r<tr>% res;",
-                        "{% if isa_dt.reg == '__m128' %}res.r = _mm_movelh_ps(r0.r, r1.r);",
-                        "{% elif isa_dt.reg == '__m128d' %}res.r = _mm_unpacklo_pd(r0.r, r1.r);",
-                        "{% else %}res.r = _mm_unpacklo_epi64(r0.r, r1.r);{% endif %}",
+                        "%vd<tr>% res;",
+                        "{% if isa_dt.reg == '__m128' %}res.vd = _mm_movelh_ps(vd0.vd, vd1.vd);",
+                        "{% elif isa_dt.reg == '__m128d' %}res.vd = _mm_unpacklo_pd(vd0.vd, vd1.vd);",
+                        "{% else %}res.vd = _mm_unpacklo_epi64(vd0.vd, vd1.vd);{% endif %}",
                         "return res;"
                     ],
                     "datatypes": [
@@ -88,7 +88,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Body of the function, one line per item: Jinja2 (variables `isa`, `isa_dt` for the datatype entry of the ISA descriptor, `ctx`, `mask_kind`, ...) and templating DSL (`%r<tp>%`, `%N<tp|m:tp*2>%`, `%r<tr>%` for the result)."
+                    "description": "Body of the function, one line per item: Jinja2 (variables `isa`, `isa_dt` for the datatype entry of the ISA descriptor, `ctx`, `mask_kind`, ...) and templating DSL (`%vd<tp>%`, `%N<tp|m:tp*2>%`, `%vd<tr>%` for the result)."
                 }
             },
             "description": "One candidate implementation."

@@ -158,7 +158,7 @@ class TestsBuilderEngine:
         """
         Arguments of a scalar form (`sub_sv(s, r)`): the operands keep the inputs of their position in the base
         function (the test loads `r<k>` / `s<k>` from `inputs<k>` for each operand k of the base), the scalars are
-        the first element of their input: `sub_sv` -> ["inputs1[0]", "r2"], with the domains of `sub`.
+        the first element of their input: `sub_sv` -> ["inputs1[0]", "vd2"], with the domains of `sub`.
         """
         iface = self.interfaces[func_name]
         form = iface[forms.FORM_KEY]
@@ -171,9 +171,9 @@ class TestsBuilderEngine:
                 if letter == "s":
                     args.append(f"inputs{k}[0]")
                 else:
-                    args.append(f"s{k}" if is_scalar else f"r{k}")
+                    args.append(f"s{k}" if is_scalar else f"vd{k}")
             elif arg["type"] == "msk":
-                args.append(f"sm{msk_i}" if is_scalar else f"m{msk_i}")
+                args.append(f"sm{msk_i}" if is_scalar else f"vm{msk_i}")
                 msk_i += 1
             else:
                 raise ValueError(f"'{func_name}': argument {arg['type']} of a scalar form is not supported by the tests")
@@ -183,9 +183,9 @@ class TestsBuilderEngine:
         if func_name in self.form_functions:
             args = self._build_form_call_args(func_name, is_scalar)
             if mkind in ("mask", "maskz", "masks"):
-                args.insert(0, "sm1" if is_scalar else "m1")
+                args.insert(0, "sm1" if is_scalar else "vm1")
             if mkind == "masks":
-                args.insert(1, "ssrc" if is_scalar else "rsrc")
+                args.insert(1, "ssrc" if is_scalar else "vdsrc")
             return args
         proto_ref = self.interfaces.get(func_name, {}).get("proto_ref", "")
         proto_spec = self.protos.get(proto_ref, {})
@@ -196,10 +196,10 @@ class TestsBuilderEngine:
         for arg in args_info:
             atype = arg.get("type")
             if atype == "reg":
-                args.append(f"s{reg_i}" if is_scalar else f"r{reg_i}")
+                args.append(f"s{reg_i}" if is_scalar else f"vd{reg_i}")
                 reg_i += 1
             elif atype == "msk":
-                args.append(f"sm{msk_i}" if is_scalar else f"m{msk_i}")
+                args.append(f"sm{msk_i}" if is_scalar else f"vm{msk_i}")
                 msk_i += 1
             elif atype == "val":
                 if self.lane_index_kind(func_name):
@@ -224,9 +224,9 @@ class TestsBuilderEngine:
                     args.append("inputs1")
 
         if mkind in ("mask", "maskz", "masks"):
-            args.insert(0, "sm1" if is_scalar else "m1")
+            args.insert(0, "sm1" if is_scalar else "vm1")
         if mkind == "masks":
-            args.insert(1, "ssrc" if is_scalar else "rsrc")
+            args.insert(1, "ssrc" if is_scalar else "vdsrc")
 
         return args
 
@@ -237,7 +237,7 @@ class TestsBuilderEngine:
 
     @staticmethod
     def test_input_lmul(lmul: int) -> int:
-        """LMUL of the arguments of a test. The `m0` tests call the names without suffix, which are
+        """LMUL of the arguments of a test. The `vm0` tests call the names without suffix, which are
         those of LMUL 1."""
         return 1 if lmul == 0 else lmul
 
@@ -368,7 +368,7 @@ class TestsBuilderEngine:
         dsts = [{"raw": d, "cpp": self._format_cpp_type(d)} for d in raw_dsts]
         return self.render_template(
             self._tpl("assertions", "cpp", "conv_helper"), fname=fname, helper=func_name, dsts=dsts,
-            arg=("m0" if first_arg == "msk" else "r0"), arg_type=("Msk" if first_arg == "msk" else "Reg"))
+            arg=("vm0" if first_arg == "msk" else "vd0"), arg_type=("Msk" if first_arg == "msk" else "Reg"))
 
     def _load_json(self, filepath: str) -> Dict[str, Any]:
         with open(filepath, "r", encoding="utf-8") as f:
@@ -1120,8 +1120,8 @@ class TestsBuilderEngine:
                 return res
 
             if overflow_check and not overflow_check.startswith("accumulate_"):
-                val1_expr = adapter.format_get("r1", "i", dt2_raw, lmul_suffix)
-                val2_expr = adapter.format_get("r2", "i", dt2_raw, lmul_suffix)
+                val1_expr = adapter.format_get("vd1", "i", dt2_raw, lmul_suffix)
+                val2_expr = adapter.format_get("vd2", "i", dt2_raw, lmul_suffix)
                 inner_lines = "\n".join(_assert_stmts(r_expr_fn(r_var), s_expr_fn(s_var), indent="\t\t\t\t"))
                 tpl_shell = self._tpl("func_templates", "c", "overflow_check_shell")
                 lines.extend(self.render_template(
@@ -1343,29 +1343,29 @@ class TestsBuilderEngineC:
 
         # Loads
         reg_type1 = adapter.format_reg_type(dt1_raw, lmul_suffix)
-        # scalar types are distinct per LMUL name: the m0 tests of an LMUL-changing function use the m1 ones
+        # scalar types are distinct per LMUL name: the vm0 tests of an LMUL-changing function use the m1 ones
         s_lmul_suffix = "m1" if (lmul == 0 and ret_lmul != lmul) else lmul_suffix
         scalar_reg_type1 = adapter.format_scalar_reg_type(dt1_raw, s_lmul_suffix)
 
-        body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} r1 = {adapter.format_load(dt1_raw, 'inputs1', lmul_suffix)};")
+        body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} vd1 = {adapter.format_load(dt1_raw, 'inputs1', lmul_suffix)};")
         body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s1 = {adapter.format_scalar_load(dt1_raw, 'inputs1', s_lmul_suffix)};")
         if not is_1arg:
-            body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} r2 = {adapter.format_load(dt1_raw, 'inputs2', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} vd2 = {adapter.format_load(dt1_raw, 'inputs2', lmul_suffix)};")
             body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s2 = {adapter.format_scalar_load(dt1_raw, 'inputs2', s_lmul_suffix)};")
         if is_3arg:
-            body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} r3 = {adapter.format_load(dt1_raw, 'inputs3', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} vd3 = {adapter.format_load(dt1_raw, 'inputs3', lmul_suffix)};")
             body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} s3 = {adapter.format_scalar_load(dt1_raw, 'inputs3', s_lmul_suffix)};")
 
         if has_mask_var:
             msk_type = adapter.format_msk_type(dt1_raw, lmul_suffix)
             scalar_msk_type = adapter.format_scalar_msk_type(dt1_raw, s_lmul_suffix)
-            body_lines.append(f"\t\t[[maybe_unused]] {msk_type} m1 = {adapter.format_set_k(dt1_raw, 'inputs_m', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {msk_type} vm1 = {adapter.format_set_k(dt1_raw, 'inputs_m', lmul_suffix)};")
             body_lines.append(f"\t\t[[maybe_unused]] {scalar_msk_type} sm1 = {adapter.format_scalar_set_k(dt1_raw, 'inputs_m', s_lmul_suffix)};")
             if n_masks >= 2:
-                body_lines.append(f"\t\t[[maybe_unused]] {msk_type} m2 = {adapter.format_set_k(dt1_raw, 'inputs_m2', lmul_suffix)};")
+                body_lines.append(f"\t\t[[maybe_unused]] {msk_type} vm2 = {adapter.format_set_k(dt1_raw, 'inputs_m2', lmul_suffix)};")
                 body_lines.append(f"\t\t[[maybe_unused]] {scalar_msk_type} sm2 = {adapter.format_scalar_set_k(dt1_raw, 'inputs_m2', s_lmul_suffix)};")
         if mkind == "masks":
-            body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} rsrc = {adapter.format_load(dt1_raw, 'inputs_src', lmul_suffix)};")
+            body_lines.append(f"\t\t[[maybe_unused]] {reg_type1} vdsrc = {adapter.format_load(dt1_raw, 'inputs_src', lmul_suffix)};")
             body_lines.append(f"\t\t[[maybe_unused]] {scalar_reg_type1} ssrc = {adapter.format_scalar_load(dt1_raw, 'inputs_src', s_lmul_suffix)};")
 
         body_lines.append("")
@@ -1587,15 +1587,16 @@ class TestsBuilderEngineCppBase:
         eliminating the two near-identical blocks that differed only by scalar prefix.
         """
         prefix = "s" if is_scalar else ""
+        mpre = "sm" if is_scalar else "vm"
         set_k = adapter.format_scalar_set_k if is_scalar else adapter.format_set_k
         load  = adapter.format_scalar_load   if is_scalar else adapter.format_load
         if n_masks >= 2:
-            lines.append(f"\t\t\t\tauto {prefix}m1 = {set_k('T', 'inputs_m', 'LMUL')};")
-            lines.append(f"\t\t\t\tauto {prefix}m2 = {set_k('T', 'inputs_m2', 'LMUL')};")
+            lines.append(f"\t\t\t\tauto {mpre}1 = {set_k('T', 'inputs_m', 'LMUL')};")
+            lines.append(f"\t\t\t\tauto {mpre}2 = {set_k('T', 'inputs_m2', 'LMUL')};")
         elif n_masks == 1 or mkind in ("mask", "maskz", "masks"):
-            lines.append(f"\t\t\t\tauto {prefix}m1 = {set_k('T', 'inputs_m', 'LMUL')};")
+            lines.append(f"\t\t\t\tauto {mpre}1 = {set_k('T', 'inputs_m', 'LMUL')};")
         if mkind == "masks":
-            src_name = "ssrc" if is_scalar else "rsrc"
+            src_name = "ssrc" if is_scalar else "vdsrc"
             lines.append(f"\t\t\t\tauto {src_name} = {load('T', 'inputs_src', 'LMUL')};")
 
 
@@ -1732,13 +1733,13 @@ class TestsBuilderEngineCpp(TestsBuilderEngineCppBase):
         lines.extend(self.engine.render_unaligned_input(func_name, "T", "size"))
         lines.extend(self.engine.lane_index_decl(func_name, "size", "T"))
 
-        lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
+        lines.append(f"\t\t[[maybe_unused]] auto vd1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
         lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")
         if not is_1arg or is_reg_val:
-            lines.append(f"\t\t[[maybe_unused]] auto r2 = {adapter.format_load('T', 'inputs2', 'LMUL')};")
+            lines.append(f"\t\t[[maybe_unused]] auto vd2 = {adapter.format_load('T', 'inputs2', 'LMUL')};")
             lines.append(f"\t\t[[maybe_unused]] auto s2 = {adapter.format_scalar_load('T', 'inputs2', 'LMUL')};")
         if is_3arg:
-            lines.append(f"\t\t[[maybe_unused]] auto r3 = {adapter.format_load('T', 'inputs3', 'LMUL')};")
+            lines.append(f"\t\t[[maybe_unused]] auto vd3 = {adapter.format_load('T', 'inputs3', 'LMUL')};")
             lines.append(f"\t\t[[maybe_unused]] auto s3 = {adapter.format_scalar_load('T', 'inputs3', 'LMUL')};")
 
         is_void_ret = self.engine.proto_is_void_ret(proto_ref)
@@ -1820,13 +1821,13 @@ class TestsBuilderEngineObj(TestsBuilderEngineCppBase):
         lines.extend(self.engine.render_unaligned_input(func_name, "T", "size"))
         lines.extend(self.engine.lane_index_decl(func_name, "size", "T"))
 
-        lines.append(f"\t\t[[maybe_unused]] auto r1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
+        lines.append(f"\t\t[[maybe_unused]] auto vd1 = {adapter.format_load('T', 'inputs1', 'LMUL')};")
         lines.append(f"\t\t[[maybe_unused]] auto s1 = {adapter.format_scalar_load('T', 'inputs1', 'LMUL')};")
         if not is_1arg or is_reg_val:
-            lines.append(f"\t\t[[maybe_unused]] auto r2 = {adapter.format_load('T', 'inputs2', 'LMUL')};")
+            lines.append(f"\t\t[[maybe_unused]] auto vd2 = {adapter.format_load('T', 'inputs2', 'LMUL')};")
             lines.append(f"\t\t[[maybe_unused]] auto s2 = {adapter.format_scalar_load('T', 'inputs2', 'LMUL')};")
         if is_3arg:
-            lines.append(f"\t\t[[maybe_unused]] auto r3 = {adapter.format_load('T', 'inputs3', 'LMUL')};")
+            lines.append(f"\t\t[[maybe_unused]] auto vd3 = {adapter.format_load('T', 'inputs3', 'LMUL')};")
             lines.append(f"\t\t[[maybe_unused]] auto s3 = {adapter.format_scalar_load('T', 'inputs3', 'LMUL')};")
 
         is_void_ret = self.engine.proto_is_void_ret(proto_ref)

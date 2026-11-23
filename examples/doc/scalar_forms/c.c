@@ -26,26 +26,26 @@ static void forms(void)
     // --8<-- [start:forms]
     vd_float32_t va = mipp_load_float32(A);
     vd_float32_t vb = mipp_load_float32(B);
-    vd_float32_t r1 = mipp_sub_vs_float32(va, 1.f);         // a - 1
-    vd_float32_t r2 = mipp_sub_sv_float32(10.f, va);        // 10 - a
-    vd_float32_t r3 = mipp_fmadd_vsv_float32(va, 2.f, vb); // a * 2 + b
+    vd_float32_t vd1 = mipp_sub_vs_float32(va, 1.f);        // a - 1
+    vd_float32_t vd2 = mipp_sub_sv_float32(10.f, va);       // 10 - a
+    vd_float32_t vd3 = mipp_fmadd_vsv_float32(va, 2.f, vb); // a * 2 + b
     vm_float32_t m = mipp_cmplt_vs_float32(va, 0.f);        // a < 0
     // --8<-- [end:forms]
     const int n = (int)MIPP_N_FLOAT32;
-    mipp_store_float32(OUT, r1);
+    mipp_store_float32(OUT, vd1);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == A[i] - 1.f);
-    mipp_store_float32(OUT, r2);
+    mipp_store_float32(OUT, vd2);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == 10.f - A[i]);
-    mipp_store_float32(OUT, r3);
+    mipp_store_float32(OUT, vd3);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == A[i] * 2.f + B[i]);
     mipp_store_float32(OUT, mipp_select_float32(m, mipp_set1_float32(1.f), mipp_set0_float32()));
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == (A[i] < 0.f ? 1.f : 0.f));
 
     // --8<-- [start:masked]
     // merge masking keeps the register operand: m ? 10 - a : a
-    vd_float32_t r4 = mipp_sub_sv_float32_mask(m, 10.f, va);
+    vd_float32_t vd4 = mipp_sub_sv_float32_mask(m, 10.f, va);
     // --8<-- [end:masked]
-    mipp_store_float32(OUT, r4);
+    mipp_store_float32(OUT, vd4);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == (A[i] < 0.f ? 10.f - A[i] : A[i]));
 }
 

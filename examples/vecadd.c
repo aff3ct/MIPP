@@ -11,10 +11,10 @@ void vecadd(const float32_t* a1, const float32_t* a2, float32_t* a3)
 {
 	for (size_t i = 0; i < BUFF_SIZE; i += MIPP_N_FLOAT32)
 	{
-		vd_float32_t r1 = mipp_loadu_float32(a1 + i);
-		vd_float32_t r2 = mipp_loadu_float32(a2 + i);
-		vd_float32_t r3 = mipp_add_float32(r1, r2);
-		mipp_storeu_float32(a3 + i, r3);
+		vd_float32_t vd1 = mipp_loadu_float32(a1 + i);
+		vd_float32_t vd2 = mipp_loadu_float32(a2 + i);
+		vd_float32_t vd3 = mipp_add_float32(vd1, vd2);
+		mipp_storeu_float32(a3 + i, vd3);
 	}
 }
 
@@ -22,11 +22,11 @@ void vecadd_mask(const float32_t* a1, const float32_t* a2, float32_t* a3)
 {
 	for (size_t i = 0; i < BUFF_SIZE; i += MIPP_N_FLOAT32)
 	{
-		vd_float32_t r1 = mipp_loadu_float32(a1 + i);
-		vd_float32_t r2 = mipp_loadu_float32(a2 + i);
-		vm_float32_t m1 = mipp_cmplt_float32(r1, r2);
-		vd_float32_t r3 = mipp_add_float32_mask(m1, r1, r2);
-		mipp_storeu_float32(a3 + i, r3);
+		vd_float32_t vd1 = mipp_loadu_float32(a1 + i);
+		vd_float32_t vd2 = mipp_loadu_float32(a2 + i);
+		vm_float32_t vm1 = mipp_cmplt_float32(vd1, vd2);
+		vd_float32_t vd3 = mipp_add_float32_mask(vm1, vd1, vd2);
+		mipp_storeu_float32(a3 + i, vd3);
 	}
 }
 
@@ -35,12 +35,12 @@ float32_t vecadd_mask_red(const float32_t* a1, const float32_t* a2)
 	vd_float32_t sum = mipp_set0_float32();
 	for (size_t i = 0; i < BUFF_SIZE; i += MIPP_N_FLOAT32)
 	{
-		vd_float32_t r1 = mipp_loadu_float32(a1 + i);
-		vd_float32_t r2 = mipp_loadu_float32(a2 + i);
-		vm_float32_t m1 = mipp_cmplt_float32(r1, r2);
-		vd_float32_t r3 = mipp_add_float32_maskz(m1, r1, r2);
+		vd_float32_t vd1 = mipp_loadu_float32(a1 + i);
+		vd_float32_t vd2 = mipp_loadu_float32(a2 + i);
+		vm_float32_t vm1 = mipp_cmplt_float32(vd1, vd2);
+		vd_float32_t vd3 = mipp_add_float32_maskz(vm1, vd1, vd2);
 
-		sum = mipp_add_float32(mipp_hadd_float32(r3), sum);
+		sum = mipp_add_float32(mipp_hadd_float32(vd3), sum);
 	}
 	return mipp_get_float32(sum, 0);
 }
@@ -50,12 +50,12 @@ float32_t vecadd_mask_red2(const float32_t* a1, const float32_t* a2)
 	float32_t sum = 0.f;
 	for (size_t i = 0; i < BUFF_SIZE; i += MIPP_N_FLOAT32)
 	{
-		vd_float32_t r1 = mipp_loadu_float32(a1 + i);
-		vd_float32_t r2 = mipp_loadu_float32(a2 + i);
-		vm_float32_t m1 = mipp_cmplt_float32(r1, r2);
-		vd_float32_t r3 = mipp_add_float32_maskz(m1, r1, r2);
+		vd_float32_t vd1 = mipp_loadu_float32(a1 + i);
+		vd_float32_t vd2 = mipp_loadu_float32(a2 + i);
+		vm_float32_t vm1 = mipp_cmplt_float32(vd1, vd2);
+		vd_float32_t vd3 = mipp_add_float32_maskz(vm1, vd1, vd2);
 
-		sum += mipp_hadd_to_scal_float32(r3);
+		sum += mipp_hadd_to_scal_float32(vd3);
 	}
 	return sum;
 }

@@ -73,23 +73,23 @@ static void mask_algebra()
     mipp::vd<float> vb = mipp::load<float>(B);
     mipp::vd<float> vc = mipp::load<float>(C);
     // --8<-- [start:mask_algebra]
-    mipp::vm<float> m1 = mipp::cmplt(va, vb);
-    mipp::vm<float> m2 = mipp::cmpgt(va, vc);
+    mipp::vm<float> vm1 = mipp::cmplt(va, vb);
+    mipp::vm<float> vm2 = mipp::cmpgt(va, vc);
 
-    // Logical AND (m1 AND m2):
-    mipp::vm<float> m_and = mipp::andb(m1, m2);
+    // Logical AND (vm1 AND vm2):
+    mipp::vm<float> m_and = mipp::andb(vm1, vm2);
 
-    // Logical OR (m1 OR m2):
-    mipp::vm<float> m_or  = mipp::orb(m1, m2);
+    // Logical OR (vm1 OR vm2):
+    mipp::vm<float> m_or  = mipp::orb(vm1, vm2);
 
-    // Logical XOR (m1 XOR m2):
-    mipp::vm<float> m_xor = mipp::xorb(m1, m2);
+    // Logical XOR (vm1 XOR vm2):
+    mipp::vm<float> m_xor = mipp::xorb(vm1, vm2);
 
-    // Logical NOT (~m1):
-    mipp::vm<float> m_not = mipp::notb(m1);
+    // Logical NOT (~vm1):
+    mipp::vm<float> m_not = mipp::notb(vm1);
 
-    // Logical AND-NOT ((NOT m1) AND m2):
-    mipp::vm<float> m_andn = mipp::andnb(m1, m2);
+    // Logical AND-NOT ((NOT vm1) AND vm2):
+    mipp::vm<float> m_andn = mipp::andnb(vm1, vm2);
     // --8<-- [end:mask_algebra]
     int32_t l_and[DOC_BUF], l_or[DOC_BUF], l_xor[DOC_BUF], l_not[DOC_BUF], l_andn[DOC_BUF];
     lanes<float>(m_and, l_and);
