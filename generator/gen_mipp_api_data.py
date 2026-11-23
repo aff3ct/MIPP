@@ -610,7 +610,7 @@ def generate_mipp_api_data(project_root=None):
     if project_root is None:
         project_root = os.path.dirname(base_generator_dir)
 
-    from gen_mipp_docs import SpecFuncInfo, match_args_type_cpp, lmuls_of, imm_info
+    from gen_mipp_docs import SpecFuncInfo, match_args_type_cpp, lmuls_of, imm_info, FORM_GROUPS, page_of
     from codegen.ldiv_mask import compute_changing_levels
 
     # 1. Discover all target ISAs
@@ -1010,7 +1010,7 @@ def generate_mipp_api_data(project_root=None):
             "scalar_macros": scalar_macros,
             "test_specs": merged_test_spec,
             "snippets": snippets,
-            "doc_url": f"../funcs_support/{cat_name}/{func}.md"
+            "doc_url": f"../funcs_support/{cat_name}/{page_of(func)}.md"
         }
         # integer argument that is often a constant: what the Explorer shows on it, with the
         # ISAs that have a body of their own for an immediate (found in the generated headers)
@@ -1029,16 +1029,10 @@ def generate_mipp_api_data(project_root=None):
     # itself first, written with one `v` per operand), and a form the name of its function
     # (`form_of`) and its own letters (`form`).
     by_name = {e["name"]: e for e in api_entries}
-    forms_of = {}
-    for e in api_entries:
-        base, _, letters = e["name"].rpartition("_")
-        if base in by_name and re.fullmatch(r"[vs]*s[vs]*", letters):
-            forms_of.setdefault(base, []).append(letters)
-    for base, found in forms_of.items():
-        declared = [f for f in (interfaces[base].get("forms") or []) if f in found]
-        letters = declared + sorted(f for f in found if f not in declared)
-        group = [{"form": "v" * len(letters[0]), "name": base}]
-        group += [{"form": f, "name": f"{base}_{f}"} for f in letters]
+    for base, members in FORM_GROUPS.items():
+        group = [{"form": letters, "name": name} for letters, name in members if name in by_name]
+        if base not in by_name or len(group) < 2:
+            continue
         for member in group:
             by_name[member["name"]]["forms"] = group
             if member["name"] != base:

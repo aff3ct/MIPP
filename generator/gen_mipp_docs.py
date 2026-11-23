@@ -51,6 +51,99 @@ import forms
 from registry import _raw_interfaces, form_functions
 forms.expand_docs(funcs_docs, _raw_interfaces, form_functions)
 
+
+def form_groups():
+    """{function: [(letters, name), ...]}: the functions that have scalar forms (`add_vs`,
+    `fmadd_vvs`...), with the function itself first, written with one `v` per operand (`vv`), then
+    its forms in the order of the registry. `lshift_vs` and `rshift_vs`, declared as functions of
+    their own, are the `vs` forms of `lshift` and `rshift`."""
+    letters_of = {}
+    for name, base in form_functions.items():
+        letters_of.setdefault(base, []).append(name[len(base) + 1:])
+    for func in interfaces:
+        base, _, letters = func.rpartition("_")
+        if func not in form_functions and base in interfaces and re.fullmatch(r"[vs]*s[vs]*", letters):
+            letters_of.setdefault(base, []).append(letters)
+    return {base: [("v" * len(letters[0]), base)] + [(f, f"{base}_{f}") for f in letters]
+            for base, letters in letters_of.items()}
+
+
+# A function and its forms share a page of the documentation and a card of the API Explorer
+FORM_GROUPS = form_groups()
+FORM_BASE = {name: base for base, members in FORM_GROUPS.items() for _, name in members[1:]}
+
+
+def page_of(func):
+    """Function whose page documents `func`: its base for a scalar form, itself otherwise."""
+    return FORM_BASE.get(func, func)
+
+
+def _split_page(text):
+    """(lines before the first section, [(heading, lines)]) of a function page, cut at its `## ` headings."""
+    preamble, sections = [], []
+    for line in text.split("\n"):
+        if line.startswith("## "):
+            sections.append((line, []))
+        elif sections:
+            sections[-1][1].append(line)
+        else:
+            preamble.append(line)
+    return preamble, sections
+
+
+def _merge_form_bodies(bodies):
+    """Body of a section for a function and its forms, `bodies` being [(letters, lines)]: the
+    common body when they are all the same, otherwise one tab per form. What they share around
+    their own tabs (an introduction, the `<div markdown>` that wraps them) stays outside."""
+    texts = [lines for _, lines in bodies]
+    if all(t == texts[0] for t in texts):
+        return texts[0]
+    pre = suf = 0
+    if all(any(l.startswith("=== ") for l in t) for t in texts):
+        first_tab = min(next(i for i, l in enumerate(t) if l.startswith("=== ")) for t in texts)
+        while pre < first_tab and all(t[pre] == texts[0][pre] for t in texts):
+            pre += 1
+        shortest = min(len(t) for t in texts) - pre
+        while suf < shortest and all(t[-1 - suf] == texts[0][-1 - suf] for t in texts) \
+                and not texts[0][-1 - suf].startswith((" ", "=== ")):
+            suf += 1
+    out = list(texts[0][:pre])
+    for letters, lines in bodies:
+        own = lines[pre:len(lines) - suf]
+        while own and not own[0]:
+            own = own[1:]
+        while own and not own[-1]:
+            own = own[:-1]
+        out += [f'=== "`{letters}`"', ""] + [("    " + l if l else "") for l in own] + [""]
+    return out + (texts[0][len(texts[0]) - suf:] if suf else [])
+
+
+def merge_form_pages(base, members):
+    """Page of the function `base` and of its scalar forms, from their own pages (`members`:
+    [(letters, name, text)], the function first): the sections of the function, with one tab per
+    form where the forms differ (linked across the sections by content.tabs.link)."""
+    pages = [(letters, name) + _split_page(text) for letters, name, text in members]
+    out = list(pages[0][2])
+    while out and not out[-1]:
+        out.pop()
+    out += ["", "## Scalar Forms", "",
+            "A scalar of the element type takes the place of a vector and is used for every lane "
+            "([Scalar Forms](../../user/scalar_forms.md)). The sections below have one tab per form.", "",
+            "| Form | Operands | C function | Semantics |", "| :--- | :--- | :--- | :--- |"]
+    for letters, name in [(l, n) for l, n, _, _ in pages]:
+        operands = ", ".join("vector" if c == "v" else "scalar" for c in letters)
+        latex = funcs_docs.get(name, {}).get("latex", "").replace("|", "\\vert ")
+        out.append(f"| `{letters}` | {operands} | `mipp_{name}_[type]` | " + (f"\\({latex}\\)" if latex else "") + " |")
+    out.append("")
+    headings = []
+    for _, _, _, sections in pages:
+        headings += [h for h, _ in sections if h not in headings]
+    for heading in headings:
+        bodies = [(letters, dict(sections)[heading]) for letters, _, _, sections in pages if heading in dict(sections)]
+        body = _merge_form_bodies(bodies)
+        out += [heading] + ([""] if body and body[0] else []) + body
+    return "\n".join(out)
+
 # Test properties of the functions, resolved with the test generator (helpers_docs/test_specs.py)
 _resolved_test_specs = None
 
@@ -430,7 +523,7 @@ def write_mipp_infos(mipp_infos, base_dir):
                 print("| :--- | " + " | ".join([":---:"] * len(dttypes)) + " |", file=f)
                 for func in single_type_funcs:
                     func_info = isa_info.get_func_info(func)
-                    line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
+                    line = f"| [{func}](../funcs_support/{category}/{page_of(func)}.md) | "
                     for dtype in dttypes:
                         dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
                         if dtype_check in interfaces[func]["datatypes"]:
@@ -532,7 +625,7 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
                         if not exists_msk_in_func(func, mkind) or is_pair_function(func):
                             continue
                         func_info = isa_info.get_func_info(func)
-                        line = f"| [{func}](../funcs_support/{category}/{func}.md) | "
+                        line = f"| [{func}](../funcs_support/{category}/{page_of(func)}.md) | "
                         for dtype in dttypes:
                             dtype_check = f"{dtype},{dtype}" if func in ("gather", "scatter") else dtype
                             if dtype_check in interfaces[func]["datatypes"] and interfaces[func]["variants"].is_supported(mkind):
@@ -944,10 +1037,15 @@ class SpecFuncInfo:
                 write_dt(dt, dt_tab_label(dt), 0)
         print('</div>\n', file=file)
 
-    def write_spec_func_info(self, base_dir, mipp_infos=None):
+    def write_spec_func_info(self, base_dir, mipp_infos=None, text=None):
         file_path = os.path.join(base_dir, self.category, f"{self.func_name}.md")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
+            f.write(self.page_text(mipp_infos) if text is None else text)
+
+    def page_text(self, mipp_infos=None):
+        """Markdown page of the function."""
+        with io.StringIO() as f:
             print(f"# `{self.func_name}`\n", file=f)
             
             doc_entry = funcs_docs.get(self.func_name, {})
@@ -1072,6 +1170,7 @@ class SpecFuncInfo:
             self.write_func_algo(f)
 
             self.write_test_specs(f)
+            return f.getvalue()
 
     def write_isa_matrix(self, file, mipp_infos):
         print(f"## Architecture & Implementation Matrix{NO_SEARCH}\n", file=file)
@@ -1196,8 +1295,17 @@ class SpecFuncInfos:
             self.spec_func_infos.append(spec_func_info)
 
     def write_spec_func_infos(self, base_dir, mipp_infos=None):
+        by_name = {info.func_name: info for info in self.spec_func_infos}
         for spec_func_info in self.spec_func_infos:
-            spec_func_info.write_spec_func_info(base_dir, mipp_infos=mipp_infos)
+            func = spec_func_info.func_name
+            if func in FORM_BASE:
+                continue  # a scalar form: in the page of its function
+            if func in FORM_GROUPS:
+                members = [(letters, name, by_name[name].page_text(mipp_infos))
+                           for letters, name in FORM_GROUPS[func] if name in by_name]
+                spec_func_info.write_spec_func_info(base_dir, text=merge_form_pages(func, members))
+            else:
+                spec_func_info.write_spec_func_info(base_dir, mipp_infos=mipp_infos)
 
 
 # ---------------------------------------------------------------------------
@@ -1257,7 +1365,7 @@ Explore hardware acceleration matrices by instruction set architecture:
 
 def write_funcs_support_index(base_dir, categories):
     file_path = os.path.join(base_dir, "index.md")
-    n_funcs = sum(len(funcs) for funcs in categories.values())
+    n_funcs = sum(1 for funcs in categories.values() for func in funcs if func not in FORM_BASE)
     with open(file_path, "w", encoding="utf-8") as f:
         print(f"""# Function Reference & Implementation Directory
 
@@ -1301,9 +1409,14 @@ Each function reference page provides:
             cat_title = cat.capitalize()
             print(f"### {cat_title}\n", file=f)
             for func in funcs:
+                if func in FORM_BASE:
+                    continue  # a scalar form: listed with its function
                 doc_entry = funcs_docs.get(func, {})
                 desc = doc_entry.get("description", "Vector function reference.")
-                print(f"- [`{func}`]({cat}/{func}.md): {desc}", file=f)
+                forms_note = ""
+                if func in FORM_GROUPS:
+                    forms_note = " Scalar forms: " + ", ".join(f"`{letters}`" for letters, _ in FORM_GROUPS[func][1:]) + "."
+                print(f"- [`{func}`]({cat}/{func}.md): {desc}{forms_note}", file=f)
             print("", file=f)
 
 

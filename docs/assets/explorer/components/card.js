@@ -106,7 +106,7 @@ export function renderCardExpandedDetails(entry) {
         <button class="mipp-card-tab-btn ${activeTab === "specs" ? "active" : ""}" data-tab="specs" data-card-tab="specs" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
           Verification Specs
         </button>
-        <a class="mipp-card-spec-link" href="../funcs_support/${encodeURIComponent(entry.category)}/${encodeURIComponent(entry.name)}/"
+        <a class="mipp-card-spec-link" href="../funcs_support/${encodeURIComponent(entry.category)}/${encodeURIComponent(entry.form_of || entry.name)}/"
            title="Specification page of ${escapeHtml(entry.name)} in the documentation">Full reference →</a>
       </nav>
 
@@ -167,13 +167,13 @@ export function computeOptimisticLevel(entry, ext) {
 
 /**
  * Selector of the scalar forms of a function (vv / vs / sv...), empty for a function without
- * forms. One letter per operand: v, a register; s, a scalar of the element type, used for
+ * forms. One letter per operand: v, a vector; s, a scalar of the element type, used for
  * every lane. `attr`: the data attribute that carries the name of the entry of each form.
  */
 export function renderFormSelector(entry, attr) {
   const forms = entry.forms || [];
   if (forms.length < 2) return "";
-  const what = (f) => f.form.split("").map((c) => (c === "v" ? "register" : "scalar")).join(", ");
+  const what = (f) => f.form.split("").map((c) => (c === "v" ? "vector" : "scalar")).join(", ");
   return `
     <span class="mipp-form-selector" role="group" aria-label="Scalar form">
       ${forms.map((f) => `<button type="button" class="mipp-form-btn ${f.name === entry.name ? "active" : ""}" ${attr}="${escapeHtml(f.name)}" title="Form ${escapeHtml(f.form)}: ${what(f)} (C function mipp_${escapeHtml(f.name)}_...)">${escapeHtml(f.form)}</button>`).join("")}

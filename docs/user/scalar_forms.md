@@ -1,12 +1,12 @@
 # Scalar Forms
 
-Many functions take several data registers: `sub(a, b)`, `fmadd(a, b, c)`, `cmplt(a, b)`... Their **scalar forms** take a scalar instead of some of these registers: the scalar is used for every lane, as if it had been broadcast with `set1`.
+Many functions take several data vectors: `sub(a, b)`, `fmadd(a, b, c)`, `cmplt(a, b)`... Their **scalar forms** take a scalar instead of some of these vectors: the scalar is used for every lane, as if it had been broadcast with `set1`.
 
 ---
 
 ## 1. Names
 
-A form is written with one letter per data register of the function, in order: `v` for a register, `s` for a scalar of the element type. The function itself is the form with only `v` letters.
+A form is written with one letter per data vector of the function, in order: `v` for a vector, `s` for a scalar of the element type. The function itself is the form with only `v` letters.
 
 | Form | Meaning | C | C++ |
 | :--- | :--- | :--- | :--- |
@@ -47,7 +47,7 @@ The forms exist for every datatype, mask variant and LMUL of their function. [§
 
 ## 3. Masked Forms
 
-The [mask variants](masking_semantics.md) apply to the forms. The merge masking (`M`, `_mask`) keeps the **first register** of the form in the inactive lanes: for `sub_sv(s, b)`, the inactive lanes are $b_i$ (a scalar cannot be merged into). It is the convention of SVE (`svsubr_n_f32_m`).
+The [mask variants](masking_semantics.md) apply to the forms. The merge masking (`M`, `_mask`) keeps the **first vector** of the form in the inactive lanes: for `sub_sv(s, b)`, the inactive lanes are $b_i$ (a scalar cannot be merged into). It is the convention of SVE (`svsubr_n_f32_m`).
 
 === "C API"
 
