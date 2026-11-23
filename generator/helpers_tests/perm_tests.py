@@ -61,6 +61,9 @@ def _inputs(func: str) -> List[str]:
         # the largest index of the type bounds the range (uint8: 256 lanes)
         lines += [f"\tconst uint64_t top = (uint64_t)({top}) - 1 < (uint64_t)(IDX)~(IDX)0 ? (uint64_t)({top}) - 1 : (uint64_t)(IDX)~(IDX)0;",
                   "\tidx[i] = static_cast<IDX>(rnd::uniform<uint64_t>(seed, 0, top));"]
+    else:
+        # no index (compress, expand...), but the register of the indices is loaded all the same
+        lines += ["\tidx[i] = 0;"]
     lines += ["}", "for (size_t i = 0; i < 2 * N; i++)", "\tmem[i] = rnd::uniform<T>(seed);"]
     return lines
 
@@ -69,7 +72,7 @@ def _decls() -> List[str]:
     return ["constexpr size_t NB = (16 / sizeof(T)) < N ? 16 / sizeof(T) : N; // lanes of a block of 128 bits",
             "alignas(64) T a[N];", "alignas(64) T b[N];", "alignas(64) T src[N];", "alignas(64) IDX idx[N];",
             "int32_t mk[N];", "alignas(64) T mem[2 * N];", "alignas(64) T res_r[2 * N];", "alignas(64) T res_s[2 * N];",
-            "(void)NB; (void)idx; // idx: the indices of permute, unused by compress and expand"]
+            "(void)NB; (void)idx; // idx: the indices of permute, zeros for compress and expand"]
 
 
 def _returns_count(func: str) -> bool:

@@ -103,10 +103,21 @@ void check_value()
 #undef MIPP_CHECK_IMM
 }
 
-template <typename T, int LMUL, int... S>
+template <typename T, int LMUL, int B, int... S>
 void check_values(std::integer_sequence<int, S...>)
 {
-	(check_value<T, LMUL, S>(), ...);
+	(check_value<T, LMUL, B + S>(), ...);
+}
+
+// the values B to TOTAL - 1, by blocks of 128: one fold expression of more than 256 terms exceeds the nesting limit
+// of Clang (int8 of LMUL 2 with registers of 1024 bits: 257 values)
+template <typename T, int LMUL, int B, int TOTAL>
+void check_from()
+{
+	constexpr int count = TOTAL - B < 128 ? TOTAL - B : 128;
+	check_values<T, LMUL, B>(std::make_integer_sequence<int, count>());
+	if constexpr (B + count < TOTAL)
+		check_from<T, LMUL, B + count, TOTAL>();
 }
 
 template <typename T, int LMUL>
@@ -114,7 +125,7 @@ void check_all()
 {
 	constexpr int n = static_cast<int>(mipp::N<T, LMUL>());
 	constexpr int bits = static_cast<int>(8 * sizeof(T));
-	check_values<T, LMUL>(std::make_integer_sequence<int, (n > bits ? n : bits) + 1>());
+	check_from<T, LMUL, 0, (n > bits ? n : bits) + 1>();
 }
 
 TEMPLATE_TEST_CASE("immediates - constant, template and dynamic calls", "[immediates]", float, double, int8_t,
