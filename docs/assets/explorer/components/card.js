@@ -4,6 +4,7 @@
  */
 import { escapeHtml, ICON_CHEVRON, ICON_WARNING, ICON_WARNING_SM } from "../explorer.config.js";
 import { formatCppObjProto, renderDescription, typesetMath } from "../syntax.js";
+import { immTargetsSentence } from "./imm_tooltip.js";
 import { ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
 import { renderTabHw } from "./tab_hw.js";
@@ -207,6 +208,10 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
             <span class="mipp-card-name">${escapeHtml(entry.name)}</span>
             <span class="mipp-cat-badge">${escapeHtml(entry.category)}</span>
             ${variantBadgesHtml}
+            ${entry.imm
+              ? `<span class="mipp-imm-badge" title="${escapeHtml(`The integer parameter ${entry.imm.arg} (${entry.imm.text.replace(/\bS\b/g, entry.imm.arg)}) is a variable or an immediate (a value known at compile time). ${immTargetsSentence(entry.imm)}`)}">imm</span>`
+              : ""
+            }
             ${matchedIntrinsic
               ? `<span class="mipp-matched-chip" title="Matched vendor hardware intrinsic">Intrinsic: ${escapeHtml(matchedIntrinsic)}</span>`
               : ""
@@ -274,8 +279,7 @@ export function switchCardTab(cardEl, entry, targetTab) {
   const tabContent = cardEl.querySelector(`#tab-content-${entry.name}`);
   if (tabContent) {
     tabContent.innerHTML = renderTabContent(entry, targetTab);
-    if (targetTab === "scalar") {
-      typesetMath(tabContent.querySelector(".arithmatex"));
-    }
+    // formula of the scalar reference, note of the immediate argument
+    typesetMath(Array.from(tabContent.querySelectorAll(".arithmatex")));
   }
 }

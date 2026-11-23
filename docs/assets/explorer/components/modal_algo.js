@@ -9,7 +9,7 @@ import { highlightCpp } from "../syntax.js";
 import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
 import { getCompilerConfigForFlat, buildGodboltUrlForFlat } from "../codegen.js";
-import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName } from "../algo_source.js";
+import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName, immChoices } from "../algo_source.js";
 
 export function getAllModalIsas() {
   return Object.keys(apiMetadata.isas || {});
@@ -85,6 +85,7 @@ function renderTree(node, currentIsa, depth = 0) {
     dedicated: ["dedicated emulation", "A sequence of instructions written for this ISA"],
     composition: ["composition", "Calls other MIPP functions"],
     fallback: ["scalar fallback", "Copies the registers to arrays and calls the scalar reference"],
+    immediate: ["immediate", "Instructions with an immediate, selected because the argument is a constant"],
     lanewise: ["from LMUL 1", "Generated from the LMUL 1 function on the same register"],
     wrapper: ["LMUL wrapper", "One call per register of the LMUL below"],
     scalar: ["scalar code", "Plain C loop of the MIPP scalar target"],
@@ -182,6 +183,42 @@ export function renderAlgoModal(modalData) {
     options: compilerCfg.options, simdWidth: currentScalarSize, overrides: flatDefines,
     compilerLabel: compilerCfg.compilerLabel,
   };
+
+  // View of the parameter that can be an immediate (functions with an "imm"): the dynamic
+  // body ("var"), the body selected for an immediate, or the whole dispatch of the headers.
+  // `immAvailable`: the function has a body of its own for an immediate with these settings;
+  // otherwise the same code runs in both cases, and the modal shows nothing about it (no
+  // selector, the parameter is not boxed in the code)
+  let immMode = "var";
+  let immValues = [];
+  let immAvailable = false;
+  if (entry.imm) {
+    algoCfg.imm = { arg: entry.imm.arg, mode: "var" };
+    const choice = sources ? immChoices(sources, algoCfg) : undefined;
+    immAvailable = Boolean(choice);
+    if (choice) {
+      if (choice.values) {
+        immValues = choice.values;
+      } else {
+        // every value of the range: the lanes of the register (or of a block), the bits of an element
+        const bits = Number((currentDt.match(/\d+/) || ["32"])[0]);
+        const width = isaMeta && typeof isaMeta.vector_size_bits === "number" ? isaMeta.vector_size_bits : currentScalarSize;
+        const l = Number(effectiveLmul);
+        const lanes = Math.max(1, Math.round((width / bits) * (l < 0 ? 0.5 : (l || 1))));
+        const block = Math.min(lanes, 128 / bits);
+        const last = { lt_n: lanes - 1, le_n: lanes, lt_nb: block - 1, le_nb: block, lt_bits: bits - 1 }[entry.imm.range];
+        immValues = Array.from({ length: Math.max(1, (last === undefined ? lanes : last) + 1) }, (_, i) => i);
+      }
+      const asked = modalData.imm;
+      if (asked === "dispatch") {
+        immMode = "dispatch";
+      } else if (asked !== undefined && asked !== null && asked !== "var" && /^-?\d+$/.test(String(asked))) {
+        immMode = "const";
+      }
+      const value = immValues.includes(Number(asked)) ? Number(asked) : (immValues.includes(1) ? 1 : immValues[0]);
+      algoCfg.imm = { arg: entry.imm.arg, mode: immMode, value };
+    }
+  }
   const isaLabel = namesMap[currentIsa] || currentIsa.toUpperCase();
   const tName = (d) => (d.includes(",") ? d.split(",").map((x) => `${x.trim()}_t`).join(" -> ") : `${d}_t`);
   let fullCode = "";
@@ -249,7 +286,7 @@ export function renderAlgoModal(modalData) {
           </div>
           <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(r.code)}" title="Copy ${escapeHtml(label)} code">${ICON_COPY}</button>
         </div>
-        <pre><code>${highlightCpp(r.code, {}, { isa })}</code></pre>
+        <pre><code>${highlightCpp(r.code, {}, { isa, imm: entry.imm && immChoices(src, { ...algoCfg, isa, options: cc.options }) ? entry.imm : null })}</code></pre>
       </div>`;
     }).join("");
     compareHtml = `
@@ -292,6 +329,29 @@ export function renderAlgoModal(modalData) {
   `;
 
   let featureControlsHtml = "";
+
+  // Parameter that can be an immediate: variable / immediate (with its value) / dispatch. Only
+  // when the function has a body of its own for an immediate with these settings: otherwise
+  // the same code runs in both cases, and there is nothing to choose
+  let immControlsHtml = "";
+  if (entry.imm && immAvailable) {
+    const arg = escapeHtml(entry.imm.arg);
+    const btn = (mode, label, title) => `<button type="button" class="mipp-segment-btn ${immMode === mode ? "active" : ""}" data-modal-imm="${mode}" title="${title}">${label}</button>`;
+    immControlsHtml = `
+      <div class="mipp-modal-ctrl-group">
+        <span class="mipp-control-label">Parameter <span class="mipp-imm-ref" data-imm="${escapeHtml(JSON.stringify(entry.imm))}" data-imm-kind="param" tabindex="0" role="button">${arg}</span>:</span>
+        <div class="mipp-segmented-group" id="mipp-modal-imm-group" data-modal-imm-default="${immValues.includes(1) ? 1 : (immValues[0] || 0)}">
+          ${btn("var", "variable", `${arg} is a variable: the dynamic body`)}
+          ${btn("const", "immediate", `${arg} is an immediate (a value known at compile time): the body selected for it`)}
+          ${btn("dispatch", "dispatch", `The code of the headers: the selection between the immediates, then the dynamic body`)}
+        </div>
+        ${immMode === "const" ? `
+          <select class="mipp-modal-imm-select" data-modal-imm-value title="Value of ${arg}" aria-label="Value of ${arg}">
+            ${immValues.map((v) => `<option value="${v}" ${v === algoCfg.imm.value ? "selected" : ""}>${arg} = ${v}</option>`).join("")}
+          </select>` : ""}
+      </div>
+    `;
+  }
 
   const isHierarchy = featuresMeta.mode === "hierarchy";
   const isMixed = featuresMeta.mode === "mixed";
@@ -407,6 +467,7 @@ export function renderAlgoModal(modalData) {
 
             <!-- Contextual Features / Target Switcher / SIMD Width -->
             ${featureControlsHtml}
+            ${immControlsHtml}
           </div>
 
           <!-- Modal View Tabs: Abstract C++ Implementation vs Flat C Code -->
@@ -441,7 +502,7 @@ export function renderAlgoModal(modalData) {
                   ${ICON_COPY}
                 </button>
               </div>
-              <pre><code>${highlightCpp(fullCode, {}, { isa: currentIsa })}</code></pre>
+              <pre><code>${highlightCpp(fullCode, {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null })}</code></pre>
             </div>
             ${treeHtml}
           ` : `
@@ -472,7 +533,7 @@ export function renderAlgoModal(modalData) {
                   </button>
                 </div>
               </div>
-              <pre><code>${highlightCpp(flatStandaloneCode, entry.scalar_macros || {}, { isa: currentIsa })}</code></pre>
+              <pre><code>${highlightCpp(flatStandaloneCode, entry.scalar_macros || {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null })}</code></pre>
             </div>
           `}
         </div>

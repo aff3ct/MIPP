@@ -252,7 +252,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   gap: 0.3rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-scalar-dt-select {
-  padding: 0.12rem 0.35rem;
+  padding: 0.12rem 1.45rem 0.12rem 0.35rem;
 }
 #mipp-explorer-app.mipp-font-sm .mipp-specs-table th {
   padding: 0.2rem 0.38rem;
@@ -1412,6 +1412,86 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   color: #fbbf24;
 }
 
+/* Integer argument that is often a constant ("imm" of the registry): badge of the
+   card header and note of the Prototypes tab */
+.mipp-imm-badge {
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-family: var(--md-code-font, monospace);
+  font-weight: 700;
+  padding: 0.12rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.14);
+  color: #7c3aed;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  cursor: help;
+}
+
+[data-md-color-scheme="slate"] .mipp-imm-badge {
+  color: #a78bfa;
+}
+
+/* The parameter itself, boxed where it is declared in the prototypes and in the
+   code of the Algorithm modal: tooltip on hover, kept open by a click. Dashed
+   box: a variable or an immediate; solid box (.mipp-imm-const, the argument of
+   the C++ template version): always an immediate */
+.mipp-imm-ref {
+  padding: 0 0.25em;
+  /* an outline drawn inside the box, not a border: a border adds to the height of the line
+     and is cut on the first line of a code box */
+  outline: 1px dashed rgba(139, 92, 246, 0.85);
+  outline-offset: -1px;
+  border-radius: 4px;
+  background: rgba(139, 92, 246, 0.14);
+  color: #7c3aed;
+  font-weight: 600;
+  cursor: help;
+  transition: background 0.15s ease;
+}
+
+/* in the label of the selector of the Algorithm modal: the name as it is written in the code */
+.mipp-control-label .mipp-imm-ref {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--md-code-font, monospace);
+}
+
+.mipp-imm-ref.mipp-imm-const {
+  outline-style: solid;
+}
+
+.mipp-imm-ref:hover,
+.mipp-imm-ref:focus-visible,
+.mipp-imm-ref.active {
+  background: rgba(139, 92, 246, 0.3);
+}
+
+[data-md-color-scheme="slate"] .mipp-imm-ref {
+  color: #c4b5fd;
+}
+
+.mipp-macro-tooltip.mipp-imm-tooltip,
+[data-md-color-scheme="slate"] .mipp-macro-tooltip.mipp-imm-tooltip {
+  border-color: #8b5cf6;
+}
+
+/* Value of the constant in the Algorithm modal */
+.mipp-modal-imm-select {
+  font-family: var(--md-code-font, monospace);
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-weight: 600;
+  padding: 0.2rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 92, 246, 0.65);
+  background-color: rgba(139, 92, 246, 0.14);
+  color: inherit;
+  cursor: pointer;
+}
+
+.mipp-imm-body p {
+  margin: 0 0 0.4rem 0;
+  line-height: 1.45;
+}
+
 /* ISA Level Badges Strip */
 .mipp-isa-strip {
   display: flex;
@@ -1532,6 +1612,14 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   line-height: 1.4;
   color: var(--md-default-fg-color--light, #475569);
   margin: 0;
+}
+
+/* Code of the descriptions (`vd0`): never broken. The theme gives the inline code
+   `white-space: break-spaces`, which lets a line break after it even in the
+   one-line description of a collapsed card (white-space: nowrap + ellipsis) */
+.mipp-card-desc code.mipp-desc-code,
+.mipp-compare-col-desc code.mipp-desc-code {
+  white-space: nowrap;
 }
 
 /* Active Prototype Preview Container & Box */
@@ -2591,16 +2679,29 @@ html:not(.js) .mipp-explorer-loading {
   padding: 0.25rem 0.6rem;
   border-radius: var(--mipp-border-radius-sm);
   border: 1px solid var(--mipp-card-border, #cbd5e1);
-  background: var(--md-default-bg-color, #ffffff);
+  background-color: var(--md-default-bg-color, #ffffff);
   color: var(--md-default-fg-color, #0f172a);
   outline: none;
   cursor: pointer;
 }
 
 [data-md-color-scheme="slate"] .mipp-scalar-dt-select {
-  background: #1e293b;
+  background-color: #1e293b;
   border-color: rgba(255, 255, 255, 0.15);
   color: #f1f5f9;
+}
+
+/* Dropdowns (datatype, value of the immediate argument): their own chevron instead of the
+   one of the browser, which sticks to the right edge of a rounded box */
+.mipp-scalar-dt-select,
+.mipp-modal-imm-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 1.6rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2394a3b8' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.55rem center;
+  background-size: 10px 6px;
 }
 
 /* Verification Specs Table */

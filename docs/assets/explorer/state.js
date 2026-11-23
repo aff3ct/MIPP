@@ -139,6 +139,8 @@ export function syncUrlHash(replace = false) {
       if (mData.mask && mData.mask !== "unmasked") params.set("algo_mask", mData.mask);
       if (mData.lmul && mData.lmul !== "1") params.set("algo_lmul", mData.lmul);
       if (mData.view && mData.view !== "abstract") params.set("algo_view", mData.view);
+      // immediate argument: "dispatch", or the value of the constant (the dynamic body by default)
+      if (mData.imm !== undefined && mData.imm !== null && mData.imm !== "var") params.set("algo_imm", String(mData.imm));
       if (mData.compareIsas && mData.compareIsas.length) params.set("algo_cmp", mData.compareIsas.join(","));
       if (mData.scalarSize && mData.scalarSize !== 256) params.set("algo_scalarsize", String(mData.scalarSize));
       if (mData.features) {
@@ -314,6 +316,7 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
         mask: mask,
         lmul: lmul,
         view: view,
+        imm: params.get("algo_imm") || "var",
         scalarSize: scalarSize,
         features: features
       };

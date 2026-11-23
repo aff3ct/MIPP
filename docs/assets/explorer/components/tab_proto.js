@@ -173,7 +173,7 @@ export function renderTabProto(entry) {
             ${ICON_COPY}
           </button>
         </div>
-        <pre><code>${highlightCpp(codeText)}</code></pre>
+        <pre><code>${highlightCpp(codeText, {}, { imm: entry.imm })}</code></pre>
       </div>
     </div>
 

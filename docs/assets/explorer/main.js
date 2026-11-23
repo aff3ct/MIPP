@@ -23,6 +23,7 @@ import { getLoadedSources, loadAlgoSources } from "./algo_source.js";
 import { renderCompareModal } from "./components/modal_compare.js";
 import { showMacroTooltip, hideMacroTooltip, toggleMacroTooltip, typesetMath } from "./syntax.js";
 import { toggleIntrinsicTooltip, hideIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
+import { showImmTooltip, hideImmTooltip, toggleImmTooltip } from "./components/imm_tooltip.js";
 
 let headerResizeObserver = null;
 
@@ -785,6 +786,28 @@ function updateModals(modalsContainerEl) {
       });
     });
 
+    // Immediate argument: variable / constant / dispatch, and the value of the constant
+    modalsContainerEl.querySelectorAll("[data-modal-imm]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!state.algoModalData) return;
+        const mode = btn.getAttribute("data-modal-imm");
+        const group = btn.closest("[data-modal-imm-default]");
+        state.algoModalData.imm = mode === "const" ? (group ? group.getAttribute("data-modal-imm-default") : "0") : mode;
+        updateModals(modalsContainerEl);
+        syncUrlHash(true);
+      });
+    });
+    const immValueEl = modalsContainerEl.querySelector("[data-modal-imm-value]");
+    if (immValueEl) {
+      immValueEl.addEventListener("change", () => {
+        if (!state.algoModalData) return;
+        state.algoModalData.imm = immValueEl.value;
+        updateModals(modalsContainerEl);
+        syncUrlHash(true);
+      });
+    }
+
     modalsContainerEl.querySelectorAll("[data-modal-tier]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -988,6 +1011,15 @@ export async function initExplorer() {
       // End of a resize of a modal (see rememberModalSizes)
       document.addEventListener("mouseup", rememberModalSizes);
 
+      // Immediate argument of a prototype: its tooltip on hover (a click keeps it open)
+      document.addEventListener("mouseover", (e) => {
+        const immEl = e.target.closest && e.target.closest(".mipp-imm-ref");
+        if (immEl) showImmTooltip(immEl);
+      });
+      document.addEventListener("mouseout", (e) => {
+        if (e.target.closest && e.target.closest(".mipp-imm-ref")) hideImmTooltip({ onlyUnpinned: true });
+      });
+
       // "/" on the Explorer page: focus the search bar of the Explorer instead of
       // opening the site search (Material listens on the document; "s" and "f"
       // still open the site search). Capture phase, to run before Material.
@@ -1085,7 +1117,13 @@ export async function initExplorer() {
           return;
         }
 
-        // 4. Macro and intrinsic tooltips toggle & outside dismissal
+        // 4. Macro, intrinsic and immediate argument tooltips toggle & outside dismissal
+        const immEl = e.target.closest(".mipp-imm-ref");
+        if (immEl) {
+          e.stopPropagation();
+          toggleImmTooltip(immEl);
+          return;
+        }
         const intrinsicEl = e.target.closest(".mipp-intrinsic-ref");
         if (intrinsicEl) {
           e.stopPropagation();
@@ -1107,6 +1145,11 @@ export async function initExplorer() {
         if (e.key === "Escape") {
           hideMacroTooltip();
           hideIntrinsicTooltip();
+          hideImmTooltip();
+        }
+        if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".mipp-imm-ref")) {
+          e.preventDefault();
+          toggleImmTooltip(e.target.closest(".mipp-imm-ref"));
         }
         // Enter / Space on a focused macro or intrinsic opens its tooltip
         if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".mipp-intrinsic-ref")) {

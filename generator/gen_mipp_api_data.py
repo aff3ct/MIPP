@@ -610,7 +610,7 @@ def generate_mipp_api_data(project_root=None):
     if project_root is None:
         project_root = os.path.dirname(base_generator_dir)
 
-    from gen_mipp_docs import SpecFuncInfo, match_args_type_cpp, lmuls_of
+    from gen_mipp_docs import SpecFuncInfo, match_args_type_cpp, lmuls_of, imm_info
     from codegen.ldiv_mask import compute_changing_levels
 
     # 1. Discover all target ISAs
@@ -695,6 +695,13 @@ def generate_mipp_api_data(project_root=None):
     scalar_macros = extract_scalar_macros(scalar_gen_path)
 
     # 4. Process each function of the registry
+    # written by helpers_docs/algo_sources.py, exported before this file (gen_mipp_docs.py)
+    imm_isas_of = {}
+    algo_index = os.path.join(project_root, "docs", "assets", "data", "algo", "index.json")
+    if os.path.exists(algo_index):
+        with open(algo_index, "r", encoding="utf-8") as f:
+            imm_isas_of = json.load(f).get("imm", {})
+
     api_entries = []
 
     for func, func_def in interfaces.items():
@@ -1005,6 +1012,11 @@ def generate_mipp_api_data(project_root=None):
             "snippets": snippets,
             "doc_url": f"../funcs_support/{cat_name}/{func}.md"
         }
+        # integer argument that is often a constant: what the Explorer shows on it, with the
+        # ISAs that have a body of their own for an immediate (found in the generated headers)
+        imm = imm_info(func)
+        if imm:
+            entry["imm"] = dict(imm, isas=imm_isas_of.get(func, []))
 
         api_entries.append(entry)
 

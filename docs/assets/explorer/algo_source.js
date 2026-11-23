@@ -217,6 +217,9 @@ export function targetMacros(isa, options, simdWidth = 256, overrides = {}) {
     const d = t.match(/^-D(\w+)(?:=(.*))?$/);
     if (d) set(d[1], d[2] !== undefined ? d[2] : "1");
   }
+  // defined by GCC and clang at any optimization level but -O0: guards the dispatch of the
+  // immediate versions (see the views of applyImm)
+  if (toks.some((t) => /^-O([1-9sgz]|fast)$/.test(t))) set("__OPTIMIZE__");
   for (const [k, v] of Object.entries(overrides || {})) {
     if (!k.startsWith("__")) continue;
     if (v === false) m.delete(k);
@@ -258,8 +261,9 @@ export function closure(roots, sources, macros) {
     }
     state.set(name, 1);
     let deps = sym.deps || [];
-    if (sym.kind !== "macro" && /^\s*#/m.test(sym.code)) {
-      // nested #if in a body: only the dependencies of the active branches
+    if (sym.kind !== "macro" && (/^\s*#/m.test(sym.code) || (macros.imm && sym.kind === "func"))) {
+      // nested #if in a body: only the dependencies of the active branches (and of the view of
+      // the immediate dispatch, which also passes the constant on to the functions it calls)
       sym.clean = cleanCode(sym, macros);
       const used = new Set(sym.clean.replace(/\/\/[^\n]*/g, "").match(/[A-Za-z_]\w*/g) || []);
       deps = deps.filter((d) => used.has(d));
@@ -297,7 +301,8 @@ export function effectiveLevel(rootName, sources, macros, memo = new Map()) {
   if (!sym || sym.kind !== "func") { memo.set(rootName, 0); return 0; }
   const code = cleanCode(sym, macros);
   const p = String(rootName).match(/_(mask|maskz|masks)_(?:m\d|d2)$/);
-  const own = KIND_LEVEL[sourceOf(code, sym.table, p ? p[1] : "unmasked").kind];
+  const src = sourceOf(code, sym.table, p ? p[1] : "unmasked");
+  const own = src.level !== undefined ? src.level : KIND_LEVEL[src.kind];
   let lv = own === null || own === undefined ? 0 : own;
   if (sym.table !== "scalar" || rootName.startsWith("mipp_scalar_")) {
     const body = code.split("{").slice(1).join("{").replace(/\/\/[^\n]*/g, "");
@@ -374,7 +379,220 @@ function cleanCode(sym, macros) {
   if (sym.kind === "macro") return sym.code.replace(/^\s+#/, "#");
   if (sym.clean !== undefined) return sym.clean;
   // nested conditions of the function bodies (e.g. #if defined(MIPP_AVX512) in a scalar fallback)
-  return preprocess(sym.code, new Map(macros), { keepDefines: true });
+  const code = preprocess(sym.code, new Map(macros), { keepDefines: true });
+  return macros.imm && sym.kind === "func" ? applyImm(sym.name, code, macros.imm) : code;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Immediate versions (`"imm"` of the registry, generator/helpers_headers/codegen/imm.py)
+// ---------------------------------------------------------------------------------------------
+// The integer parameter of these functions is a variable or a value known at compile time, an
+// immediate. Their body starts with a block used in the second case:
+//
+//     if (__builtin_constant_p(s0)) { // immediate when s0 is a constant: vpalignr
+//         switch (s0) { case 0: {...} case 1: {...} ... default: break; }
+//     }
+//
+// (a switch of immediate bodies for the LMUL 1 functions; for the LMUL above, a body that
+// calls the LMUL 1 function on the registers two by two). The dynamic body follows. Three
+// views of such a function (cfg.imm.mode):
+//   - "var" (default): the parameter is a variable, the dynamic body (the block reduced to
+//     one comment line);
+//   - "const": the parameter is the immediate cfg.imm.value, the body selected for it, alone;
+//   - "dispatch": the code of the headers, with the whole block.
+
+/** View of the immediate argument for a build: null for a function without one. */
+function immState(cfg, rootName, sources, macros) {
+  const im = cfg.imm;
+  if (!im || !im.arg) return null;
+  const mode = im.mode === "const" || im.mode === "dispatch" ? im.mode : "var";
+  // constant received by each function: the root, then the functions it passes its argument to
+  return { arg: im.arg, mode, sources, macros, consts: new Map(mode === "const" ? [[rootName, Number(im.value) || 0]] : []) };
+}
+
+/** `const <type> name = expr;` declarations of a function body: name -> expr. */
+function localConsts(code) {
+  const out = new Map();
+  const re = /^\s*const\s+[\w\s]+?\b(\w+)\s*=\s*([^;]+);/gm;
+  let m;
+  while ((m = re.exec(code)) !== null) out.set(m[1], m[2]);
+  return out;
+}
+
+/**
+ * Value of an integer C expression made of numbers, sizeof of the element types, integer casts,
+ * `?:`, the constants of the headers (MIPP_AVX_N_FLOAT32...) and `locals` (name -> expression):
+ * what a function passes on when its parameter is an immediate (`N - s0`). NaN when it cannot
+ * be computed.
+ */
+function evalIntExpr(expr, locals, sources, macros, depth = 0) {
+  if (depth > 10) return NaN;
+  let e = String(expr).replace(/\/\/[^\n]*/g, "");
+  e = e.replace(/\bsizeof\s*\(\s*(\w+)\s*\)/g, (all, t) => {
+    const dt = Object.keys(C_TYPES).find((k) => C_TYPES[k] === t);
+    return dt ? String(BITS(dt) / 8) : all;
+  });
+  e = e.replace(/\(\s*(?:const\s+)?(?:u?int(?:8|16|32|64)_t|size_t|int|unsigned|long)\s*\)/g, "");
+  let changed = false;
+  e = e.replace(/\b[A-Za-z_]\w*\b/g, (id) => {
+    let v = locals.has(id) ? locals.get(id) : null;
+    if (v === null) {
+      const sym = resolve(id, sources, macros);
+      const d = sym && sym.kind === "macro" ? sym.code.match(/^\s*#\s*define\s+\w+[ \t]+([^\n]*)/) : null;
+      if (d) v = d[1].replace(/\/\/.*$/, "").replace(/\/\*.*?\*\//g, "").trim();
+    }
+    if (v === null || v === "") return id;
+    changed = true;
+    return `(${v})`;
+  });
+  if (/[A-Za-z_]/.test(e.replace(/\b0[xX][0-9a-fA-F]+\b/g, ""))) return changed ? evalIntExpr(e, locals, sources, macros, depth + 1) : NaN;
+  // numbers and operators only: the parentheses from the innermost, each one a `c ? a : b`
+  // or a plain expression
+  const ternary = (s) => {
+    const q = s.indexOf("?");
+    if (q < 0) return evalCondition(s, new Map());
+    let nest = 0, colon = -1;
+    for (let i = q + 1; i < s.length; i++) {
+      if (s[i] === "?") nest++;
+      else if (s[i] === ":") { if (nest === 0) { colon = i; break; } nest--; }
+    }
+    if (colon < 0) return NaN;
+    return evalCondition(s.slice(0, q), new Map()) ? ternary(s.slice(q + 1, colon)) : ternary(s.slice(colon + 1));
+  };
+  for (let guard = 0; guard < 64 && /\([^()]*\)/.test(e); guard++) {
+    e = e.replace(/\(([^()]*)\)/, (all, inner) => {
+      const x = ternary(inner);
+      return Number.isFinite(x) ? ` ${x} ` : " NaN "; // a negative value stays a unary minus
+    });
+    if (/NaN/.test(e)) return NaN;
+  }
+  const v = ternary(e);
+  return Number.isFinite(v) ? Math.trunc(v) : NaN;
+}
+
+/**
+ * Constant received by a function called with `argExpr` when the parameter `imm.arg` of the
+ * caller (whose code is `code`) is the immediate `k`: `k` when the parameter is passed as it
+ * is, the value of the expression otherwise (`N - s0`), NaN when it cannot be computed.
+ */
+function passedImm(argExpr, k, code, imm) {
+  if (argExpr === imm.arg) return k;
+  const locals = localConsts(code);
+  locals.set(imm.arg, String(k));
+  return evalIntExpr(argExpr, locals, imm.sources, imm.macros);
+}
+
+/** The block of a function body: { start, end, arg, instr, cases: Map(value -> lines) | null, body }. */
+function parseImmBlock(code) {
+  const lines = code.split("\n");
+  const start = lines.findIndex((l) => /^\tif \(__builtin_constant_p\(\w+\)\) \{/.test(l));
+  if (start < 0) return null;
+  const head = lines[start].match(/^\tif \(__builtin_constant_p\((\w+)\)\) \{\s*(?:\/\/\s*(.*))?$/);
+  let end = start + 1;
+  while (end < lines.length && lines[end] !== "\t}") end++;
+  if (!head || end >= lines.length) return null;
+  const inner = lines.slice(start + 1, end);
+  let cases = null;
+  if (inner.some((l) => /^\t\tswitch \(/.test(l))) {
+    cases = new Map();
+    let cur = null;
+    for (const l of inner) {
+      const c = l.match(/^\t\tcase (-?\d+): \{$/);
+      if (c) { cur = []; cases.set(Number(c[1]), cur); continue; }
+      if (l === "\t\t}") { cur = null; continue; } // end of a case, or of the switch
+      if (cur) cur.push(l.replace(/^\t\t/, ""));
+    }
+  }
+  const instr = head[2] ? head[2].replace(/^.*constant:\s*/, "") : "";
+  return { lines, start, end, arg: head[1], instr, cases, body: cases ? null : inner.map((l) => l.replace(/^\t/, "")) };
+}
+
+/** Top-level arguments of the call that starts at the `(` of index `open`. */
+function callArgsAt(code, open) {
+  const args = [];
+  let depth = 0, cur = "";
+  for (let i = open; i < code.length; i++) {
+    const ch = code[i];
+    if (ch === "(") { if (depth++ > 0) cur += ch; continue; }
+    if (ch === ")") { if (--depth === 0) { args.push(cur.trim()); return args; } cur += ch; continue; }
+    if (ch === "," && depth === 1) { args.push(cur.trim()); cur = ""; continue; }
+    cur += ch;
+  }
+  return args;
+}
+
+/** Code of the function `name` in the view `imm` of its immediate block. */
+function applyImm(name, code, imm) {
+  const b = parseImmBlock(code);
+  const k = imm.consts.get(name);
+  let out = code;
+  if (b && imm.mode !== "dispatch") {
+    const L = b.lines;
+    const selected = k === undefined ? null : (b.cases ? b.cases.get(k) : b.body);
+    if (selected) {
+      const what = b.cases ? `body of this value${b.instr ? ` (${b.instr})` : ""}` : "the LMUL 1 function on the registers two by two";
+      out = L.slice(0, b.start).concat([`\t// ${b.arg} = ${k} (immediate): ${what}`], selected, ["}"]).join("\n");
+    } else {
+      const note = k !== undefined
+        ? `${b.arg} = ${k} (immediate): no body for this value, the dynamic body`
+        : (b.cases
+          ? `${b.arg} immediate: one of ${b.cases.size} bodies${b.instr ? ` (${b.instr})` : ""}, selected at compile time`
+          : `${b.arg} immediate: the LMUL 1 function on the registers two by two, selected at compile time`);
+      out = L.slice(0, b.start).concat([`\t// ${note}`], L.slice(b.end + 1)).join("\n");
+    }
+  }
+  if (k !== undefined) {
+    // the functions that receive the parameter receive a constant too: the same one, or the
+    // value of the expression it is part of (slideup calls slide with N - s0)
+    const call = /\b(mipp_\w+)\s*\(/g;
+    const body = out.slice(out.indexOf("{") + 1);
+    const uses = new RegExp(`\\b${imm.arg}\\b`);
+    let m;
+    while ((m = call.exec(body)) !== null) {
+      const args = callArgsAt(body, m.index + m[0].length - 1);
+      const last = args.length ? args[args.length - 1] : "";
+      if (!uses.test(last) || /\bmipp_\w+\s*\(/.test(last) || imm.consts.has(m[1])) continue;
+      const v = passedImm(last, k, body, imm);
+      if (Number.isFinite(v)) imm.consts.set(m[1], v);
+    }
+  }
+  return out;
+}
+
+/**
+ * Constants the selector of the Algorithm modal can offer for `cfg`: the values of the immediate
+ * bodies of the function (or of the function it passes its argument to), `null` when every value
+ * of the range is accepted (body of a constant without a switch), `undefined` when the function
+ * has no code of its own for a constant with these flags.
+ */
+export function immChoices(sources, cfg) {
+  if (!cfg.imm || !cfg.imm.arg) return undefined;
+  const macros = targetMacros(cfg.isa, cfg.options, cfg.simdWidth, cfg.overrides);
+  const arg = cfg.imm.arg;
+  const seen = new Set();
+  const look = (name, depth) => {
+    if (seen.has(name) || depth > 4) return undefined;
+    seen.add(name);
+    const sym = resolve(name, sources, macros);
+    if (!sym || sym.kind !== "func") return undefined;
+    const code = preprocess(sym.code, new Map(macros), { keepDefines: true });
+    const b = parseImmBlock(code);
+    if (b) return b.cases ? { values: [...b.cases.keys()].sort((x, y) => x - y), instr: b.instr } : { values: null, instr: "" };
+    const call = /\b(mipp_\w+)\s*\(/g;
+    const body = code.slice(code.indexOf("{") + 1);
+    const uses = new RegExp(`\\b${arg}\\b`);
+    let m;
+    while ((m = call.exec(body)) !== null) {
+      const args = callArgsAt(body, m.index + m[0].length - 1);
+      const last = args.length ? args[args.length - 1] : "";
+      if (!uses.test(last) || /\bmipp_\w+\s*\(/.test(last)) continue;
+      const r = look(m[1], depth + 1);
+      // passed through an expression (N - s0): the values are the ones of the range
+      if (r) return last === arg ? r : { values: null, instr: r.instr };
+    }
+    return undefined;
+  };
+  return look(cFunctionName(cfg.isa, cfg.func, cfg.dt, cfg.mask, cfg.lmul), 0);
 }
 
 function parseDomain(entry, dt, mask) {
@@ -436,6 +654,10 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
   const { isa, func, dt, mask, lmul } = cfg;
   const macros = targetMacros(isa, cfg.options, cfg.simdWidth, cfg.overrides);
   const rootName = cFunctionName(isa, func, dt, mask, lmul);
+  macros.imm = immState(cfg, rootName, sources, macros);
+  // with a constant, `test` passes it: the argument is not one of its parameters
+  const immConst = macros.imm && macros.imm.mode === "const" ? macros.imm.consts.get(rootName) : undefined;
+  const isImmParam = (p) => immConst !== undefined && p.name === macros.imm.arg && !p.isPtr && !regInfo(p.type);
   const root = resolve(rootName, sources, macros);
   if (!root) {
     return { code: `// ${rootName} is not defined for these compiler flags.\n`, missing: [rootName], rootFound: false };
@@ -552,6 +774,7 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
       targs.push(stride ? `${p.name} + i * ${stride}` : p.name);
       return;
     }
+    if (isImmParam(p)) { targs.push(String(immConst)); return; }
     tparams.push(`${p.isConst ? "const " : ""}${p.type} ${p.name}`);
     targs.push(p.name);
   });
@@ -638,8 +861,9 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
       const reg = sig.params.map((q) => regInfo(q.type)).find(Boolean);
       const lit = pdt && IS_FLOAT(pdt) ? valueLiteral(pdt, 1, dom, 0)
         : (base === "uint32_t" && reg ? `(${nMacro(reg)} > 1 ? 1 : 0)` : "1"); // lane index: in the register
-      decls.push(`\t${base} ${p.name} = ${lit};`);
-      callArgs.push(p.name);
+      // the constant of `test` (not one of its parameters), also given to the scalar reference
+      decls.push(`\t${base} ${p.name} = ${isImmParam(p) ? immConst : lit};`);
+      if (!isImmParam(p)) callArgs.push(p.name);
       refArgs.push(p.name);
     }
   });
@@ -792,6 +1016,7 @@ export function buildAbstractCode(entry, sources, cfg) {
   const macros = targetMacros(isa, cfg.options, cfg.simdWidth, cfg.overrides);
   const rootName = cFunctionName(isa, func, dt, mask, lmul);
   const root = resolve(rootName, sources, macros);
+  macros.imm = immState(cfg, rootName, sources, macros);
   if (!root) return { code: `// ${rootName} is not defined for these compiler flags.`, calls: [], rootFound: false };
   const cppMap = Object.assign({}, ...sources.map((t) => t.cpp || {}));
   const body = shownCode(root, sources, macros, new Map());
@@ -896,7 +1121,9 @@ export function callTree(rootName, sources, macros, maxDepth = 6) {
 /** The call tree of the function of a configuration (same cfg as buildFlatCode). */
 export function buildCallTree(sources, cfg) {
   const macros = targetMacros(cfg.isa, cfg.options, cfg.simdWidth, cfg.overrides);
-  return callTree(cFunctionName(cfg.isa, cfg.func, cfg.dt, cfg.mask, cfg.lmul), sources, macros);
+  const rootName = cFunctionName(cfg.isa, cfg.func, cfg.dt, cfg.mask, cfg.lmul);
+  macros.imm = immState(cfg, rootName, sources, macros);
+  return callTree(rootName, sources, macros);
 }
 
 const INTRINSIC_RE = /\b(_mm\d*_\w+|__riscv_\w+|sv[a-z0-9_]+|v[a-z0-9]+q?_[a-z0-9_]+|_cvt\w+|__builtin_\w+)\s*\(/;
@@ -912,6 +1139,13 @@ export function sourceOf(code, table, mask) {
   const text = (String(code).match(/\/\/\s*Level[^\n]*/) || [""])[0];
   const body = String(code).split("{").slice(1).join("{").replace(/\/\/[^\n]*/g, "");
   if (table === "scalar") return { kind: "scalar", path: "generator/helpers_headers/registry_scalar_implems.json", what: "scalar reference" };
+  if (/\(immediate\): body of this value/.test(code)) {
+    // The registry gives no level to an immediate body: Level 0 when it is one instruction
+    // (reinterpretations aside, they emit none), Level 1 for a sequence
+    const calls = (body.match(new RegExp(INTRINSIC_RE.source, "g")) || [])
+      .filter((c) => !/^(_mm\d*_cast|_mm\d*_undefined|v?reinterpret|svreinterpret|__builtin_)/.test(c));
+    return { kind: "immediate", level: calls.length <= 1 ? 0 : 1, path: `generator/simd_ext/${table}/${table}_imm_implems.json`, what: "immediate body (templates: _imm_templates.json)" };
+  }
   if (!lv) return { kind: "wrapper", path: "generator/helpers_headers/codegen/lmul_orchestrator.py", what: "software LMUL wrapper: one call per register of the LMUL below" };
   if (/lane-wise|half of the software LMUL|each half of the result/.test(text)) {
     return { kind: "lanewise", path: "generator/helpers_headers/codegen/ldiv_mask.py", what: "generated from the LMUL 1 function" };

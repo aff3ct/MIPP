@@ -212,6 +212,76 @@ def _deps(code, known, self_name):
     return sorted(n for n in names if n in known)
 
 
+_IMM_BLOCK = re.compile(r"\bif \(__builtin_constant_p\(\w+\)\)")
+_MIPP_CALL = re.compile(r"\b(mipp_\w+)\s*\(")
+
+
+def _last_arg(code, open_idx):
+    """Last top-level argument of the call whose `(` is at `open_idx`."""
+    depth, cur = 0, ""
+    for ch in code[open_idx:]:
+        if ch == "(":
+            depth += 1
+            if depth > 1:
+                cur += ch
+            continue
+        if ch == ")":
+            depth -= 1
+            if depth == 0:
+                return cur.strip()
+            cur += ch
+            continue
+        if ch == "," and depth == 1:
+            cur = ""
+            continue
+        cur += ch
+    return cur.strip()
+
+
+def imm_isas(tables):
+    """{function: [isa, ...]}: the ISAs on which the function has a body of its own when its
+    integer parameter is an immediate (`if (__builtin_constant_p(...))`, see codegen/imm.py),
+    in its own code or in a function it passes this parameter to (`slideup` calls `slide` with
+    `N - s0`). Looked up in the unmasked LMUL 1 functions, for any datatype and any condition:
+    on the other ISAs the same code runs with a variable and with an immediate."""
+    out = {}
+    for isa, symbols in tables.items():
+        if isa == "interface":
+            continue
+        memo = {}
+
+        def has(name, depth=0):
+            if name in memo:
+                return memo[name]
+            memo[name] = False
+            for v in symbols.get(name, []):
+                if v["kind"] != "func" or "{" not in v["code"]:
+                    continue
+                code = v["code"]
+                if _IMM_BLOCK.search(code):
+                    memo[name] = True
+                    break
+                arg = re.search(r"\bu?int32_t\s+(\w+)\s*\)\s*$", code.split("{")[0].strip())
+                if not arg or depth > 4:
+                    continue
+                body = code[code.index("{") + 1:]
+                for call in _MIPP_CALL.finditer(body):
+                    last = _last_arg(body, call.end() - 1)
+                    if re.search(rf"\b{arg.group(1)}\b", last) and not _MIPP_CALL.search(last) and has(call.group(1), depth + 1):
+                        memo[name] = True
+                        break
+                if memo[name]:
+                    break
+            return memo[name]
+
+        unmasked_m1 = re.compile(rf"^mipp_{isa}_(\w+?)_(?:float64|float32|u?int(?:64|32|16|8))_m1$")
+        for name in symbols:
+            m = unmasked_m1.match(name)
+            if m and has(name) and isa not in out.setdefault(m.group(1), []):
+                out[m.group(1)].append(isa)
+    return {f: isas for f, isas in out.items() if isas}
+
+
 def export_algo_sources(project_root, isas):
     include_dir = os.path.join(project_root, "include")
     out_dir = os.path.join(project_root, "docs", "assets", "data", "algo")
@@ -270,6 +340,8 @@ def export_algo_sources(project_root, isas):
     start = text.find("#if defined(MIPP_SCALAR)")
     end = text.find("#ifndef MIPP_FLOAT_TYPEDEFS_")
     index["selection"] = text[start:end].strip() if start >= 0 and end > start else ""
+    # ISAs with a body of their own for an immediate, per function (read by gen_mipp_api_data.py)
+    index["imm"] = imm_isas(tables)
     with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as f:
         json.dump(index, f, indent=1)
     return index

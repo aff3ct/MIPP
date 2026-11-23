@@ -113,6 +113,48 @@ def index_reg_type_cpp(reg, fixed_dtype, lmul):
     return None
 
 
+# Integer argument that is often a constant (`"imm"` of the registry, see codegen/imm.py): range of the
+# constant as plain text (tooltip of the "imm" badge) and as LaTeX, and what its bound stands for
+IMM_RANGES = {
+    "lt_n": ("0 <= S < N", r"0 \le {arg} < N", None),
+    "le_n": ("0 <= S <= N", r"0 \le {arg} \le N", None),
+    "lt_nb": ("0 <= S < B, the lanes of a block of 128 bits", r"0 \le {arg} < B", "$B$ the number of lanes of a block of 128 bits"),
+    "le_nb": ("0 <= S <= B, the lanes of a block of 128 bits", r"0 \le {arg} \le B", "$B$ the number of lanes of a block of 128 bits"),
+    "lt_bits": ("0 <= S < bits of T", r"0 \le {arg} < b", "$b$ the number of bits of an element"),
+}
+
+
+def imm_info(func_name):
+    """Integer argument of `func_name` that has an immediate version, None for the other functions:
+    {"arg": its name, "range": the registry value, "text": range of the constant as plain text, "latex": range of the
+    argument, "bound": what the bound of the range stands for (markup of the descriptions) or None,
+    "template": call of the C++ template version}."""
+    kind = interfaces[func_name].get("imm")
+    if not kind:
+        return None
+    args = interfaces[func_name]["proto"]["args"]
+    arg = "s" + str(sum(a["type"] == "val" for a in args) - 1)
+    text, latex, bound = IMM_RANGES[kind]
+    cnt, call_args = {"reg": 0, "msk": 0}, []
+    for a in args:  # the registers and the masks: the integer is the template parameter
+        if a["type"] in cnt:
+            call_args.append(("vd" if a["type"] == "reg" else "vm") + str(cnt[a["type"]]))
+            cnt[a["type"]] += 1
+    cpp_name = interfaces[func_name].get("cpp_name", func_name)
+    return {"arg": arg, "range": kind, "text": text, "latex": latex.format(arg=arg), "bound": bound,
+            "template": f"mipp::{cpp_name}<S>({', '.join(call_args)})"}
+
+
+def imm_template_line(func_name, line):
+    """Template version (`mipp::slide<S>(a, b)`) of the unmasked C++ prototype `line`: the integer argument
+    becomes the template parameter S. None when the function has no immediate version."""
+    imm = imm_info(func_name)
+    m = re.search(r", const u?int32_t s\d+\);$", line)
+    if not imm or not m or "template <" not in line:
+        return None
+    return line[:m.start()].replace("template <", "template <int S, ", 1) + ");"
+
+
 def ret_lmul_of(func_name, lmul):
     """LMUL of the returned register when the arguments have the LMUL `lmul`."""
     r = resolve_ret_lmul(interfaces[func_name]["proto"]["ret"], lmul)
@@ -679,7 +721,9 @@ class SpecFuncInfo:
             tmpl_parts.append("typename T_IDX")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
-        return f"{tmpl_header}{ret_str} {cpp_name}({args_str});"
+        line = f"{tmpl_header}{ret_str} {cpp_name}({args_str});"
+        imm_line = imm_template_line(self.func_name, line) if not mask_kind or mask_kind == "unmasked" else None
+        return line + "\n" + imm_line if imm_line else line
 
     def func_to_str_obj(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
@@ -777,6 +821,9 @@ class SpecFuncInfo:
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
         lines = [f"{tmpl_header}{ret_str} {func_call_name}({args_str});"]
+        imm_line = imm_template_line(self.func_name, lines[0]) if not mask_kind or mask_kind == "unmasked" else None
+        if imm_line:
+            lines.append(imm_line)
 
         if not mask_kind or mask_kind == "unmasked":
             op_map = {
@@ -944,6 +991,12 @@ class SpecFuncInfo:
                 for line in obj_block.splitlines():
                     print(f"    {line}", file=f)
             print("    ```\n", file=f)
+
+            imm = imm_info(self.func_name)
+            if imm:
+                rng = f"${imm['latex']}$" + (f", with {imm['bound']}" if imm["bound"] else "")
+                print(f"`{imm['arg']}` can be an immediate ({rng}): see "
+                      f"[Constant Counts](../../user/rearrangements.md#31-constant-counts).\n", file=f)
 
             print("## Headers\n", file=f)
 
@@ -1393,16 +1446,18 @@ def main(argv=None):
         write_funcs_support_nav(funcs_support_dir)
 
     if "explorer" in parts:
-        # Export Interactive API Explorer metadata
-        print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json, mipp_api_details.json)...")
-        from gen_mipp_api_data import export_api_data
-        export_api_data(project_root)
-        # Source code of the "Algorithm" modal: symbol tables of the generated headers (include/)
+        # Source code of the "Algorithm" modal: symbol tables of the generated headers (include/).
+        # First: the Explorer metadata read in its index the ISAs that have a body of their own
+        # for an immediate
         print("[MIPP DocGen] Exporting the header symbol tables of the Algorithm modal (docs/assets/data/algo/)...")
         from helpers_docs.algo_sources import export_algo_sources
         simd_ext_dir = os.path.join(base_generator_dir, "simd_ext")
         algo_isas = sorted(d for d in os.listdir(simd_ext_dir) if os.path.isdir(os.path.join(simd_ext_dir, d)))
         export_algo_sources(project_root, algo_isas)
+        # Export Interactive API Explorer metadata
+        print("[MIPP DocGen] Exporting Interactive API Explorer metadata (docs/assets/data/mipp_api_index.json, mipp_api_details.json)...")
+        from gen_mipp_api_data import export_api_data
+        export_api_data(project_root)
 
     if "dev_reference" in parts:
         print("[MIPP DocGen] Writing the Developer Guide reference (docs/developer/reference/cli.md, registries/)...")

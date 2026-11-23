@@ -153,6 +153,11 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
     '\\b(T|T1|T2|T_IDX|T_DST|T_SRC|LMUL|LDIV|N|V|M|Z|S|U)\\b',
   ];
 
+  // Parameter that can be an immediate (options.imm, the "imm" of the entry): its
+  // name is a token, boxed where it is declared (see the loop)
+  const imm = options.imm && options.imm.arg ? options.imm : null;
+  if (imm) tokenPatterns.push('\\b(' + imm.arg + ')\\b');
+
   if (customMacros && typeof customMacros === "object") {
     const macroNames = Object.keys(customMacros).filter((k) => /^[A-Z0-9_]+$/.test(k));
     if (macroNames.length > 0) {
@@ -181,7 +186,16 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
     else if (match[7]) cls = "mipp-hl-fn";
     else if (match[8]) cls = "mipp-hl-tmpl";
 
-    if (customMacros && customMacros[token]) {
+    // declaration of the parameter (`const int32_t s0`), or of the constant of
+    // the C++ template version (`template <int S, ...>`)
+    const before = imm ? cleanCode.slice(Math.max(0, match.index - 12), match.index) : "";
+    const isImmDecl = imm && ((token === imm.arg && /\bu?int32_t\s+$/.test(before)) || (token === "S" && /<int\s+$/.test(before)));
+
+    if (isImmDecl) {
+      // the parameter is a variable or an immediate, the template argument always an immediate
+      const isTemplate = token !== imm.arg;
+      html += `<span class="mipp-imm-ref${isTemplate ? " mipp-imm-const" : ""}" data-imm="${escapeHtml(JSON.stringify(imm))}" data-imm-kind="${isTemplate ? "template" : "param"}" tabindex="0" role="button" aria-label="${escapeHtml(token)}: ${isTemplate ? "always an immediate" : "variable or immediate"}">${escapeHtml(token)}</span>`;
+    } else if (customMacros && customMacros[token]) {
       const macroInfo = customMacros[token];
       const macroDef = typeof macroInfo === "object" ? (macroInfo.definition || macroInfo.body || "") : String(macroInfo);
       html += `<span class="mipp-hl-macro mipp-macro-ref" data-macro-name="${escapeHtml(token)}" data-macro-def="${escapeHtml(macroDef)}" tabindex="0" role="button" title="Click to view macro definition">${escapeHtml(token)}</span>`;

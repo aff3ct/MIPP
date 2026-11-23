@@ -43,7 +43,7 @@ export function renderCompareColumn(entry) {
       <div>
         <div class="mipp-control-label" style="margin-bottom: 0.3rem;">Active Prototype (${state.flavor.toUpperCase()})</div>
         <div class="mipp-code-box">
-          <pre style="padding: 0.5rem; font-size: var(--mipp-fs-base, 0.72rem);"><code>${highlightCpp(activeProto)}</code></pre>
+          <pre style="padding: 0.5rem; font-size: var(--mipp-fs-base, 0.72rem);"><code>${highlightCpp(activeProto, {}, { imm: entry.imm })}</code></pre>
         </div>
       </div>
 
