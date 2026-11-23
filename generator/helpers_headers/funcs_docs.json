@@ -92,7 +92,7 @@
     "latex": "a b + c"
   },
   "clamp": {
-    "description": "Clamps each element between the elements of the same lane of the second (lower bound) and third (upper bound) registers: `min(max(vd0, vd1), vd2)`. With bounds such that lo > hi, the result is hi. The form `vss` takes scalar bounds: `clamp(r, lo, hi)`.",
+    "description": "Clamps each element between the elements of the same lane of the second (lower bound) and third (upper bound) registers: `min(max(vd0, vd1), vd2)`. With bounds such that lo > hi, the result is hi. The form `vss` takes scalar bounds: `clamp(vd0, s0, s1)`.",
     "latex": "\\text{res}_i = \\min(\\max(vd0_i, vd1_i), vd2_i)"
   },
   "cmpeq": {
@@ -176,7 +176,7 @@
     "latex": "\\text{res}_i = (T_{\\text{dst}}) vd0_i"
   },
   "unzip": {
-    "description": "Separates the even and the odd lanes: the even lanes in the lower half, the odd lanes in the upper half (interleaved to planar layout, MIPPv1 `deinterleave`).",
+    "description": "Separates the even and the odd lanes: the even lanes in the lower half, the odd lanes in the upper half (interleaved to planar layout).",
     "latex": "\\text{res}_k = vd0_{2k},\\ \\text{res}_{N/2+k} = vd0_{2k+1}"
   },
   "div": {
@@ -272,7 +272,7 @@
     "latex": "\\text{res} = \\prod_{i=0}^{N-1} vd0_i"
   },
   "zip": {
-    "description": "Interleaves the two halves of the register: the lane 2k receives the lane k, the lane 2k+1 the lane N/2 + k (planar to interleaved layout, MIPPv1 `interleave`; the inverse of `unzip`).",
+    "description": "Interleaves the two halves of the register: the lane 2k receives the lane k, the lane 2k+1 the lane N/2 + k (planar to interleaved layout; the inverse of `unzip`).",
     "latex": "\\text{res}_{2k} = vd0_k,\\ \\text{res}_{2k+1} = vd0_{N/2+k}"
   },
   "load": {
@@ -280,7 +280,7 @@
     "latex": "\\text{res}_i = \\text{p0}[i]"
   },
   "loadu_unzip": {
-    "description": "Loads N elements (no alignment required) and separates the even and the odd ones: the even elements in the lower half of the register, the odd ones in the upper half (`unzip(loadu(p))`; with LMUL 2, the two LMUL 1 halves are the even and the odd elements of 2N elements, as ARM `vld2`).",
+    "description": "Loads N elements (no alignment required) and separates the even and the odd ones: the even elements in the lower half of the register, the odd ones in the upper half (`unzip(loadu(p0))`; with LMUL 2, the two LMUL 1 halves are the even and the odd elements of 2N elements, as ARM `vld2`).",
     "latex": "\\text{res}_k = p_{2k},\\ \\text{res}_{N/2+k} = p_{2k+1}"
   },
   "loadu": {
@@ -300,11 +300,11 @@
     "latex": "m_{\\text{res}, i} = m_{0, i}, \\quad 0 \\le i < N / 2"
   },
   "lshift": {
-    "description": "Shifts each element left by the number of bits of the same lane of the second register (from 0 to the number of bits of the type minus 1; any other count is undefined behavior). The shift by the same count for every lane is `lshift_vs` (`mipp::lshift(r, n)` in C++).",
+    "description": "Shifts each element left by the number of bits of the same lane of the second register (from 0 to the number of bits of the type minus 1; any other count is undefined behavior). The shift by the same count for every lane is `lshift_vs` (`mipp::lshift(vd0, s0)` in C++).",
     "latex": "\\text{res}_i = vd0_i \\ll vd1_i"
   },
   "lshift_vs": {
-    "description": "Shifts every element left by the same number of bits `s0` (scalar form `vs` of `lshift`; `mipp::lshift(r, n)` in C++). The bits of the floating-point elements are shifted as an integer of the same size.",
+    "description": "Shifts every element left by the same number of bits `s0` (scalar form `vs` of `lshift`; `mipp::lshift(vd0, s0)` in C++). The bits of the floating-point elements are shifted as an integer of the same size.",
     "latex": "\\text{res}_i = vd0_i \\ll s0"
   },
   "max": {
@@ -396,11 +396,11 @@
     "latex": "\\text{res}_i = \\operatorname{round}(vd0_i)"
   },
   "rshift": {
-    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(r, n)` in C++).",
+    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(vd0, s0)` in C++).",
     "latex": "\\text{res}_i = vd0_i \\gg vd1_i"
   },
   "rshift_vs": {
-    "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshift`; `mipp::rshift(r, n)` in C++): arithmetic shift for the signed types, logical shift for the unsigned ones. The bits of the floating-point elements are shifted as an unsigned integer of the same size.",
+    "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshift`; `mipp::rshift(vd0, s0)` in C++): arithmetic shift for the signed types, logical shift for the unsigned ones. The bits of the floating-point elements are shifted as an unsigned integer of the same size.",
     "latex": "\\text{res}_i = vd0_i \\gg s0"
   },
   "rsqrt": {
@@ -452,7 +452,7 @@
     "latex": "\\text{res}_i = \\sinh(vd0_i)"
   },
   "slide": {
-    "description": "Window of N lanes at the position `s0` (0 <= s0 <= N) of the concatenation of the two registers: the lanes s0 to N-1 of vd0, then the lanes 0 to s0-1 of vd1 (MIPPv1 `combine<S>`; x86 `alignr`, ARM `ext`).",
+    "description": "Window of N lanes at the position `s0` (0 <= s0 <= N) of the concatenation of the two registers: the lanes s0 to N-1 of vd0, then the lanes 0 to s0-1 of vd1 (x86 `alignr`, ARM `ext`).",
     "latex": "\\text{res}_i = (vd0 \\| vd1)_{i + s0}"
   },
   "slide_b128": {
@@ -484,7 +484,7 @@
     "latex": "\\text{p0}[i] = vd0_i"
   },
   "storeu_zip": {
-    "description": "Interleaves the two halves of the register and stores the N elements (no alignment required): `storeu(p, zip(r))`, the inverse of `loadu_unzip` (ARM `vst2`).",
+    "description": "Interleaves the two halves of the register and stores the N elements (no alignment required): `storeu(p0, zip(vd0))`, the inverse of `loadu_unzip` (ARM `vst2`).",
     "latex": "p_{2k} = vd0_k,\\ p_{2k+1} = vd0_{N/2+k}"
   },
   "storeu": {
