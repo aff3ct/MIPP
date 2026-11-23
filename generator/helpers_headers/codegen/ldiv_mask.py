@@ -323,7 +323,7 @@ def _lane_crossing_body(ctx, params):
             sys.exit(1)
     scalar_f = build_func_name_internal(scalar_isa, ctx.dt, ctx.dt_par, ctx.dt_ret, ctx.f, lmul=-2)
     if ctx.proto["ret"]["type"] == "val":
-        # a value (count of compress_store): the one of the scalar function
+        # a value (count of storeu_compress): the one of the scalar function
         lines.append(f"return {scalar_f}({', '.join(args)});")
         return "\n".join(lines)
     if ctx.proto["ret"]["type"] != "reg":

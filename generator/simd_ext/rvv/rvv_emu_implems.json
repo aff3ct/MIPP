@@ -178,13 +178,6 @@
             "template": "rea_compress"
         }
     ],
-    "compress_store": [
-        {
-            "instr_name": "vcompress",
-            "datatypes": "all_datatypes",
-            "template": "rea_compress_store"
-        }
-    ],
     "div": [
         {
             "instr_name": "fdiv",
@@ -270,13 +263,6 @@
             "instr_name": "viota",
             "datatypes": "all_datatypes",
             "template": "rea_expand"
-        }
-    ],
-    "expand_load": [
-        {
-            "instr_name": "viota",
-            "datatypes": "all_datatypes",
-            "template": "rea_expand_load"
         }
     ],
     "fmsub": [
@@ -605,6 +591,13 @@
             "datatypes": "all_datatypes",
             "template": "load_mskz",
             "variant": "z"
+        }
+    ],
+    "loadu_expand": [
+        {
+            "instr_name": "viota",
+            "datatypes": "all_datatypes",
+            "template": "rea_loadu_expand"
         }
     ],
     "lshift": [
@@ -1044,6 +1037,13 @@
             "datatypes": "all_datatypes",
             "template": "store_mskz",
             "variant": "z"
+        }
+    ],
+    "storeu_compress": [
+        {
+            "instr_name": "vcompress",
+            "datatypes": "all_datatypes",
+            "template": "rea_storeu_compress"
         }
     ],
     "sub": [

@@ -782,7 +782,7 @@
             "return %xorb<tp>%(r0, sgn);"
         ]
     },
-    "compress_store_buf": {
+    "storeu_compress_buf": {
         "format": "long",
         "code": [
             "// compress in a register, then exactly the active lanes copied to p0",
@@ -793,7 +793,7 @@
             "return n;"
         ]
     },
-    "compress_store_full": {
+    "storeuf_compress": {
         "format": "long",
         "code": [
             "// the whole register (the lanes after the count are zero), then the count",
@@ -1099,7 +1099,7 @@
             "return res;"
         ]
     },
-    "expand_load_buf": {
+    "loadu_expand_buf": {
         "format": "long",
         "code": [
             "// exactly the count of active lanes read from p0, then expand",
@@ -1167,7 +1167,7 @@
             "return %zip_lo<tp>%(r0, %slide_down<tp>%(r0, (int32_t)(%N<tp>% / 2)));"
         ]
     },
-    "load_interleaved2": {
+    "loadu_unzip": {
         "format": "long",
         "code": [
             "return %deinterleave<tp>%(%loadu<tp>%(p0));"
@@ -1921,7 +1921,7 @@
             "return %slide<tp>%(%set0<tp>%(), r0, (int32_t)%N<tp>% - s0);"
         ]
     },
-    "store_interleaved2": {
+    "storeu_zip": {
         "format": "long",
         "code": [
             "%storeu<tp>%(p0, %interleave<tp>%(r0));"

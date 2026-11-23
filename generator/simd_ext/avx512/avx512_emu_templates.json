@@ -77,15 +77,6 @@
             "return res;"
         ]
     },
-    "rea_compress_store": {
-        "format": "long",
-        "code": [
-            "// compressed in a register, then a store of the first count lanes (exact)",
-            "const unsigned long long n = (unsigned long long)__builtin_popcountll((unsigned long long)m0.m);",
-            "{{ isa.prefix }}_mask_storeu_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(p0, ({{ isa_dt_par.msk }})(n >= 64 ? ~0ULL : (1ULL << n) - 1), {{ isa.prefix }}_maskz_compress_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(m0.m, r0.r));",
-            "return (int32_t)n;"
-        ]
-    },
     "rea_perm2_32": {
         "format": "short",
         "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(r0.r, {{ isa.prefix }}_set_epi32({{ instr_name }}), r1.r);"
@@ -122,6 +113,15 @@
             "%r<tp>% res;",
             "res.r = {% if dt_par.category == 'float' %}_mm512_castsi512_{{ isa_dt_par.data_ext }}(_mm512_mask_blend_epi8(hi, x, y)){% else %}_mm512_mask_blend_epi8(hi, x, y){% endif %};",
             "return res;"
+        ]
+    },
+    "rea_storeu_compress": {
+        "format": "long",
+        "code": [
+            "// compressed in a register, then a store of the first count lanes (exact)",
+            "const unsigned long long n = (unsigned long long)__builtin_popcountll((unsigned long long)m0.m);",
+            "{{ isa.prefix }}_mask_storeu_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(p0, ({{ isa_dt_par.msk }})(n >= 64 ? ~0ULL : (1ULL << n) - 1), {{ isa.prefix }}_maskz_compress_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(m0.m, r0.r));",
+            "return (int32_t)n;"
         ]
     },
     "reduce_16": {

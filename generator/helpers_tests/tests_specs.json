@@ -681,10 +681,10 @@
         "compress": {
             "support_obj": true
         },
-        "compress_store": {
+        "storeu_compress": {
             "support_obj": true
         },
-        "compress_store_full": {
+        "storeuf_compress": {
             "support_obj": true
         },
         "cos": {
@@ -794,7 +794,7 @@
         "expand": {
             "support_obj": true
         },
-        "expand_load": {
+        "loadu_expand": {
             "support_obj": true
         },
         "fmadd": {
@@ -954,7 +954,7 @@
         "interleave": {
             "support_obj": true
         },
-        "load_interleaved2": {
+        "loadu_unzip": {
             "support_obj": true
         },
         "log": {
@@ -1398,7 +1398,7 @@
             "comparison": "tolerance",
             "nan_inf_skip": true
         },
-        "store_interleaved2": {
+        "storeu_zip": {
             "support_obj": true
         },
         "sub": {

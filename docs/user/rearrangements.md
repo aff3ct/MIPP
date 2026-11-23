@@ -22,12 +22,12 @@ Most functions also have a variant **by block of 128 bits**, suffix `_b128`: the
 | `slide_up(a, n)` / `slide_down(a, n)` | lanes moved up / down by `n`, zeros entering | yes |
 | `rotate(a, n)` | lane i receives `a[(i + n) mod N]` (0 ≤ n < N) | yes |
 | `broadcast_lane(a, k)` | `a[k]` in every lane (0 ≤ k < N) | yes |
-| `load_interleaved2(p)` / `store_interleaved2(p, a)` | `deinterleave(loadu(p))` / `storeu(p, interleave(a))` | — |
+| `loadu_unzip(p)` / `storeu_zip(p, a)` | `deinterleave(loadu(p))` / `storeu(p, interleave(a))` | — |
 | `permute(a, idx)` | `a[idx[0]], a[idx[1]], ...` (indices < N) | yes |
 | `permute2(a, b, idx)` | the same in `a` then `b` (indices < 2N) | — |
 | `compress(a, m)` / `expand(a, m)` | active lanes packed first, zeros after / the inverse | — |
-| `compress_store(p, a, m)` / `compress_store_full(p, a, m)` | active lanes stored, their count returned | — |
-| `expand_load(p, m)` | `count(m)` elements loaded into the active lanes | — |
+| `storeu_compress(p, a, m)` / `storeuf_compress(p, a, m)` | active lanes stored, their count returned | — |
+| `loadu_expand(p, m)` | `count(m)` elements loaded into the active lanes | — |
 
 `swap_pairs`, `dup_even` and `dup_odd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments: a constant or a variable (see §3 for the constants).
 
@@ -114,7 +114,7 @@ The immediate instructions are written for the unmasked functions of LMUL 1 on S
 
 ## 4. Interleaved Data
 
-`load_interleaved2` loads N elements and separates the even and the odd ones: with LMUL 2, the two registers of LMUL 1 are the even and the odd elements of 2N elements, as ARM `vld2`. Below, the real and imaginary parts of N complex numbers.
+`loadu_unzip` loads N elements and separates the even and the odd ones: with LMUL 2, the two registers of LMUL 1 are the even and the odd elements of 2N elements, as ARM `vld2`. Below, the real and imaginary parts of N complex numbers.
 
 === "C API"
 
@@ -164,10 +164,10 @@ The immediate instructions are written for the unmasked functions of LMUL 1 on S
 
 `compress(a, m)` packs the active lanes of `a` at the beginning of the register, in order, and zeroes the other lanes; `expand(a, m)` is the inverse. `count(m)` is the number of active lanes. To store the result:
 
-- `compress_store(p, a, m)` writes **exactly** the `count(m)` active lanes and returns this count;
-- `compress_store_full(p, a, m)` writes a **whole register** (the lanes after the count are unspecified) and returns the count: faster on the ISAs without a native masked store (SSE, AVX2, NEON). The memory of N elements from `p` must be writable: in a filter loop, each call overwrites the extra elements of the previous one, and the output needs N elements of margin.
+- `storeu_compress(p, a, m)` writes **exactly** the `count(m)` active lanes and returns this count;
+- `storeuf_compress(p, a, m)` writes a **whole register** (the lanes after the count are unspecified) and returns the count: faster on the ISAs without a native masked store (SSE, AVX2, NEON). The memory of N elements from `p` must be writable: in a filter loop, each call overwrites the extra elements of the previous one, and the output needs N elements of margin.
 
-`expand_load(p, m)` reads exactly `count(m)` elements. These functions have no half-vector (`d2`) version.
+`loadu_expand(p, m)` reads exactly `count(m)` elements. These functions have no half-vector (`d2`) version.
 
 === "C API"
 

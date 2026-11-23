@@ -143,12 +143,12 @@
     "description": "The active lanes of r0 (mask m0), in order, packed at the beginning of the register; the other lanes are zero.",
     "latex": "\\text{res} = (r0_i)_{m0_i \\neq 0},\\ 0, \\ldots"
   },
-  "compress_store": {
+  "storeu_compress": {
     "description": "Stores the active lanes of r0 (mask m0), in order, at p0 (no alignment required) and returns their number. Exactly this number of elements is written.",
     "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
   },
-  "compress_store_full": {
-    "description": "`compress_store` that may write a whole register: the active lanes of r0 at p0, then up to N - count unspecified elements (the memory of N elements from p0 must be writable). Faster than `compress_store` without a native masked store: a filter loop overwrites the unspecified elements with the next call (keep N elements of margin at the end of the output).",
+  "storeuf_compress": {
+    "description": "`storeu_compress` that may write a whole register: the active lanes of r0 at p0, then up to N - count unspecified elements (the memory of N elements from p0 must be writable). Faster than `storeu_compress` without a native masked store: a filter loop overwrites the unspecified elements with the next call (keep N elements of margin at the end of the output).",
     "latex": "p0_k = r0_{i_k},\\ \\text{res} = \\#\\{i \\mid m0_i \\neq 0\\}"
   },
   "conj": {
@@ -207,7 +207,7 @@
     "description": "The inverse of `compress`: the first lanes of r0, in order, go to the active lanes (mask m0); the inactive lanes are zero.",
     "latex": "\\text{res}_i = m0_i\\ ?\\ r0_{\\#\\{j < i \\mid m0_j\\}} : 0"
   },
-  "expand_load": {
+  "loadu_expand": {
     "description": "Loads as many elements from p0 (no alignment required) as there are active lanes (mask m0) and puts them in the active lanes, in order; the inactive lanes are zero. Only these elements are read.",
     "latex": "\\text{res}_i = m0_i\\ ?\\ p0_{\\#\\{j < i \\mid m0_j\\}} : 0"
   },
@@ -279,7 +279,7 @@
     "description": "Loads elements from an aligned memory address into a vector register.",
     "latex": "\\text{res}_i = \\text{p0}[i]"
   },
-  "load_interleaved2": {
+  "loadu_unzip": {
     "description": "Loads N elements (no alignment required) and separates the even and the odd ones: the even elements in the lower half of the register, the odd ones in the upper half (`deinterleave(loadu(p))`; with LMUL 2, the two LMUL 1 halves are the even and the odd elements of 2N elements, as ARM `vld2`).",
     "latex": "\\text{res}_k = p_{2k},\\ \\text{res}_{N/2+k} = p_{2k+1}"
   },
@@ -483,8 +483,8 @@
     "description": "Stores vector elements into an aligned memory address.",
     "latex": "\\text{p0}[i] = r0_i"
   },
-  "store_interleaved2": {
-    "description": "Interleaves the two halves of the register and stores the N elements (no alignment required): `storeu(p, interleave(r))`, the inverse of `load_interleaved2` (ARM `vst2`).",
+  "storeu_zip": {
+    "description": "Interleaves the two halves of the register and stores the N elements (no alignment required): `storeu(p, interleave(r))`, the inverse of `loadu_unzip` (ARM `vst2`).",
     "latex": "p_{2k} = r0_k,\\ p_{2k+1} = r0_{N/2+k}"
   },
   "storeu": {

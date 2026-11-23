@@ -221,20 +221,6 @@
             "template": "complex_cmla"
         }
     ],
-    "compress_store": [
-        {
-            "instr_name": "compact",
-            "datatypes": [
-                "float32",
-                "int32",
-                "uint32",
-                "float64",
-                "int64",
-                "uint64"
-            ],
-            "template": "rea_compact_store"
-        }
-    ],
     "count": [
         {
             "instr_name": "count",
@@ -838,6 +824,20 @@
             "datatypes": "all_datatypes",
             "variant": "z",
             "template": "store_z"
+        }
+    ],
+    "storeu_compress": [
+        {
+            "instr_name": "compact",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_compact_store"
         }
     ],
     "sub": [

@@ -563,34 +563,6 @@
             ]
         }
     ],
-    "compress_store": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%s<c:int|b:32>% k = 0;",
-                "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tif (m0.m[i])",
-                "\t\tp0[k++] = r0.r[i];",
-                "return k;"
-            ]
-        }
-    ],
-    "compress_store_full": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%s<c:int|b:32>% k = 0;",
-                "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tif (m0.m[i])",
-                "\t\tp0[k++] = r0.r[i];",
-                "return k;"
-            ]
-        }
-    ],
     "conj": [
         {
             "type": "element-wide",
@@ -797,20 +769,6 @@
                 "size_t k = 0;",
                 "for (size_t i = 0; i < %N<tp>%; i++)",
                 "\tres.r[i] = m0.m[i] ? r0.r[k++] : (%s<tr>%)0;",
-                "return res;"
-            ]
-        }
-    ],
-    "expand_load": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%r<tr>% res;",
-                "size_t k = 0;",
-                "for (size_t i = 0; i < %N<tp>%; i++)",
-                "\tres.r[i] = m0.m[i] ? p0[k++] : (%s<tr>%)0;",
                 "return res;"
             ]
         }
@@ -1135,17 +1093,6 @@
             ]
         }
     ],
-    "load_interleaved2": [
-        {
-            "type": "element-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "const size_t h = (%N<tp>% + 1) / 2;",
-                "res.r[i] = i < h ? p0[2 * i] : p0[2 * (i - h) + 1];"
-            ]
-        }
-    ],
     "loadu": [
         {
             "type": "element-wide",
@@ -1153,6 +1100,31 @@
             "variants": [],
             "implem": [
                 "res.r[i] = %!pred_cond!% p0[i] %!pred_alt!%;"
+            ]
+        }
+    ],
+    "loadu_expand": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%r<tr>% res;",
+                "size_t k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tres.r[i] = m0.m[i] ? p0[k++] : (%s<tr>%)0;",
+                "return res;"
+            ]
+        }
+    ],
+    "loadu_unzip": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t h = (%N<tp>% + 1) / 2;",
+                "res.r[i] = i < h ? p0[2 * i] : p0[2 * (i - h) + 1];"
             ]
         }
     ],
@@ -2060,7 +2032,7 @@
               ]
           }
       ],
-      "store_interleaved2": [
+      "storeu_zip": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -2165,6 +2137,34 @@
             ]
           }
       ],
+    "storeu_compress": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tif (m0.m[i])",
+                "\t\tp0[k++] = r0.r[i];",
+                "return k;"
+            ]
+        }
+    ],
+    "storeuf_compress": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%s<c:int|b:32>% k = 0;",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "\tif (m0.m[i])",
+                "\t\tp0[k++] = r0.r[i];",
+                "return k;"
+            ]
+        }
+    ],
     "tanh": [
         {
           "type": "element-wide",

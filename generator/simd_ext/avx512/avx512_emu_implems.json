@@ -6,31 +6,6 @@
             "template": "complex_cmul"
         }
     ],
-    "compress_store": [
-        {
-            "instr_name": "compress",
-            "datatypes": [
-                "float32",
-                "int32",
-                "uint32",
-                "float64",
-                "int64",
-                "uint64"
-            ],
-            "template": "rea_compress_store"
-        },
-        {
-            "instr_name": "compress",
-            "datatypes": [
-                "int16",
-                "uint16",
-                "int8",
-                "uint8"
-            ],
-            "template": "rea_compress_store",
-            "if": "defined(__AVX512VBMI2__)"
-        }
-    ],
     "fmadd": [
         {
             "instr_name": "fmadd",
@@ -450,6 +425,31 @@
             "datatypes": "all_datatypes",
             "template": "rea_slide_b128_pshufb",
             "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "storeu_compress": [
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_storeu_compress"
+        },
+        {
+            "instr_name": "compress",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_storeu_compress",
+            "if": "defined(__AVX512VBMI2__)"
         }
     ],
     "unzip_even": [

@@ -1161,31 +1161,6 @@
             "if": "defined(__AVX512VBMI2__)"
         }
     ],
-    "expand_load": [
-        {
-            "instr_name": "expandloadu",
-            "datatypes": [
-                "float32",
-                "int32",
-                "uint32",
-                "float64",
-                "int64",
-                "uint64"
-            ],
-            "template": "rea_expandloadu"
-        },
-        {
-            "instr_name": "expandloadu",
-            "datatypes": [
-                "int16",
-                "uint16",
-                "int8",
-                "uint8"
-            ],
-            "template": "rea_expandloadu",
-            "if": "defined(__AVX512VBMI2__)"
-        }
-    ],
     "fmadd": [
         {
             "instr_name": "fmadd",
@@ -1544,6 +1519,31 @@
             "template": "load_mskz",
             "if": "defined(__AVX512BW__)",
             "variant": "z"
+        }
+    ],
+    "loadu_expand": [
+        {
+            "instr_name": "expandloadu",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_expandloadu"
+        },
+        {
+            "instr_name": "expandloadu",
+            "datatypes": [
+                "int16",
+                "uint16",
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_expandloadu",
+            "if": "defined(__AVX512VBMI2__)"
         }
     ],
     "lshift": [

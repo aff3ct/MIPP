@@ -24,7 +24,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [x] `interleavelo`, `interleavehi`: Low/high lane interleaving of two registers: `zip_lo`, `zip_hi` (and `unzip_even`, `unzip_odd` for the inverse).
 - [x] `interleavelo2`, `interleavehi2`: 2-element granular low/high interleaving: `zip_lo_b128`, `zip_hi_b128` (per 128-bit block, see below).
 - [x] `interleavelo4`, `interleavehi4`: 4-element granular low/high interleaving: same `_b128` variants.
-- [x] `interleave`, `deinterleave`: Full two-register zip and unzip operations returning `regx2`: the result is a register of LMUL 2 (`combine(zip_lo(a, b), zip_hi(a, b))`); `interleave(a)` / `deinterleave(a)` in one register, and `load_interleaved2` / `store_interleaved2`.
+- [x] `interleave`, `deinterleave`: Full two-register zip and unzip operations returning `regx2`: the result is a register of LMUL 2 (`combine(zip_lo(a, b), zip_hi(a, b))`); `interleave(a)` / `deinterleave(a)` in one register, and `loadu_unzip` / `storeu_zip`.
 - [x] `interleave2`, `interleave4`: Multi-stride 2-way and 4-way register interleaving returning `regx2`. In MIPPv1 the block is relative to the register (a half or a quarter, i.e. 256 bits on AVX-512): MIPPv2 uses fixed 128-bit blocks instead (`_b128` variants).
 - [ ] `interleavex2`, `interleavex4`, `interleavex16`: Cross-lane intra-register interleaving permutations.
 
@@ -33,7 +33,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `cmask`, `cmask2`, `cmask4`: Opaque, ISA-specific encoding of the shuffle indices (byte indices for `pshufb`/`vtbl`), prepared once. MIPPv2 starts with plain index registers; a prepared type will only be added if measurements require it.
 - [x] `combine<S>(a, b)`: Lanes `S` to `S + N - 1` of the concatenation of `a` and `b` (`alignr` / `ext`). Done as `slide(a, b, n)` (and `slide_up`, `slide_down`, `_b128`), since `combine` is the concatenation of two halves in MIPPv2. The count is an ordinary argument, not an immediate.
 - [ ] `transpose`, `transpose8x8`, `transpose2`, `transpose28x8`: Register-block transposes (a few datatypes and ISAs only in MIPPv1). Postponed with the register tuples.
-- [x] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`), with `expand`, `count`, `compress_store` (exact), `compress_store_full` (a whole register written) and `expand_load`.
+- [x] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`), with `expand`, `count`, `storeu_compress` (exact), `storeuf_compress` (a whole register written) and `loadu_expand`.
 - [ ] `MIPP_STATIC_LIB`: compiled shuffle tables of `compress` for the 8 and 16-bit elements on SSSE3, AVX2 and NEON (Level 3 today), and the large tables out of the headers.
 - [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation, done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
 - [x] `pack`: Saturating register narrowing from two inputs: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs, and `mipp::pack<T_DST>(a, b)` = `ncvts(combine(a, b))` in the C++ APIs.

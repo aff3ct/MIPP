@@ -119,7 +119,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
     body_start = len(lines)
 
     # Category 1: Load / initializers (free functions with _obj suffix)
-    if fn in ("load", "loadu", "load_interleaved2"):
+    if fn in ("load", "loadu", "loadu_unzip"):
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline Rvd<T, LMUL> {fn}_obj(const T* p0)")
         lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}<T, LMUL>(p0)); }}")
@@ -159,12 +159,12 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append(f"inline Rvd<T, LMUL> {fn}(const Rvd<T, LMUL>& r0, const Rvm<T, LMUL>& m0)")
         lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}(r0.r, m0.m)); }}")
         lines.append("")
-    elif fn in ("compress_store", "compress_store_full"):
+    elif fn in ("storeu_compress", "storeuf_compress"):
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline int32_t {fn}(T* p0, const Rvd<T, LMUL>& r0, const Rvm<T, LMUL>& m0)")
         lines.append(f"{{ return mipp::{fn}(p0, r0.r, m0.m); }}")
         lines.append("")
-    elif fn == "expand_load":
+    elif fn == "loadu_expand":
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline Rvd<T, LMUL> {fn}(const T* p0, const Rvm<T, LMUL>& m0)")
         lines.append(f"{{ return Rvd<T, LMUL>(mipp::{fn}(p0, m0.m)); }}")
@@ -263,7 +263,7 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
         lines.append("")
 
     # Category 2: Store / Memory operations
-    elif fn in ("store", "storeu", "store_interleaved2"):
+    elif fn in ("store", "storeu", "storeu_zip"):
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline void {fn}(T* p0, const Rvd<T, LMUL>& r0)")
         lines.append(f"{{ mipp::{fn}(p0, r0.r); }}")

@@ -38,30 +38,8 @@
             "// the active lanes of the m1 registers one after the other in memory, then zeros",
             "%s<tp>% buf[%N<tp>%] = {0};",
             "%s<c:int|b:32>% n = 0;",
-            "{% for j in range(lmul) %}n += %compress_store<c:tp|b:tp|m:tp/{{ lmul }}>%(buf + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "{% for j in range(lmul) %}n += %storeu_compress<c:tp|b:tp|m:tp/{{ lmul }}>%(buf + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
             "return %loadu<tp>%(buf);"
-        ]
-    },
-    "compress_store": {
-        "format": "long",
-        "code": [
-            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
-            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
-            "// the active lanes of each m1 register, one after the other",
-            "%s<c:int|b:32>% n = 0;",
-            "{% for j in range(lmul) %}n += %compress_store<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
-            "return n;"
-        ]
-    },
-    "compress_store_full": {
-        "format": "long",
-        "code": [
-            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
-            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
-            "// each m1 register written in full after the previous active lanes (overwritten by the next one)",
-            "%s<c:int|b:32>% n = 0;",
-            "{% for j in range(lmul) %}n += %compress_store_full<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
-            "return n;"
         ]
     },
     "count": {
@@ -138,20 +116,7 @@
             "%storeu<tp>%(buf, r0);",
             "%s<c:int|b:32>% n = 0;",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %expand_load<c:tp|b:tp|m:tp/{{ lmul }}>%(buf + n, {{ piece('m0', j, 'm') }});\nn += %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }});\n{% endfor %}",
-            "(void)n;",
-            "return res;"
-        ]
-    },
-    "expand_load": {
-        "format": "long",
-        "code": [
-            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
-            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
-            "// each m1 register reads from the count of the previous masks",
-            "%s<c:int|b:32>% n = 0;",
-            "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %expand_load<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('m0', j, 'm') }});\nn += %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %loadu_expand<c:tp|b:tp|m:tp/{{ lmul }}>%(buf + n, {{ piece('m0', j, 'm') }});\nn += %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }});\n{% endfor %}",
             "(void)n;",
             "return res;"
         ]
@@ -271,7 +236,20 @@
             "{% endif %}"
         ]
     },
-    "load_interleaved2": {
+    "loadu_expand": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// each m1 register reads from the count of the previous masks",
+            "%s<c:int|b:32>% n = 0;",
+            "%r<tp>% res;",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %loadu_expand<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('m0', j, 'm') }});\nn += %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "(void)n;",
+            "return res;"
+        ]
+    },
+    "loadu_unzip": {
         "format": "long",
         "code": [
             "return %deinterleave<tp>%(%loadu<tp>%(p0));"
@@ -527,10 +505,32 @@
             "{% endif %}"
         ]
     },
-    "store_interleaved2": {
+    "storeu_compress": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// the active lanes of each m1 register, one after the other",
+            "%s<c:int|b:32>% n = 0;",
+            "{% for j in range(lmul) %}n += %storeu_compress<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "return n;"
+        ]
+    },
+    "storeu_zip": {
         "format": "long",
         "code": [
             "%storeu<tp>%(p0, %interleave<tp>%(r0));"
+        ]
+    },
+    "storeuf_compress": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p, mb='r') -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.{{ mb }}2{% set ns.p = ns.p - h %}{% else %}.{{ mb }}1{% endif %}{% endfor %}{%- endmacro %}",
+            "// each m1 register written in full after the previous active lanes (overwritten by the next one)",
+            "%s<c:int|b:32>% n = 0;",
+            "{% for j in range(lmul) %}n += %storeuf_compress<c:tp|b:tp|m:tp/{{ lmul }}>%(p0 + n, {{ piece('r0', j) }}, {{ piece('m0', j, 'm') }});\n{% endfor %}",
+            "return n;"
         ]
     },
     "swap_pairs": {

@@ -647,18 +647,6 @@
             "template_ref": "tpl_generic_emu.complex_cnorm"
         }
     ],
-    "compress_store": [
-        {
-            "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.compress_store_buf"
-        }
-    ],
-    "compress_store_full": [
-        {
-            "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.compress_store_full"
-        }
-    ],
     "conj": [
         {
             "datatypes": "all_float",
@@ -760,12 +748,6 @@
                 "float64"
             ],
             "template_ref": "tpl_generic_emu.exp_f64"
-        }
-    ],
-    "expand_load": [
-        {
-            "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.expand_load_buf"
         }
     ],
     "fmadd": [
@@ -960,10 +942,16 @@
             "template_ref": "tpl_generic_emu.interleave"
         }
     ],
-    "load_interleaved2": [
+    "loadu_expand": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.load_interleaved2"
+            "template_ref": "tpl_generic_emu.loadu_expand_buf"
+        }
+    ],
+    "loadu_unzip": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.loadu_unzip"
         }
     ],
     "log": [
@@ -1587,10 +1575,22 @@
             "template_ref": "tpl_generic_emu.slide_up_b128"
         }
     ],
-    "store_interleaved2": [
+    "storeu_compress": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.store_interleaved2"
+            "template_ref": "tpl_generic_emu.storeu_compress_buf"
+        }
+    ],
+    "storeu_zip": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.storeu_zip"
+        }
+    ],
+    "storeuf_compress": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.storeuf_compress"
         }
     ],
     "sub": [

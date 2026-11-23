@@ -39,22 +39,6 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.compress"
         }
     ],
-    "compress_store": [
-        {
-            "instr_name": "compress_store",
-            "datatypes": "all_datatypes",
-            "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.compress_store"
-        }
-    ],
-    "compress_store_full": [
-        {
-            "instr_name": "compress_store_full",
-            "datatypes": "all_datatypes",
-            "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.compress_store_full"
-        }
-    ],
     "count": [
         {
             "instr_name": "count",
@@ -93,14 +77,6 @@
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.expand"
-        }
-    ],
-    "expand_load": [
-        {
-            "instr_name": "expand_load",
-            "datatypes": "all_datatypes",
-            "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.expand_load"
         }
     ],
     "get": [
@@ -175,12 +151,20 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.interleave"
         }
     ],
-    "load_interleaved2": [
+    "loadu_expand": [
         {
-            "instr_name": "load_interleaved2",
+            "instr_name": "loadu_expand",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.load_interleaved2"
+            "template_ref": "tpl_horiz_lmul_generic_emu.loadu_expand"
+        }
+    ],
+    "loadu_unzip": [
+        {
+            "instr_name": "loadu_unzip",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.loadu_unzip"
         }
     ],
     "none": [
@@ -311,12 +295,28 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.slide_up_b128"
         }
     ],
-    "store_interleaved2": [
+    "storeu_compress": [
         {
-            "instr_name": "store_interleaved2",
+            "instr_name": "storeu_compress",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.store_interleaved2"
+            "template_ref": "tpl_horiz_lmul_generic_emu.storeu_compress"
+        }
+    ],
+    "storeu_zip": [
+        {
+            "instr_name": "storeu_zip",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.storeu_zip"
+        }
+    ],
+    "storeuf_compress": [
+        {
+            "instr_name": "storeuf_compress",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.storeuf_compress"
         }
     ],
     "swap_pairs": [

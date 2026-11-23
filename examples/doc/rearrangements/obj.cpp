@@ -64,7 +64,7 @@ static void interleaved()
 {
     // --8<-- [start:interleaved]
     // N pairs (re, im): the real parts in the lower half of the LMUL 2 register, the imaginary ones in the upper half
-    mipp::Rvd<float, 2> c = mipp::load_interleaved2_obj<float, 2>(X);
+    mipp::Rvd<float, 2> c = mipp::loadu_unzip_obj<float, 2>(X);
     mipp::Rvd<float> re = c.low();
     mipp::Rvd<float> im = c.high();
     mipp::Rvd<float> mag2 = mipp::fmadd(re, re, im * im); // re^2 + im^2
@@ -90,12 +90,12 @@ static void filter()
 {
     const size_t n = DOC_BUF;
     // --8<-- [start:filter]
-    // keeps the positive elements of X: OUT needs one register of margin (compress_store_full)
+    // keeps the positive elements of X: OUT needs one register of margin (storeuf_compress)
     float* out = OUT;
     for (size_t i = 0; i < n; i += mipp::N<float>()) {
         mipp::Rvd<float> v(X + i);
         mipp::Rvm<float> m = v > 0.f;
-        out += mipp::compress_store_full(out, v, m);
+        out += mipp::storeuf_compress(out, v, m);
     }
     // --8<-- [end:filter]
     size_t k = 0;

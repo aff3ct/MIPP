@@ -50,7 +50,7 @@ The complex numbers are loaded as they are in memory: `Z` below is an array of c
 
 ## 3. Split Layout
 
-When the real and imaginary parts are in two separate arrays (structure of arrays), the ordinary functions compute the complex operations on N complex numbers at a time, with all the lanes useful and without moving them: this is usually the fastest layout for long loops. `load_interleaved2` gives the two parts from interleaved data, and `store_interleaved2` stores them back (see [Rearrangements](rearrangements.md)).
+When the real and imaginary parts are in two separate arrays (structure of arrays), the ordinary functions compute the complex operations on N complex numbers at a time, with all the lanes useful and without moving them: this is usually the fastest layout for long loops. `loadu_unzip` gives the two parts from interleaved data, and `storeu_zip` stores them back (see [Rearrangements](rearrangements.md)).
 
 === "C API"
 

@@ -628,15 +628,6 @@
             "return res;"
         ]
     },
-    "rea_compress_store": {
-        "format": "long",
-        "code": [
-            "const size_t n = %N<tp>%;",
-            "const size_t c = {{ isa.prefix }}_vcpop_m_{{isa_dt_par.data_ext_logi}}(m0.m, n);",
-            "{{ isa.prefix }}_vse{{ dt_par.n_bits }}_v_{{ isa_dt_par.data_ext }}(p0, {{ isa.prefix }}_vcompress_vm_{{ isa_dt_par.data_ext }}(r0.r, m0.m, n), c);",
-            "return (int32_t)c;"
-        ]
-    },
     "rea_dup_even": {
         "format": "long",
         "code": [
@@ -674,7 +665,7 @@
             "return res;"
         ]
     },
-    "rea_expand_load": {
+    "rea_loadu_expand": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",
@@ -736,6 +727,15 @@
             "%r<tp>% res;",
             "res.r = {{ isa.prefix }}_vslideup_vx_{{ isa_dt_par.data_ext }}(z.r, r0.r, (size_t)s0, n);",
             "return res;"
+        ]
+    },
+    "rea_storeu_compress": {
+        "format": "long",
+        "code": [
+            "const size_t n = %N<tp>%;",
+            "const size_t c = {{ isa.prefix }}_vcpop_m_{{isa_dt_par.data_ext_logi}}(m0.m, n);",
+            "{{ isa.prefix }}_vse{{ dt_par.n_bits }}_v_{{ isa_dt_par.data_ext }}(p0, {{ isa.prefix }}_vcompress_vm_{{ isa_dt_par.data_ext }}(r0.r, m0.m, n), c);",
+            "return (int32_t)c;"
         ]
     },
     "rea_swap_pairs": {

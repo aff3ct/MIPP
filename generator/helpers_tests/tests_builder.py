@@ -26,7 +26,7 @@ _AUX_HEADERS = ["load", "get", "get_k", "torvd", "torvm", "set_k"]
 
 # Functions whose vector call gets a pointer shifted by one element: never aligned on the
 # register size (the scalar reference keeps the aligned buffers).
-_UNALIGNED_PTR_FUNCS = ("loadu", "storeu", "load_interleaved2", "store_interleaved2")
+_UNALIGNED_PTR_FUNCS = ("loadu", "storeu", "loadu_unzip", "storeu_zip")
 
 _RE_TEST_PLACEHOLDER = re.compile(r'%([\w]+)(?:<([^>]*)>)?(?:\(([^)]*)\))?%')
 
@@ -1017,7 +1017,7 @@ class TestsBuilderEngine:
         obj_name_map = {
             "load": "load_obj",
             "loadu": "loadu_obj",
-            "load_interleaved2": "load_interleaved2_obj",
+            "loadu_unzip": "loadu_unzip_obj",
             "set": "set_obj",
             "set0": "set0_obj",
             "set1": "set1_obj",

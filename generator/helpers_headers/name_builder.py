@@ -11,7 +11,7 @@ import tools
 
 # Functions that only take a pointer and return a register: the C++ functions are specializations of a template
 # <T, LMUL, ISA> (the LMUL cannot be deduced from the arguments), like the set functions.
-LOAD_FUNCS = ("load", "loadu", "load_interleaved2")
+LOAD_FUNCS = ("load", "loadu", "loadu_unzip")
 
 
 def lmul_suffix(lmul, isa_name=True):

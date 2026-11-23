@@ -55,7 +55,7 @@
         "set0",
         "set0_k",
         "gather",
-        "expand_load"
+        "loadu_expand"
     ],
     "logic": [
         "andb",
@@ -127,8 +127,8 @@
         "unzip_odd_b128",
         "interleave",
         "deinterleave",
-        "load_interleaved2",
-        "store_interleaved2",
+        "loadu_unzip",
+        "storeu_zip",
         "permute",
         "permute2",
         "permute_b128",
@@ -166,7 +166,7 @@
         "get_k",
         "getfirst",
         "scatter",
-        "compress_store",
-        "compress_store_full"
+        "storeu_compress",
+        "storeuf_compress"
     ]
 }

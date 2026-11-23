@@ -1,6 +1,6 @@
 """
 Tests of the functions that move lanes with a register of indices or a mask (permute, permute2, permute_b128,
-compress, expand, compress_store, compress_store_full, expand_load).
+compress, expand, storeu_compress, storeuf_compress, loadu_expand).
 
 The generic test builder cannot generate their arguments: a register of unsigned indices of the width of the data
 (whose valid values depend on the number of lanes of the register, so on the ISA and the LMUL), a mask that selects
@@ -10,15 +10,15 @@ half-vector (d2, when the function has one) and mask variant, in the three APIs:
 
   permute, permute_b128, permute2: indices drawn in [0, N), [0, lanes of a block of 128 bits), [0, 2N) (bounded
       by the largest index of the type: a uint8 index cannot reach the lanes from 256), the registers compared;
-  compress, expand, expand_load: the registers compared;
-  compress_store: the returned count and the whole output buffer (2N elements, initialized with the same random
+  compress, expand, loadu_expand: the registers compared;
+  storeu_compress: the returned count and the whole output buffer (2N elements, initialized with the same random
       values): exactly the active lanes are written;
-  compress_store_full: the count and the first `count` elements (the following ones are unspecified).
+  storeuf_compress: the count and the first `count` elements (the following ones are unspecified).
 """
 from typing import List, Optional
 
-PERM_FUNCS = ("permute", "permute2", "permute_b128", "compress", "expand", "compress_store", "compress_store_full",
-              "expand_load")
+PERM_FUNCS = ("permute", "permute2", "permute_b128", "compress", "expand", "storeu_compress", "storeuf_compress",
+              "loadu_expand")
 
 _MK_ENUM = {"": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
 _MK_LABEL = {"": "unmasked", "mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": "Source-Masked"}
@@ -29,7 +29,7 @@ _C_STD = ("#include <exception>", "#include <algorithm>", "#include <random>", "
 _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("store", "store"), ("store", "get"), ("reinterpret", "torvd"),
                  ("reinterpret", "torvm"), ("rearrangement", "permute"), ("rearrangement", "permute2"),
                  ("rearrangement", "permute_b128"), ("rearrangement", "compress"), ("rearrangement", "expand"),
-                 ("store", "compress_store"), ("store", "compress_store_full"), ("load", "expand_load"))
+                 ("store", "storeu_compress"), ("store", "storeuf_compress"), ("load", "loadu_expand"))
 
 
 def _uint(dt: str) -> str:
@@ -73,14 +73,14 @@ def _decls() -> List[str]:
 
 
 def _returns_count(func: str) -> bool:
-    return func.startswith("compress_store")
+    return func in ("storeu_compress", "storeuf_compress")
 
 
 def _compare(func: str) -> List[str]:
-    if func == "compress_store":
+    if func == "storeu_compress":
         # exact: the count, and nothing written after the active lanes
         return ["REQUIRE(cnt_r == cnt_s);", "for (size_t i = 0; i < 2 * N; i++)", "\tREQUIRE(res_r[i] == res_s[i]);"]
-    if func == "compress_store_full":
+    if func == "storeuf_compress":
         # the lanes after the count are unspecified
         return ["REQUIRE(cnt_r == cnt_s);", "for (size_t i = 0; i < (size_t)cnt_r; i++)", "\tREQUIRE(res_r[i] == res_s[i]);"]
     return ["for (size_t i = 0; i < N; i++)", "\tREQUIRE(res_r[i] == res_s[i]);"]
@@ -114,7 +114,7 @@ def _c_test(func: str, dt: str, sfx: str, mkind: str, lmul: int) -> List[str]:
             b += [f"mipp_{prefix}store_{dt}{sfx_u}({res}, {call}({args}));"]
         elif func in ("compress", "expand"):
             b += [f"mipp_{prefix}store_{dt}{sfx_u}({res}, {call}({p}a, {p}m));"]
-        elif func == "expand_load":
+        elif func == "loadu_expand":
             b += [f"mipp_{prefix}store_{dt}{sfx_u}({res}, {call}(mem, {p}m));"]
         else:
             b += [f"const int32_t cnt_{p} = {call}({res}, {p}a, {p}m);"]
@@ -166,7 +166,7 @@ def _cpp_call(func: str, dialect: str, mkind: str, scalar: bool) -> str:
         return f"mipp::{func}<{var}>({p}m, {args})"
     if func in ("compress", "expand"):
         return f"mipp::{func}({p}a, {p}m)"
-    if func == "expand_load":
+    if func == "loadu_expand":
         return f"mipp::{func}(mem, {p}m)"
     return f"mipp::{func}({'res_s' if scalar else 'res_r'}, {p}a, {p}m)"
 
