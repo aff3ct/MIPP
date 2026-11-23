@@ -3,7 +3,7 @@
  * Manages primitive card rendering and structural tab transitions.
  */
 import { escapeHtml, ICON_CHEVRON, ICON_WARNING, ICON_WARNING_SM } from "../explorer.config.js";
-import { formatCppObjProto, typesetMath } from "../syntax.js";
+import { formatCppObjProto, renderDescription, typesetMath } from "../syntax.js";
 import { ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
 import { renderTabHw } from "./tab_hw.js";
@@ -232,7 +232,7 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
           </button>
         </div>
 
-        <p class="mipp-card-desc">${escapeHtml(entry.description)}</p>
+        <p class="mipp-card-desc">${renderDescription(entry.description)}</p>
       </div>
 
       <!-- Card Body (Tabs with smooth slide transition) -->

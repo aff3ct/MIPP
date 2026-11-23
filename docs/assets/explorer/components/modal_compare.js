@@ -2,7 +2,7 @@
  * MIPP API Explorer - Side-by-Side Primitive Comparison Modal
  */
 import { escapeHtml } from "../explorer.config.js";
-import { highlightCpp, getDtBadgeClass, renderMathFormula } from "../syntax.js";
+import { highlightCpp, getDtBadgeClass, renderDescription, renderMathFormula } from "../syntax.js";
 import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES } from "../data.js";
 import { state } from "../state.js";
 import { getActivePrototype, computeOptimisticLevel } from "./card.js";
@@ -21,7 +21,7 @@ export function renderCompareColumn(entry) {
         <span class="mipp-cat-badge">${escapeHtml(entry.category)}</span>
       </div>
 
-      <p class="mipp-compare-col-desc" style="font-size: var(--mipp-fs-md, 0.8rem); margin: 0; color: var(--md-default-fg-color--light);">${escapeHtml(entry.description)}</p>
+      <p class="mipp-compare-col-desc" style="font-size: var(--mipp-fs-md, 0.8rem); margin: 0; color: var(--md-default-fg-color--light);">${renderDescription(entry.description)}</p>
 
       <div>
         <div class="mipp-control-label" style="margin-bottom: 0.3rem;">Mathematical Semantics</div>

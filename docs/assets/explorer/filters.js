@@ -1,6 +1,7 @@
 /**
  * MIPP API Explorer - Multi-Criteria Filter Engine
  */
+import { plainDescription } from "./syntax.js";
 import { allPrimitiveNamesDesc, INTRINSIC_INDEX, isIntrinsicPrefixTyped, matchesDatatype, ALL_SIMD_EXTS, maskSupportOf } from "./data.js";
 
 function getPrimitiveFromQuery(rest) {
@@ -86,7 +87,7 @@ export function matchesQuery(entry, qClean, field = "all") {
 
   // Field: 'desc'
   if (field === "desc") {
-    const descLow = (entry.description || "").toLowerCase();
+    const descLow = plainDescription(entry.description).toLowerCase();
     return { matches: descLow.includes(qClean), matchedIntrinsic: null, matchedC99: null };
   }
 
@@ -176,7 +177,7 @@ export function matchesQuery(entry, qClean, field = "all") {
   }
 
   // Description or math semantics
-  if (entry.description && entry.description.toLowerCase().includes(qClean)) {
+  if (entry.description && plainDescription(entry.description).toLowerCase().includes(qClean)) {
     return { matches: true, matchedIntrinsic: null, matchedC99: null };
   }
   if (entry.math_semantics && entry.math_semantics.toLowerCase().includes(qClean)) {

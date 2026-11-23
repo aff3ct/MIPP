@@ -208,6 +208,10 @@ function renderCards(cardsContainerEl) {
   `;
 
   bindCardEvents(cardsContainerEl);
+
+  // math of the descriptions ($...$): only the descriptions that have some
+  typesetMath(Array.from(cardsContainerEl.querySelectorAll(".mipp-card-desc"))
+    .filter((el) => el.querySelector(".arithmatex")));
 }
 
 function bindCardEvents(cardsContainerEl) {

@@ -42,12 +42,38 @@ export function renderMathFormula(entry) {
   return `<span class="mipp-math-formula">${formatMathHtml(entry && entry.math_semantics)}</span>`;
 }
 
-/** Typesets the formulas of `el` once MathJax has started (CDN script loaded). */
+/**
+ * Description of a function (generator/helpers_headers/funcs_docs.json): text
+ * with code between backticks (`vd0`) and math between dollars ($0 \le s0 < N$),
+ * as in the Markdown pages. The math is typeset by MathJax (typesetMath).
+ */
+export function renderDescription(text) {
+  return String(text || "").split(/(`[^`]+`|\$[^$]+\$)/).map((part) => {
+    if (part.length > 2 && part[0] === "`" && part[part.length - 1] === "`") {
+      return `<code class="mipp-desc-code">${escapeHtml(part.slice(1, -1))}</code>`;
+    }
+    if (part.length > 2 && part[0] === "$" && part[part.length - 1] === "$") {
+      return `<span class="arithmatex mipp-desc-math">\\(${escapeHtml(part.slice(1, -1))}\\)</span>`;
+    }
+    return escapeHtml(part);
+  }).join("");
+}
+
+/** The same description without its markup: the text the search runs on. */
+export function plainDescription(text) {
+  return String(text || "").replace(/`([^`]+)`/g, "$1").replace(/\$([^$]+)\$/g, "$1");
+}
+
+/**
+ * Typesets the formulas of `el` (an element or a list of elements) once MathJax
+ * has started (CDN script loaded).
+ */
 export function typesetMath(el) {
   const mj = typeof window !== "undefined" ? window.MathJax : null;
-  if (!mj || !el) return;
+  const els = (Array.isArray(el) ? el : [el]).filter(Boolean);
+  if (!mj || !els.length) return;
   const run = () => {
-    if (mj.typesetPromise) mj.typesetPromise([el]).catch(() => {});
+    if (mj.typesetPromise) mj.typesetPromise(els).catch(() => {});
   };
   if (mj.startup && mj.startup.promise) {
     mj.startup.promise.then(run).catch(() => {});
