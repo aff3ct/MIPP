@@ -416,9 +416,12 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
               f"a fallback without \"if\" is needed (generic_ldiv_mask.json)")
         sys.exit(1)
     level_lines = None
+    # the body copies the registers to the scalar ISA (Level 3): attributes of the fallbacks
+    copies_to_scalar = False
     if not chain and funcs[f].get("lane_crossing", False):
         body = _lane_crossing_body(ctx, params)
         lvl = 3 if not mask_kind else 2
+        copies_to_scalar = not mask_kind
         level = _LEVEL_TEXT[lvl] + (": lanes moved across the register, through the scalar d2 function"
                                     if not mask_kind else ": the unmasked d2 function, then select")
         chain = None
@@ -476,7 +479,7 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
     print("", file=file)
     if guard:
         print(f"#if {guard}", file=file)
-    print(f"static {proto} {{", file=file)
+    print(f"static {fallback_attributes(isa) if copies_to_scalar else ''}{proto} {{", file=file)
     if changing and lmul_in == 1:
         # the function without suffix is generated afterwards, as the alias of this one
         record_lmul1_definition(isa["name"], f, dt, mask_kind)
@@ -491,14 +494,17 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
     print("}", file=file)
     if guard:
         print("#else", file=file)
-        print(f"static {proto} {{", file=file)
-        if funcs[f].get("lane_crossing", False) and not changing:
+        lane_crossing_else = funcs[f].get("lane_crossing", False) and not changing
+        memcpy_else = not lane_crossing_else and not chain and not changing
+        attrs = fallback_attributes(isa) if (copies_to_scalar if lane_crossing_else else memcpy_else) else ""
+        print(f"static {attrs}{proto} {{", file=file)
+        if lane_crossing_else:
             # the scalar d2 function does not depend on the guard of the datatype
             print(f"\t// {level}", file=file)
             for line in body.split("\n"):
                 if line.strip():
                     print("\t" + line, file=file)
-        elif not chain and not changing:
+        elif memcpy_else:
             # lane-wise function: Level 3 fallback through the LMUL 1 function
             print(f"\t// {_LEVEL_TEXT[3]}: lane-wise, through the LMUL 1 function (memcpy of the registers)", file=file)
             for line in _wrapper_body_memcpy(ctx, params).split("\n"):

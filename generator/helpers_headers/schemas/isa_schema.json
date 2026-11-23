@@ -230,6 +230,10 @@
             "description": "With `hw_mask`: the scalar fallback also depends on `store` to read a mask (RVV).",
             "type": "boolean"
         },
+        "scalar_fallback_attributes": {
+            "description": "Attributes (a macro defined by `header_template`) placed before `inline` on the Level 3 functions that copy their registers to the scalar ISA; the prototypes of the ISA are then written without `inline`, so that the attributes of a definition do not follow an inline declaration. RVV: `MIPP_RVV_FALLBACK_ATTRIBUTES` (`noinline` and no vectorization with GCC, nothing with the other compilers), against bugs of GCC 14.",
+            "type": "string"
+        },
         "layout": {
             "description": "For the ISAs whose register size is only known at compile time (RVV): templates of the size macros, of the fixed-size typedefs and of the `vd` / `vm` structures, used instead of the default ones.",
             "type": "object",

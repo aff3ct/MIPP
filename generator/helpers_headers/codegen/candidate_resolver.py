@@ -287,7 +287,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
 
 
     single_template = """{% if cond %}#if {{ cond }}
-{% endif %}static {{ proto }} {
+{% endif %}static {{ attrs }}{{ proto }} {
 \t// Level 3 (Scalar Fallback)
 {{ body }}
 }
@@ -295,7 +295,7 @@ def _gen_c_auto_scalar_fallback_one(isa, file, funcs, f, dt, mask_kind, cond, lm
 #endif
 {%- endif %}"""
     j2 = Template(single_template, undefined=StrictUndefined)
-    print(j2.render(cond=cond, proto=proto_str, body=full_body), file=file)
+    print(j2.render(cond=cond, attrs=fallback_attributes(isa), proto=proto_str, body=full_body), file=file)
 
 
 
@@ -818,7 +818,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                         proto_str = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, lmul=lmul, isa_name=True, masked_version=mask_kind)
                         # not guarded by `outer_guard`: the include manager gathers the prototypes at the top of
                         # the header, and repeating an identical prototype (once per half-vector mode) is valid C
-                        print("static " + proto_str + ";", file=target_file)
+                        print("static " + declaration_proto(isa, proto_str) + ";", file=target_file)
                         
         for dt in funcs[f]["datatypes"]:
             if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):

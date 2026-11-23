@@ -223,6 +223,8 @@ On RVV, a half-vector can be represented in two ways, chosen by defining **one**
 
 With a vector length of $N/2$, the RVV instructions only process the lower $N/2$ lanes: the lane-wise operations, the loads, the stores and the reductions of a half-vector are single instructions, with no mask and no access beyond the $N/2$ elements. This is the only native representation of the 64-bit half-vectors, for which RVV has no fractional register type. `lo` is then free and `hi` / `combine` are a slide of the register.
 
+In the default mode, the Level 3 functions of the 64-bit half-vectors compiled by GCC are neither inlined nor vectorized: GCC 14 miscompiles them in some inlining contexts ([details](../developer/internals/code_generation.md#54-gcc-bugs-in-the-scalar-fallback)). The modes `MIPP_RVV_LDIV_VL` and `MIPP_RVV_LDIV_HYBRID` have native 64-bit half-vectors.
+
 The API is the same in the three modes (same type names, same functions, same results): only the content of the `d2` types and the implementation change. Since the types change, **all the files of a program must be compiled with the same mode**; passing a `d2` register between files compiled with different modes is not supported. Defining several of these macros is a compilation error. The implementation levels given by the documentation and the API Explorer are the ones of the default mode.
 
 ---

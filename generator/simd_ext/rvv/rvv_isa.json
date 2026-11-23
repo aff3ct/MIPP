@@ -332,6 +332,15 @@
         "#if defined(MIPP_RVV_LDIV_HW) + defined(MIPP_RVV_LDIV_VL) + defined(MIPP_RVV_LDIV_HYBRID) > 1",
         "#error \"MIPP: define at most one of MIPP_RVV_LDIV_HW, MIPP_RVV_LDIV_VL and MIPP_RVV_LDIV_HYBRID\"",
         "#endif",
+        "// With GCC, the Level 3 functions that copy their registers to the scalar ISA are neither inlined nor",
+        "// vectorized: GCC 14 miscompiles them (wrong lanes) or fails on them (internal error in the register",
+        "// allocation) otherwise. Clang compiles them right, inlined. See \"GCC Bugs in the Scalar Fallback\" in",
+        "// the developer documentation.",
+        "#if defined(__GNUC__) && !defined(__clang__)",
+        "#define MIPP_RVV_FALLBACK_ATTRIBUTES __attribute__((noinline, optimize(\"no-tree-vectorize\")))",
+        "#else",
+        "#define MIPP_RVV_FALLBACK_ATTRIBUTES",
+        "#endif",
         "#ifndef MIPP_FLOAT_TYPEDEFS_",
         "#define MIPP_FLOAT_TYPEDEFS_",
         "typedef float float32_t;",
@@ -385,5 +394,6 @@
     ],
     "name": "rvv",
     "prefix": "__riscv",
+    "scalar_fallback_attributes": "MIPP_RVV_FALLBACK_ATTRIBUTES",
     "sw_lmul": []
 }

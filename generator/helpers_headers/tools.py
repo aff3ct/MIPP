@@ -163,6 +163,21 @@ def ldiv_mask_functions(isa):
 # of their arguments: wcvt m1 -> m2, ncvt m2 -> m1
 SW_LMUL_FUNCS = {"wcvt": 1, "ncvt": 2}
 
+def fallback_attributes(isa):
+    """Attributes of the Level 3 functions that copy their registers to the scalar ISA, from
+    `scalar_fallback_attributes` (RVV: `noinline` and no vectorization with GCC, against bugs of GCC 14)."""
+    attrs = isa.get("scalar_fallback_attributes", "")
+    return attrs + " " if attrs else ""
+
+
+def declaration_proto(isa, proto):
+    """Prototype of a declaration (`static <proto>;`). With `scalar_fallback_attributes`, without `inline`: a definition
+    with attributes may not follow an inline declaration (GCC warns), and the definitions keep `inline`."""
+    if isa.get("scalar_fallback_attributes") and proto.startswith("inline "):
+        return proto[len("inline "):]
+    return proto
+
+
 _sw_lmul_entries_cache = {}
 
 def sw_lmul_path(isa):

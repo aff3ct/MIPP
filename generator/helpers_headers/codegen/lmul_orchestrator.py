@@ -229,7 +229,7 @@ def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
         record_lmul1_definition(isa["name"], f, _dt_of(dt_par, dt_ret))
         conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=-2)
         # the half-vector conversion may be written after this one (single header in coarse granularity): declare it
-        print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, conv, lmul=-2, isa_name=True) + ";", file=file)
+        print("\nstatic " + declaration_proto(isa, build_proto(proto, dt_par, dt_ret, isa, conv, lmul=-2, isa_name=True)) + ";", file=file)
     print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
     print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
     print(f"\t{res_type} res;", file=file)
@@ -267,7 +267,7 @@ def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul
     if lmul == 2:
         comb = build_func_name_short(isa, dt_ret, "combine", True, lmul=-2)
         # the LMUL 1 conversion may be written after this one (single header in coarse granularity): declare it
-        print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, conv, lmul=1, isa_name=True) + ";", file=file)
+        print("\nstatic " + declaration_proto(isa, build_proto(proto, dt_par, dt_ret, isa, conv, lmul=1, isa_name=True)) + ";", file=file)
         print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
         print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
         print(f"\treturn {comb}({conv}(vd0.lo), {conv}(vd0.hi));", file=file)
@@ -335,7 +335,7 @@ def _emit_lmul1_alias(f, dt, dt_par, dt_ret, isa, funcs, file, mask_type=None):
         alias_name = build_func_name(isa, dt_par, dt_ret, f, masked_version=mask_type, alias=True)
         func_name_lmul = build_func_name(isa, dt_par, dt_ret, f, lmul=1, masked_version=mask_type)
     alias_proto = "static " + build_proto(proto, dt_par, dt_ret, isa, alias_name, lmul=1, isa_name=True, masked_version=mask_type)
-    print("\n" + alias_proto + ";", file=file)
+    print("\nstatic " + declaration_proto(isa, alias_proto[len("static "):]) + ";", file=file)
     print(alias_proto + " {", file=file)
     print("\t" + build_call(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=1, isa_name=True, masked_version=mask_type) + ";", file=file)
     print("}", file=file)
