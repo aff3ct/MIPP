@@ -44,7 +44,7 @@
                 "by_datatype": {
                     "float32": {
                         "type": "max_abs_diff",
-                        "value": 2e-06
+                        "value": 3e-06
                     },
                     "float64": {
                         "type": "max_abs_diff",
@@ -805,12 +805,14 @@
                 },
                 "by_datatype": {
                     "float32": {
-                        "type": "relative_percent",
-                        "value": 0.001
+                        "type": "hybrid",
+                        "abs_value": 6e-08,
+                        "rel_value": 0.001
                     },
                     "float64": {
-                        "type": "relative_percent",
-                        "value": 0.0001
+                        "type": "hybrid",
+                        "abs_value": 1.2e-16,
+                        "rel_value": 0.0001
                     }
                 }
             }
@@ -823,12 +825,14 @@
                 },
                 "by_datatype": {
                     "float32": {
-                        "type": "relative_percent",
-                        "value": 0.001
+                        "type": "hybrid",
+                        "abs_value": 6e-08,
+                        "rel_value": 0.001
                     },
                     "float64": {
-                        "type": "relative_percent",
-                        "value": 0.0001
+                        "type": "hybrid",
+                        "abs_value": 1.2e-16,
+                        "rel_value": 0.0001
                     }
                 }
             }
@@ -841,12 +845,14 @@
                 },
                 "by_datatype": {
                     "float32": {
-                        "type": "relative_percent",
-                        "value": 0.001
+                        "type": "hybrid",
+                        "abs_value": 6e-08,
+                        "rel_value": 0.001
                     },
                     "float64": {
-                        "type": "relative_percent",
-                        "value": 0.0001
+                        "type": "hybrid",
+                        "abs_value": 1.2e-16,
+                        "rel_value": 0.0001
                     }
                 }
             }
@@ -859,12 +865,14 @@
                 },
                 "by_datatype": {
                     "float32": {
-                        "type": "relative_percent",
-                        "value": 0.001
+                        "type": "hybrid",
+                        "abs_value": 6e-08,
+                        "rel_value": 0.001
                     },
                     "float64": {
-                        "type": "relative_percent",
-                        "value": 0.0001
+                        "type": "hybrid",
+                        "abs_value": 1.2e-16,
+                        "rel_value": 0.0001
                     }
                 }
             }

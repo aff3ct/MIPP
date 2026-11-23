@@ -48,7 +48,16 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 | `bitwise` | Bit-pattern equality (NaN-safe), possibly per datatype. |
 | `logical` | Truth-value equality, used for masks. |
 
-`tolerance` is `exact`, `max_abs_diff` (absolute value) or `relative_percent` (fraction of `|ref|`), possibly refined with `by_datatype`, `by_lmul` (a ternary on `LMUL` in C++) and `by_define` (preprocessor branches).
+`tolerance` is `exact`, `max_abs_diff` (absolute value), `relative_percent` (fraction of `|ref|`) or `hybrid` (`abs_value + rel_value * |ref|`), possibly refined with `by_datatype`, `by_lmul` (a ternary on `LMUL` in C++) and `by_define` (preprocessor branches).
+
+**Choosing a tolerance.** The inputs are random, with a new seed at each run (`--rng-seed` replays one): a tolerance taken from a few runs fails from time to time, on another seed. A tolerance is therefore derived from a bound of the error (the rounding of the operations, or the worst case measured over every input of the domain when it can be enumerated, as for the `float32` inputs), with a margin, never from the largest error of a few seeds. The tolerances changed after a measure are listed below, with their reason:
+
+| Function | Datatype | Before | After | Reason |
+| :--- | :--- | :--- | :--- | :--- |
+| `fmadd`, `fmsub`, `fnmadd`, `fnmsub` (and their scalar forms) | `float32` | `relative_percent` 1e-3 | `hybrid` 6e-8 + 1e-3 &times; \|ref\| | A fused multiply-add and the scalar reference, when the compiler does not fuse it, differ by the rounding of `a * b`, at most half an ulp of `a * b`: $2^{-25} \approx 3 \cdot 10^{-8}$ for inputs in $[-1, 1]$. When `a * b` and `c` cancel, `|ref|` is tiny and a purely relative tolerance is below this difference: 28 seeds out of 300 failed on AVX-512 (largest difference $3 \cdot 10^{-8}$). The absolute part is $2^{-24}$, twice the bound. November 2026. |
+| same | `float64` | `relative_percent` 1e-4 | `hybrid` 1.2e-16 + 1e-4 &times; \|ref\| | Same bound in double precision: $2^{-54}$, absolute part $\approx 2^{-53}$. No failure seen yet, a cancellation being much rarer at this relative tolerance. November 2026. |
+| `acosh` | `float32` | `max_abs_diff` 2e-6 | `max_abs_diff` 3e-6 | `acosh` is ill-conditioned near 1 (derivative $1/\sqrt{x^2-1}$). Exhaustive comparison of every `float32` of the domain $[1, 10]$ with the scalar reference: largest difference $2.403 \cdot 10^{-6}$ at $x = 1.00017$, the same on AVX2, AVX-512, NEON, SVE and RVV, so 2e-6 failed on about 1 seed out of 150. November 2026. |
+
 
 **Other properties.** `nan_inf_skip` ignores the lanes where the difference is NaN or infinite; `skip_condition` ignores the lanes that match a condition on the reference value (for example the halfway cases of `round`); `overflow_check` ignores the lanes where an addition, subtraction or multiplication overflows; `disabled` comments the test out, with `disabled_reason`; `support_obj: false` skips the Object API.
 
@@ -57,7 +66,6 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 **Indexed functions.** `gather` and `scatter` take a pointer and a register of unsigned indices, which the generic builder cannot generate. They are generated for pairs `"data,index"`, the index having its own LMUL when its width differs from the one of the data (`mipp::details::idx_lmul<T, IDX>(LMUL)` in C++); a pair is only tested for the LMULs where this LMUL exists, and the mask has the type of the data. `helpers_tests/indexed_tests.py` writes their tests, with the same principle as the others: the result of the ISA under test is compared with the scalar reference (`gather`: the stored register; `scatter`: the memory written by both targets), for every datatype, LMUL, `d2` and mask variant, in the three APIs. The indices address a table larger than a register: $2^8$ elements for 8-bit indices, $2^{16}$ for 16-bit indices and $2^{17}$ for wider ones (and at least N), so that the whole range of the 8 and 16-bit indices is covered, including the byte offsets that overflow the index width. The indices of a `gather` are random values of the table; the ones of a `scatter` are N distinct positions of the table, so that the result does not depend on the order of the writes, and the whole table is compared. They have no entry in `tests_specs.json`.
 
 !!! warning "Known gaps"
-    - The tolerance type `hybrid` (used by `cosh`, `sin`, `sinh`) is accepted by the schema but not implemented: these tests fall back to an absolute tolerance of `0.001`.
     - `overflow_check` with `add`, `sub` or `mul` is only applied in the C tests; the C++ tests only handle the `accumulate_*` values (reductions).
     - The `define` field of a domain rule is accepted by the schema but ignored.
 
