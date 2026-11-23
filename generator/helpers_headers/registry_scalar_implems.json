@@ -576,16 +576,23 @@
     "copysign": [
         {
             "type": "element-wide",
-            "datatypes": "all_float",
+            "datatypes": "float64",
             "variants": [],
             "implem": [
-                "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
-                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
-                "%s<c:uint|b:tp>% resi = (r0i & ~((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) | (r1i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1)));",
-                "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
-                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
+                "// the function of the C library: the same loop written on the bits (memcpy to an unsigned integer, masks of",
+                "// the sign bit, select of the mask variant) is vectorized by Clang 18 and 20 with -O2 -mavx512f into a wrong",
+                "// code for the groups of LMUL 4 and 8 (wrong lanes, depending on the context; fine with -fno-vectorize)",
+                "// requires #include <math.h>",
+                "res.vd[i] = %!pred_cond!% copysign(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "variants": [],
+            "implem": [
+                "// see float64",
+                "res.vd[i] = %!pred_cond!% copysignf(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -1956,12 +1963,15 @@
                 "// compiled by riscv64 GCC 14 -O3, inlined in a caller, as a wrong code (zeros in lanes that receive a lane of vd0)",
                 "%vd<tr>% res;",
                 "const size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "// the count bounded by nb (0 <= s0 <= nb): otherwise GCC sees a memset of any size in the first loop",
+                "// (-Wstringop-overflow, with -funroll-loops)",
+                "const size_t n = (size_t)s0 < nb ? (size_t)s0 : nb;",
                 "for (size_t b0 = 0; b0 < %N<tp>%; b0 += nb)",
                 "{",
-                "\tfor (size_t i = b0; i < b0 + (size_t)s0; i++)",
+                "\tfor (size_t i = b0; i < b0 + n; i++)",
                 "\t\tres.vd[i] = %!pred_cond!% (%s<tr>%)0 %!pred_alt!%;",
-                "\tfor (size_t i = b0 + (size_t)s0; i < b0 + nb; i++)",
-                "\t\tres.vd[i] = %!pred_cond!% vd0.vd[i - (size_t)s0] %!pred_alt!%;",
+                "\tfor (size_t i = b0 + n; i < b0 + nb; i++)",
+                "\t\tres.vd[i] = %!pred_cond!% vd0.vd[i - n] %!pred_alt!%;",
                 "}",
                 "return res;"
             ]
