@@ -123,8 +123,8 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
     '\\b(const|static|inline|return|if|else|for|while|do|switch|case|default|break|continue|struct|class|template|typename|auto|sizeof|typedef|namespace|using|constexpr|extern)\\b',
     // 7. Functions / Hardware Intrinsics / MIPP / Function declarations & calls
     '(\\b_mm256_[a-zA-Z0-9_]+|\\b_mm512_[a-zA-Z0-9_]+|\\b_mm_[a-zA-Z0-9_]+|\\bv[a-z0-9_]+|\\bsv[a-z0-9_]+|\\b__riscv_[a-z0-9_]+|\\bmipp::[a-zA-Z0-9_]+|\\b(?!mipp_obj\\b)mipp_[a-zA-Z0-9_]+|\\b[a-zA-Z_][a-zA-Z0-9_]*(?=\\s*\\())',
-    // 8. Template parameters (T, T1, T2, LMUL, LDIV, N, V, M, Z, S, U)
-    '\\b(T|T1|T2|LMUL|LDIV|N|V|M|Z|S|U)\\b',
+    // 8. Template parameters (T, T1, T2, T_IDX, T_DST, T_SRC, LMUL, LDIV, N, V, M, Z, S, U)
+    '\\b(T|T1|T2|T_IDX|T_DST|T_SRC|LMUL|LDIV|N|V|M|Z|S|U)\\b',
   ];
 
   if (customMacros && typeof customMacros === "object") {
