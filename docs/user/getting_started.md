@@ -43,6 +43,8 @@ Each API has a single umbrella header that brings every MIPP function into scope
 
 This is the simplest way to start. For larger projects, you can include only the functions you use (`<mipp/obj/fun/add.hpp>`), or even a single masking variant and LMUL (`<mipp/obj/fun/m/m2/add.hpp>`), which makes compilation 2× to 4× faster: see [Headers & Compile Time](headers_and_compile_time.md).
 
+Every public name starts with `mipp` (`mipp_add_float32`, `mipp::add`, `MIPP_N_FLOAT32`). In C++, a shorter prefix is a namespace alias in your own code: with `namespace mi = mipp;`, write `mi::add(a, b)` or `mi::Vd<float>`. MIPP does not shorten its prefix itself, since a two-letter prefix would collide with other libraries in C (`mi_` is the one of mimalloc): see [Naming Conventions](../developer/reference/naming.md).
+
 ---
 
 ## 2. Compiler Flags & Target Architecture Selection

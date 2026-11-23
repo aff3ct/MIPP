@@ -33,6 +33,20 @@ Most functions also have a variant **by block of 128 bits**, suffix `_b128`: the
 
 The [mask variants](masking_semantics.md) apply the mask after the rearrangement (the merge masking keeps the lanes of the first register).
 
+The names describe what happens to the lanes, not the instructions of one ISA ([Naming Conventions](../developer/reference/naming.md#names-that-differ-from-the-intrinsics)). The closest instructions, for the names that differ:
+
+| MIPP | x86 | ARM | RVV |
+| :--- | :--- | :--- | :--- |
+| `slide(a, b, n)` | `alignr` | `ext` | `vslidedown` + `vslideup` |
+| `slideup` / `slidedown` | `slli_si128` / `srli_si128` (bytes) | `ext` with zeros | `vslideup` / `vslidedown` |
+| `bcast(a, k)` | `shuffle` / `permutexvar` | `dup` (element) | `vrgather` |
+| `ziplo` / `ziphi` | `unpacklo` / `unpackhi` | `zip1` / `zip2` | — |
+| `unziplo` / `unziphi` | `shuffle` | `uzp1` / `uzp2` | — |
+| `dupeven` / `dupodd` | `moveldup` / `movehdup` | `trn1(a, a)` / `trn2(a, a)` | — |
+| `swap2` | `shuffle` | `rev64` | — |
+| `loadu_unzip` / `storeu_zip` | — | `vld2` / `vst2` | `vlseg2` / `vsseg2` |
+| `compress` | `vcompressps` (AVX-512) | `svcompact` (SVE) | `vcompress` |
+
 ---
 
 ## 2. Named Rearrangements
