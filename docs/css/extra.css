@@ -770,6 +770,14 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
   display: none !important;
 }
 
+/* Below 60em Material moves the TOC into the navigation drawer: there is no
+   sidebar to restore (the button is shown by an inline style, hence !important) */
+@media screen and (max-width: 59.984375em) {
+  #mipp-toc-restore-btn {
+    display: none !important;
+  }
+}
+
 /* Tabbed sets (Segmented Control style) */
 .md-typeset .tabbed-set {
   border-radius: var(--mipp-radius-md);
