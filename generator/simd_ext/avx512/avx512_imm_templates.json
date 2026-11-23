@@ -1,0 +1,42 @@
+{
+    "slide_valign": {
+        "format": "long",
+        "code": [
+            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm512_cast{{ isa_dt_par.data_ext }}_si512({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm512_castsi512_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}{% set w = 32 if dt_par.n_bits <= 32 else 64 %}{% set u = (k * 8) // w %}{% if k * 8 == u * w %}%r<tp>% res;",
+            "{% if k == 0 %}res.r = r0.r;{% elif k == 64 %}res.r = r1.r;{% else %}res.r = {{ co('_mm512_alignr_epi' ~ w ~ '(' ~ ci('r1.r') ~ ', ' ~ ci('r0.r') ~ ', ' ~ u ~ ')') }};{% endif %}",
+            "return res;{% endif %}"
+        ]
+    },
+    "slide_b128_alignr": {
+        "format": "long",
+        "code": [
+            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm512_cast{{ isa_dt_par.data_ext }}_si512({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm512_castsi512_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}%r<tp>% res;",
+            "res.r = {{ co('_mm512_alignr_epi8(' ~ ci('r1.r') ~ ', ' ~ ci('r0.r') ~ ', ' ~ k ~ ')') }};",
+            "return res;"
+        ]
+    },
+    "broadcast_b128_permute": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.name == 'float32' %}_mm512_permute_ps(r0.r, {{ imm * 85 }}){% else %}_mm512_permute_pd(r0.r, {{ 255 if imm else 0 }}){% endif %};",
+            "return res;"
+        ]
+    },
+    "broadcast_b128_shuffle32": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = _mm512_shuffle_epi32(r0.r, (_MM_PERM_ENUM){% if dt_par.n_bits == 32 %}{{ imm * 85 }}{% else %}{{ 238 if imm else 68 }}{% endif %});",
+            "return res;"
+        ]
+    },
+    "broadcast_b128_pshufb": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = _mm512_shuffle_epi8(r0.r, {% if dt_par.n_bits == 16 %}_mm512_set1_epi16({{ (2 * imm) + 256 * (2 * imm + 1) }}){% else %}_mm512_set1_epi8({{ imm }}){% endif %});",
+            "return res;"
+        ]
+    }
+}

@@ -78,7 +78,7 @@ The shifts take a count for each lane, in a register of the same type, or the sa
 | `lshift`, `rshift` | one per lane, a register | `mipp_lshift_int32(a, n)` | `mipp::lshift(a, n)` | `a << n` |
 | `lshift_vs`, `rshift_vs` | the same for every lane, an `int32_t` | `mipp_lshift_vs_int32(a, 3)` | `mipp::lshift(a, 3)` | `a << 3` |
 
-`rshift` is arithmetic (copies of the sign bit) for the signed types and logical (zeros) for the unsigned ones. A count must be between 0 and the number of bits of the type minus 1: other counts are undefined behavior (the hardware differs). The per-lane shifts exist for the integers; `lshift_vs` and `rshift_vs` also shift the bits of the floating-point numbers.
+With a constant count, the C++ APIs also have `mipp::lshift<3>(a)` / `mipp::rshift<3>(a)`, and the shift instructions with an immediate count are used (see [Constant Counts](rearrangements.md#31-constant-counts)). `rshift` is arithmetic (copies of the sign bit) for the signed types and logical (zeros) for the unsigned ones. A count must be between 0 and the number of bits of the type minus 1: other counts are undefined behavior (the hardware differs). The per-lane shifts exist for the integers; `lshift_vs` and `rshift_vs` also shift the bits of the floating-point numbers.
 
 === "C API"
 

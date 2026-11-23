@@ -18,6 +18,7 @@ from registry import scalar_isa
 from codegen.implem_tracker import get_implem_bucket, missing_build_negated_ifdef_for_existing_implems
 from codegen.emit_helpers import emit_function_body, emit_panic_stub
 from luts import TEMPLATE_GLOBALS
+from codegen.imm import build_imm_dispatch
 
 
 _template_cache = {}
@@ -853,7 +854,9 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
                             print("", file=target_file)
                             if cond:
                                 print(f"#if {cond}", file=target_file)
-                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, target_file, masked_version=mask_kind, level=cand["level"], lmul=lmul)
+                            # unmasked LMUL 1 function with immediate bodies: dispatch on the constant values (codegen/imm.py)
+                            imm_dispatch = build_imm_dispatch(isa, funcs, f, dt, dt_par, dt_ret) if (mask_kind is None and lmul == 0) else None
+                            emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, cand["ff"], post_rendering, target_file, masked_version=mask_kind, level=cand["level"], lmul=lmul, imm_dispatch=imm_dispatch)
                             if cond:
                                 print("#endif", file=target_file)
                             

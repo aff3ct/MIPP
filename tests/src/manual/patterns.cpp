@@ -11,7 +11,8 @@
 
 #if __cplusplus >= 201703L
 
-namespace
+// a named namespace: the unity builds put several test files in one translation unit
+namespace mipp_test_patterns
 {
 // one register
 struct p_zero      { static constexpr int get(int, int) { return -1; } };
@@ -92,7 +93,6 @@ void check_all()
 	check2<T, LMUL, q_table>();
 	check2<T, LMUL, q_table0>();
 }
-} // namespace
 
 TEMPLATE_TEST_CASE("patterns - permute<P> and permute2<P>", "[patterns]", float, double, int8_t, uint8_t, int16_t,
                    int32_t, uint64_t)
@@ -116,5 +116,6 @@ TEST_CASE("patterns - recognized patterns", "[patterns]")
 	static_assert(!mipp::details::is_zip_lo(mipp::details::pattern_checked<q_table, n, 2 * n>()) || n <= 2, "zip_lo");
 	SUCCEED();
 }
+} // namespace mipp_test_patterns
 
 #endif // __cplusplus >= 201703L

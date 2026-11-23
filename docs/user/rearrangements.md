@@ -29,7 +29,7 @@ Most functions also have a variant **by block of 128 bits**, suffix `_b128`: the
 | `compress_store(p, a, m)` / `compress_store_full(p, a, m)` | active lanes stored, their count returned | — |
 | `expand_load(p, m)` | `count(m)` elements loaded into the active lanes | — |
 
-`swap_pairs`, `dup_even` and `dup_odd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments, not immediates: a constant or a variable.
+`swap_pairs`, `dup_even` and `dup_odd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments: a constant or a variable (see §3 for the constants).
 
 The [mask variants](masking_semantics.md) apply the mask after the rearrangement (the merge masking keeps the lanes of the first register).
 
@@ -80,6 +80,35 @@ Two registers interleaved, then separated again. The interleaving of two registe
     ```cpp
     --8<-- "examples/doc/rearrangements/obj.cpp:slide"
     ```
+
+### 3.1. Constant Counts
+
+The number of lanes of `slide`, `slide_up`, `slide_down`, `rotate`, `broadcast_lane` (and their `_b128` variants), the lane of `get` and the count of `lshift` / `rshift` (`lshift_vs` / `rshift_vs` in C) are often constants. Many instructions only exist with a constant encoded in them, an **immediate**: `palignr`, `pshufd`, `pextrd` on x86, `ext`, `dup` (element), `umov`, `shl` / `sshr` on NEON. The same function serves both cases:
+
+- with a **variable**, the function runs its dynamic body: `slide` through `permute2` and indices `i + n` (`pshufb`, `vpermps`, `vpermt2ps`, `tbl`), `svsplice` on SVE, `vslidedown` / `vslideup` on RVV;
+- with a **constant**, once the function is inlined (any optimization level but `-O0`), the immediate instruction: the function tests `__builtin_constant_p(n)` and selects it at compile time, at no run-time cost. `get` needs no such test: its dynamic body (store, then read of the lane) already becomes an extraction (`pextrd`, `vextracti128`, `umov`...) when the lane is a constant, with GCC as with Clang.
+
+The C++ APIs also have a **template version**, `mipp::slide<2>(a, b)`, `mipp::get<3>(r)`, `mipp::lshift<4>(r)`, as the MIPPv1 `combine<2>(a, b)`: the value must be a constant, and a value out of the range is a compilation error (`static_assert`). It calls the same function with the constant.
+
+=== "C API"
+
+    ```c
+    --8<-- "examples/doc/rearrangements/c.c:immediates"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/fun.cpp:immediates"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/obj.cpp:immediates"
+    ```
+
+The immediate instructions are written for the unmasked functions of LMUL 1 on SSE, AVX2, AVX-512 and NEON (AArch64), where the instruction exists for the type. The masked variants call them; with an LMUL above 1, `slide` (and `rotate`, `slide_up`, `slide_down`) slides the registers of the groups two by two with the LMUL 1 function when the count is a constant, and the other functions work register by register: the constant reaches the immediate instructions through the inlining. With `-O0`, or when the compiler does not inline the function, the dynamic body runs: the result is the same.
 
 ---
 

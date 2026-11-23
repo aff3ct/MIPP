@@ -1,0 +1,48 @@
+{
+    "broadcast_lane_b128": [
+        {
+            "instr_name": "vpermilps / vpermilpd",
+            "datatypes": [
+                "float32",
+                "float64"
+            ],
+            "template": "broadcast_b128_permute"
+        },
+        {
+            "instr_name": "vpshufd",
+            "datatypes": [
+                "int32",
+                "uint32",
+                "int64",
+                "uint64"
+            ],
+            "template": "broadcast_b128_shuffle32"
+        },
+        {
+            "instr_name": "vpshufb",
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16"
+            ],
+            "template": "broadcast_b128_pshufb",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "slide": [
+        {
+            "instr_name": "valignd / valignq",
+            "datatypes": "all_datatypes",
+            "template": "slide_valign"
+        }
+    ],
+    "slide_b128": [
+        {
+            "instr_name": "vpalignr",
+            "datatypes": "all_datatypes",
+            "template": "slide_b128_alignr",
+            "if": "defined(__AVX512BW__)"
+        }
+    ]
+}

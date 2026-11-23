@@ -89,6 +89,8 @@ The separator between prefix and name belongs to the template: SSE templates wri
 
 An entry can also hold its template inline (`"template": { "format": ..., "code": ... }`) instead of a name.
 
+The bodies used when an integer argument is a constant (immediate instructions: `palignr`, `ext`, `pshufd`...) are in `<isa>_imm_templates.json` and `<isa>_imm_implems.json`, in the same format, with the variable `imm`: see [Immediate Versions](../internals/code_generation.md#53-immediate-versions).
+
 A template shared by functions that differ by more than an intrinsic name can take several fields in `instr_name`, separated by `|` (a comma would cut the arguments of a call), and read them with Jinja `set`, on a line of its own: the `%...%` markers of the [templating DSL](../reference/templating_dsl.md) must not share a line with a Jinja tag. For example, `complex_cmla` of NEON and SVE writes `cmul`, `cmulconj` and `cfmadd` as two `cmla` instructions, from `"ZERO|90|r0.r|r1.r"` (the accumulator, `ZERO` for a zero register; the rotation of the second instruction; the two operands):
 
 ```jinja

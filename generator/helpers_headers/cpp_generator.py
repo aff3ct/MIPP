@@ -184,6 +184,39 @@ def _gen_cpp_functions(isa_list, include_manager, funcs):
 # Helpers
 # -------------------------------------------------------------------------------------------------
 
+
+# Immediate versions of the C++ API (`"imm"` of the registry, see codegen/imm.py): `mipp::slide<3>(a, b)` for
+# `mipp::slide(a, b, 3)`. One template per concrete overload, whose only template parameter is the constant: the
+# overload is chosen by the types of the registers, as for the dynamic function, and the range is checked at compile
+# time. The call passes a constant to the C function, whose dispatch then uses the immediate instruction.
+_IMM_CPP_RANGES = {
+    "lt_n": ("0", "<", "N"), "le_n": ("0", "<=", "N"), "lt_nb": ("0", "<", "NB"), "le_nb": ("0", "<=", "NB"),
+    "lt_bits": ("0", "<", "BITS"),
+}
+
+
+def _emit_imm_template(funcs, f, dt_par, dt_ret, isa, cpp_func_name, c_func_name, lmul, file):
+    rng = funcs[f].get("imm")
+    if not rng:
+        return
+    proto = build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True)
+    m = re.search(r", const (u?int32_t) (s\d+)\)$", proto)
+    if not m:
+        raise ValueError(f"'{f}': immediate version without a final integer argument ({proto})")
+    int_t, arg = m.group(1), m.group(2)
+    proto = proto[:m.start()] + ")"
+    call = build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name, lmul, False)
+    call = re.sub(r"\b" + arg + r"\b", f"({int_t})S", call)
+    lo, op, hi = _IMM_CPP_RANGES[rng]
+    n = f"N<{dt_par}_t, {lmul}, ISA::{isa['name'].upper()}>()"
+    hi = {"N": f"(int){n}", "NB": f"(int)(16 / sizeof({dt_par}_t) < {n} ? 16 / sizeof({dt_par}_t) : {n})",
+          "BITS": f"(int)(8 * sizeof({dt_par}_t))"}[hi]
+    print(f"template <int S>", file=file)
+    print(proto + " {", file=file)
+    print(f'\tstatic_assert(S >= {lo} && S {op} {hi}, "mipp::{cpp_func_name}<S>: S out of range");', file=file)
+    print("\t" + call + ";", file=file)
+    print("}", file=file)
+
 def _cpp_base_name(funcs, f):
     """
     Name of `f` in the C++ APIs: `cpp_name` of the registry when given, `f` otherwise. The scalar forms of a function
@@ -676,6 +709,7 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file)
                     print("}", file=file)
+                    _emit_imm_template(funcs, f, dt_par, dt_ret, isa, cpp_func_name, c_func_name + "_m" + str(lmul), lmul, file)
                 mask_status = funcs[f]["variants"]
 
                 has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2)
@@ -684,6 +718,7 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file)
                     print("}", file=file)
+                    _emit_imm_template(funcs, f, dt_par, dt_ret, isa, cpp_func_name, c_func_name + "_d" + str(-ldiv), ldiv, file)
                 
                 if mask_status and mask_status.is_any_mask():
                     proto = funcs[f]["proto"]
@@ -728,6 +763,7 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, lmul, isa_name=True, cpp=True) + " {", file=file_u)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_m" + str(lmul), lmul, False) + ";", file=file_u)
                     print("}", file=file_u)
+                    _emit_imm_template(funcs, f, dt_par, dt_ret, isa, cpp_func_name, c_func_name + "_m" + str(lmul), lmul, file_u)
 
                 has_ldiv = (isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))) and isa_provides_lmul(isa, funcs[f]["proto"], -2) and is_defined_for_dt_lmul(funcs[f]["proto"], dt, -2)
                 if has_ldiv:
@@ -736,6 +772,7 @@ def _gen_cpp_functions_isa(include_manager, isa, funcs):
                     print(build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, cpp_func_name, ldiv, isa_name=True, cpp=True) + " {", file=file_u)
                     print("\t" + build_call(funcs[f]["proto"], dt_par, dt_ret, "", c_func_name + "_d" + str(-ldiv), ldiv, False) + ";", file=file_u)
                     print("}", file=file_u)
+                    _emit_imm_template(funcs, f, dt_par, dt_ret, isa, cpp_func_name, c_func_name + "_d" + str(-ldiv), ldiv, file_u)
                 
                 mask_status = funcs[f]["variants"]
                 if mask_status and mask_status.is_any_mask():

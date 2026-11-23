@@ -137,6 +137,31 @@ static inline rvd_avx_float32_m1_t mipp_avx_add_float32(const rvd_avx_float32_m1
 }
 ```
 
+
+### 5.3. Immediate Versions
+
+Some instructions only take a constant encoded in them (an immediate: `palignr`, `pshufd`, `ext`, `dup` element, `shl` immediate...), and a `static inline` function cannot pass its parameter to them: clang checks the immediate before inlining. The functions whose integer argument is often a constant are marked in `registry_interfaces.json` with the range of this argument, `"imm": "le_n"` (`slide`), `"lt_n"` (`rotate`, `broadcast_lane`, `get`), `"le_nb"` / `"lt_nb"` (the `_b128` variants), `"lt_bits"` (`lshift_vs`, `rshift_vs`). An ISA writes the bodies for the constant values in `simd_ext/<isa>/<isa>_imm_templates.json` and `<isa>_imm_implems.json`, in the format of the emulation files (`datatypes`, `if`, `template`, `instr_name`). A template is rendered for each value of the range, with the variables of the other templates plus `imm` (the value), `lanes` and `block` (the lanes of the register and of a block of 128 bits): one template describes all the cases, with Jinja conditions on `imm` when the instructions depend on the value. A value that renders to nothing has no case.
+
+`codegen/imm.py` writes the cases at the beginning of the unmasked LMUL 1 function, before its dynamic body (chosen by the usual resolution), under `defined(__OPTIMIZE__)` and the `if` of the entry (several entries: `#if` / `#elif`):
+
+```c
+#if defined(__OPTIMIZE__) && (defined(__SSSE3__))
+	if (__builtin_constant_p(s0)) { // immediate when s0 is a constant: palignr
+		switch (s0) {
+		case 1: { rvd_sse_float32_m1_t res; res.r = ..._mm_alignr_epi8(..., 4)...; return res; }
+		...
+		default: break;
+		}
+	}
+#endif
+```
+
+Inlined with a constant, `__builtin_constant_p` is true and the switch is resolved at compile time; with a variable, the dynamic body runs.
+
+The switch weighs in the size the inliner estimates even when the argument is a variable: a function with a dispatch, and the LMUL > 1 or masked functions that call it, are less often inlined. A function whose dynamic body the compiler already turns into the immediate instruction gets no bodies: `get` keeps its `"imm"` range (for its C++ template) but no ISA writes a case, since `storeu` then `t[s0]` with a constant `s0` already compiles to an extraction (`pextrd`, `vextracti128`, `valignq`, `umov`), with GCC 12 / 13 and Clang 18. With a dispatch, the larger `get` was not inlined any more in big translation units, and passing the AVX-512 mask groups by value to `get_k` revealed a GCC 13 bug (wrong lanes in `cmplt` on a test of 16 files compiled together). The immediate bodies use intrinsics and the types of the DSL only (a call to a MIPP function is an error: the include resolution would not see it). The masked variants call the unmasked function; the LMUL > 1 template of `slide` (`generic_emu_templates_lmulh.json`) has its own constant path, which slides the registers of the groups with the LMUL 1 function.
+
+The C++ APIs get a template per concrete overload, `template <int S> rvd<float32_t,1,SSE> slide(r0, r1)`, with a `static_assert` on the range, which calls the C function with the constant (`_emit_imm_template()` of `cpp_generator.py`), and its `Rvd` / `Rvm` version (`obj_generator.py`).
+
 ---
 
 ## 6. Summary Table
@@ -160,6 +185,7 @@ At the end of a run, `print_summary_table()` reads the generated `simd_ext/<isa>
 | `cond_utils.py` | Parsing, simplification and algebra of preprocessor conditions. |
 | `c_generator.py` | One ISA layer: common header, candidate registration, LMUL loops ([§2](#2-one-isa-layer)). |
 | `codegen/candidate_resolver.py` | Candidate resolution, effective levels, emission, scalar fallback and stubs ([§4](#4-resolution), [§5](#5-emission)). |
+| `codegen/imm.py` | Immediate versions ([§5.3](#53-immediate-versions)): the functions marked `"imm"` in the registry get, in their unmasked LMUL 1 version, a dispatch on the constant values of their integer argument (`__builtin_constant_p`, then a `switch` of the bodies of `<isa>_imm_implems.json` rendered for each value), and C++ templates `f<S>(...)` (`cpp_generator.py`, `obj_generator.py`). |
 | `luts.py` | Constant tables of the implementation templates computed at generation time (`compress_lut`: the shuffle of `compress` for each value of the mask), available in every template as Jinja globals (`TEMPLATE_GLOBALS`, `render_template()`). |
 | `codegen/lmul_orchestrator.py` | Software LMUL and `sub_isa` half-vector wrappers, horizontal LMUL wrappers. |
 | `codegen/ldiv_modes.py` | Half-vector representations selected at compile time (`ldiv_modes`, RVV): the descriptor of each mode, its macro. |

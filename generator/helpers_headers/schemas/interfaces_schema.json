@@ -61,6 +61,11 @@
                 "type": "array",
                 "uniqueItems": true,
                 "items": { "type": "string", "pattern": "^[vs]*s[vs]*$" }
+            },
+            "imm": {
+                "description": "Values of the integer argument when it is a constant (`lt_n`: [0, N), `le_n`: [0, N], `lt_nb` / `le_nb`: the same with the lanes of a block of 128 bits, `lt_bits`: [0, bits of the elements)): the ISAs that have immediate bodies for the function (`<isa>_imm_implems.json`) start its unmasked LMUL 1 version with a dispatch on these values, used when the argument is known at compile time (see `codegen/imm.py`), and the C++ APIs have a template version `f<N>(...)`.",
+                "type": "string",
+                "enum": ["lt_n", "le_n", "lt_nb", "le_nb", "lt_bits"]
             }
         },
         "required": [

@@ -786,6 +786,14 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "slide_b128": [
+        {
+            "instr_name": "shuffle_epi8",
+            "datatypes": "all_datatypes",
+            "template": "rea_slide_b128_pshufb",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "sub": [
         {
             "instr_name": "sub",

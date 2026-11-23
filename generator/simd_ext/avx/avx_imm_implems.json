@@ -1,0 +1,55 @@
+{
+    "broadcast_lane": [
+        {
+            "instr_name": "vpermpd / vpermq",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "broadcast_permute4x64",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "broadcast_lane_b128": [
+        {
+            "instr_name": "vpermilps / vpermilpd",
+            "datatypes": [
+                "float32",
+                "float64"
+            ],
+            "template": "broadcast_b128_permute"
+        },
+        {
+            "instr_name": "vpshufd / vpshufb",
+            "datatypes": [
+                "int8",
+                "uint8",
+                "int16",
+                "uint16",
+                "int32",
+                "uint32",
+                "int64",
+                "uint64"
+            ],
+            "template": "broadcast_b128_shuffle",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "slide": [
+        {
+            "instr_name": "vperm2i128 / vpalignr",
+            "datatypes": "all_datatypes",
+            "template": "slide_alignr",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "slide_b128": [
+        {
+            "instr_name": "vpalignr",
+            "datatypes": "all_datatypes",
+            "template": "slide_b128_alignr",
+            "if": "defined(__AVX2__)"
+        }
+    ]
+}

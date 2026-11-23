@@ -1,0 +1,34 @@
+{
+    "slide_ext": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if imm == lanes %}r1.r{% else %}{{ isa.prefix }}extq_{{ isa_dt_par.data_ext }}(r0.r, r1.r, {{ imm }}){% endif %};",
+            "return res;"
+        ]
+    },
+    "broadcast_dup_laneq": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {{ isa.prefix }}dupq_laneq_{{ isa_dt_par.data_ext }}(r0.r, {{ imm }});",
+            "return res;"
+        ]
+    },
+    "lshift_n": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'float' %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}shlq_n_u{{ dt_par.n_bits }}({{ isa.prefix }}reinterpretq_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r), {{ imm }})){% else %}{{ isa.prefix }}shlq_n_{{ isa_dt_par.data_ext }}(r0.r, {{ imm }}){% endif %};",
+            "return res;"
+        ]
+    },
+    "rshift_n": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if imm == 0 %}r0.r{% elif dt_par.category == 'float' %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}shrq_n_u{{ dt_par.n_bits }}({{ isa.prefix }}reinterpretq_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(r0.r), {{ imm }})){% else %}{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(r0.r, {{ imm }}){% endif %};",
+            "return res;"
+        ]
+    }
+}

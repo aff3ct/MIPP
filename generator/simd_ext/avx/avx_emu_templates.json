@@ -420,6 +420,20 @@
         "format": "short",
         "code": "{{ isa.prefix }}_permutevar8x32_ps(r0.r, {{ isa.prefix }}_setr_epi32(7, 6, 5, 4, 3, 2, 1, 0));"
     },
+    "rea_slide_b128_pshufb": {
+        "format": "long",
+        "code": [
+            "// pshufb works in each block of 128 bits: the bytes b + k of the block of r0 (b + k < 16), then of r1 (low 4 bits",
+            "// of b + k), with k = s0 * sizeof(T) bytes",
+            "const __m256i ib = _mm256_add_epi8(_mm256_setr_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15), _mm256_set1_epi8((char)(s0 * (int32_t)sizeof(%s<tp>%))));",
+            "const __m256i hi = _mm256_cmpgt_epi8(ib, _mm256_set1_epi8(15));",
+            "const __m256i x = _mm256_shuffle_epi8({% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(r0.r){% else %}r0.r{% endif %}, ib);",
+            "const __m256i y = _mm256_shuffle_epi8({% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(r1.r){% else %}r1.r{% endif %}, ib);",
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'float' %}_mm256_castsi256_{{ isa_dt_par.data_ext }}(_mm256_blendv_epi8(x, y, hi)){% else %}_mm256_blendv_epi8(x, y, hi){% endif %};",
+            "return res;"
+        ]
+    },
     "rea_unzip_epi32": {
         "format": "short",
         "code": "{{ isa.prefix }}_permute4x64_epi64({{ isa.prefix }}_castps_si256({{ isa.prefix }}_shuffle_ps({{ isa.prefix }}_castsi256_ps(r0.r), {{ isa.prefix }}_castsi256_ps(r1.r), {{ instr_name }})), 0xD8);"

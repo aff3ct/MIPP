@@ -1,0 +1,49 @@
+{
+    "broadcast_lane": [
+        {
+            "instr_name": "shufps / pshufd",
+            "datatypes": [
+                "float32",
+                "float64",
+                "int32",
+                "uint32",
+                "int64",
+                "uint64"
+            ],
+            "template": "broadcast_shuffle",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "pshuflw / pshufhw",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "broadcast_shuffle16",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "pshufb",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "broadcast_pshufb8",
+            "if": "defined(__SSSE3__)"
+        }
+    ],
+    "slide": [
+        {
+            "instr_name": "palignr",
+            "datatypes": "all_datatypes",
+            "template": "slide_alignr",
+            "if": "defined(__SSSE3__)"
+        },
+        {
+            "instr_name": "psrldq / pslldq",
+            "datatypes": "all_datatypes",
+            "template": "slide_bsrli",
+            "if": "defined(__SSE2__)"
+        }
+    ]
+}

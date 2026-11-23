@@ -110,6 +110,20 @@
         "format": "short",
         "code": "{{ isa.prefix }}_shuffle_epi8(r0.r, _mm512_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));"
     },
+    "rea_slide_b128_pshufb": {
+        "format": "long",
+        "code": [
+            "// pshufb works in each block of 128 bits: the bytes b + k of the block of r0 (b + k < 16), then of r1 (low 4 bits",
+            "// of b + k), with k = s0 * sizeof(T) bytes",
+            "const __m512i ib = _mm512_add_epi8(_mm512_broadcast_i32x4(_mm_setr_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15)), _mm512_set1_epi8((char)(s0 * (int32_t)sizeof(%s<tp>%))));",
+            "const __mmask64 hi = _mm512_cmpgt_epi8_mask(ib, _mm512_set1_epi8(15));",
+            "const __m512i x = _mm512_shuffle_epi8({% if dt_par.category == 'float' %}_mm512_cast{{ isa_dt_par.data_ext }}_si512(r0.r){% else %}r0.r{% endif %}, ib);",
+            "const __m512i y = _mm512_shuffle_epi8({% if dt_par.category == 'float' %}_mm512_cast{{ isa_dt_par.data_ext }}_si512(r1.r){% else %}r1.r{% endif %}, ib);",
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.category == 'float' %}_mm512_castsi512_{{ isa_dt_par.data_ext }}(_mm512_mask_blend_epi8(hi, x, y)){% else %}_mm512_mask_blend_epi8(hi, x, y){% endif %};",
+            "return res;"
+        ]
+    },
     "reduce_16": {
         "format": "long",
         "code": [

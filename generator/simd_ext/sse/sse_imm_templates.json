@@ -1,0 +1,42 @@
+{
+    "slide_alignr": {
+        "format": "long",
+        "code": [
+            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}%r<tp>% res;",
+            "res.r = {{ co('_mm_alignr_epi8(' ~ ci('r1.r') ~ ', ' ~ ci('r0.r') ~ ', ' ~ k ~ ')') }};",
+            "return res;"
+        ]
+    },
+    "slide_bsrli": {
+        "format": "long",
+        "code": [
+            "{% macro ci(x) %}{% if dt_par.category == 'float' %}_mm_cast{{ isa_dt_par.data_ext }}_si128({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% macro co(x) %}{% if dt_par.category == 'float' %}_mm_castsi128_{{ isa_dt_par.data_ext }}({{ x }}){% else %}{{ x }}{% endif %}{% endmacro %}{% set k = imm * (dt_par.n_bits // 8) %}%r<tp>% res;",
+            "{% if k == 0 %}res.r = r0.r;{% elif k == 16 %}res.r = r1.r;{% else %}res.r = {{ co('_mm_or_si128(_mm_srli_si128(' ~ ci('r0.r') ~ ', ' ~ k ~ '), _mm_slli_si128(' ~ ci('r1.r') ~ ', ' ~ (16 - k) ~ '))') }};{% endif %}",
+            "return res;"
+        ]
+    },
+    "broadcast_shuffle": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = {% if dt_par.name == 'float32' %}_mm_shuffle_ps(r0.r, r0.r, {{ imm * 85 }}){% elif dt_par.name == 'float64' %}_mm_shuffle_pd(r0.r, r0.r, {{ imm * 3 }}){% elif dt_par.n_bits == 32 %}_mm_shuffle_epi32(r0.r, {{ imm * 85 }}){% else %}_mm_shuffle_epi32(r0.r, {{ 238 if imm else 68 }}){% endif %};",
+            "return res;"
+        ]
+    },
+    "broadcast_shuffle16": {
+        "format": "long",
+        "code": [
+            "{% set t = ('_mm_shufflelo_epi16(r0.r, ' ~ (imm * 85) ~ ')') if imm < 4 else ('_mm_shufflehi_epi16(r0.r, ' ~ ((imm - 4) * 85) ~ ')') %}%r<tp>% res;",
+            "res.r = {% if imm < 4 %}_mm_unpacklo_epi64({{ t }}, {{ t }}){% else %}_mm_unpackhi_epi64({{ t }}, {{ t }}){% endif %};",
+            "return res;"
+        ]
+    },
+    "broadcast_pshufb8": {
+        "format": "long",
+        "code": [
+            "%r<tp>% res;",
+            "res.r = _mm_shuffle_epi8(r0.r, _mm_set1_epi8({{ imm }}));",
+            "return res;"
+        ]
+    }
+}

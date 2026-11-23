@@ -1164,6 +1164,12 @@
             "template_ref": "tpl_generic_emu.rotate"
         }
     ],
+    "rotate_b128": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.rotate_b128"
+        }
+    ],
     "round": [
         {
             "instr_name": "",
@@ -1532,7 +1538,23 @@
     "slide": [
         {
             "datatypes": "all_datatypes",
+            "preferred_simd_ext": [
+                "sse",
+                "avx",
+                "avx512",
+                "neon"
+            ],
+            "template_ref": "tpl_generic_emu.slide_perm"
+        },
+        {
+            "datatypes": "all_datatypes",
             "template_ref": "tpl_generic_emu.slide_mem"
+        }
+    ],
+    "slide_b128": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.slide_b128_perm"
         }
     ],
     "slide_down": [
@@ -1541,10 +1563,22 @@
             "template_ref": "tpl_generic_emu.slide_down"
         }
     ],
+    "slide_down_b128": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.slide_down_b128"
+        }
+    ],
     "slide_up": [
         {
             "datatypes": "all_datatypes",
             "template_ref": "tpl_generic_emu.slide_up"
+        }
+    ],
+    "slide_up_b128": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.slide_up_b128"
         }
     ],
     "store_interleaved2": [

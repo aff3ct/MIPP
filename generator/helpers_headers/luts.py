@@ -42,7 +42,19 @@ def compress_lut(lanes, units, fill=None):
     return _initializer(rows)
 
 
+def iota(n, start=0):
+    """C initializer of a 1D array {start, start + 1, ..., start + n - 1} (indices of the lanes)."""
+    return "{" + ", ".join(str(start + i) for i in range(n)) + "}"
+
+
+def iota_mod(n, m):
+    """C initializer of a 1D array {0, 1, ..., m - 1, 0, 1, ...} of n elements (lane in a block of m lanes)."""
+    return "{" + ", ".join(str(i % m) for i in range(n)) + "}"
+
+
 # functions available in every implementation template
 TEMPLATE_GLOBALS = {
     "compress_lut": compress_lut,
+    "iota": iota,
+    "iota_mod": iota_mod,
 }

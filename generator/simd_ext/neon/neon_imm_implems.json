@@ -1,0 +1,34 @@
+{
+    "broadcast_lane": [
+        {
+            "instr_name": "dup (element)",
+            "datatypes": "all_datatypes",
+            "template": "broadcast_dup_laneq",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "lshift_vs": [
+        {
+            "instr_name": "shl (immediate)",
+            "datatypes": "all_datatypes",
+            "template": "lshift_n",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "rshift_vs": [
+        {
+            "instr_name": "sshr / ushr",
+            "datatypes": "all_datatypes",
+            "template": "rshift_n",
+            "if": "defined(__aarch64__)"
+        }
+    ],
+    "slide": [
+        {
+            "instr_name": "ext",
+            "datatypes": "all_datatypes",
+            "template": "slide_ext",
+            "if": "defined(__aarch64__)"
+        }
+    ]
+}

@@ -50,7 +50,8 @@ def emit_short_format_prologue(funcs_for_f, dt_ret, isa, file, lmul=0, dt_par=No
             )
             print("\tres.m = ", end="", file=file)
 
-def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None):
+def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, file, masked_version=None, lmul=0, level=None,
+                       imm_dispatch=None):
     func_name = build_func_name_internal(isa, dt, dt_par, dt_ret, f, masked_version=masked_version, lmul=lmul)
 
     print("static " + build_proto(funcs[f]["proto"], dt_par, dt_ret, isa, func_name, masked_version = masked_version, lmul=lmul) + " {", file=file)
@@ -67,6 +68,10 @@ def emit_function_body(funcs, f, isa, dt, dt_par, dt_ret, ff, post_rendering, fi
         }
         if level in level_comments:
             print(f"\t// {level_comments[level]}", file=file)
+
+    if imm_dispatch:
+        # immediate bodies used when the integer argument is a constant (codegen/imm.py)
+        print("\n".join(imm_dispatch), file=file)
 
     post_rendering = post_rendering.strip("\n")
 

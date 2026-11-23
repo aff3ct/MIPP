@@ -50,6 +50,13 @@ static void slide()
     for (int i = 0; i < n; i++) DOC_CHECK(s[i] == (i + 1 < n ? A[i + 1] : B[0]));
     for (int i = 0; i < n; i++) DOC_CHECK(t[i] == A[(i + 1) % n]);
     for (int i = 0; i < n; i++) DOC_CHECK(u[i] == A[2]);
+    // --8<-- [start:immediates]
+    int32_t k = n / 2;                         // a variable: the dynamic body
+    mipp::Rvd<float> v = mipp::slide(a, b, k);
+    mipp::Rvd<float> w = mipp::slide<2>(a, b); // a constant, checked at compile time
+    // --8<-- [end:immediates]
+    for (int i = 0; i < n; i++) DOC_CHECK(v[i] == (i + k < n ? A[i + k] : B[i + k - n]));
+    for (int i = 0; i < n; i++) DOC_CHECK(w[i] == (i + 2 < n ? A[i + 2] : B[i + 2 - n]));
 }
 
 // §4: interleaved data

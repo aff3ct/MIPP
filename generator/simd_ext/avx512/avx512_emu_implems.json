@@ -444,6 +444,14 @@
             "if": "defined(__AVX512F__)"
         }
     ],
+    "slide_b128": [
+        {
+            "instr_name": "shuffle_epi8",
+            "datatypes": "all_datatypes",
+            "template": "rea_slide_b128_pshufb",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
     "unzip_even": [
         {
             "instr_name": "30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0",

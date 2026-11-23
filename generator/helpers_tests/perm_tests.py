@@ -69,7 +69,7 @@ def _decls() -> List[str]:
     return ["constexpr size_t NB = (16 / sizeof(T)) < N ? 16 / sizeof(T) : N; // lanes of a block of 128 bits",
             "alignas(64) T a[N];", "alignas(64) T b[N];", "alignas(64) T src[N];", "alignas(64) IDX idx[N];",
             "int32_t mk[N];", "alignas(64) T mem[2 * N];", "alignas(64) T res_r[2 * N];", "alignas(64) T res_s[2 * N];",
-            "(void)NB;"]
+            "(void)NB; (void)idx; // idx: the indices of permute, unused by compress and expand"]
 
 
 def _returns_count(func: str) -> bool:

@@ -142,6 +142,8 @@ def _load_funcs_registry():
             "horizontal": v["horizontal"],
             # moves lanes across the register: LMUL > 1 bodies from the lmulh templates, d2 bodies not lane-wise
             "lane_crossing": v.get("lane_crossing", False),
+            # values of the integer argument with an immediate dispatch (see codegen/imm.py)
+            "imm": v.get("imm"),
             "variants": VariantSet.from_variants(v["variants"])
         }
         if "cpp_name" in v:

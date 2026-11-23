@@ -59,6 +59,15 @@ static void slide(void)
     for (int i = 0; i < n; i++) DOC_CHECK(O1[i] == A[(i + 1) % n]);
     mipp_store_float32(O1, u);
     for (int i = 0; i < n; i++) DOC_CHECK(O1[i] == A[2]);
+    // --8<-- [start:immediates]
+    int32_t k = n / 2;                             // a variable: the dynamic body
+    rvd_float32_t v = mipp_slide_float32(a, b, k);
+    rvd_float32_t w = mipp_slide_float32(a, b, 2); // a constant: palignr, ext...
+    // --8<-- [end:immediates]
+    mipp_store_float32(O1, v);
+    for (int i = 0; i < n; i++) DOC_CHECK(O1[i] == (i + k < n ? A[i + k] : B[i + k - n]));
+    mipp_store_float32(O1, w);
+    for (int i = 0; i < n; i++) DOC_CHECK(O1[i] == (i + 2 < n ? A[i + 2] : B[i + 2 - n]));
 }
 
 /* §4: interleaved data */

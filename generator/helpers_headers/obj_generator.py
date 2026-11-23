@@ -681,6 +681,24 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append("{ return mipp::notb(r0); }")
             lines.append("")
 
+    # Immediate version (`"imm"` of the registry, see codegen/imm.py): `mipp::slide<3>(a, b)`, the C++ Functional
+    # template of the same name on the registers
+    if info.get("imm"):
+        ret_t = "T" if p["ret"]["type"] == "val" else "Rvd<T, LMUL>"
+        typed, raw, cnt = [], [], {"reg": 0, "msk": 0}
+        for a in args:  # the registers and masks; the integer argument is the template parameter
+            if a in cnt:
+                name = ("r" if a == "reg" else "m") + str(cnt[a])
+                cnt[a] += 1
+                typed.append(f"const {'Rvd' if a == 'reg' else 'Rvm'}<T, LMUL>& {name}")
+                raw.append(f"{name}.{'r' if a == 'reg' else 'm'}")
+        typed, raw = ", ".join(typed), ", ".join(raw)
+        call = f"mipp::{cpp_fn}<S>({raw})"
+        lines.append("template <int S, typename T, int LMUL = 1>")
+        lines.append(f"inline {ret_t} {cpp_fn}({typed})")
+        lines.append(f"{{ return {call if ret_t == 'T' else ret_t + '(' + call + ')'}; }}")
+        lines.append("")
+
     body = lines[body_start:]
     lines.append("} // namespace mipp")
 
