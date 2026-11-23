@@ -96,6 +96,23 @@ def is_pair_function(func_name):
     return False
 
 
+def is_indexed_function(func_name):
+    """True for gather / scatter: their datatypes are (data,index) pairs, and the index register
+    ("fixeddatatype": "ret" in the registry) has a type of its own, T_IDX in C++."""
+    return any(arg.get("type") == "reg" and arg.get("fixeddatatype") == "ret"
+               for arg in interfaces[func_name]["proto"]["args"])
+
+
+def index_reg_type_cpp(reg, fixed_dtype, lmul):
+    """C++ type of an index register (`reg`: "vd" or "Vd"), None for a data register. The helpers
+    are written without their `details::` namespace, as the ISA parameter is left out."""
+    if fixed_dtype == "uint":  # permute: unsigned integers of the width of T
+        return f"{reg}<uint_of<T>" + ("" if lmul == 1 else f", {lmul}") + ">"
+    if fixed_dtype == "ret":  # gather / scatter: one index per lane, so an LMUL of its own
+        return f"{reg}<T_IDX, idx_lmul<T, T_IDX>({lmul})>"
+    return None
+
+
 def ret_lmul_of(func_name, lmul):
     """LMUL of the returned register when the arguments have the LMUL `lmul`."""
     r = resolve_ret_lmul(interfaces[func_name]["proto"]["ret"], lmul)
@@ -490,6 +507,8 @@ def write_mipp_infos_masked(mipp_infos, base_dir):
 
 def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=1):
     lmul_str = "" if lmul == 1 else (f", {lmul}" if lmul > 0 else f", -2")
+    if not arg_type:
+        return "void"
     if arg_type == "msk":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
         return f"vm<{t_param}{lmul_str}>"
@@ -507,6 +526,8 @@ def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul
 
 def match_args_type_obj(arg_type, cast=False, ret=False, fixed_dtype=False, lmul=1):
     lmul_str = "" if lmul == 1 else (f", {lmul}" if lmul > 0 else f", -2")
+    if not arg_type:
+        return "void"
     if arg_type == "msk":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
         return f"Vm<{t_param}{lmul_str}>"
@@ -569,7 +590,8 @@ class SpecFuncInfo:
 
     def func_to_str_cpp(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
-        is_pair_func = is_pair_function(self.func_name)
+        is_indexed = is_indexed_function(self.func_name)
+        is_pair_func = is_pair_function(self.func_name) and not is_indexed
         
         tmpl_parts = []
         if mask_kind == "mask":
@@ -622,6 +644,10 @@ class SpecFuncInfo:
             arg_type = arg["type"]
             type_str = match_args_type_cpp(arg_type, False, False, fixed, lmul=lmul)
             is_const = arg.get("charac", "RO") == "RO"
+            if arg_type == "reg":
+                type_str = index_reg_type_cpp("vd", fixed, lmul) or type_str
+            elif arg_type == "ptr" and not is_const:
+                type_str = type_str.replace("const ", "", 1)  # written pointer (stores, scatter)
             const_prefix = "const " if (is_const and not type_str.startswith("const ")) else ""
 
             if arg_type == "reg":
@@ -649,14 +675,21 @@ class SpecFuncInfo:
         ret_str = match_args_type_cpp(self.ret["type"], False, True, ret_fixed, lmul=ret_lmul_of(self.func_name, lmul))
         
         tmpl_parts.append("typename T")
+        if is_indexed:
+            tmpl_parts.append("typename T_IDX")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
         return f"{tmpl_header}{ret_str} {cpp_name}({args_str});"
 
     def func_to_str_obj(self, lmul=1, mask_kind=None):
         cpp_name = self.get_cpp_func_name()
-        is_pair_func = is_pair_function(self.func_name)
+        is_indexed = is_indexed_function(self.func_name)
+        is_pair_func = is_pair_function(self.func_name) and not is_indexed
         lmul_arg = f", {lmul}" if lmul != 1 else ""
+
+        # the Object API has one masked scatter (obj_generator.py): M when the function has it
+        if is_indexed and not self.ret["type"] and mask_kind == "maskz" and exists_msk_in_func(self.func_name, "mask"):
+            return ""
 
         if is_pair_func:
             if mask_kind is not None and mask_kind != "unmasked":
@@ -704,6 +737,10 @@ class SpecFuncInfo:
             arg_type = arg["type"]
             type_str = match_args_type_obj(arg_type, False, False, fixed, lmul=lmul)
             is_const = arg.get("charac", "RO") == "RO"
+            if arg_type == "reg":
+                type_str = index_reg_type_cpp("Vd", fixed, lmul) or type_str
+            elif arg_type == "ptr" and not is_const:
+                type_str = type_str.replace("const ", "", 1)  # written pointer (stores, scatter)
 
             if arg_type in ("reg", "msk"):
                 type_str = f"const {type_str}&"
@@ -735,6 +772,8 @@ class SpecFuncInfo:
         ret_str = match_args_type_obj(self.ret["type"], False, True, ret_fixed, lmul=ret_lmul_of(self.func_name, lmul))
 
         tmpl_parts.append("typename T")
+        if is_indexed:
+            tmpl_parts.append("typename T_IDX")
         tmpl_header = f"template <{', '.join(tmpl_parts)}> "
 
         lines = [f"{tmpl_header}{ret_str} {func_call_name}({args_str});"]
