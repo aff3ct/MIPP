@@ -220,8 +220,11 @@ export function renderAlgoModal(modalData) {
       flatStandaloneCode = buildFlatCode(entry, sources, algoCfg).code;
       godboltUrl = buildGodboltUrlForFlat(flatStandaloneCode, currentIsa, flatDefines, currentScalarSize);
       // the same code with a main() that runs it and compares with the scalar reference
-      const runCode = buildFlatCode(entry, sources, algoCfg, { verify: true }).code;
-      godboltRunUrl = buildGodboltUrlForFlat(runCode, currentIsa, flatDefines, currentScalarSize, { execute: true });
+      // (no link when Compiler Explorer cannot run the programs of the target)
+      if (compilerCfg.canExecute) {
+        const runCode = buildFlatCode(entry, sources, algoCfg, { verify: true }).code;
+        godboltRunUrl = buildGodboltUrlForFlat(runCode, currentIsa, flatDefines, currentScalarSize, { execute: true });
+      }
     }
   }
   // Compare view: the same function on several ISAs, side by side
@@ -455,10 +458,11 @@ export function renderAlgoModal(modalData) {
                   <span class="mipp-isa-badge lvl-${currentImplLvl}" title="Effective implementation level: Level ${currentImplLvl} (${escapeHtml(lvlDescFinal)})">${currentImplLvl === "na" ? "N/A" : `L${currentImplLvl}`}</span>
                 </div>
                 <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  ${godboltRunUrl ? `
                   <a href="${godboltRunUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-btn" title="Open in Godbolt with a main() that runs test() once and compares the result with the scalar reference of MIPP">
                     ${ICON_RUN}
                     <span>Run in Godbolt</span>
-                  </a>
+                  </a>` : ""}
                   <a href="${godboltUrl}" target="_blank" rel="noopener noreferrer" class="mipp-godbolt-btn" title="Open in Godbolt and look at the assembly of test()">
                     ${ICON_GODBOLT}
                     <span>Open in Godbolt</span>

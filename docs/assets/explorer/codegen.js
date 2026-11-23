@@ -140,7 +140,10 @@ export function getCompilerConfigForFlat(isa, defines = {}, scalarSize = 256) {
   const options = flags.join(" ").replace(/\s+/g, " ").trim();
   const compilerLabel = `${compilerMeta.label || "Compiler"} (${options})`;
 
-  return { compiler, options, compilerLabel, targetDesc };
+  // Compiler Explorer has no execution host for some targets (RISC-V, ARMv7)
+  const canExecute = compilerMeta.execute !== false;
+
+  return { compiler, options, compilerLabel, targetDesc, canExecute };
 }
 
 

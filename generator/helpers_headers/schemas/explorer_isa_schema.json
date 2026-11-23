@@ -72,6 +72,10 @@
                     "description": "Base compilation flags (can contain {simd_width} template)",
                     "type": "string"
                 },
+                "execute": {
+                    "description": "false when Compiler Explorer cannot run the programs of this target (no execution host): the \"Run in Godbolt\" link is hidden. Default: true.",
+                    "type": "boolean"
+                },
                 "compiler_32": {
                     "description": "Compiler used for the 32-bit variant of the ISA (e.g. ARMv7 for NEON).",
                     "type": "object",
@@ -98,6 +102,10 @@
                         "base_flags": {
                             "description": "Base compilation flags.",
                             "type": "string"
+                        },
+                        "execute": {
+                            "description": "false when Compiler Explorer cannot run the programs of this target.",
+                            "type": "boolean"
                         }
                     }
                 },

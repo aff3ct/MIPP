@@ -9,7 +9,8 @@
             "id": "carmg1320",
             "arch": "arm",
             "label": "ARM32 GCC",
-            "base_flags": "-O3 -march=armv7-a -mfloat-abi=hard"
+            "base_flags": "-O3 -march=armv7-a -mfloat-abi=hard",
+            "execute": false
         }
     },
     "description": "ARM Advanced SIMD (NEON 128-bit vector extensions for ARM32 and AArch64)",
