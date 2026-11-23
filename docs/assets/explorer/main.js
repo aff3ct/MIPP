@@ -96,6 +96,7 @@ function mountAppShell(appEl) {
   const catCounts = {};
   for (const c of ALL_CATEGORIES) catCounts[c] = 0;
   for (const e of apiData) {
+    if (e.form_of) continue; // the forms of a function are in its card
     if (e.category && catCounts[e.category] !== undefined) {
       catCounts[e.category]++;
     }
@@ -178,13 +179,56 @@ function mountAppShell(appEl) {
 
 
 
+/**
+ * One card per function: a function and its scalar forms (add, add_vs...) are separate
+ * entries of the data, shown by the same card. The card shows the form selected in it
+ * (state.cardForm), else an opened or compared one (as named in the URL), else the function
+ * itself, else the first form that matches the search (`add_vs`, or an intrinsic of a form).
+ */
+function groupForms(results) {
+  const groups = new Map();
+  for (const r of results) {
+    const key = r.entry.form_of || r.entry.name;
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(r);
+  }
+  return [...groups.entries()].map(([key, rs]) =>
+    rs.find((r) => r.entry.name === state.cardForm[key])
+    || rs.find((r) => state.expandedCards.has(r.entry.name) || state.focusedCard === r.entry.name || state.compareSet.has(r.entry.name))
+    || rs.find((r) => r.entry.name === key)
+    || rs[0]);
+}
+
+/** Shows another form in the card of a function: the state of the card follows. */
+function switchCardForm(from, to, cardsContainerEl) {
+  const target = apiData.find((x) => x.name === to);
+  if (!target || from === to) return;
+  state.cardForm[target.form_of || target.name] = to;
+  if (state.expandedCards.delete(from)) state.expandedCards.add(to);
+  state.openedCardsOrder = state.openedCardsOrder.map((c) => (c === from ? to : c));
+  if (state.focusedCard === from) state.focusedCard = to;
+  const compared = state.compareSet.has(from);
+  if (compared) state.compareSet = new Set([...state.compareSet].map((c) => (c === from ? to : c)));
+  for (const perCard of [state.cardTabs, state.cardScalarVariants, state.cardTestVariants, state.cardHwMask, state.cardFlatState]) {
+    if (perCard[from] !== undefined) {
+      perCard[to] = perCard[from];
+      delete perCard[from];
+    }
+  }
+  delete state.cardScalarTypes[from]; // the datatypes are not the same for every form
+  renderCards(cardsContainerEl);
+  if (compared) updateCompareBar(document.querySelector(".mipp-compare-bar"));
+  syncUrlHash(true);
+}
+
 function renderCards(cardsContainerEl) {
   if (!cardsContainerEl) return;
-  const filtered = filterEntries(apiData, state);
+  const filtered = groupForms(filterEntries(apiData, state));
+  const functionCount = apiData.filter((e) => !e.form_of).length;
 
   cardsContainerEl.innerHTML = `
     <div class="mipp-results-bar">
-      <span>Showing <span class="mipp-results-count">${filtered.length}</span> of ${apiData.length} primitives</span>
+      <span>Showing <span class="mipp-results-count">${filtered.length}</span> of ${functionCount} primitives</span>
       ${state.compareSet.size > 0
         ? `<span style="color: var(--mipp-accent); font-weight: 600;">${state.compareSet.size} selected for comparison</span>`
         : ""
@@ -240,12 +284,22 @@ function bindCardEvents(cardsContainerEl) {
       state.cardTestVariants = {};
       state.cardFlatState = {};
       state.cardHwMask = {};
+      state.cardForm = {};
       if (typeof window !== "undefined" && window.history && window.history.replaceState) {
         window.history.replaceState(null, "", window.location.pathname + window.location.search);
       }
       renderApp();
     });
   }
+
+  // Form selector of a card (vv / vs / sv)
+  cardsContainerEl.querySelectorAll("[data-card-form]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const cardEl = btn.closest(".mipp-card");
+      if (cardEl) switchCardForm(cardEl.getAttribute("data-card-name"), btn.getAttribute("data-card-form"), cardsContainerEl);
+    });
+  });
 
   // 2. Card Expansion Toggle
   cardsContainerEl.querySelectorAll("[data-toggle-card]").forEach((btn) => {
@@ -783,6 +837,20 @@ function updateModals(modalsContainerEl) {
           updateModals(modalsContainerEl);
           syncUrlHash(true);
         }
+      });
+    });
+
+    // Scalar form of the function shown by the modal (vv / vs / sv)
+    modalsContainerEl.querySelectorAll("[data-modal-form]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const target = apiData.find((x) => x.name === btn.getAttribute("data-modal-form"));
+        if (!target || !state.algoModalData || state.algoModalData.funcName === target.name) return;
+        state.algoModalData.entry = target;
+        state.algoModalData.funcName = target.name;
+        state.algoModalData.imm = "var";
+        updateModals(modalsContainerEl);
+        syncUrlHash(true);
       });
     });
 

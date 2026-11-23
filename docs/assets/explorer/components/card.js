@@ -165,6 +165,21 @@ export function computeOptimisticLevel(entry, ext) {
   return bestLvl > 3 ? "na" : bestLvl;
 }
 
+/**
+ * Selector of the scalar forms of a function (vv / vs / sv...), empty for a function without
+ * forms. One letter per operand: v, a register; s, a scalar of the element type, used for
+ * every lane. `attr`: the data attribute that carries the name of the entry of each form.
+ */
+export function renderFormSelector(entry, attr) {
+  const forms = entry.forms || [];
+  if (forms.length < 2) return "";
+  const what = (f) => f.form.split("").map((c) => (c === "v" ? "register" : "scalar")).join(", ");
+  return `
+    <span class="mipp-form-selector" role="group" aria-label="Scalar form">
+      ${forms.map((f) => `<button type="button" class="mipp-form-btn ${f.name === entry.name ? "active" : ""}" ${attr}="${escapeHtml(f.name)}" title="Form ${escapeHtml(f.form)}: ${what(f)} (C function mipp_${escapeHtml(f.name)}_...)">${escapeHtml(f.form)}</button>`).join("")}
+    </span>`;
+}
+
 export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   const isExpanded = state.expandedCards.has(entry.name);
   const isCompared = state.compareSet.has(entry.name);
@@ -205,8 +220,9 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
             <label class="mipp-checkbox-item" style="margin-right: 0.2rem;" onclick="event.stopPropagation();">
               <input type="checkbox" data-compare="${escapeHtml(entry.name)}" data-compare-name="${escapeHtml(entry.name)}" ${isCompared ? "checked" : ""} title="Add to comparison">
             </label>
-            <span class="mipp-card-name">${escapeHtml(entry.name)}</span>
+            <span class="mipp-card-name">${escapeHtml(entry.form_of || entry.name)}</span>
             <span class="mipp-cat-badge">${escapeHtml(entry.category)}</span>
+            ${renderFormSelector(entry, "data-card-form")}
             ${variantBadgesHtml}
             ${entry.imm
               ? `<span class="mipp-imm-badge" title="${escapeHtml(`The integer parameter ${entry.imm.arg} (${entry.imm.text.replace(/\bS\b/g, entry.imm.arg)}) is a variable or an immediate (a value known at compile time). ${immTargetsSentence(entry.imm)}`)}">imm</span>`

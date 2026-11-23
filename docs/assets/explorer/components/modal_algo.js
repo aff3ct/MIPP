@@ -8,6 +8,7 @@ import { escapeHtml, ICON_COPY, ICON_GODBOLT, ICON_RUN, ICON_LINK, ICON_WARNING,
 import { highlightCpp } from "../syntax.js";
 import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
+import { renderFormSelector } from "./card.js";
 import { getCompilerConfigForFlat, buildGodboltUrlForFlat } from "../codegen.js";
 import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName, immChoices } from "../algo_source.js";
 
@@ -409,7 +410,7 @@ export function renderAlgoModal(modalData) {
         <!-- Header -->
         <div class="mipp-modal-header">
           <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-            <h3 class="mipp-modal-title" style="margin: 0;">Algorithm: <code>mipp::${escapeHtml(entry.name)}</code></h3>
+            <h3 class="mipp-modal-title" style="margin: 0;">Algorithm: <code>mipp::${escapeHtml(entry.form_of || entry.name)}</code></h3>
           </div>
           <div style="display: flex; gap: 0.45rem; align-items: center;">
             ${(modalData.history && modalData.history.length) ? `<button class="mipp-modal-share-btn" id="mipp-algo-modal-back" title="Back to ${escapeHtml(modalData.history[modalData.history.length - 1].entry.name)}" aria-label="Back">←</button>` : ""}
@@ -467,6 +468,11 @@ export function renderAlgoModal(modalData) {
 
             <!-- Contextual Features / Target Switcher / SIMD Width -->
             ${featureControlsHtml}
+            ${(entry.forms || []).length > 1 ? `
+              <div class="mipp-modal-ctrl-group">
+                <span class="mipp-control-label">Form:</span>
+                ${renderFormSelector(entry, "data-modal-form")}
+              </div>` : ""}
             ${immControlsHtml}
           </div>
 

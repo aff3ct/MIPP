@@ -38,6 +38,10 @@ export const state = {
   algoModalData: null, // { entry, simdExt, dt, mask, lmul }
   cardTabs: {}, // cardName -> "hw" | "proto" | "scalar" | "specs" | "flat"
   cardFlatState: {}, // cardName -> { simdExt, dt, mask, lmul, scalarSize, defines }
+  // Scalar form shown by the card of a function: function name -> name of the entry of the
+  // selected form (add -> add_vs). The cards are named after the entry they show, so the URL
+  // (focus, open, cmp) gives the form as well.
+  cardForm: {},
   cardHwMask: {}, // cardName -> "unmasked" | "mask" | "maskz" | "masks"
   cardScalarTypes: {},
   cardScalarVariants: {},

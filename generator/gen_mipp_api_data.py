@@ -1023,6 +1023,28 @@ def generate_mipp_api_data(project_root=None):
     # Sort entries alphabetically by function name
     api_entries.sort(key=lambda x: x["name"])
 
+    # Scalar forms (`add_vs`, `fmadd_vvs`, `lshift_vs`...): a function and its forms are one
+    # card of the Explorer, with a form selector. Each entry gets the list of the forms of its
+    # function, {"form": "vv", "name": "add"}, {"form": "vs", "name": "add_vs"}... (the function
+    # itself first, written with one `v` per operand), and a form the name of its function
+    # (`form_of`) and its own letters (`form`).
+    by_name = {e["name"]: e for e in api_entries}
+    forms_of = {}
+    for e in api_entries:
+        base, _, letters = e["name"].rpartition("_")
+        if base in by_name and re.fullmatch(r"[vs]*s[vs]*", letters):
+            forms_of.setdefault(base, []).append(letters)
+    for base, found in forms_of.items():
+        declared = [f for f in (interfaces[base].get("forms") or []) if f in found]
+        letters = declared + sorted(f for f in found if f not in declared)
+        group = [{"form": "v" * len(letters[0]), "name": base}]
+        group += [{"form": f, "name": f"{base}_{f}"} for f in letters]
+        for member in group:
+            by_name[member["name"]]["forms"] = group
+            if member["name"] != base:
+                by_name[member["name"]]["form_of"] = base
+                by_name[member["name"]]["form"] = member["form"]
+
     # 5. Export JSON to docs/assets/data/: the index, needed for the first display
     # (cards, filters, search), and the details, only read once a card tab or the
     # Algorithm modal is opened: the Explorer loads them after the first display

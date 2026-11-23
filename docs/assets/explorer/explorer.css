@@ -1964,6 +1964,48 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 /* Test & Scalar Variant Switcher Buttons (Matching Left Sidebar Mask Badges) */
 /* Static Read-only Variant Badges */
 /* Card Header Square Variant Badges (U, M, Z, S) */
+/* Selector of the scalar forms of a function (vv / vs / sv): card header and Algorithm modal */
+.mipp-form-selector {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  border: 1px solid var(--mipp-card-border, #cbd5e1);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.mipp-form-btn {
+  font-family: var(--md-code-font, monospace);
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.22rem 0.42rem;
+  border: none;
+  border-left: 1px solid var(--mipp-card-border, #cbd5e1);
+  background: transparent;
+  color: var(--md-default-fg-color--light, #64748b);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mipp-form-btn:first-child {
+  border-left: none;
+}
+
+.mipp-form-btn:hover {
+  background: var(--mipp-accent-glow, rgba(14, 165, 233, 0.15));
+}
+
+.mipp-form-btn.active {
+  background: var(--mipp-accent, #0284c7);
+  color: #ffffff;
+}
+
+[data-md-color-scheme="slate"] .mipp-form-selector,
+[data-md-color-scheme="slate"] .mipp-form-btn {
+  border-color: rgba(148, 163, 184, 0.3);
+}
+
 .mipp-card-variant-badges {
   display: inline-flex;
   align-items: center;
