@@ -114,8 +114,10 @@ inline T reduce(const T* data, const std::size_t n, OP op)
 	}
 	else
 		i = 1;
-	for (; i < n; i++)
-		res = op(Vd<T, 1>(res), Vd<T, 1>(data[i]))[0];
+	// through pointers: with the index, GCC 13 sees an overflow in this loop once inlined with a constant n
+	// (-Waggressive-loop-optimizations, a false positive: the loop does not run when n is a multiple of N)
+	for (const T *p = data + i, *e = data + n; p < e; p++)
+		res = op(Vd<T, 1>(res), Vd<T, 1>(*p))[0];
 	return res;
 }
 
