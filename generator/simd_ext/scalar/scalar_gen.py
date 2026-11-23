@@ -293,6 +293,7 @@ def gen_c_defines_scalar(isa, file):
         print("#if MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE == 0", file=file)
         print("\t#error \"MIPP_" + isa["name"].upper() + "_RVD_SIZE_BYTE can't be null\"", file=file)
         print("#endif", file=file)
+    gen_c_rvd_align_define(isa["name"].upper(), file)
 
     template1 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}"""
     template2 = """#define MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} {{n_elmts}}
@@ -363,9 +364,9 @@ def gen_c_structures_scalar(isa, file):
     """
     Writes the C structures corresponding to the supported datatypes for a given ISA, for both vector and mask types.
     """
-    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
 
-    template_alt = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) {
+    template_alt = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE))) {
 #if {{ isa_datatype.if }}
     {{ isa_datatype.reg }} vd;
 #else
@@ -390,7 +391,7 @@ def gen_c_structures_scalar(isa, file):
             print(j2_template_alt.render(isa=isa, isa_datatype=isa["datatypes"][dt], datatype=datatypes[dt], isa_name_upper=isa["name"].upper()), file=file)
 
 
-    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
+    template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
 
     for dt in isa["datatypes"]:
@@ -405,8 +406,8 @@ def gen_c_structures_scalar(isa, file):
             file=file)
         
     for lmul in all_lmul:
-        template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
-        template_msk = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
+        template = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
+        template_msk = """typedef struct __attribute__((aligned(MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_M{{lmul}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{lmul}}_t;"""
         if lmul == 1:
             # the type without suffix is an alias of the LMUL 1 type (as for the other ISAs), so that both can be mixed
             template = """typedef vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m1_t vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
@@ -440,8 +441,8 @@ def gen_c_structures_scalar(isa, file):
             )
 
     ldiv = 2
-    template = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE) / {{ldiv}}))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
-    template_msk = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_SIZE_BYTE) / {{ldiv}}))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
+    template = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE) / {{ldiv}}))) { {{ isa_datatype.reg }} vd[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
+    template_msk = """typedef struct __attribute__((aligned((MIPP_{{isa_name_upper}}_RVD_ALIGN_BYTE) / {{ldiv}}))) { {{ isa_datatype.msk }} vm[MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{datatype.n_bits}}_D{{ldiv}}]; } vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ldiv}}_t;"""
     
     j2_template = Template(template, undefined=StrictUndefined)
     j2_template_msk = Template(template_msk, undefined=StrictUndefined)
