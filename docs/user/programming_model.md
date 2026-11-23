@@ -162,7 +162,7 @@ template <typename T, int LMUL = 1>
 struct Vd {
     using value_type = T;
     static constexpr int lmul = LMUL;
-    vd<T, LMUL> r; // Underlying low-level SIMD register
+    vd<T, LMUL> vd; // Underlying low-level SIMD register
 
     static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
 
@@ -191,7 +191,7 @@ template <typename T, int LMUL = 1>
 struct Vm {
     using value_type = T;
     static constexpr int lmul = LMUL;
-    vm<T, LMUL> m; // Underlying low-level mask register
+    vm<T, LMUL> vm; // Underlying low-level mask register
 
     static constexpr int N(); // Number of elements (mipp::N<T, LMUL>())
 
