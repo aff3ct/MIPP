@@ -173,6 +173,12 @@ def parse_isa(include_dir, isa):
     includes = []
     for p in paths:
         parse_header(p, isa, symbols, imports, includes if p.endswith(os.sep + "common.h") else None)
+    # Prototypes of the functions defined in these headers (RVV declares its functions first,
+    # as they call each other in any order): the definitions are the symbols. A prototype
+    # listed first would be resolved in their place, and it has no body to show.
+    for variants in symbols.values():
+        if any(v["kind"] == "func" for v in variants):
+            variants[:] = [v for v in variants if v["kind"] != "decl"]
     return symbols, sorted(imports), includes
 
 
