@@ -40,14 +40,14 @@ int main(int argc, char** argv)
 	std::cout << "mipp::N<float32_t,4>() = " << mipp::N<float32_t,4>() << std::endl;
 	std::cout << "mipp::N<float32_t,8>() = " << mipp::N<float32_t,8>() << std::endl;
 
-	mipp::rvd<float32_t,LMUL> rvd1, rvd2, rvd3;
+	mipp::vd<float32_t,LMUL> vd1, vd2, vd3;
 
-	rvd1 = mipp::load<float32_t,LMUL>(a1);
-	rvd2 = mipp::load<float32_t,LMUL>(a2);
+	vd1 = mipp::load<float32_t,LMUL>(a1);
+	vd2 = mipp::load<float32_t,LMUL>(a2);
 
-	rvd3 = mipp::add(rvd1, rvd2);
+	vd3 = mipp::add(vd1, vd2);
 
-	mipp::store(a3, rvd3);
+	mipp::store(a3, vd3);
 
 	print_v(a3, "a3");
 

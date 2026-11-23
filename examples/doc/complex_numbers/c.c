@@ -37,12 +37,12 @@ static int close_to(float x, float ref)
 static void interleaved(void)
 {
     // --8<-- [start:interleaved]
-    rvd_float32_t a = mipp_load_float32(Z);         // re0 im0 re1 im1 ...
-    rvd_float32_t b = mipp_load_float32(W);
-    rvd_float32_t p = mipp_cmul_float32(a, b);      // a * b
-    rvd_float32_t q = mipp_cdiv_float32(a, b);      // a / b
-    rvd_float32_t s = mipp_cfmadd_float32(a, b, p); // a * b + p
-    rvd_float32_t m = mipp_cabs_float32(a);         // |a|, in both lanes of each pair
+    vd_float32_t a = mipp_load_float32(Z);          // re0 im0 re1 im1 ...
+    vd_float32_t b = mipp_load_float32(W);
+    vd_float32_t p = mipp_cmul_float32(a, b);       // a * b
+    vd_float32_t q = mipp_cdiv_float32(a, b);       // a / b
+    vd_float32_t s = mipp_cfmadd_float32(a, b, p); // a * b + p
+    vd_float32_t m = mipp_cabs_float32(a);          // |a|, in both lanes of each pair
     // --8<-- [end:interleaved]
     mipp_store_float32(P, p);
     mipp_store_float32(Q, q);
@@ -61,10 +61,10 @@ static void interleaved(void)
 static void split(void)
 {
     // --8<-- [start:split]
-    rvd_float32_t ar = mipp_load_float32(AR), ai = mipp_load_float32(AI);
-    rvd_float32_t br = mipp_load_float32(BR), bi = mipp_load_float32(BI);
-    rvd_float32_t pr = mipp_fmsub_float32(ar, br, mipp_mul_float32(ai, bi)); // ar br - ai bi
-    rvd_float32_t pi = mipp_fmadd_float32(ar, bi, mipp_mul_float32(ai, br)); // ar bi + ai br
+    vd_float32_t ar = mipp_load_float32(AR), ai = mipp_load_float32(AI);
+    vd_float32_t br = mipp_load_float32(BR), bi = mipp_load_float32(BI);
+    vd_float32_t pr = mipp_fmsub_float32(ar, br, mipp_mul_float32(ai, bi)); // ar br - ai bi
+    vd_float32_t pi = mipp_fmadd_float32(ar, bi, mipp_mul_float32(ai, br)); // ar bi + ai br
     // --8<-- [end:split]
     mipp_store_float32(PR, pr);
     mipp_store_float32(PI, pi);

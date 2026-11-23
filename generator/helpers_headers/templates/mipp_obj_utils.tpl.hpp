@@ -21,32 +21,32 @@ namespace mipp
 {
 // "[l0, l1, l2, l3 | l4, ...]", a '|' between the 128-bit blocks; masks: 1 (active) / 0 (inactive)
 template <typename T, int LMUL>
-inline std::ostream& operator<<(std::ostream& os, const Rvd<T, LMUL>& r)
+inline std::ostream& operator<<(std::ostream& os, const Vd<T, LMUL>& r)
 {
-	T buf[Rvd<T, LMUL>::N()];
+	T buf[Vd<T, LMUL>::N()];
 	mipp::storeu(buf, r.r);
-	details::print_lanes(os, buf, Rvd<T, LMUL>::N(), false);
+	details::print_lanes(os, buf, Vd<T, LMUL>::N(), false);
 	return os;
 }
 
 template <typename T, int LMUL>
-inline std::ostream& operator<<(std::ostream& os, const Rvm<T, LMUL>& m)
+inline std::ostream& operator<<(std::ostream& os, const Vm<T, LMUL>& m)
 {
-	T buf[Rvd<T, LMUL>::N()];
-	mipp::storeu(buf, mipp::torvd(m.m));
-	details::print_lanes(os, buf, Rvd<T, LMUL>::N(), true);
+	T buf[Vd<T, LMUL>::N()];
+	mipp::storeu(buf, mipp::tovd(m.m));
+	details::print_lanes(os, buf, Vd<T, LMUL>::N(), true);
 	return os;
 }
 
 // Saturating narrowing of two registers into one (the lanes of `a`, then the lanes of `b`).
 template <typename T_DST, typename T, int LMUL>
-inline Rvd<T_DST, LMUL> pack(const Rvd<T, LMUL>& a, const Rvd<T, LMUL>& b)
+inline Vd<T_DST, LMUL> pack(const Vd<T, LMUL>& a, const Vd<T, LMUL>& b)
 {
-	return Rvd<T_DST, LMUL>(mipp::pack<T_DST>(a.r, b.r));
+	return Vd<T_DST, LMUL>(mipp::pack<T_DST>(a.r, b.r));
 }
 
 // ---------------------------------------------------------------------------------------------------------
-// Reductions with an associative operation: `op(Rvd, Rvd) -> Rvd`, callable for every LMUL (a functor with
+// Reductions with an associative operation: `op(Vd, Vd) -> Vd`, callable for every LMUL (a functor with
 // a template operator(), or a generic lambda in C++14). Predefined operations: mipp::op::add, mul, min,
 // max, andb, orb, xorb.
 // ---------------------------------------------------------------------------------------------------------
@@ -73,49 +73,49 @@ constexpr int reduce_last_lmul = 1;
 #endif
 
 template <typename T, int LMUL, typename OP>
-inline T reduce_rvd(const Rvd<T, LMUL>& r, OP op, std::true_type /* smallest LMUL */)
+inline T reduce_vd(const Vd<T, LMUL>& r, OP op, std::true_type /* smallest LMUL */)
 {
-	T buf[Rvd<T, LMUL>::N()];
+	T buf[Vd<T, LMUL>::N()];
 	mipp::storeu(buf, r.r);
 	T acc = buf[0];
-	for (std::size_t i = 1; i < Rvd<T, LMUL>::N(); i++)
-		acc = op(Rvd<T, LMUL>(acc), Rvd<T, LMUL>(buf[i]))[0];
+	for (std::size_t i = 1; i < Vd<T, LMUL>::N(); i++)
+		acc = op(Vd<T, LMUL>(acc), Vd<T, LMUL>(buf[i]))[0];
 	return acc;
 }
 
 template <typename T, int LMUL, typename OP>
-inline T reduce_rvd(const Rvd<T, LMUL>& r, OP op, std::false_type)
+inline T reduce_vd(const Vd<T, LMUL>& r, OP op, std::false_type)
 {
-	const Rvd<T, lmul_down(LMUL)> h = op(r.lo(), r.hi());
-	return reduce_rvd(h, op, std::integral_constant<bool, lmul_down(LMUL) == reduce_last_lmul>());
+	const Vd<T, lmul_down(LMUL)> h = op(r.lo(), r.hi());
+	return reduce_vd(h, op, std::integral_constant<bool, lmul_down(LMUL) == reduce_last_lmul>());
 }
 } // namespace details
 
 // op(r[0], op(r[1], ...)) in an unspecified order (the operation must be associative and commutative).
 template <typename T, int LMUL, typename OP>
-inline T reduce(const Rvd<T, LMUL>& r, OP op)
+inline T reduce(const Vd<T, LMUL>& r, OP op)
 {
-	return details::reduce_rvd(r, op, std::integral_constant<bool, LMUL == details::reduce_last_lmul>());
+	return details::reduce_vd(r, op, std::integral_constant<bool, LMUL == details::reduce_last_lmul>());
 }
 
 // Reduction of the `n` elements of `data` (n >= 1; `data` needs no alignment), with registers of LMUL `LMUL`.
 template <typename T, int LMUL = 1, typename OP>
 inline T reduce(const T* data, const std::size_t n, OP op)
 {
-	const std::size_t w = Rvd<T, LMUL>::N();
+	const std::size_t w = Vd<T, LMUL>::N();
 	std::size_t i = 0;
 	T res = data[0];
 	if (n >= w)
 	{
-		Rvd<T, LMUL> acc(data);
+		Vd<T, LMUL> acc(data);
 		for (i = w; i + w <= n; i += w)
-			acc = op(acc, Rvd<T, LMUL>(data + i));
+			acc = op(acc, Vd<T, LMUL>(data + i));
 		res = mipp::reduce(acc, op);
 	}
 	else
 		i = 1;
 	for (; i < n; i++)
-		res = op(Rvd<T, 1>(res), Rvd<T, 1>(data[i]))[0];
+		res = op(Vd<T, 1>(res), Vd<T, 1>(data[i]))[0];
 	return res;
 }
 

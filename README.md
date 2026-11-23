@@ -52,14 +52,14 @@ Leaky ReLU (`y = x > 0 ? x : alpha * x`) with the C++ Object API:
 
 void leaky_relu(float alpha, const float* x, float* y, size_t size)
 {
-    constexpr size_t N = mipp::Rvd<float>::N(); // elements per register (e.g. 8 with AVX2)
+    constexpr size_t N = mipp::Vd<float>::N(); // elements per register (e.g. 8 with AVX2)
     const size_t vec_end = (size / N) * N;
 
     // 1. Vector main loop
     for (size_t i = 0; i < vec_end; i += N) {
-        mipp::Rvd<float> vx(&x[i]);                               // load
-        mipp::Rvm<float> pos = vx > 0.f;                          // comparison -> mask
-        mipp::Rvd<float> vy  = mipp::select(pos, vx, vx * alpha); // branch-free
+        mipp::Vd<float> vx(&x[i]);                                // load
+        mipp::Vm<float> pos = vx > 0.f;                           // comparison -> mask
+        mipp::Vd<float> vy  = mipp::select(pos, vx, vx * alpha); // branch-free
         mipp::storeu(&y[i], vy);
     }
     // 2. Scalar tail loop for the remaining elements
@@ -82,16 +82,16 @@ The same loop body with the C API and the C++ Functional API (`vzero` and
 `valpha` hold the broadcast constants):
 
 ```c
-rvd_float32_m1_t vx  = mipp_loadu_float32_m1(&x[i]);
-rvm_float32_m1_t pos = mipp_cmpgt_float32_m1(vx, vzero);
-rvd_float32_m1_t vy  = mipp_select_float32_m1(pos, vx, mipp_mul_float32_m1(vx, valpha));
+vd_float32_m1_t vx  = mipp_loadu_float32_m1(&x[i]);
+vm_float32_m1_t pos = mipp_cmpgt_float32_m1(vx, vzero);
+vd_float32_m1_t vy  = mipp_select_float32_m1(pos, vx, mipp_mul_float32_m1(vx, valpha));
 mipp_storeu_float32_m1(&y[i], vy);
 ```
 
 ```cpp
-mipp::rvd<float> vx  = mipp::loadu<float>(&x[i]);
-mipp::rvm<float> pos = mipp::cmpgt(vx, vzero);
-mipp::rvd<float> vy  = mipp::select(pos, vx, mipp::mul(vx, valpha));
+mipp::vd<float> vx  = mipp::loadu<float>(&x[i]);
+mipp::vm<float> pos = mipp::cmpgt(vx, vzero);
+mipp::vd<float> vy  = mipp::select(pos, vx, mipp::mul(vx, valpha));
 mipp::storeu(&y[i], vy);
 ```
 

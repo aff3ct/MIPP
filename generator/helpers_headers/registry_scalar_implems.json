@@ -2174,7 +2174,7 @@
             ]
         }
     ],
-    "torvd": [
+    "tovd": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2186,7 +2186,7 @@
             ]
         }
     ],
-    "torvm": [
+    "tovm": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",

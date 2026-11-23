@@ -117,8 +117,8 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
     '("(?:\\\\.|[^"\\\\])*")',
     // 4. Numbers
     '\\b(0x[0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?[fFulUL]*)\\b',
-    // 5. Types (MIPP SIMD types, Rvd, rvd, Rvm, rvm, C/C++ primitives)
-    '\\b(VARIANT|rvd_[a-z0-9_]+_t|rvm_[a-z0-9_]+_t|Rvd|rvd|Rvm|rvm|__m128[a-z0-9_]*|__m256[a-z0-9_]*|__m512[a-z0-9_]*|__mmask8|__mmask16|__mmask32|__mmask64|__mmask[0-9]+|uint8x16_t|uint16x8_t|uint32x4_t|uint64x2_t|int8x16_t|int16x8_t|int32x4_t|int64x2_t|float64x2_t|float32x4_t|float[0-9]+x[0-9]+_t|[u]?int[0-9]+x[0-9]+_t|sv[a-z0-9_]+_t|v[a-z0-9_]+_t|reg|msk|void|bool|bool_t|char|int|short|long|float|double|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64|float32_t|float64_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t)\\b',
+    // 5. Types (MIPP SIMD types, Vd, vd, Vm, vm, C/C++ primitives)
+    '\\b(VARIANT|vd_[a-z0-9_]+_t|vm_[a-z0-9_]+_t|Vd|vd|Vm|vm|__m128[a-z0-9_]*|__m256[a-z0-9_]*|__m512[a-z0-9_]*|__mmask8|__mmask16|__mmask32|__mmask64|__mmask[0-9]+|uint8x16_t|uint16x8_t|uint32x4_t|uint64x2_t|int8x16_t|int16x8_t|int32x4_t|int64x2_t|float64x2_t|float32x4_t|float[0-9]+x[0-9]+_t|[u]?int[0-9]+x[0-9]+_t|sv[a-z0-9_]+_t|v[a-z0-9_]+_t|reg|msk|void|bool|bool_t|char|int|short|long|float|double|float32|float64|int8|int16|int32|int64|uint8|uint16|uint32|uint64|float32_t|float64_t|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_t)\\b',
     // 6. Keywords
     '\\b(const|static|inline|return|if|else|for|while|do|switch|case|default|break|continue|struct|class|template|typename|auto|sizeof|typedef|namespace|using|constexpr|extern)\\b',
     // 7. Functions / Hardware Intrinsics / MIPP / Function declarations & calls
@@ -277,7 +277,7 @@ function splitArgs(argStr) {
 }
 
 /**
- * Parses a parameter declaration like "const rvd<T, 1> r0" or "const float64_t* p0"
+ * Parses a parameter declaration like "const vd<T, 1> r0" or "const float64_t* p0"
  * into { type, name }.
  */
 function parseParam(paramStr) {

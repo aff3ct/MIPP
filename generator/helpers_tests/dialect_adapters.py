@@ -21,7 +21,7 @@ class DialectAdapter(ABC):
 
     @abstractmethod
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        """Return the register vector type for this dialect (e.g. 'auto', 'rvd_float32_t')."""
+        """Return the register vector type for this dialect (e.g. 'auto', 'vd_float32_t')."""
         pass
 
     @abstractmethod
@@ -229,16 +229,16 @@ class CDialectAdapter(DialectAdapter):
         return f"_{lmul_suffix}" if lmul_suffix and lmul_suffix not in ("", "m0") else ""
 
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"rvd_{dt_ext}{self._suffix(lmul_suffix)}_t"
+        return f"vd_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"rvm_{dt_ext}{self._suffix(lmul_suffix)}_t"
+        return f"vm_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_scalar_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"rvd_scalar_{dt_ext}{self._suffix(lmul_suffix)}_t"
+        return f"vd_scalar_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_scalar_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
-        return f"rvm_scalar_{dt_ext}{self._suffix(lmul_suffix)}_t"
+        return f"vm_scalar_{dt_ext}{self._suffix(lmul_suffix)}_t"
 
     def format_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
         return f"mipp_load_{dt_ext}{self._suffix(lmul_suffix)}({ptr_name})"
@@ -305,14 +305,14 @@ class CppObjDialectAdapter(DialectAdapter):
     def format_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
         coeff = self._coeff(lmul_suffix)
         if coeff != "1":
-            return f"mipp::Rvd<T, {coeff}>"
-        return "mipp::Rvd<T>"
+            return f"mipp::Vd<T, {coeff}>"
+        return "mipp::Vd<T>"
 
     def format_msk_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
         coeff = self._coeff(lmul_suffix)
         if coeff != "1":
-            return f"mipp::Rvm<T, {coeff}>"
-        return "mipp::Rvm<T>"
+            return f"mipp::Vm<T, {coeff}>"
+        return "mipp::Vm<T>"
 
     def format_scalar_reg_type(self, dt_ext: str, lmul_suffix: str = "") -> str:
         return "auto"
@@ -323,8 +323,8 @@ class CppObjDialectAdapter(DialectAdapter):
     def format_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
         coeff = self._coeff(lmul_suffix)
         if coeff != "1":
-            return f"mipp::Rvd<T, {coeff}>({ptr_name})"
-        return f"mipp::Rvd<T>({ptr_name})"
+            return f"mipp::Vd<T, {coeff}>({ptr_name})"
+        return f"mipp::Vd<T>({ptr_name})"
 
     def format_scalar_load(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
         coeff = self._coeff(lmul_suffix)
@@ -335,8 +335,8 @@ class CppObjDialectAdapter(DialectAdapter):
     def format_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
         coeff = self._coeff(lmul_suffix)
         if coeff != "1":
-            return f"mipp::Rvm<T, {coeff}>({ptr_name})"
-        return f"mipp::Rvm<T>({ptr_name})"
+            return f"mipp::Vm<T, {coeff}>({ptr_name})"
+        return f"mipp::Vm<T>({ptr_name})"
 
     def format_scalar_set_k(self, dt_ext: str, ptr_name: str, lmul_suffix: str = "") -> str:
         coeff = self._coeff(lmul_suffix)

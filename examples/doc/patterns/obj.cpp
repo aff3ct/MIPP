@@ -21,11 +21,11 @@ int main()
     }
     const int n = (int)mipp::N<float>();
     // --8<-- [start:calls]
-    mipp::Rvd<float> a(A);
-    mipp::Rvd<float> b(B);
-    mipp::Rvd<float> r = mipp::permute<reversed>(a);  // mipp::reverse(a)
-    mipp::Rvd<float> s = mipp::permute<shifted>(a);   // mipp::slidedown(a, 1)
-    mipp::Rvd<float> m = mipp::permute2<mixed>(a, b); // a0 b1 a2 b3 ...: permute2 and a table
+    mipp::Vd<float> a(A);
+    mipp::Vd<float> b(B);
+    mipp::Vd<float> r = mipp::permute<reversed>(a);   // mipp::reverse(a)
+    mipp::Vd<float> s = mipp::permute<shifted>(a);    // mipp::slidedown(a, 1)
+    mipp::Vd<float> m = mipp::permute2<mixed>(a, b); // a0 b1 a2 b3 ...: permute2 and a table
     // --8<-- [end:calls]
     for (int i = 0; i < n; i++) DOC_CHECK(r[i] == A[n - 1 - i]);
     for (int i = 0; i < n; i++) DOC_CHECK(s[i] == (i + 1 < n ? A[i + 1] : 0.f));

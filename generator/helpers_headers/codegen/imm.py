@@ -7,7 +7,7 @@ take a constant, encoded in the instruction (an immediate: `palignr`, `vext`, `p
 static inline function cannot pass its parameter to them (clang checks the immediate before inlining). The generated
 function therefore keeps its dynamic body and starts with a dispatch, used when the compiler knows the value:
 
-    static inline rvd_sse_float32_m1_t mipp_sse_slide_float32_m1(const rvd_sse_float32_m1_t r0, ..., const int32_t s0) {
+    static inline vd_sse_float32_m1_t mipp_sse_slide_float32_m1(const vd_sse_float32_m1_t r0, ..., const int32_t s0) {
         // Level 2 (Generic Emulation)
     #if defined(__OPTIMIZE__) && (defined(__SSSE3__))
         if (__builtin_constant_p(s0)) { // immediate when s0 is a constant: alignr

@@ -17,14 +17,14 @@ include/
         ├── interfaces/
         │   ├── c/                      # C API: dispatch to the selected ISA
         │   ├── cpp/                    # C++ Functional API: dispatch to the selected ISA
-        │   └── obj/                    # C++ Object API (Rvd, Rvm)
+        │   └── obj/                    # C++ Object API (Vd, Vm)
         ├── templates/cpp/              # Declarations of the C++ function templates
         └── simd_ext/<isa>/
             ├── c/                      # Resolved implementations of one ISA
             │   ├── common.h            # Register types and ISA macros
             │   ├── mipp_<isa>.h        # Includes every function of the ISA
             │   └── functions/<category>/...
-            └── cpp/                    # C++ overloads of one ISA (mipp::rvd<T,LMUL,ISA>)
+            └── cpp/                    # C++ overloads of one ISA (mipp::vd<T,LMUL,ISA>)
 ```
 
 The public headers contain nothing but `#include` lines to `mipp/internal/`: `mipp/cpp/fun/add.hpp` includes `mipp/internal/interfaces/cpp/functions/arithmetic/add.hpp`. Users never include `mipp/internal/` directly. The `utils.h(pp)` headers are the exception: they hold the hand-written utilities of each API (aligned allocation, printing, `sum`, `pack`, `reduce`), rendered by `utils_generator.py` from `generator/helpers_headers/templates/mipp_utils.tpl.h`, `mipp_utils.tpl.hpp` and `mipp_obj_utils.tpl.hpp`, on top of the generated functions; the global headers include them. So do `mipp/cpp/patterns.hpp` and `mipp/obj/patterns.hpp` (`mipp_patterns.tpl.hpp`, `mipp_obj_patterns.tpl.hpp`): the permutations whose pattern is known at compile time, `permute<P>` and `permute2<P>`, under `#if __cplusplus >= 201703L` (C++17 extras of a C++11 API). They pull about 20 rearrangement functions, so only `mipp.hpp` and `mipp_obj.hpp` include them, not the `utils.hpp` headers; with fine-grained headers, they include the unmasked granules only (`mipp/cpp/fun/u/<function>.hpp`, found with `__has_include`).
@@ -99,7 +99,7 @@ The interface layers select the ISA at compile time:
 #endif
 ```
 
-3. The C interface functions (`mipp_add_float32`) call the ISA functions (`mipp_avx_add_float32`) under the same `#if` chain; the C++ overloads of `simd_ext/<isa>/cpp/` wrap them for `mipp::rvd<T, LMUL, ISA>`.
+3. The C interface functions (`mipp_add_float32`) call the ISA functions (`mipp_avx_add_float32`) under the same `#if` chain; the C++ overloads of `simd_ext/<isa>/cpp/` wrap them for `mipp::vd<T, LMUL, ISA>`.
 
 Only the ISAs selected with `--simd-ext` appear in these chains. The C++ `mipp::ISA` enum lists every directory of `simd_ext/`, whatever the selection.
 

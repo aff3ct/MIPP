@@ -385,7 +385,7 @@
             "return _mm_movemask_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(_mm_and_{{ isa_dt_par.data_ext_logi }}(m0.m, m1.m)) == 0;"
         ]
     },
-    "torvm_cmp": {
+    "tovm_cmp": {
         "format": "long",
         "code": [
             "%m<tr>% res;",
@@ -397,7 +397,7 @@
             "return res;"
         ]
     },
-    "torvm_cmp64_sse2": {
+    "tovm_cmp64_sse2": {
         "format": "long",
         "code": [
             "%m<tr>% res;",

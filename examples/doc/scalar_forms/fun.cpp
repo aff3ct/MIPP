@@ -24,12 +24,12 @@ static void fill()
 static void forms()
 {
     // --8<-- [start:forms]
-    mipp::rvd<float> va = mipp::load<float>(A);
-    mipp::rvd<float> vb = mipp::load<float>(B);
-    mipp::rvd<float> r1 = mipp::sub(va, 1.f);        // a - 1
-    mipp::rvd<float> r2 = mipp::sub(10.f, va);       // 10 - a
-    mipp::rvd<float> r3 = mipp::fmadd(va, 2.f, vb);  // a * 2 + b
-    mipp::rvm<float> m = mipp::cmplt(va, 0.f);       // a < 0
+    mipp::vd<float> va = mipp::load<float>(A);
+    mipp::vd<float> vb = mipp::load<float>(B);
+    mipp::vd<float> r1 = mipp::sub(va, 1.f);         // a - 1
+    mipp::vd<float> r2 = mipp::sub(10.f, va);        // 10 - a
+    mipp::vd<float> r3 = mipp::fmadd(va, 2.f, vb);   // a * 2 + b
+    mipp::vm<float> m = mipp::cmplt(va, 0.f);        // a < 0
     // --8<-- [end:forms]
     const int n = (int)mipp::N<float>();
     mipp::store(OUT, r1);
@@ -43,7 +43,7 @@ static void forms()
 
     // --8<-- [start:masked]
     // merge masking keeps the register operand: m ? 10 - a : a
-    mipp::rvd<float> r4 = mipp::sub<mipp::M>(m, 10.f, va);
+    mipp::vd<float> r4 = mipp::sub<mipp::M>(m, 10.f, va);
     // --8<-- [end:masked]
     mipp::store(OUT, r4);
     for (int i = 0; i < n; i++) DOC_CHECK(OUT[i] == (A[i] < 0.f ? 10.f - A[i] : A[i]));
@@ -53,10 +53,10 @@ static void forms()
 static void shifts()
 {
     // --8<-- [start:shifts]
-    mipp::rvd<int32_t> vi = mipp::load<int32_t>(I);
-    mipp::rvd<int32_t> vn = mipp::load<int32_t>(CNT); // a count per lane, in [0, 31]
-    mipp::rvd<int32_t> s1 = mipp::lshift(vi, vn);     // i << n, lane by lane
-    mipp::rvd<int32_t> s2 = mipp::rshift(vi, 1);      // i >> 1, every lane
+    mipp::vd<int32_t> vi = mipp::load<int32_t>(I);
+    mipp::vd<int32_t> vn = mipp::load<int32_t>(CNT); // a count per lane, in [0, 31]
+    mipp::vd<int32_t> s1 = mipp::lshift(vi, vn);      // i << n, lane by lane
+    mipp::vd<int32_t> s2 = mipp::rshift(vi, 1);       // i >> 1, every lane
     // --8<-- [end:shifts]
     const int n = (int)mipp::N<int32_t>();
     mipp::store(IOUT, s1);

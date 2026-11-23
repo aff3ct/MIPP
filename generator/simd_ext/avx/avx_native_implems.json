@@ -1007,10 +1007,10 @@
             "template": "testz_2argsf"
         }
     ],
-    "torvd": [
+    "tovd": [
         {
             "datatypes": "all_datatypes",
-            "template": "torvd",
+            "template": "tovd",
             "skip_audit_level": true,
             "skip_audit_level_reason": "zero-overhead struct field copy for full-vector masks"
         }

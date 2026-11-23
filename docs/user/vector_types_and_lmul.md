@@ -15,11 +15,11 @@ MIPP standardizes naming across C and C++ interfaces:
 ## 2. Vector Type Representation
 
 ### 2.1. Vector Handles
-- **Value Registers**: `mipp::rvd<T, LMUL>` (underlying C struct / hardware handle) and `mipp::Rvd<T, LMUL>` (C++ class).
-- **Mask Registers**: `mipp::rvm<T, LMUL>` and `mipp::Rvm<T, LMUL>`.
+- **Value Registers**: `mipp::vd<T, LMUL>` (underlying C struct / hardware handle) and `mipp::Vd<T, LMUL>` (C++ class).
+- **Mask Registers**: `mipp::vm<T, LMUL>` and `mipp::Vm<T, LMUL>`.
 
 ### 2.2. Compile-Time Element Capacity (`N`)
-The total number of elements contained in a vector is retrieved via `mipp::N<T, LMUL>()` (C API: `MIPP_N_[TYPE]_[LMUL]` macros; C++ Object API: `mipp::Rvd<T, LMUL>::N()`):
+The total number of elements contained in a vector is retrieved via `mipp::N<T, LMUL>()` (C API: `MIPP_N_[TYPE]_[LMUL]` macros; C++ Object API: `mipp::Vd<T, LMUL>::N()`):
 
 $$N(T, \text{LMUL}) = \left( \frac{\text{VectorBitWidth}}{\text{sizeof}(T) \times 8} \right) \times \text{LMUL}$$
 
@@ -82,16 +82,16 @@ On SIMD architectures without hardware register grouping (SSE, AVX, AVX-512, NEO
 
 ```c
 /* Base Level: LMUL = 1 (Single hardware vector) */
-typedef struct { __m256 r; } rvd_avx_float32_m1_t;
+typedef struct { __m256 r; } vd_avx_float32_m1_t;
 
 /* Multiplied Level: LMUL = 2 (Pair of LMUL=1 structs) */
-typedef struct { rvd_avx_float32_m1_t r1, r2; } rvd_avx_float32_m2_t;
+typedef struct { vd_avx_float32_m1_t r1, r2; } vd_avx_float32_m2_t;
 
 /* Multiplied Level: LMUL = 4 (Pair of LMUL=2 structs) */
-typedef struct { rvd_avx_float32_m2_t r1, r2; } rvd_avx_float32_m4_t;
+typedef struct { vd_avx_float32_m2_t r1, r2; } vd_avx_float32_m4_t;
 
 /* Multiplied Level: LMUL = 8 (Pair of LMUL=4 structs) */
-typedef struct { rvd_avx_float32_m4_t r1, r2; } rvd_avx_float32_m8_t;
+typedef struct { vd_avx_float32_m4_t r1, r2; } vd_avx_float32_m8_t;
 ```
 
 #### Compilation & Zero-Overhead Execution
@@ -100,11 +100,11 @@ When calling an operation on a multiplied vector (e.g., `mipp::add(va, vb)` on `
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-static inline rvd_avx_float32_m2_t mipp_avx_add_float32_m2(
-    const rvd_avx_float32_m2_t r0,
-    const rvd_avx_float32_m2_t r1)
+static inline vd_avx_float32_m2_t mipp_avx_add_float32_m2(
+    const vd_avx_float32_m2_t r0,
+    const vd_avx_float32_m2_t r1)
 {
-    rvd_avx_float32_m2_t res;
+    vd_avx_float32_m2_t res;
     res.r1 = mipp_avx_add_float32_m1(r0.r1, r1.r1); // _mm256_add_ps
     res.r2 = mipp_avx_add_float32_m1(r0.r2, r1.r2); // _mm256_add_ps
     return res;
@@ -119,10 +119,10 @@ In the scalar fallback backend, multi-register vectors are represented as flat a
 <!-- not-compiled: example of generated code (include/mipp/internal/), not user code -->
 
 ```c
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M1]; } rvd_scalar_float32_m1_t;
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M2]; } rvd_scalar_float32_m2_t;
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M4]; } rvd_scalar_float32_m4_t;
-typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M8]; } rvd_scalar_float32_m8_t;
+typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M1]; } vd_scalar_float32_m1_t;
+typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M2]; } vd_scalar_float32_m2_t;
+typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M4]; } vd_scalar_float32_m4_t;
+typedef struct { float32_t r[MIPP_SCALAR_N_FLOAT32_M8]; } vd_scalar_float32_m8_t;
 ```
 
 Scalar operations execute flat sequential loops over all $N \times \text{LMUL}$ elements.
@@ -144,8 +144,8 @@ In addition to multi-register expansion ($\text{LMUL} > 1$), MIPP provides **hal
 | Context | Notation |
 | :--- | :--- |
 | Concept | half-vector, length divider $\text{LDIV} = 2$ (equivalently $\text{LMUL} = 1/2$) |
-| C API types and functions | `d2` suffix: `rvd_float32_d2_t`, `mipp_add_float32_d2` |
-| C++ Functional and Object APIs | `LMUL` template argument `-2`: `mipp::rvd<float, -2>`, `mipp::Rvd<float, -2>` |
+| C API types and functions | `d2` suffix: `vd_float32_d2_t`, `mipp_add_float32_d2` |
+| C++ Functional and Object APIs | `LMUL` template argument `-2`: `mipp::vd<float, -2>`, `mipp::Vd<float, -2>` |
 | Availability macro | `MIPP_LDIV_2` |
 | ISA descriptors of the generator (`sw_lmul`, `hw_lmul`) | factor `-2` |
 | Test generator (`gen_mipp_tests.py --ldiv`) | `--ldiv 2` |
@@ -239,7 +239,7 @@ MIPP provides five conversions between data vectors. They differ in what they pr
 | **`ncvt`** | Converts the value of every element to the type **twice as narrow** (truncation); the result has the next `LMUL` down. | `mipp_ncvt_[src]_[dst]_[lmul](v)` | `mipp::ncvt_[dst](v)` | `mipp::ncvt<T_DST>(v)` |
 | **`ncvts`** | As `ncvt` for the integers, with **saturation** to the range of the destination type. | `mipp_ncvts_[src]_[dst]_[lmul](v)` | `mipp::ncvts_[dst](v)` | `mipp::ncvts<T_DST>(v)` |
 
-`cast` and `cvt` keep the `LMUL` of their input; `wcvt`, `ncvt` and `ncvts` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `torvd` / `torvm` ([§6.2](masking_semantics.md#62-torvm-data-vector-to-mask), [§6.3](masking_semantics.md#63-torvd-mask-to-data-vector)).
+`cast` and `cvt` keep the `LMUL` of their input; `wcvt`, `ncvt` and `ncvts` do not. Masks have their own reinterpretation, `cast_k` (see [Masking Semantics §6.1](masking_semantics.md#61-strong-mask-typing-cast_k-mask-to-mask-conversion)), and masks convert to and from data vectors with `tovd` / `tovm` ([§6.2](masking_semantics.md#62-tovm-data-vector-to-mask), [§6.3](masking_semantics.md#63-tovd-mask-to-data-vector)).
 
 === "C API"
 
@@ -261,7 +261,7 @@ MIPP provides five conversions between data vectors. They differ in what they pr
 
 ### 5.1. `cast` (Bit Reinterpretation)
 
-`cast` exists for every pair of the 10 datatypes. The register keeps its size, so the number of elements changes when the widths differ: `cast` from `rvd<float>` to `rvd<int8_t>` gives 4 times more lanes, each holding one byte of the original floats. Typical uses are bit manipulations on floating-point values (sign, exponent) and feeding integer-only operations with floating-point data.
+`cast` exists for every pair of the 10 datatypes. The register keeps its size, so the number of elements changes when the widths differ: `cast` from `vd<float>` to `vd<int8_t>` gives 4 times more lanes, each holding one byte of the original floats. Typical uses are bit manipulations on floating-point values (sign, exponent) and feeding integer-only operations with floating-point data.
 
 ### 5.2. `cvt` (Value Conversion, Same Width)
 
@@ -294,7 +294,7 @@ MIPP provides five conversions between data vectors. They differ in what they pr
 | **`hi`** | The upper half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
 | **`combine`** | Joins two registers: the first one gives the lower half, the second one the upper half. | `d2` $\to$ `m1` $\to$ `m2` $\to$ `m4` $\to$ `m8` |
 
-`lo`, `hi` and `combine` also exist on masks: `lo_k`, `hi_k` and `combine_k` in the C API, overloads of `lo`, `hi` and `combine` taking `rvm` / `Rvm` arguments in the C++ APIs. `combine(lo(v), hi(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `lo` from `d2`, no `combine` or `wcvt` from `m8`).
+`lo`, `hi` and `combine` also exist on masks: `lo_k`, `hi_k` and `combine_k` in the C API, overloads of `lo`, `hi` and `combine` taking `vm` / `Vm` arguments in the C++ APIs. `combine(lo(v), hi(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `lo` from `d2`, no `combine` or `wcvt` from `m8`).
 
 The C name carries the **`LMUL` of the arguments**, the one of the result being given by the type (`mipp_lo_float32_m2` takes an `m2` register and returns an `m1` one). As for the other functions, no suffix means `m1`. The C++ Functional and Object APIs deduce the `LMUL` from the type of the argument.
 

@@ -215,11 +215,11 @@
             }
         },
         "hw_mask": {
-            "description": "`true` when the masks have their own registers (AVX-512 `__mmask`, SVE and RVV predicates). The scalar fallback then converts the masks with `torvd` / `torvm` instead of copying them.",
+            "description": "`true` when the masks have their own registers (AVX-512 `__mmask`, SVE and RVV predicates). The scalar fallback then converts the masks with `tovd` / `tovm` instead of copying them.",
             "type": "boolean"
         },
-        "hw_mask_requires_torvd": {
-            "description": "With `hw_mask`: the scalar fallback of a function with a mask argument or result depends on `torvd` and `torvm`, so that the resolver emits them first.",
+        "hw_mask_requires_tovd": {
+            "description": "With `hw_mask`: the scalar fallback of a function with a mask argument or result depends on `tovd` and `tovm`, so that the resolver emits them first.",
             "type": "boolean"
         },
         "hw_mask_is_bitfield": {
@@ -231,7 +231,7 @@
             "type": "boolean"
         },
         "layout": {
-            "description": "For the ISAs whose register size is only known at compile time (RVV): templates of the size macros, of the fixed-size typedefs and of the `rvd` / `rvm` structures, used instead of the default ones.",
+            "description": "For the ISAs whose register size is only known at compile time (RVV): templates of the size macros, of the fixed-size typedefs and of the `vd` / `vm` structures, used instead of the default ones.",
             "type": "object",
             "properties": {
                 "size_symbol": {
@@ -254,12 +254,12 @@
                     "description": "Template of the fixed-size typedef of a mask register.",
                     "type": "string"
                 },
-                "rvd_struct_template": {
-                    "description": "Template of the `rvd_<isa>_<type>_t` structure.",
+                "vd_struct_template": {
+                    "description": "Template of the `vd_<isa>_<type>_t` structure.",
                     "type": "string"
                 },
-                "rvm_struct_template": {
-                    "description": "Template of the `rvm_<isa>_<type>_t` structure.",
+                "vm_struct_template": {
+                    "description": "Template of the `vm_<isa>_<type>_t` structure.",
                     "type": "string"
                 }
             },
@@ -268,8 +268,8 @@
                 "defines_template",
                 "vector_typedef_template",
                 "mask_typedef_template",
-                "rvd_struct_template",
-                "rvm_struct_template"
+                "vd_struct_template",
+                "vm_struct_template"
             ],
             "additionalProperties": false
         },

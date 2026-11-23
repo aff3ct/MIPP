@@ -170,9 +170,9 @@ mkdocs build --strict                     # what the CI runs: warnings are error
 The C and C++ code blocks of the User Guide are not written in the pages: they are sections of complete programs in `examples/doc/<page>/`, one file per API (`c.c`, `fun.cpp`, `obj.cpp`), included by `pymdownx.snippets`. A section is delimited by two comments in the program:
 
 ```cpp
-mipp::rvd<float> a = mipp::load<float>(A);              // setup, not shown
+mipp::vd<float> a = mipp::load<float>(A);               // setup, not shown
 // ;--8<-- [start:masked]
-mipp::rvd<float> c = mipp::add<mipp::M, float>(m, a, b);
+mipp::vd<float> c = mipp::add<mipp::M, float>(m, a, b);
 // ;--8<-- [end:masked]
 DOC_CHECK(...);                                         // check, not shown
 ```

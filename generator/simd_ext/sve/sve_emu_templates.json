@@ -286,7 +286,7 @@
             "\treturn !{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), m0.m);"
         ]
     },
-    "torvd_dup": {
+    "tovd_dup": {
         "format": "long",
         "code": [
             "%r<tr>% res;",
@@ -294,7 +294,7 @@
             "return res;"
         ]
     },
-    "torvm_cmpne": {
+    "tovm_cmpne": {
         "format": "long",
         "code": [
             "%m<tr>% res;",

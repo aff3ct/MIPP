@@ -9,7 +9,7 @@
  *   closure of what it uses, for the selected compiler flags) and a `test` function that calls it
  *   in a loop: its assembly shows that the MIPP calls compile to the bare instructions. With
  *   { verify: true }, a `main` runs it and compares with the scalar reference of MIPP.
- * - buildAbstractCode(): the same function written with the C++ Functional API (mipp::rvd<T, LMUL>,
+ * - buildAbstractCode(): the same function written with the C++ Functional API (mipp::vd<T, LMUL>,
  *   mipp::add(...)), with the level of each MIPP function it calls.
  */
 
@@ -328,9 +328,9 @@ const C_TYPES = {
   float64: "float64_t", float32: "float32_t", int64: "int64_t", int32: "int32_t", int16: "int16_t", int8: "int8_t",
   uint64: "uint64_t", uint32: "uint32_t", uint16: "uint16_t", uint8: "uint8_t",
 };
-const REG_TYPE_RE = /^(rvd|rvm)_(\w+?)_(float64|float32|u?int64|u?int32|u?int16|u?int8)(?:_(m\d|d2))?_t$/;
+const REG_TYPE_RE = /^(vd|vm)_(\w+?)_(float64|float32|u?int64|u?int32|u?int16|u?int8)(?:_(m\d|d2))?_t$/;
 
-/** {kind: rvd|rvm, isa, dt, lmul} of a register type name, following the typedef aliases. */
+/** {kind: vd|vm, isa, dt, lmul} of a register type name, following the typedef aliases. */
 function regInfo(typeName) {
   const m = String(typeName).match(REG_TYPE_RE);
   if (!m) return null;
@@ -446,13 +446,13 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
   const helperRoots = [];
   for (const p of sig.params) {
     const ri = regInfo(p.type);
-    if (ri && ri.kind === "rvm") {
+    if (ri && ri.kind === "vm") {
       helperRoots.push(`mipp_${ri.isa}_set_k_${ri.dt}_${ri.lsuf}`);
       if (refSym) helperRoots.push(`mipp_scalar_set_k_${ri.dt}_${ri.lsuf}`);
     }
   }
   const retInfo = regInfo(sig.ret);
-  if (retInfo && retInfo.kind === "rvm") {
+  if (retInfo && retInfo.kind === "vm") {
     helperRoots.push(`mipp_${retInfo.isa}_get_k_${retInfo.dt}_${retInfo.lsuf}`);
     if (refSym) helperRoots.push(`mipp_scalar_get_k_${retInfo.dt}_${retInfo.lsuf}`);
   }
@@ -592,7 +592,7 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
   };
   sig.params.forEach((p, idx) => {
     const ri = regInfo(p.type);
-    if (ri && ri.kind === "rvd") {
+    if (ri && ri.kind === "vd") {
       const ct = C_TYPES[ri.dt], n = nMacro(ri);
       // sized as the register type: a half-vector by mask fills a whole register
       decls.push(`\t${ct} in_${p.name}[sizeof(${p.type}) / sizeof(${ct})] = {0};`);
@@ -605,7 +605,7 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
       }
       callArgs.push(`&${p.name}`);
       show(p.name, `in_${p.name}`, ri, n);
-    } else if (ri && ri.kind === "rvm") {
+    } else if (ri && ri.kind === "vm") {
       const n = nMacro(ri);
       decls.push(`\tint32_t bits_${p.name}[${n}];`);
       decls.push(`\tfor (int i = 0; i < ${n}; i++) bits_${p.name}[i] = (i % 3) != 1;`);
@@ -688,7 +688,7 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
       L.push(...M.splice(0));
       L.push(`\treturn 0;`);
     }
-  } else if (retInfo && retInfo.kind === "rvd") {
+  } else if (retInfo && retInfo.kind === "vd") {
     const ct = C_TYPES[retInfo.dt], n = nMacro(retInfo);
     L.push(`\t${sig.ret} res;`);
     L.push(`\ttest(${["&res", ...callArgs, "1"].join(", ")});`);
@@ -707,7 +707,7 @@ export function buildFlatCode(entry, sources, cfg, opts = {}) {
     } else {
       L.push(`\treturn 0;`);
     }
-  } else if (retInfo && retInfo.kind === "rvm") {
+  } else if (retInfo && retInfo.kind === "vm") {
     const n = nMacro(retInfo);
     L.push(`\t${sig.ret} res;`);
     L.push(`\ttest(${["&res", ...callArgs, "1"].join(", ")});`);
@@ -780,7 +780,7 @@ function replaceCalls(code, re, rename) {
 }
 
 /**
- * The function written with the C++ Functional API: types rvd<T, LMUL> / rvm<T, LMUL>, calls
+ * The function written with the C++ Functional API: types vd<T, LMUL> / vm<T, LMUL>, calls
  * mipp::<name>(...). The scalar fallbacks keep their C names (C API of the scalar target).
  * Returns { code, calls: [{cpp, cName, level}] }.
  */

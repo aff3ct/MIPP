@@ -49,20 +49,20 @@ template <typename R> inline auto combine_call(const R& r0, const R& r1) -> decl
 } // namespace details
 
 template <typename T, int LMUL = 1>
-struct Rvd
+struct Vd
 {
 	using value_type = T;
 	static constexpr int lmul = LMUL;
-	rvd<T, LMUL> r;
+	vd<T, LMUL> r;
 
 	static constexpr int N() { return mipp::N<T, LMUL>(); }
 
-	static inline rvd<T, LMUL> from_list(std::initializer_list<T> l)
+	static inline vd<T, LMUL> from_list(std::initializer_list<T> l)
 	{
 		if (l.size() == 1)
 			return mipp::set1<T, LMUL>(*l.begin());
 		if (l.size() != (size_t)N())
-			throw std::invalid_argument("mipp::Rvd: the initializer list must have 1 or N() values");
+			throw std::invalid_argument("mipp::Vd: the initializer list must have 1 or N() values");
 		T buf[N()];
 		size_t i = 0;
 		for (const T v : l)
@@ -70,42 +70,42 @@ struct Rvd
 		return mipp::loadu<T, LMUL>(buf);
 	}
 
-	inline Rvd() = default;
-	inline Rvd(rvd<T, LMUL> r0) : r(r0) {}
-	inline Rvd(const T val) : r(mipp::set1<T, LMUL>(val)) {}
-	inline Rvd(const T *p0) : r(mipp::loadu<T, LMUL>(p0)) {}
-	// The lanes in order, {l0, l1, ...} (N() values), or a single value broadcast to every lane ({val}, as Rvd(val))
-	inline Rvd(std::initializer_list<T> l) : r(from_list(l)) {}
+	inline Vd() = default;
+	inline Vd(vd<T, LMUL> r0) : r(r0) {}
+	inline Vd(const T val) : r(mipp::set1<T, LMUL>(val)) {}
+	inline Vd(const T *p0) : r(mipp::loadu<T, LMUL>(p0)) {}
+	// The lanes in order, {l0, l1, ...} (N() values), or a single value broadcast to every lane ({val}, as Vd(val))
+	inline Vd(std::initializer_list<T> l) : r(from_list(l)) {}
 
 	// Implicit conversion to underlying functional SIMD register (C++ Func interop)
-	inline operator rvd<T, LMUL>() const { return this->r; }
-	inline Rvd& operator=(const rvd<T, LMUL>& r0) { this->r = r0; return *this; }
-	inline Rvd& operator=(const T val) { this->r = mipp::set1<T, LMUL>(val); return *this; }
+	inline operator vd<T, LMUL>() const { return this->r; }
+	inline Vd& operator=(const vd<T, LMUL>& r0) { this->r = r0; return *this; }
+	inline Vd& operator=(const T val) { this->r = mipp::set1<T, LMUL>(val); return *this; }
 
 	inline T operator[](const size_t index) const { return mipp::get(this->r, index); }
 
 	// Lower / upper half (LMUL below): m2 -> m1, m1 -> d2, ... (not defined for d2)
-	inline Rvd<T, details::lmul_down(LMUL)> lo() const { return Rvd<T, details::lmul_down(LMUL)>(details::lo_call(this->r)); }
-	inline Rvd<T, details::lmul_down(LMUL)> hi() const { return Rvd<T, details::lmul_down(LMUL)>(details::hi_call(this->r)); }
+	inline Vd<T, details::lmul_down(LMUL)> lo() const { return Vd<T, details::lmul_down(LMUL)>(details::lo_call(this->r)); }
+	inline Vd<T, details::lmul_down(LMUL)> hi() const { return Vd<T, details::lmul_down(LMUL)>(details::hi_call(this->r)); }
 	// Register of the LMUL above made of this register (low half) and `hi` (high half)
-	inline Rvd<T, details::lmul_up(LMUL)> combine(const Rvd& hi) const { return Rvd<T, details::lmul_up(LMUL)>(details::combine_call(this->r, hi.r)); }
+	inline Vd<T, details::lmul_up(LMUL)> combine(const Vd& hi) const { return Vd<T, details::lmul_up(LMUL)>(details::combine_call(this->r, hi.r)); }
 };
 
 template <typename T, int LMUL = 1>
-struct Rvm
+struct Vm
 {
 	using value_type = T;
 	static constexpr int lmul = LMUL;
-	rvm<T, LMUL> m;
+	vm<T, LMUL> m;
 
 	static constexpr int N() { return mipp::N<T, LMUL>(); }
 
-	static inline rvm<T, LMUL> from_list(std::initializer_list<bool> l)
+	static inline vm<T, LMUL> from_list(std::initializer_list<bool> l)
 	{
 		if (l.size() == 1)
 			return mipp::set1_k<T, LMUL>(*l.begin() ? 1 : 0);
 		if (l.size() != (size_t)N())
-			throw std::invalid_argument("mipp::Rvm: the initializer list must have 1 or N() values");
+			throw std::invalid_argument("mipp::Vm: the initializer list must have 1 or N() values");
 		int32_t vals[N()];
 		size_t i = 0;
 		for (const bool b : l)
@@ -113,30 +113,30 @@ struct Rvm
 		return mipp::set_k<T, LMUL>(vals);
 	}
 
-	inline Rvm() = default;
-	inline Rvm(rvm<T, LMUL> m0) : m(m0) {}
-	inline Rvm(const bool val) : m(mipp::set1_k<T, LMUL>(val ? 1 : 0)) {}
-	inline Rvm(const int32_t vals[mipp::N<T, LMUL>()]) : m(mipp::set_k<T, LMUL>(vals)) {}
-	// The lanes in order, {b0, b1, ...} (N() values), or a single value broadcast to every lane ({b}, as Rvm(b))
-	inline Rvm(std::initializer_list<bool> l) : m(from_list(l)) {}
-	// A bool array would decay to bool* then silently convert to `true` through Rvm(bool): forbid it
-	Rvm(const bool*) = delete;
+	inline Vm() = default;
+	inline Vm(vm<T, LMUL> m0) : m(m0) {}
+	inline Vm(const bool val) : m(mipp::set1_k<T, LMUL>(val ? 1 : 0)) {}
+	inline Vm(const int32_t vals[mipp::N<T, LMUL>()]) : m(mipp::set_k<T, LMUL>(vals)) {}
+	// The lanes in order, {b0, b1, ...} (N() values), or a single value broadcast to every lane ({b}, as Vm(b))
+	inline Vm(std::initializer_list<bool> l) : m(from_list(l)) {}
+	// A bool array would decay to bool* then silently convert to `true` through Vm(bool): forbid it
+	Vm(const bool*) = delete;
 
 	// Implicit conversion to underlying functional SIMD mask (C++ Func interop)
-	inline operator rvm<T, LMUL>() const { return this->m; }
-	inline Rvm& operator=(const rvm<T, LMUL>& m0) { this->m = m0; return *this; }
-	inline Rvm& operator=(const bool val) { this->m = mipp::set1_k<T, LMUL>(val ? 1 : 0); return *this; }
-	Rvm& operator=(const bool*) = delete;
+	inline operator vm<T, LMUL>() const { return this->m; }
+	inline Vm& operator=(const vm<T, LMUL>& m0) { this->m = m0; return *this; }
+	inline Vm& operator=(const bool val) { this->m = mipp::set1_k<T, LMUL>(val ? 1 : 0); return *this; }
+	Vm& operator=(const bool*) = delete;
 
 	inline bool operator[](const size_t index) const {
 		return details::mask_get_val<T>(mipp::get(this->m, index), typename std::is_floating_point<T>::type());
 	}
 
 	// Lower / upper half (LMUL below): m2 -> m1, m1 -> d2, ... (not defined for d2)
-	inline Rvm<T, details::lmul_down(LMUL)> lo() const { return Rvm<T, details::lmul_down(LMUL)>(details::lo_call(this->m)); }
-	inline Rvm<T, details::lmul_down(LMUL)> hi() const { return Rvm<T, details::lmul_down(LMUL)>(details::hi_call(this->m)); }
+	inline Vm<T, details::lmul_down(LMUL)> lo() const { return Vm<T, details::lmul_down(LMUL)>(details::lo_call(this->m)); }
+	inline Vm<T, details::lmul_down(LMUL)> hi() const { return Vm<T, details::lmul_down(LMUL)>(details::hi_call(this->m)); }
 	// Mask of the LMUL above made of this mask (low half) and `hi` (high half)
-	inline Rvm<T, details::lmul_up(LMUL)> combine(const Rvm& hi) const { return Rvm<T, details::lmul_up(LMUL)>(details::combine_call(this->m, hi.m)); }
+	inline Vm<T, details::lmul_up(LMUL)> combine(const Vm& hi) const { return Vm<T, details::lmul_up(LMUL)>(details::combine_call(this->m, hi.m)); }
 };
 
 } // namespace mipp

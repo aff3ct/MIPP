@@ -19,7 +19,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-            "%r<tp>% tmp = %torvd<tp>%(m0);",
+            "%r<tp>% tmp = %tovd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
@@ -251,7 +251,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, s0);",
-            "%r<tp>% tmp = %torvd<tp>%(m0);",
+            "%r<tp>% tmp = %tovd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
@@ -298,7 +298,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0, r1, s0);",
-            "%r<tp>% tmp = %torvd<tp>%(m0);",
+            "%r<tp>% tmp = %tovd<tp>%(m0);",
             "return %andb<tp>%(op, tmp);"
         ]
     },
@@ -325,7 +325,7 @@
     "store_mskz_vec": {
         "format": "long",
         "code": [
-            "%{{ func_name }}<tp>%(p0, %andb<tp>%(r0, %torvd<tp>%(m0)));"
+            "%{{ func_name }}<tp>%(p0, %andb<tp>%(r0, %tovd<tp>%(m0)));"
         ]
     },
     "storeu_msk": {
@@ -333,7 +333,7 @@
         "code": [
             "%s<tp>% buff[%N<tp>%];",
             "%s<tp>% mask_buff[%N<tp>%];",
-            "%r<tp>% msk_reg = %torvd<tp>%(m0);",
+            "%r<tp>% msk_reg = %tovd<tp>%(m0);",
             "",
             "%storeu<tp>%(buff, r0);",
             "%storeu<tp>%(mask_buff, msk_reg);",
@@ -347,7 +347,7 @@
         "code": [
             "%s<tp>% buff[%N<tp>%];",
             "%s<tp>% mask_buff[%N<tp>%];",
-            "%r<tp>% msk_reg = %torvd<tp>%(m0);",
+            "%r<tp>% msk_reg = %tovd<tp>%(m0);",
             "",
             "%storeu<tp>%(buff, r0);",
             "%storeu<tp>%(mask_buff, msk_reg);",
@@ -378,7 +378,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%( r0, r1, r2);",
-            "%r<tp>% tmp = %torvd<tp>%(m0);",
+            "%r<tp>% tmp = %tovd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]
@@ -403,7 +403,7 @@
         "format": "long",
         "code": [
             "%r<tp>% op = %{{func_name}}<tp>%(r0);",
-            "%r<tp>% tmp = %torvd<tp>%(m0);",
+            "%r<tp>% tmp = %tovd<tp>%(m0);",
             "%r<tp>% res = %andb<tp>%(op, tmp);",
             "return res;"
         ]

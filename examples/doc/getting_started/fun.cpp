@@ -9,14 +9,14 @@ void leaky_relu(float alpha, const float* x, float* y, size_t size)
 {
     constexpr size_t N = mipp::N<float>(); // elements per register (e.g. 8 with AVX2)
     const size_t vec_end = (size / N) * N;
-    mipp::rvd<float> vzero  = mipp::set1<float>(0.f);
-    mipp::rvd<float> valpha = mipp::set1<float>(alpha);
+    mipp::vd<float> vzero  = mipp::set1<float>(0.f);
+    mipp::vd<float> valpha = mipp::set1<float>(alpha);
 
     // 1. Vector main loop
     for (size_t i = 0; i < vec_end; i += N) {
-        mipp::rvd<float> vx  = mipp::loadu<float>(&x[i]);
-        mipp::rvm<float> pos = mipp::cmpgt(vx, vzero);                       // comparison -> mask
-        mipp::rvd<float> vy  = mipp::select(pos, vx, mipp::mul(vx, valpha)); // branch-free
+        mipp::vd<float> vx  = mipp::loadu<float>(&x[i]);
+        mipp::vm<float> pos = mipp::cmpgt(vx, vzero);                        // comparison -> mask
+        mipp::vd<float> vy  = mipp::select(pos, vx, mipp::mul(vx, valpha)); // branch-free
         mipp::storeu(&y[i], vy);
     }
     // 2. Scalar tail loop for the remaining elements

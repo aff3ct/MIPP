@@ -24,8 +24,8 @@ static void fill()
 static void capacity()
 {
     // --8<-- [start:capacity]
-    constexpr int n_f32_m1 = mipp::Rvd<float, 1>::N(); // 8 on AVX2 (256-bit / 32-bit * 1)
-    constexpr int n_f32_m4 = mipp::Rvd<float, 4>::N(); // 32 on AVX2 (8 * 4)
+    constexpr int n_f32_m1 = mipp::Vd<float, 1>::N(); // 8 on AVX2 (256-bit / 32-bit * 1)
+    constexpr int n_f32_m4 = mipp::Vd<float, 4>::N(); // 32 on AVX2 (8 * 4)
     // --8<-- [end:capacity]
     DOC_CHECK(n_f32_m4 == 4 * n_f32_m1);
     DOC_CHECK(n_f32_m1 * sizeof(float) == mipp::req_alignment());
@@ -42,9 +42,9 @@ static void d2_loop()
 #ifdef MIPP_LDIV_2
 constexpr size_t n_half = mipp::N<float, -2>();
 for (size_t i = 0; i + n_half <= n; i += n_half) {
-    mipp::Rvd<float, -2> a = mipp::loadu_obj<float, -2>(in_a + i);
-    mipp::Rvd<float, -2> b = mipp::loadu_obj<float, -2>(in_b + i);
-    mipp::Rvd<float, -2> c = a + b;
+    mipp::Vd<float, -2> a = mipp::loadu_obj<float, -2>(in_a + i);
+    mipp::Vd<float, -2> b = mipp::loadu_obj<float, -2>(in_b + i);
+    mipp::Vd<float, -2> c = a + b;
     mipp::storeu(out + i, c);
 }
 #endif
@@ -62,11 +62,11 @@ static void d2_guard()
 {
     // --8<-- [start:d2_guard]
 #ifdef MIPP_LDIV_2
-    mipp::Rvd<float, -2> h = mipp::set0_obj<float, -2>();
+    mipp::Vd<float, -2> h = mipp::set0_obj<float, -2>();
 #endif
     // --8<-- [end:d2_guard]
 #ifdef MIPP_LDIV_2
-    for (int i = 0; i < mipp::Rvd<float, -2>::N(); i++)
+    for (int i = 0; i < mipp::Vd<float, -2>::N(); i++)
         DOC_CHECK(h[i] == 0.f);
 #endif
 }
@@ -76,20 +76,20 @@ static void conversions()
 {
     const float* ptr = P;
     // --8<-- [start:conversions]
-    mipp::Rvd<float>   v  = mipp::loadu_obj<float>(ptr); // {-2.7, -1.4, -0.1, 1.2, ...}
-    mipp::Rvd<int32_t> vb = mipp::cast<int32_t>(v);      // {0xC02CCCCD, ...}: IEEE-754 bit patterns
-    mipp::Rvd<int32_t> vi = mipp::cvt<int32_t>(v);       // {-2, -1, 0, 1, ...}: truncation
-    mipp::Rvd<double, 2> vw = mipp::wcvt<double>(v);     // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
+    mipp::Vd<float>   v  = mipp::loadu_obj<float>(ptr); // {-2.7, -1.4, -0.1, 1.2, ...}
+    mipp::Vd<int32_t> vb = mipp::cast<int32_t>(v);       // {0xC02CCCCD, ...}: IEEE-754 bit patterns
+    mipp::Vd<int32_t> vi = mipp::cvt<int32_t>(v);        // {-2, -1, 0, 1, ...}: truncation
+    mipp::Vd<double, 2> vw = mipp::wcvt<double>(v);      // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
     // --8<-- [end:conversions]
     DOC_CHECK((uint32_t)vb[0] == 0xC02CCCCDu);
-    for (int i = 0; i < mipp::Rvd<float>::N(); i++) {
+    for (int i = 0; i < mipp::Vd<float>::N(); i++) {
         int32_t bits;
         std::memcpy(&bits, &P[i], sizeof(bits));
         DOC_CHECK(vb[i] == bits);
         DOC_CHECK(vi[i] == (int32_t)P[i]);
     }
     DOC_CHECK(vi[0] == -2 && vi[1] == -1 && vi[2] == 0 && vi[3] == 1);
-    for (int i = 0; i < mipp::Rvd<float>::N(); i++)
+    for (int i = 0; i < mipp::Vd<float>::N(); i++)
         DOC_CHECK(vw[i] == (double)P[i]);
 }
 
@@ -98,15 +98,15 @@ static void changing_lmul()
 {
     const float* ptr = P;
     // --8<-- [start:changing_lmul]
-    mipp::Rvd<float>     a  = mipp::loadu_obj<float>(ptr);
-    mipp::Rvd<float>     b  = mipp::loadu_obj<float>(ptr + mipp::Rvd<float>::N());
-    mipp::Rvd<float, 2>  ab = mipp::combine(a, b);          // {a, b}: twice as many elements
-    mipp::Rvd<float>     lo = mipp::lo(ab);                 // == a
-    mipp::Rvd<float>     hi = mipp::hi(ab);                 // == b
-    mipp::Rvd<double, 2> vw = mipp::wcvt<double>(a);        // a as double, in a register of LMUL 2
-    mipp::Rvd<float>     vn = mipp::ncvt<float>(vw);        // and back to float: == a
+    mipp::Vd<float>     a  = mipp::loadu_obj<float>(ptr);
+    mipp::Vd<float>     b  = mipp::loadu_obj<float>(ptr + mipp::Vd<float>::N());
+    mipp::Vd<float, 2>  ab = mipp::combine(a, b);           // {a, b}: twice as many elements
+    mipp::Vd<float>     lo = mipp::lo(ab);                  // == a
+    mipp::Vd<float>     hi = mipp::hi(ab);                  // == b
+    mipp::Vd<double, 2> vw = mipp::wcvt<double>(a);         // a as double, in a register of LMUL 2
+    mipp::Vd<float>     vn = mipp::ncvt<float>(vw);         // and back to float: == a
     // --8<-- [end:changing_lmul]
-    const int N = mipp::Rvd<float>::N();
+    const int N = mipp::Vd<float>::N();
     for (int i = 0; i < N; i++) {
         DOC_CHECK(ab[i] == P[i] && ab[i + N] == P[i + N]);
         DOC_CHECK(lo[i] == P[i] && hi[i] == P[i + N]);

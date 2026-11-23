@@ -312,7 +312,7 @@
         "andnb": {
             "comparison": "bitwise",
             "extra_includes": [
-                "torvd"
+                "tovd"
             ]
         },
         "any": {
@@ -634,7 +634,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "torvd",
+                "tovd",
                 "get_k"
             ]
         },
@@ -642,7 +642,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "torvd",
+                "tovd",
                 "get_k"
             ]
         },
@@ -650,7 +650,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "torvd",
+                "tovd",
                 "get_k"
             ]
         },
@@ -658,7 +658,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "torvd",
+                "tovd",
                 "get_k"
             ]
         },
@@ -666,7 +666,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "torvd",
+                "tovd",
                 "get_k"
             ]
         },
@@ -674,7 +674,7 @@
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
-                "torvd",
+                "tovd",
                 "get_k"
             ]
         },
@@ -1622,7 +1622,7 @@
         "testz": {
             "mask_pattern": "reduction_cycle"
         },
-        "torvd": {
+        "tovd": {
             "comparison": "bitwise"
         },
         "unziplo": {

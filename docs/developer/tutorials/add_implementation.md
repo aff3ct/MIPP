@@ -56,9 +56,9 @@ After `./gen_mipp_headers.py`, the NEON header contains:
 
 ```c
 #if defined(__aarch64__)
-static inline rvd_neon_float64_m1_t mipp_neon_absdiff_float64_m1(const rvd_neon_float64_m1_t r0, const rvd_neon_float64_m1_t r1) {
+static inline vd_neon_float64_m1_t mipp_neon_absdiff_float64_m1(const vd_neon_float64_m1_t r0, const vd_neon_float64_m1_t r1) {
 	// Level 0 (Native Hardware)
-	rvd_neon_float64_m1_t res;
+	vd_neon_float64_m1_t res;
 	res.r = vabdq_f64(r0.r, r1.r);
 	return res;
 }
@@ -85,7 +85,7 @@ The code is rendered by Jinja2 with these variables:
 | `lmul`, `mask_kind` | The LMUL and the mask variant being generated. |
 | `compress_lut(lanes, units, fill)` | A function (`helpers_headers/luts.py`) that computes the constant table of a `compress` by permutation and returns its C initializer: `static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=128) }};` (SSSE3 `pshufb`, 32-bit lanes). The tables of the templates are computed there at generation time, not written in the JSON files. |
 
-The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `r0.r` is the native register wrapped by the MIPP type `rvd_neon_float32_m1_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(r0, r1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
+The separator between prefix and name belongs to the template: SSE templates write `{{ isa.prefix }}_{{ instr_name }}`, NEON ones `{{ isa.prefix }}{{ instr_name }}`. Inside the parameters, `r0.r` is the native register wrapped by the MIPP type `vd_neon_float32_m1_t`. The code may also call MIPP functions through the [templating DSL](../reference/templating_dsl.md) (`%max<tp>%(r0, r1)`), as the <span class="mipp-isa-badge lvl-1">L1</span> and <span class="mipp-isa-badge lvl-2">L2</span> templates do.
 
 An entry can also hold its template inline (`"template": { "format": ..., "code": ... }`) instead of a name.
 
@@ -128,10 +128,10 @@ and the entry in `helpers_headers/generic_emu_implems.json`:
 `%r<tp>%` is the register type and `%max<tp>%` the `max` function of the ISA being generated, for the current datatype and LMUL. On AVX the template becomes:
 
 ```c
-static inline rvd_avx_float32_m1_t mipp_avx_absdiff_float32_m1(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
+static inline vd_avx_float32_m1_t mipp_avx_absdiff_float32_m1(const vd_avx_float32_m1_t r0, const vd_avx_float32_m1_t r1) {
 	// Level 2 (Generic Emulation)
-	rvd_avx_float32_m1_t hi = mipp_avx_max_float32_m1(r0, r1);
-	rvd_avx_float32_m1_t lo = mipp_avx_min_float32_m1(r0, r1);
+	vd_avx_float32_m1_t hi = mipp_avx_max_float32_m1(r0, r1);
+	vd_avx_float32_m1_t lo = mipp_avx_min_float32_m1(r0, r1);
 	return mipp_avx_sub_float32_m1(hi, lo);
 }
 ```
@@ -162,7 +162,7 @@ At this point `mipp_neon_absdiff_float32_maskz_m1` is still <span class="mipp-is
     "format": "long",
     "code": [
         "%r<tp>% op = %{{func_name}}<tp>%(r0, r1);",
-        "%r<tp>% tmp = %torvd<tp>%(m0);",
+        "%r<tp>% tmp = %tovd<tp>%(m0);",
         "%r<tp>% res = %andb<tp>%(op, tmp);",
         "return res;"
     ]

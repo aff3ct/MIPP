@@ -23,12 +23,12 @@ static void fill()
 static void named()
 {
     // --8<-- [start:named]
-    mipp::Rvd<float> a(A);
-    mipp::Rvd<float> b(B);
-    mipp::Rvd<float> r = mipp::reverse(a);                                         // a[N-1] ... a[0]
-    mipp::Rvd<float, 2> z = mipp::combine(mipp::ziplo(a, b), mipp::ziphi(a, b)); // a0 b0 a1 b1 ...
-    mipp::Rvd<float> e = mipp::unziplo(z.lo(), z.hi());                            // a again
-    mipp::Rvd<float> o = mipp::unziphi(z.lo(), z.hi());                            // b again
+    mipp::Vd<float> a(A);
+    mipp::Vd<float> b(B);
+    mipp::Vd<float> r = mipp::reverse(a);                                          // a[N-1] ... a[0]
+    mipp::Vd<float, 2> z = mipp::combine(mipp::ziplo(a, b), mipp::ziphi(a, b)); // a0 b0 a1 b1 ...
+    mipp::Vd<float> e = mipp::unziplo(z.lo(), z.hi());                             // a again
+    mipp::Vd<float> o = mipp::unziphi(z.lo(), z.hi());                             // b again
     // --8<-- [end:named]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(r[i] == A[n - 1 - i]);
@@ -39,12 +39,12 @@ static void named()
 // §3: lanes moved by a number of lanes
 static void slide()
 {
-    mipp::Rvd<float> a(A);
-    mipp::Rvd<float> b(B);
+    mipp::Vd<float> a(A);
+    mipp::Vd<float> b(B);
     // --8<-- [start:slide]
-    mipp::Rvd<float> s = mipp::slide(a, b, 1);       // a1 ... a[N-1] b0
-    mipp::Rvd<float> t = mipp::rotate(a, 1);         // a1 ... a[N-1] a0
-    mipp::Rvd<float> u = mipp::bcast(a, 2); // a2 a2 ... a2
+    mipp::Vd<float> s = mipp::slide(a, b, 1);        // a1 ... a[N-1] b0
+    mipp::Vd<float> t = mipp::rotate(a, 1);          // a1 ... a[N-1] a0
+    mipp::Vd<float> u = mipp::bcast(a, 2); // a2 a2 ... a2
     // --8<-- [end:slide]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(s[i] == (i + 1 < n ? A[i + 1] : B[0]));
@@ -52,8 +52,8 @@ static void slide()
     for (int i = 0; i < n; i++) DOC_CHECK(u[i] == A[2]);
     // --8<-- [start:immediates]
     int32_t k = n / 2;                         // a variable: the dynamic body
-    mipp::Rvd<float> v = mipp::slide(a, b, k);
-    mipp::Rvd<float> w = mipp::slide<2>(a, b); // a constant, checked at compile time
+    mipp::Vd<float> v = mipp::slide(a, b, k);
+    mipp::Vd<float> w = mipp::slide<2>(a, b); // a constant, checked at compile time
     // --8<-- [end:immediates]
     for (int i = 0; i < n; i++) DOC_CHECK(v[i] == (i + k < n ? A[i + k] : B[i + k - n]));
     for (int i = 0; i < n; i++) DOC_CHECK(w[i] == (i + 2 < n ? A[i + 2] : B[i + 2 - n]));
@@ -64,10 +64,10 @@ static void interleaved()
 {
     // --8<-- [start:interleaved]
     // N pairs (re, im): the real parts in the lower half of the LMUL 2 register, the imaginary ones in the upper half
-    mipp::Rvd<float, 2> c = mipp::loadu_unzip_obj<float, 2>(X);
-    mipp::Rvd<float> re = c.lo();
-    mipp::Rvd<float> im = c.hi();
-    mipp::Rvd<float> mag2 = mipp::fmadd(re, re, im * im); // re^2 + im^2
+    mipp::Vd<float, 2> c = mipp::loadu_unzip_obj<float, 2>(X);
+    mipp::Vd<float> re = c.lo();
+    mipp::Vd<float> im = c.hi();
+    mipp::Vd<float> mag2 = mipp::fmadd(re, re, im * im); // re^2 + im^2
     // --8<-- [end:interleaved]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(mag2[i] == X[2 * i] * X[2 * i] + X[2 * i + 1] * X[2 * i + 1]);
@@ -77,9 +77,9 @@ static void interleaved()
 static void permutations()
 {
     // --8<-- [start:permute]
-    mipp::Rvd<float> a(A);
-    mipp::Rvd<uint32_t> idx(IDX);                   // indices < N
-    mipp::Rvd<float> p = mipp::permute(a, idx);     // a[idx[0]], a[idx[1]], ...
+    mipp::Vd<float> a(A);
+    mipp::Vd<uint32_t> idx(IDX);                    // indices < N
+    mipp::Vd<float> p = mipp::permute(a, idx);      // a[idx[0]], a[idx[1]], ...
     // --8<-- [end:permute]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(p[i] == A[IDX[i]]);
@@ -93,8 +93,8 @@ static void filter()
     // keeps the positive elements of X: OUT needs one register of margin (storeuf_compress)
     float* out = OUT;
     for (size_t i = 0; i < n; i += mipp::N<float>()) {
-        mipp::Rvd<float> v(X + i);
-        mipp::Rvm<float> m = v > 0.f;
+        mipp::Vd<float> v(X + i);
+        mipp::Vm<float> m = v > 0.f;
         out += mipp::storeuf_compress(out, v, m);
     }
     // --8<-- [end:filter]

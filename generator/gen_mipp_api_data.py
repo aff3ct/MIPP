@@ -73,7 +73,7 @@ def build_obj_prototype(func, interfaces_dict):
     """
     args = interfaces_dict[func]["proto"]["args"]
     ret = interfaces_dict[func]["proto"]["ret"]
-    ret_type = "Rvm<T,LMUL>" if func.endswith("_k") or ret.get("type") == "msk" else "Rvd<T,LMUL>"
+    ret_type = "Vm<T,LMUL>" if func.endswith("_k") or ret.get("type") == "msk" else "Vd<T,LMUL>"
     
     # Check operator overloads
     all_binary_ops = {}
@@ -83,7 +83,7 @@ def build_obj_prototype(func, interfaces_dict):
     
     if func in all_binary_ops and len(args) == 2:
         sym = all_binary_ops[func]["operation"]
-        return f"inline {ret_type} operator {sym} (const Rvd<T,LMUL>& r1) const;"
+        return f"inline {ret_type} operator {sym} (const Vd<T,LMUL>& r1) const;"
     elif func == "notb" and len(args) == 1:
         return f"inline {ret_type} operator~ () const;"
     
@@ -98,10 +98,10 @@ def build_obj_prototype(func, interfaces_dict):
     for arg in args[1:]:
         atype = arg.get("type", "reg")
         if atype == "reg":
-            arg_strs.append(f"const Rvd<T,LMUL>& r{reg_idx}")
+            arg_strs.append(f"const Vd<T,LMUL>& r{reg_idx}")
             reg_idx += 1
         elif atype == "msk":
-            arg_strs.append(f"const Rvm<T,LMUL>& m{mask_idx}")
+            arg_strs.append(f"const Vm<T,LMUL>& m{mask_idx}")
             mask_idx += 1
         elif atype == "scl":
             arg_strs.append("const T val")
@@ -348,27 +348,27 @@ def build_code_snippets(func, category, spec_info):
         "",
         "int main(void) {",
         "    // 1. Initialize C99 vector registers",
-        "    rvd_float32_m1_t r0 = mipp_set1_float32_m1(1.5f);"
+        "    vd_float32_m1_t r0 = mipp_set1_float32_m1(1.5f);"
     ]
     c_args = ["r0"]
     if n_args >= 2:
         if args[1].get("type") == "msk":
-            c99_lines.append("    rvm_float32_m1_t m0 = mipp_set0_float32_m1();")
+            c99_lines.append("    vm_float32_m1_t m0 = mipp_set0_float32_m1();")
             c_args.append("m0")
         else:
-            c99_lines.append("    rvd_float32_m1_t r1 = mipp_set1_float32_m1(2.5f);")
+            c99_lines.append("    vd_float32_m1_t r1 = mipp_set1_float32_m1(2.5f);")
             c_args.append("r1")
     if n_args >= 3:
         if args[2].get("type") == "msk":
-            c99_lines.append("    rvm_float32_m1_t m0 = mipp_set0_float32_m1();")
+            c99_lines.append("    vm_float32_m1_t m0 = mipp_set0_float32_m1();")
             c_args.append("m0")
         else:
-            c99_lines.append("    rvd_float32_m1_t r2 = mipp_set1_float32_m1(0.5f);")
+            c99_lines.append("    vd_float32_m1_t r2 = mipp_set1_float32_m1(0.5f);")
             c_args.append("r2")
             
     c99_lines.append("")
     c99_lines.append("    // 2. Execute C99 MIPP function")
-    c99_lines.append(f"    rvd_float32_m1_t res = mipp_{func}_float32_m1({', '.join(c_args)});")
+    c99_lines.append(f"    vd_float32_m1_t res = mipp_{func}_float32_m1({', '.join(c_args)});")
     c99_lines.append("")
     c99_lines.append("    // 3. Inspect first element")
     c99_lines.append("    printf(\"First vector element: %f\\n\", mipp_get_float32_m1(res, 0));")

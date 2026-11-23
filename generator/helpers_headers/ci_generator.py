@@ -231,7 +231,7 @@ def _gen_ci_defines(isa_list, file):
             tmp = tmp.replace("{ lmul }", str(lmul))
             template += tmp
 
-        # same condition as the rvd_*_d2_t typedefs (see _gen_ci_structures)
+        # same condition as the vd_*_d2_t typedefs (see _gen_ci_structures)
         has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
         for ldiv in (all_ldiv if has_ldiv else []):
             tmp = "\n#define MIPP_N_{{type_category_upper}}{{n_bits}}_D{ ldiv } (MIPP_{{isa_name_upper}}_N_{{type_category_upper}}{{n_bits}} / { ldiv })"
@@ -260,13 +260,13 @@ def _gen_ci_structures(isa_list, file):
         else:
             print("#elif " + isa["gen_define"], file=file)
 
-        template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+        template = """typedef vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t vd_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
         j2_template = Template(template, undefined=StrictUndefined)
 
         for dt in isa["datatypes"]:
             print(j2_template.render(isa=isa, datatype=datatypes[dt]), file=file)
 
-        template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
+        template = """typedef vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t vm_{{ datatype.category }}{{ datatype.n_bits }}_t;"""
         j2_template = Template(template, undefined=StrictUndefined)
 
         for dt in isa["datatypes"]:
@@ -275,11 +275,11 @@ def _gen_ci_structures(isa_list, file):
         has_ldiv = isa.get("is_scalar", False) or any(x < 0 for x in isa.get("hw_lmul", []) + isa.get("sw_lmul", []))
         if has_ldiv:
             ldiv = 2
-            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
+            template = """typedef vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t vd_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
-            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
+            template = """typedef vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t vm_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], ldiv=str(ldiv)), file=file)
@@ -293,11 +293,11 @@ def _gen_ci_structures(isa_list, file):
         else:
             print("#elif " + isa["gen_define"], file=file)
         for lmul in all_lmul:
-            template = """typedef rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+            template = """typedef vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t vd_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul)), file=file)
-            template = """typedef rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t rvm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
+            template = """typedef vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t vm_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t;"""
             j2_template = Template(template, undefined=StrictUndefined)
             for dt in isa["datatypes"]:
                 print(j2_template.render(isa=isa, datatype=datatypes[dt], lmul=str(lmul)), file=file)

@@ -23,7 +23,7 @@ For example:
 When evaluated for `float32` on AVX, for the base registers, this becomes:
 
 ```c
-rvd_avx_float32_m1_t res = mipp_avx_add_float32_m1(r0, r1);
+vd_avx_float32_m1_t res = mipp_avx_add_float32_m1(r0, r1);
 ```
 
 Inside an ISA, the base registers and the functions on them are named with the `_m1` suffix ([Code Generation](../internals/code_generation.md#2-one-isa-layer)); the examples of this page use these names.
@@ -36,8 +36,8 @@ The prefix before the opening angle bracket `<` indicates what entity is being g
 
 | Token Prefix | Entity Generated | Example Expression | Generated C Code (AVX, `float32`) |
 | :--- | :--- | :--- | :--- |
-| **`r`** | Vector Data Register (`rvd`) | `%r<tp>%` | `rvd_avx_float32_m1_t` |
-| **`m`** | Vector Mask Register (`rvm`) | `%m<tp>%` | `rvm_avx_float32_m1_t` |
+| **`r`** | Vector Data Register (`vd`) | `%r<tp>%` | `vd_avx_float32_m1_t` |
+| **`m`** | Vector Mask Register (`vm`) | `%m<tp>%` | `vm_avx_float32_m1_t` |
 | **`s`** | Scalar Value Type | `%s<tp>%` | `float32_t` |
 | **`N`** | Number of Elements Constant | `%N<tp>%` | `MIPP_AVX_N_FLOAT32` |
 | **`<function>`** | Call to another MIPP function | `%select<tp>%(...)` | `mipp_avx_select_float32_m1(...)` |
@@ -48,8 +48,8 @@ Inside a template body, the parameters of the function being generated are not n
 
 | Name | Kind of argument | Example |
 | :--- | :--- | :--- |
-| **`r0`, `r1`, `r2`, ...** | Vector data registers (`rvd`) | `add(r0, r1)` |
-| **`m0`, `m1`, `m2`, ...** | Vector mask registers (`rvm`) | `select(m0, r0, r1)` |
+| **`r0`, `r1`, `r2`, ...** | Vector data registers (`vd`) | `add(r0, r1)` |
+| **`m0`, `m1`, `m2`, ...** | Vector mask registers (`vm`) | `select(m0, r0, r1)` |
 | **`s0`, `s1`, `s2`, ...** | Scalar values | `set1(s0)`, `rshift_vs(r0, s0)` |
 | **`p0`, `p1`, `p2`, ...** | Pointers (memory addresses) | `loadu(p0)` |
 
@@ -94,9 +94,9 @@ A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`,
 #### Examples
 
 ```mipp-dsl
-%r<c:int|b:32>%   // 32-bit signed integer register (rvd_avx_int32_m1_t)
-%r<c:uint|b:tp>%  // Unsigned integer with the same bitwidth as tp (rvd_avx_uint32_m1_t if tp is float32)
-%r<c:float|b:64>% // 64-bit floating-point register (rvd_avx_float64_m1_t)
+%r<c:int|b:32>%   // 32-bit signed integer register (vd_avx_int32_m1_t)
+%r<c:uint|b:tp>%  // Unsigned integer with the same bitwidth as tp (vd_avx_uint32_m1_t if tp is float32)
+%r<c:float|b:64>% // 64-bit floating-point register (vd_avx_float64_m1_t)
 %m<c:uint|b:tp>%  // Mask register matching tp's bitwidth
 ```
 
@@ -191,10 +191,10 @@ When specializing this template for `func_name = "add"` on AVX with `tp = float3
 2. The DSL parser produces the body of `mipp_avx_add_float32_mask_m1`:
 
     ```c
-    static inline rvd_avx_float32_m1_t mipp_avx_add_float32_mask_m1(const rvm_avx_float32_m1_t m0, const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
+    static inline vd_avx_float32_m1_t mipp_avx_add_float32_mask_m1(const vm_avx_float32_m1_t m0, const vd_avx_float32_m1_t r0, const vd_avx_float32_m1_t r1) {
     	// Level 2 (Generic Emulation)
-    	rvd_avx_float32_m1_t op = mipp_avx_add_float32_m1(r0, r1);
-    	rvd_avx_float32_m1_t res = mipp_avx_select_float32_m1(m0, op, r0);
+    	vd_avx_float32_m1_t op = mipp_avx_add_float32_m1(r0, r1);
+    	vd_avx_float32_m1_t res = mipp_avx_select_float32_m1(m0, op, r0);
     	return res;
     }
     ```
@@ -214,8 +214,8 @@ return %cast<c:int|b:tp, tp>%(res_s);
 For `uint32`, this generates:
 
 ```c
-rvd_avx_int32_m1_t r0_s = mipp_avx_cast_uint32_int32_m1(r0);
-rvd_avx_int32_m1_t r1_s = mipp_avx_cast_uint32_int32_m1(r1);
-rvd_avx_int32_m1_t res_s = mipp_avx_add_int32_m1(r0_s, r1_s);
+vd_avx_int32_m1_t r0_s = mipp_avx_cast_uint32_int32_m1(r0);
+vd_avx_int32_m1_t r1_s = mipp_avx_cast_uint32_int32_m1(r1);
+vd_avx_int32_m1_t res_s = mipp_avx_add_int32_m1(r0_s, r1_s);
 return mipp_avx_cast_int32_uint32_m1(res_s);
 ```

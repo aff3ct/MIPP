@@ -26,8 +26,8 @@ _C_STD = ("#include <exception>", "#include <algorithm>", "#include <random>", "
           "#include <cstdlib>", "#include <cstring>", "#include <vector>", '#include "utils/random.hpp"',
           "#ifndef N_ITER", "#define N_ITER {N_ITER}", "#endif")
 # scalar reference headers (first, as in the other tests)
-_SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("store", "store"), ("store", "get"), ("reinterpret", "torvd"),
-                 ("reinterpret", "torvm"), ("rearrangement", "permute"), ("rearrangement", "permute2"),
+_SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("store", "store"), ("store", "get"), ("reinterpret", "tovd"),
+                 ("reinterpret", "tovm"), ("rearrangement", "permute"), ("rearrangement", "permute2"),
                  ("rearrangement", "permute_b128"), ("rearrangement", "compress"), ("rearrangement", "expand"),
                  ("store", "storeu_compress"), ("store", "storeuf_compress"), ("load", "loadu_expand"))
 
@@ -98,14 +98,14 @@ def _c_test(func: str, dt: str, sfx: str, mkind: str, lmul: int) -> List[str]:
     b = [f"constexpr size_t N = MIPP_N_{dt.upper()}{mult};"] + _decls() + [""] + _inputs(func) + [""]
     for prefix, res, p in (("", "res_r", "r"), ("scalar_", "res_s", "s")):
         call = f"mipp_{prefix}{func}_{dt}{mk_sfx}{sfx_u}"
-        r_t, rm_t = f"rvd_{prefix}{dt}{sfx_u}_t", f"rvm_{prefix}{dt}{sfx_u}_t"
+        r_t, rm_t = f"vd_{prefix}{dt}{sfx_u}_t", f"vm_{prefix}{dt}{sfx_u}_t"
         b += [f"[[maybe_unused]] {r_t} {p}a = mipp_{prefix}load_{dt}{sfx_u}(a);",
               f"[[maybe_unused]] {r_t} {p}b = mipp_{prefix}load_{dt}{sfx_u}(b);",
               f"[[maybe_unused]] {r_t} {p}src = mipp_{prefix}load_{dt}{sfx_u}(src);",
               f"[[maybe_unused]] {rm_t} {p}m = mipp_{prefix}set_k_{dt}{sfx_u}(mk);",
               f"std::memcpy({res}, mem, sizeof(mem));"]
         if func.startswith("permute"):
-            b += [f"[[maybe_unused]] rvd_{prefix}{idt}{sfx_u}_t {p}i = mipp_{prefix}load_{idt}{sfx_u}(idx);"]
+            b += [f"[[maybe_unused]] vd_{prefix}{idt}{sfx_u}_t {p}i = mipp_{prefix}load_{idt}{sfx_u}(idx);"]
             args = f"{p}a, {p}b, {p}i" if func == "permute2" else f"{p}a, {p}i"
             if mkind in ("mask", "maskz"):
                 args = f"{p}m, {args}"
@@ -181,9 +181,9 @@ def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
                     f"[[maybe_unused]] auto {p}src = mipp::load<T, LMUL{isa}>(src);",
                     f"[[maybe_unused]] auto {p}i = mipp::load<IDX, LMUL{isa}>(idx);",
                     f"[[maybe_unused]] auto {p}m = mipp::set_k<T, LMUL{isa}>(mk);"]
-        return ["[[maybe_unused]] auto ra = mipp::Rvd<T, LMUL>(a);", "[[maybe_unused]] auto rb = mipp::Rvd<T, LMUL>(b);",
-                "[[maybe_unused]] auto rsrc = mipp::Rvd<T, LMUL>(src);", "[[maybe_unused]] auto ri = mipp::Rvd<IDX, LMUL>(idx);",
-                "[[maybe_unused]] auto rm = mipp::Rvm<T, LMUL>(mk);"]
+        return ["[[maybe_unused]] auto ra = mipp::Vd<T, LMUL>(a);", "[[maybe_unused]] auto rb = mipp::Vd<T, LMUL>(b);",
+                "[[maybe_unused]] auto rsrc = mipp::Vd<T, LMUL>(src);", "[[maybe_unused]] auto ri = mipp::Vd<IDX, LMUL>(idx);",
+                "[[maybe_unused]] auto rm = mipp::Vm<T, LMUL>(mk);"]
 
     def dispatch(scalar: bool) -> List[str]:
         out: List[str] = []

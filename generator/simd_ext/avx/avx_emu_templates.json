@@ -162,7 +162,7 @@
             "__m256 pow2n = _mm256_castsi256_ps(imm0);",
             "y = _mm256_mul_ps(y, pow2n);",
             "",
-            "rvd_avx_float32_t res;",
+            "vd_avx_float32_t res;",
             "res.r = y;",
             "return res;",
             ""
@@ -279,7 +279,7 @@
             "x = _mm256_add_ps(x, y);",
             "x = _mm256_add_ps(x, tmp);",
             "x = _mm256_or_ps(x, invalid_mask); // negative arg will be NAN",
-            "rvd_avx_float32_t res;",
+            "vd_avx_float32_t res;",
             "res.r = x;",
             "return res;",
             ""
@@ -732,7 +732,7 @@
             "return res;"
         ]
     },
-    "split_torvm": {
+    "split_tovm": {
         "format": "long",
         "code": [
             "%m<tr>% res;",
@@ -742,7 +742,7 @@
             "return res;"
         ]
     },
-    "torvm_float32": {
+    "tovm_float32": {
         "format": "long",
         "code": [
             "// bitwise test: a lane is active if at least one bit is set (-0.0f is active)",
@@ -762,7 +762,7 @@
             "return res;"
         ]
     },
-    "torvm_float64": {
+    "tovm_float64": {
         "format": "long",
         "code": [
             "// bitwise test: a lane is active if at least one bit is set (-0.0 is active)",
@@ -782,7 +782,7 @@
             "return res;"
         ]
     },
-    "torvm_int": {
+    "tovm_int": {
         "format": "long",
         "code": [
             "%m<tr>% res;",

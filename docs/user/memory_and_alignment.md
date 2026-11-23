@@ -43,7 +43,7 @@ MIPP distinguishes between **aligned** (`load`, `store`) and **unaligned** (`loa
 | Operation | C API | C++ Functional API | C++ Object API | Pointer Requirement |
 | :--- | :--- | :--- | :--- | :--- |
 | **Aligned Load** | `mipp_load_[type]_[lmul]` | `mipp::load<T, LMUL>(ptr)` | `mipp::load_obj<T, LMUL>(ptr)` | Aligned on the register size ([§1.1](#11-required-alignment-per-architecture)) |
-| **Unaligned Load** | `mipp_loadu_[type]_[lmul]` | `mipp::loadu<T, LMUL>(ptr)` | `mipp::loadu_obj<T, LMUL>(ptr)` or `Rvd<T, LMUL>(ptr)` | Any address |
+| **Unaligned Load** | `mipp_loadu_[type]_[lmul]` | `mipp::loadu<T, LMUL>(ptr)` | `mipp::loadu_obj<T, LMUL>(ptr)` or `Vd<T, LMUL>(ptr)` | Any address |
 | **Aligned Store** | `mipp_store_[type]_[lmul]` | `mipp::store(ptr, r)` | `mipp::store(ptr, r)` | Aligned on the register size ([§1.1](#11-required-alignment-per-architecture)) |
 | **Unaligned Store** | `mipp_storeu_[type]_[lmul]` | `mipp::storeu(ptr, r)` | `mipp::storeu(ptr, r)` | Any address |
 
@@ -95,15 +95,15 @@ A masked access reads or writes the active lanes only: inactive lanes are never 
     --8<-- "examples/doc/memory_and_alignment/obj.cpp:masked"
     ```
 
-In the Object API, loads are named `load_obj` / `loadu_obj` (masked or not) so that they return an `Rvd`; stores keep the names `store` / `storeu`.
+In the Object API, loads are named `load_obj` / `loadu_obj` (masked or not) so that they return an `Vd`; stores keep the names `store` / `storeu`.
 
-In the C++ Functional API, a masked access deduces `T` from the pointer and assumes `LMUL = 1`: the mask type does not allow the deduction of `LMUL`, so give `T` and `LMUL` for a multi-register vector (`mipp::loadu<mipp::Z, float, 2>`). In the C++ Object API, `T` and `LMUL` are deduced from the `Rvm` mask.
+In the C++ Functional API, a masked access deduces `T` from the pointer and assumes `LMUL = 1`: the mask type does not allow the deduction of `LMUL`, so give `T` and `LMUL` for a multi-register vector (`mipp::loadu<mipp::Z, float, 2>`). In the C++ Object API, `T` and `LMUL` are deduced from the `Vm` mask.
 
 ---
 
 ## 3. Non-Contiguous Memory Access: Gather & Scatter
 
-When data elements reside at non-sequential memory addresses, MIPP provides vectorized **gather** and **scatter** operations using index vectors. The index vector holds unsigned integers counted in elements, not in bytes (`uint32_t` indices for `float` data, `uint64_t` indices for `double` data). The C names give the type of the data then the type of the index: `mipp_gather_float32_uint32`. For the masked variants, the mask has the type of the **data** (`rvm<float>` for a `float` gather, as for the masked loads); a mask computed on the indices is converted with `cast_k`. In the C++ Functional API, the masked variants cannot deduce the types: give `T` and the index type (`mipp::gather<mipp::Z, float, uint32_t>`). In the C++ Object API, they are deduced from the arguments.
+When data elements reside at non-sequential memory addresses, MIPP provides vectorized **gather** and **scatter** operations using index vectors. The index vector holds unsigned integers counted in elements, not in bytes (`uint32_t` indices for `float` data, `uint64_t` indices for `double` data). The C names give the type of the data then the type of the index: `mipp_gather_float32_uint32`. For the masked variants, the mask has the type of the **data** (`vm<float>` for a `float` gather, as for the masked loads); a mask computed on the indices is converted with `cast_k`. In the C++ Functional API, the masked variants cannot deduce the types: give `T` and the index type (`mipp::gather<mipp::Z, float, uint32_t>`). In the C++ Object API, they are deduced from the arguments.
 
 ### 3.0. Indices of Another Width than the Data
 
@@ -115,7 +115,7 @@ The indices can also be `uint32_t` or `uint64_t` whatever the width of the data:
 | 32, 16 or 8-bit types | `uint64` | `m2`, `m4` or `m8` | RVV |
 | 16 or 8-bit types | `uint32` | `m2` or `m4` | RVV |
 
-Elsewhere the scalar fallback applies, as for the gathers of 8 and 16-bit elements on x86. With the C++ Object API, the LMUL of the result is deduced from the index (`mipp::gather(table, idx)` with an `Rvd<uint32_t, -2>` gives an `Rvd<double, 1>`); with the C++ Functional API, it is the LMUL of the data (`mipp::gather<mipp::Z, double, uint32_t, 1>`).
+Elsewhere the scalar fallback applies, as for the gathers of 8 and 16-bit elements on x86. With the C++ Object API, the LMUL of the result is deduced from the index (`mipp::gather(table, idx)` with an `Vd<uint32_t, -2>` gives an `Vd<double, 1>`); with the C++ Functional API, it is the LMUL of the data (`mipp::gather<mipp::Z, double, uint32_t, 1>`).
 
 !!! warning "Range of the indices"
     Every index must address an element of the array. The 8-bit and 16-bit indices can take any value of their type. The 32-bit indices must be lower than $2^{31}$: the x86 gather and scatter instructions read them as signed integers. On RVV, the byte offset of a 32-bit element, $\text{index} \times 4$, is computed on 32 bits: the indices must be lower than $2^{30}$ (arrays of at most 4 GiB).
@@ -185,7 +185,7 @@ MIPP provides primitives to extract individual scalar values from vector and mas
 In C++, the mask-lane extraction has no `_k` suffix: it is the `get` overload taking a mask.
 
 !!! warning "Mask-lane extraction in the C and C++ Functional APIs"
-    `mipp_get_k_*` and `mipp::get(rvm, idx)` currently return the raw lane with the element type `T`: zero for an inactive lane, all bits set for an active one, which is **NaN** for `float` / `double`, `-1` for signed and the maximum value for unsigned types. Do not convert this value to an integer (converting a NaN is undefined behavior). Until these functions return a `0` / `1` value, read mask lanes with the Object API (`m[idx]` returns a `bool`).
+    `mipp_get_k_*` and `mipp::get(vm, idx)` currently return the raw lane with the element type `T`: zero for an inactive lane, all bits set for an active one, which is **NaN** for `float` / `double`, `-1` for signed and the maximum value for unsigned types. Do not convert this value to an integer (converting a NaN is undefined behavior). Until these functions return a `0` / `1` value, read mask lanes with the Object API (`m[idx]` returns a `bool`).
 
 === "C API"
 

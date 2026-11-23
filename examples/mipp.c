@@ -25,9 +25,9 @@ int main(int argc, char** argv)
 	float32_t a2[MIPP_N_FLOAT32 * 4];
 	float32_t a3[MIPP_N_FLOAT32 * 4];
 
-	rvd_float32_m4_t rvd1;
-	rvd_float32_m4_t rvd2;
-	rvd_float32_m4_t rvd3;
+	vd_float32_m4_t vd1;
+	vd_float32_m4_t vd2;
+	vd_float32_m4_t vd3;
 
 	for (i = 0; i < MIPP_N_FLOAT32 * 4; i++) {
 		a1[i] = i+0;
@@ -37,12 +37,12 @@ int main(int argc, char** argv)
 	print_v(a1, "a1");
 	print_v(a2, "a2");
 
-	rvd1 = mipp_loadu_float32_m4(a1);
-	rvd2 = mipp_loadu_float32_m4(a2);
+	vd1 = mipp_loadu_float32_m4(a1);
+	vd2 = mipp_loadu_float32_m4(a2);
 
-	rvd3 = mipp_add_float32_m4(rvd1, rvd2);
+	vd3 = mipp_add_float32_m4(vd1, vd2);
 
-	mipp_storeu_float32_m4(a3, rvd3);
+	mipp_storeu_float32_m4(a3, vd3);
 
 	print_v(a3, "a3");
 

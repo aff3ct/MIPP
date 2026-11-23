@@ -22,12 +22,12 @@ static void fill()
 static void forms()
 {
     // --8<-- [start:forms]
-    mipp::Rvd<float> va(A);
-    mipp::Rvd<float> vb(B);
-    mipp::Rvd<float> r1 = va - 1.f;                  // a - 1
-    mipp::Rvd<float> r2 = 10.f - va;                 // 10 - a
-    mipp::Rvd<float> r3 = mipp::fmadd(va, 2.f, vb);  // a * 2 + b
-    mipp::Rvm<float> m = va < 0.f;                   // a < 0
+    mipp::Vd<float> va(A);
+    mipp::Vd<float> vb(B);
+    mipp::Vd<float> r1 = va - 1.f;                   // a - 1
+    mipp::Vd<float> r2 = 10.f - va;                  // 10 - a
+    mipp::Vd<float> r3 = mipp::fmadd(va, 2.f, vb);   // a * 2 + b
+    mipp::Vm<float> m = va < 0.f;                    // a < 0
     // --8<-- [end:forms]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(r1[i] == A[i] - 1.f);
@@ -37,7 +37,7 @@ static void forms()
 
     // --8<-- [start:masked]
     // merge masking keeps the register operand: m ? 10 - a : a
-    mipp::Rvd<float> r4 = mipp::sub<mipp::M>(m, 10.f, va);
+    mipp::Vd<float> r4 = mipp::sub<mipp::M>(m, 10.f, va);
     // --8<-- [end:masked]
     for (int i = 0; i < n; i++) DOC_CHECK(r4[i] == (A[i] < 0.f ? 10.f - A[i] : A[i]));
 }
@@ -46,10 +46,10 @@ static void forms()
 static void shifts()
 {
     // --8<-- [start:shifts]
-    mipp::Rvd<int32_t> vi(I);
-    mipp::Rvd<int32_t> vn(CNT);                       // a count per lane, in [0, 31]
-    mipp::Rvd<int32_t> s1 = vi << vn;                 // i << n, lane by lane
-    mipp::Rvd<int32_t> s2 = vi >> 1;                  // i >> 1, every lane
+    mipp::Vd<int32_t> vi(I);
+    mipp::Vd<int32_t> vn(CNT);                        // a count per lane, in [0, 31]
+    mipp::Vd<int32_t> s1 = vi << vn;                  // i << n, lane by lane
+    mipp::Vd<int32_t> s2 = vi >> 1;                   // i >> 1, every lane
     // --8<-- [end:shifts]
     const int n = (int)mipp::N<int32_t>();
     for (int i = 0; i < n; i++) DOC_CHECK(s1[i] == (int32_t)((uint32_t)I[i] << CNT[i]));

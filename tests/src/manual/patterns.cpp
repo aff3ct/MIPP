@@ -49,7 +49,7 @@ void check1()
 		const int k = P::get(i, n);
 		REQUIRE(r[i] == (k < 0 ? T(0) : a[k]));
 	}
-	mipp::Rvd<T, LMUL> o(a); // Object API
+	mipp::Vd<T, LMUL> o(a); // Object API
 	mipp::storeu(r, mipp::permute<P>(o).r);
 	for (int i = 0; i < n; i++)
 		REQUIRE(r[i] == (P::get(i, n) < 0 ? T(0) : a[P::get(i, n)]));

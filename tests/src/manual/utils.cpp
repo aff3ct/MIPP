@@ -66,8 +66,8 @@ TEST_CASE("utils - dump", "[utils]")
 	const std::string lanes_k = expected_lanes(n, 4, true);
 
 	// C API: written to a temporary file
-	rvd_int32_t r = mipp_loadu_int32(in);
-	rvm_int32_t m = mipp_set_k_int32(mk);
+	vd_int32_t r = mipp_loadu_int32(in);
+	vm_int32_t m = mipp_set_k_int32(mk);
 	FILE* f = std::tmpfile();
 	REQUIRE(f != nullptr);
 	mipp_fdump_int32(f, r);
@@ -87,7 +87,7 @@ TEST_CASE("utils - dump", "[utils]")
 
 	// C++ Object API
 	std::ostringstream obj;
-	obj << mipp::Rvd<int32_t>(in) << ";" << mipp::Rvm<int32_t>(mk);
+	obj << mipp::Vd<int32_t>(in) << ";" << mipp::Vm<int32_t>(mk);
 	REQUIRE(obj.str() == lanes + ";" + lanes_k);
 
 	// 8-bit lanes are printed as numbers, 16 lanes per 128-bit block
@@ -95,7 +95,7 @@ TEST_CASE("utils - dump", "[utils]")
 	for (int i = 0; i < MIPP_N_INT8; i++)
 		in8[i] = static_cast<int8_t>(i);
 	std::ostringstream o8;
-	o8 << mipp::Rvd<int8_t>(in8);
+	o8 << mipp::Vd<int8_t>(in8);
 	REQUIRE(o8.str() == expected_lanes(MIPP_N_INT8, 16));
 }
 
@@ -104,7 +104,7 @@ TEST_CASE("utils - sum and pack", "[utils]")
 	float in[MIPP_N_FLOAT32];
 	for (int i = 0; i < MIPP_N_FLOAT32; i++)
 		in[i] = static_cast<float>(i) * 0.5f;
-	const mipp::Rvd<float> rf(in);
+	const mipp::Vd<float> rf(in);
 	REQUIRE(mipp::sum(rf.r) == mipp::hadd(rf.r));
 	REQUIRE(mipp::sum(rf) == mipp::hadd(rf));
 
@@ -116,7 +116,7 @@ TEST_CASE("utils - sum and pack", "[utils]")
 		a[i] = static_cast<int16_t>(i * 37 - 300);
 		b[i] = static_cast<int16_t>(300 - i * 41);
 	}
-	const mipp::Rvd<int8_t> p = mipp::pack<int8_t>(mipp::Rvd<int16_t>(a), mipp::Rvd<int16_t>(b));
+	const mipp::Vd<int8_t> p = mipp::pack<int8_t>(mipp::Vd<int16_t>(a), mipp::Vd<int16_t>(b));
 	auto sat = [](int v) { return static_cast<int8_t>(std::min(127, std::max(-128, v))); };
 	for (int i = 0; i < n16; i++)
 	{
@@ -135,9 +135,9 @@ TEST_CASE("utils - reduce", "[utils]")
 	const int32_t mn = *std::min_element(data.begin(), data.end());
 
 	// one register, several LMULs
-	const mipp::Rvd<int32_t, 2> r2(data.data());
+	const mipp::Vd<int32_t, 2> r2(data.data());
 	REQUIRE(mipp::reduce(r2, mipp::op::add()) == std::accumulate(data.begin(), data.begin() + r2.N(), 0));
-	const mipp::Rvd<int32_t> r1(data.data());
+	const mipp::Vd<int32_t> r1(data.data());
 	REQUIRE(mipp::reduce(r1, mipp::op::max()) == *std::max_element(data.begin(), data.begin() + r1.N()));
 
 	// arrays: a length that is not a multiple of the register, and shorter than a register
@@ -150,9 +150,9 @@ TEST_CASE("utils - reduce", "[utils]")
 
 TEST_CASE("utils - initializer lists", "[utils]")
 {
-	// a single value is broadcast, as Rvd(val) / Rvm(val)
-	const mipp::Rvd<int32_t> b = {5};
-	const mipp::Rvm<int32_t> t = {true};
+	// a single value is broadcast, as Vd(val) / Vm(val)
+	const mipp::Vd<int32_t> b = {5};
+	const mipp::Vm<int32_t> t = {true};
 	for (int i = 0; i < b.N(); i++)
 	{
 		REQUIRE(b[i] == 5);
@@ -161,23 +161,23 @@ TEST_CASE("utils - initializer lists", "[utils]")
 	// N values: the lanes in order
 	if constexpr (mipp::N<int32_t>() == 4)
 	{
-		const mipp::Rvd<int32_t> r = {1, 2, 3, 4};
-		const mipp::Rvm<int32_t> m = {true, false, false, true};
+		const mipp::Vd<int32_t> r = {1, 2, 3, 4};
+		const mipp::Vm<int32_t> m = {true, false, false, true};
 		REQUIRE((r[0] == 1 && r[1] == 2 && r[2] == 3 && r[3] == 4));
 		REQUIRE((m[0] && !m[1] && !m[2] && m[3]));
 	}
 	else if constexpr (mipp::N<int32_t>() == 8)
 	{
-		const mipp::Rvd<int32_t> r = {1, 2, 3, 4, 5, 6, 7, 8};
+		const mipp::Vd<int32_t> r = {1, 2, 3, 4, 5, 6, 7, 8};
 		for (int i = 0; i < 8; i++)
 			REQUIRE(r[i] == i + 1);
 	}
 	else if constexpr (mipp::N<int32_t>() == 16)
 	{
-		const mipp::Rvd<int32_t> r = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+		const mipp::Vd<int32_t> r = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
 		for (int i = 0; i < 16; i++)
 			REQUIRE(r[i] == i + 1);
 	}
 	// any other count is an error
-	REQUIRE_THROWS_AS((mipp::Rvd<int32_t>{1, 2}), std::invalid_argument);
+	REQUIRE_THROWS_AS((mipp::Vd<int32_t>{1, 2}), std::invalid_argument);
 }

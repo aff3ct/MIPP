@@ -8,14 +8,14 @@ void leaky_relu(float alpha, const float* x, float* y, size_t size)
 {
     const size_t N = MIPP_N_FLOAT32; // elements per register (e.g. 8 with AVX2)
     const size_t vec_end = (size / N) * N;
-    rvd_float32_m1_t vzero  = mipp_set1_float32_m1(0.f);
-    rvd_float32_m1_t valpha = mipp_set1_float32_m1(alpha);
+    vd_float32_m1_t vzero  = mipp_set1_float32_m1(0.f);
+    vd_float32_m1_t valpha = mipp_set1_float32_m1(alpha);
 
     // 1. Vector main loop
     for (size_t i = 0; i < vec_end; i += N) {
-        rvd_float32_m1_t vx  = mipp_loadu_float32_m1(&x[i]);
-        rvm_float32_m1_t pos = mipp_cmpgt_float32_m1(vx, vzero);                                 // comparison -> mask
-        rvd_float32_m1_t vy  = mipp_select_float32_m1(pos, vx, mipp_mul_float32_m1(vx, valpha)); // branch-free
+        vd_float32_m1_t vx  = mipp_loadu_float32_m1(&x[i]);
+        vm_float32_m1_t pos = mipp_cmpgt_float32_m1(vx, vzero);                                  // comparison -> mask
+        vd_float32_m1_t vy  = mipp_select_float32_m1(pos, vx, mipp_mul_float32_m1(vx, valpha)); // branch-free
         mipp_storeu_float32_m1(&y[i], vy);
     }
     // 2. Scalar tail loop for the remaining elements

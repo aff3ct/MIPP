@@ -146,6 +146,6 @@
   <line class="rule" x1="16" y1="394" x2="664" y2="394"/>
   <rect class="e"   x="16"  y="408" width="16" height="16" rx="4"/><text class="leg" x="40"  y="416">element (index)</text>
   <rect class="reg" x="150" y="408" width="16" height="16" rx="4"/><text class="leg" x="174" y="416">hardware register</text>
-  <rect class="grp" x="300" y="408" width="16" height="16" rx="4"/><text class="leg" x="324" y="416">one MIPP vector (rvd&lt;T, LMUL&gt;)</text>
+  <rect class="grp" x="300" y="408" width="16" height="16" rx="4"/><text class="leg" x="324" y="416">one MIPP vector (vd&lt;T, LMUL&gt;)</text>
   <rect class="off" x="530" y="408" width="16" height="16" rx="4"/><text class="leg" x="554" y="416">unused lanes</text>
 </svg>

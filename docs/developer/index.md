@@ -100,7 +100,7 @@ generator/
 │   ├── c_generator.py               # Per-ISA C implementation headers
 │   ├── ci_generator.py              # C API dispatch headers
 │   ├── cpp_generator.py             # C++ Functional API (namespace mipp)
-│   └── obj_generator.py             # C++ Object API (Rvd, Rvm) and public per-function headers
+│   └── obj_generator.py             # C++ Object API (Vd, Vm) and public per-function headers
 │
 ├── helpers_tests/                   # Test generation engine
 │   ├── tests_builder.py             # Test engine and test audits

@@ -1650,7 +1650,7 @@
             "template_ref": "tpl_generic_emu.testz_emu"
         }
     ],
-    "torvd": [
+    "tovd": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
@@ -1661,10 +1661,10 @@
                 "rvv",
                 "sve"
             ],
-            "template_ref": "tpl_generic_emu.torvd_emu"
+            "template_ref": "tpl_generic_emu.tovd_emu"
         }
     ],
-    "torvm": [
+    "tovm": [
         {
             "datatypes": "all_datatypes",
             "preferred_simd_ext": [
@@ -1675,7 +1675,7 @@
                 "rvv",
                 "sve"
             ],
-            "template_ref": "tpl_generic_emu.torvm_emu"
+            "template_ref": "tpl_generic_emu.tovm_emu"
         }
     ],
     "trunc": [

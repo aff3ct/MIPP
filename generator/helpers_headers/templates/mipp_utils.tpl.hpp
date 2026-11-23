@@ -14,7 +14,7 @@
 #include "mipp/c/utils.h"
 #include "mipp/internal/interfaces/cpp/common.hpp"
 #include "mipp/cpp/fun/storeu.hpp"
-#include "mipp/cpp/fun/torvd.hpp"
+#include "mipp/cpp/fun/tovd.hpp"
 #include "mipp/cpp/fun/hadd.hpp"
 #include "mipp/cpp/fun/combine.hpp"
 #include "mipp/cpp/fun/ncvts.hpp"
@@ -95,7 +95,7 @@ inline void print_lanes(std::ostream& os, const T* p, const std::size_t n, const
 // The datatype and the LMUL of a register of the Functional API cannot be deduced: give them,
 // e.g. mipp::dump<float, 2>(r). The Object API has operator<< (mipp/obj/utils.hpp).
 template <typename T, int LMUL = 1>
-inline std::ostream& dump(const rvd<T, LMUL>& r, std::ostream& os = std::cout)
+inline std::ostream& dump(const vd<T, LMUL>& r, std::ostream& os = std::cout)
 {
 	T buf[N<T, LMUL>()];
 	mipp::storeu(buf, r);
@@ -104,10 +104,10 @@ inline std::ostream& dump(const rvd<T, LMUL>& r, std::ostream& os = std::cout)
 }
 
 template <typename T, int LMUL = 1>
-inline std::ostream& dump_k(const rvm<T, LMUL>& m, std::ostream& os = std::cout)
+inline std::ostream& dump_k(const vm<T, LMUL>& m, std::ostream& os = std::cout)
 {
 	T buf[N<T, LMUL>()];
-	mipp::storeu(buf, mipp::torvd(m));
+	mipp::storeu(buf, mipp::tovd(m));
 	details::print_lanes(os, buf, N<T, LMUL>(), true);
 	return os << '\n';
 }

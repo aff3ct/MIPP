@@ -1164,11 +1164,11 @@
             "if": "defined(__SSE4_1__)"
         }
     ],
-    "torvd": [
+    "tovd": [
         {
-            "instr_name": "torvd",
+            "instr_name": "tovd",
             "datatypes": "all_datatypes",
-            "template": "torvd",
+            "template": "tovd",
             "skip_audit_level": true,
             "skip_audit_level_reason": "zero-overhead struct field copy: on SSE the mask register is the data register (__m128, __m128d, __m128i)"
         }

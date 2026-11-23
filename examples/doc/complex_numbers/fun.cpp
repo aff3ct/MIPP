@@ -37,12 +37,12 @@ static bool close_to(float x, float ref)
 static void interleaved()
 {
     // --8<-- [start:interleaved]
-    mipp::rvd<float> a = mipp::load<float>(Z);  // re0 im0 re1 im1 ...
-    mipp::rvd<float> b = mipp::load<float>(W);
-    mipp::rvd<float> p = mipp::cmul(a, b);      // a * b
-    mipp::rvd<float> q = mipp::cdiv(a, b);      // a / b
-    mipp::rvd<float> s = mipp::cfmadd(a, b, p); // a * b + p
-    mipp::rvd<float> m = mipp::cabs(a);         // |a|, in both lanes of each pair
+    mipp::vd<float> a = mipp::load<float>(Z);   // re0 im0 re1 im1 ...
+    mipp::vd<float> b = mipp::load<float>(W);
+    mipp::vd<float> p = mipp::cmul(a, b);       // a * b
+    mipp::vd<float> q = mipp::cdiv(a, b);       // a / b
+    mipp::vd<float> s = mipp::cfmadd(a, b, p); // a * b + p
+    mipp::vd<float> m = mipp::cabs(a);          // |a|, in both lanes of each pair
     // --8<-- [end:interleaved]
     mipp::store(P, p);
     mipp::store(Q, q);
@@ -61,10 +61,10 @@ static void interleaved()
 static void split()
 {
     // --8<-- [start:split]
-    mipp::rvd<float> ar = mipp::load<float>(AR), ai = mipp::load<float>(AI);
-    mipp::rvd<float> br = mipp::load<float>(BR), bi = mipp::load<float>(BI);
-    mipp::rvd<float> pr = mipp::fmsub(ar, br, mipp::mul(ai, bi)); // ar br - ai bi
-    mipp::rvd<float> pi = mipp::fmadd(ar, bi, mipp::mul(ai, br)); // ar bi + ai br
+    mipp::vd<float> ar = mipp::load<float>(AR), ai = mipp::load<float>(AI);
+    mipp::vd<float> br = mipp::load<float>(BR), bi = mipp::load<float>(BI);
+    mipp::vd<float> pr = mipp::fmsub(ar, br, mipp::mul(ai, bi)); // ar br - ai bi
+    mipp::vd<float> pi = mipp::fmadd(ar, bi, mipp::mul(ai, br)); // ar bi + ai br
     // --8<-- [end:split]
     mipp::store(PR, pr);
     mipp::store(PI, pi);

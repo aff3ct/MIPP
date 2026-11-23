@@ -213,7 +213,7 @@ export function renderAlgoModal(modalData) {
     ];
     if (uses.length) head.push(`// Calls: ${uses.join(", ")}`);
     if (abstractCalls.some((c) => c.scalar)) head.push("// The scalar fallback calls the C API of the scalar target (mipp_scalar_*).");
-    head.push("// C++ Functional API (#include <mipp.hpp>): rvd<T, LMUL> = data register, rvm<T, LMUL> = mask.");
+    head.push("// C++ Functional API (#include <mipp.hpp>): vd<T, LMUL> = data register, vm<T, LMUL> = mask.");
     head.push("// =============================================================================", "");
     fullCode = head.join("\n") + "\n" + abs.code;
     if (currentView === "flat") {
@@ -424,7 +424,7 @@ export function renderAlgoModal(modalData) {
             ${notesHtml}
             <div class="mipp-algo-note">
               <span class="mipp-algo-note-icon">${ICON_INFO}</span>
-              <span>The code of the MIPP headers for these flags, written with the C++ Functional API: <code>rvd&lt;T, LMUL&gt;</code> is a <strong>data</strong> register, <code>rvm&lt;T, LMUL&gt;</code> a <strong>mask</strong> register. Each <code>mipp::</code> call is another MIPP function, with its own level.</span>
+              <span>The code of the MIPP headers for these flags, written with the C++ Functional API: <code>vd&lt;T, LMUL&gt;</code> is a <strong>data</strong> register, <code>vm&lt;T, LMUL&gt;</code> a <strong>mask</strong> register. Each <code>mipp::</code> call is another MIPP function, with its own level.</span>
             </div>
 
             <!-- Abstract C++ Code Box -->

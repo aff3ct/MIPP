@@ -31,7 +31,7 @@ def lmul_suffix(lmul, isa_name=True):
 
 def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
-        str_reg = "rvd"
+        str_reg = "vd"
         str_reg += "<" + datatype["cstd"]
         if lmul:
             str_reg += "," + str(int(lmul))
@@ -42,7 +42,7 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
         str_reg += ">"
         return str_reg
     else:
-        str_reg = "rvd_"
+        str_reg = "vd_"
         if isa_name:
             str_reg += isa["name"] + "_"
         str_reg += datatype["category"] + str(datatype["n_bits"])
@@ -52,7 +52,7 @@ def build_reg(datatype, isa, lmul=0, isa_name=True, cpp=False):
 
 def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
-        str_msk = "rvm"
+        str_msk = "vm"
         str_msk += "<" + datatype["cstd"]
         if lmul:
             str_msk += "," + str(int(lmul))
@@ -63,7 +63,7 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
         str_msk += ">"
         return str_msk
     else:
-        str_msk = "rvm_"
+        str_msk = "vm_"
         if isa_name:
             str_msk += isa["name"] + "_"
         str_msk += datatype["category"] + str(datatype["n_bits"])
@@ -71,16 +71,16 @@ def build_msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
         str_msk += "_t"
         return str_msk
 
-# build class Rvd and Rvm
+# build class Vd and Vm
 def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=True):
     if cpp:
-        str_reg = "Rvd <T "
+        str_reg = "Vd <T "
         if lmul:
             str_reg += "," + str(int(lmul))
         str_reg += ">"
         return str_reg
     else:
-        str_reg = "Rvd_"
+        str_reg = "Vd_"
         if isa_name:
             str_reg += isa["name"] + "_"
         str_reg += datatype["category"] + str(datatype["n_bits"])
@@ -91,7 +91,7 @@ def build_Reg(datatype, isa, lmul=0, isa_name=True, cpp=True):
 
 def build_Msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
     if cpp:
-        str_msk = "Rvm"
+        str_msk = "Vm"
         if isa_name:
             str_msk += "_"+isa["name"]
         str_msk += "<T " 
@@ -100,7 +100,7 @@ def build_Msk(datatype, isa, lmul=0, isa_name=True, cpp=False):
         str_msk += ">"
         return str_msk
     else:
-        str_msk = "Rvm_"
+        str_msk = "Vm_"
         if isa_name:
             str_msk += isa["name"] + "_"
         str_msk += datatype["category"] + str(datatype["n_bits"])
@@ -325,11 +325,11 @@ def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
         isa_type = isa["name"].upper()
     template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
     if func_name == "set0":
-        reg_type = "rvd"
+        reg_type = "vd"
     elif func_name == "set0_k":
-        reg_type = "rvm"
+        reg_type = "vm"
     else:
-        reg_type = "rvd"
+        reg_type = "vd"
 
     # masked template form (no template<>)
     if masked_version:
@@ -345,9 +345,9 @@ def build_proto_set0(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
 
         # set0 has no other args, but masked forms still take m0 (and maybe rsrc)
         if masked_version in ("mask", "maskz"):
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_ret}_t,{lmul}, {isa_type}> m0"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_ret}_t,{lmul}, {isa_type}> m0"
         elif masked_version == "masks":
-            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_ret}_t,{lmul}, {isa_type}> m0, const {reg_type}<{dt_ret}_t,{lmul}, {isa_type}> rsrc"
+            return f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_ret}_t,{lmul}, {isa_type}> m0, const {reg_type}<{dt_ret}_t,{lmul}, {isa_type}> rsrc"
 
     # unmasked (unchanged)
     return f"template <>\ninline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
@@ -363,14 +363,14 @@ def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, ma
     template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
     if func_name == "set":
         dt_par = f"{dt_ret}_t"
-        reg_type = "rvd"
+        reg_type = "vd"
     elif func_name == "set_k":
         dt_par = "int32_t"
-        reg_type = "rvm"
+        reg_type = "vm"
     else:
         # keep fallback sane
         dt_par = f"{dt_ret}_t"
-        reg_type = "rvd"
+        reg_type = "vd"
 
     if masked_version:
         if masked_version == "mask":
@@ -387,14 +387,14 @@ def build_proto_set(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, ma
         if masked_version in ("mask", "maskz"):
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
                 f"const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
             )
         elif masked_version == "masks":
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
-                f"const rvd<{dt_par},{lmul}, {isa_type}> rsrc, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const vd<{dt_par},{lmul}, {isa_type}> rsrc, "
                 f"const {dt_par} vals[N<{dt_ret}_t, {lmul}, {isa_type}>()]"
             )
 
@@ -410,13 +410,13 @@ def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
     template = f"<{dt_ret}_t, {lmul}, {isa_type}>"
     if func_name == "set1":
         dt_par = f"{dt_ret}_t"
-        reg_type = "rvd"
+        reg_type = "vd"
     elif func_name == "set1_k":
         dt_par = "int32_t"
-        reg_type = "rvm"
+        reg_type = "vm"
     else:
         dt_par = f"{dt_ret}_t"
-        reg_type = "rvd"
+        reg_type = "vd"
 
     if masked_version:
         if masked_version == "mask":
@@ -432,14 +432,14 @@ def build_proto_set1(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
         if masked_version in ("mask", "maskz"):
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
                 f"const {dt_par} s0"
             )
         elif masked_version == "masks":
             return (
                 f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}("
-                f"const rvm<{dt_par},{lmul}, {isa_type}> m0, "
-                f"const rvd<{dt_par},{lmul}, {isa_type}> rsrc, "
+                f"const vm<{dt_par},{lmul}, {isa_type}> m0, "
+                f"const vd<{dt_par},{lmul}, {isa_type}> rsrc, "
                 f"const {dt_par} s0"
             )
 
@@ -464,15 +464,15 @@ def build_proto_load(dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, m
             else :
                 print("error: masked_version should be mask, maskz or masks")
                 exit(-1)
-        reg_type = "rvd"
+        reg_type = "vd"
   
     if masked_version:
         if masked_version == "mask" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
         elif masked_version == "maskz" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> m0, const {dt_par}* p0"
         elif masked_version == "masks" :
-            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const rvm<{dt_par},{lmul}, {isa_type}> m0, const rvd<{dt_par},{lmul}, {isa_type}> rsrc, const {dt_par}* p0"
+            ret = f"inline {reg_type}<{dt_ret}_t, {lmul}, {isa_type}> {func_name}{template}(const vm<{dt_par},{lmul}, {isa_type}> m0, const vd<{dt_par},{lmul}, {isa_type}> rsrc, const {dt_par}* p0"
         else : 
             print("error: masked_version should be mask, maskz or masks")
             exit(-1)
@@ -487,7 +487,7 @@ def _idx_lmul_str(dt_par, dt_ret, lmul):
 
 def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     """
-    C++ masked gather: rvd<T, LMUL> gather<V, T, T_IDX, LMUL>(m0, [rsrc,] const T* p0, idx). The pair is
+    C++ masked gather: vd<T, LMUL> gather<V, T, T_IDX, LMUL>(m0, [rsrc,] const T* p0, idx). The pair is
     "data,index" (dt_par, dt_ret); the mask has the type of the data, the index its own LMUL (`"lmul": "ratio"`).
     """
     func_name = func_name.replace("_masks", "").replace("_maskz", "").replace("_mask", "")
@@ -499,10 +499,10 @@ def build_proto_gather(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, c
         sys.exit(1)
         exit(-1)
     template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
-    p = f"inline rvd<{t}, {lmul}, {isa_type}> {func_name}{template}(const rvm<{t},{lmul}, {isa_type}> m0"
+    p = f"inline vd<{t}, {lmul}, {isa_type}> {func_name}{template}(const vm<{t},{lmul}, {isa_type}> m0"
     if masked_version == "masks":
-        p += f", const rvd<{t},{lmul}, {isa_type}> rsrc"
-    return p + f", const {t}* p0, const rvd<{t_idx},{l_idx}, {isa_type}> r0"
+        p += f", const vd<{t},{lmul}, {isa_type}> rsrc"
+    return p + f", const {t}* p0, const vd<{t_idx},{l_idx}, {isa_type}> r0"
 
 def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, cpp=False, masked_version=False):
     """C++ masked scatter: void scatter<V, T, T_IDX, LMUL>(m0, T* p0, idx, r1), as build_proto_gather."""
@@ -515,27 +515,27 @@ def build_proto_scatter(dt_par, dt_ret, isa, func_name, lmul=1, isa_name=False, 
         sys.exit(1)
         exit(-1)
     template = f"<{letters[masked_version]}, {t}, {t_idx}, {lmul}, {isa_type}>"
-    p = f"inline void {func_name}{template}(const rvm<{t},{lmul}, {isa_type}> m0"
+    p = f"inline void {func_name}{template}(const vm<{t},{lmul}, {isa_type}> m0"
     if masked_version == "masks":
-        p += f", const rvd<{t},{lmul}, {isa_type}> rsrc"
-    return p + f", {t}* p0, const rvd<{t_idx},{l_idx}, {isa_type}> r0, const rvd<{t},{lmul}, {isa_type}> r1"
+        p += f", const vd<{t},{lmul}, {isa_type}> rsrc"
+    return p + f", {t}* p0, const vd<{t_idx},{l_idx}, {isa_type}> r0, const vd<{t},{lmul}, {isa_type}> r1"
 
 #function message error set functions
 def gen_set_func_error(func_name, file):
     if func_name == "set":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]);", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vd<T, LMUL, ISA_TYPE> {func_name}(const T[N<T, LMUL, ISA_TYPE>()]);", file=file)
     if func_name == "set1":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T);", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vd<T, LMUL, ISA_TYPE> {func_name}(const T);", file=file)
     if func_name == "set0":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}();", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vd<T, LMUL, ISA_TYPE> {func_name}();", file=file)
     if func_name == "set_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]);", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vm<T, LMUL, ISA_TYPE> {func_name}(const int32_t[N<T, LMUL, ISA_TYPE>()]);", file=file)
     if func_name == "set0_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}();", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vm<T, LMUL, ISA_TYPE> {func_name}();", file=file)
     if func_name == "set1_k":
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvm<T, LMUL, ISA_TYPE> {func_name}(const int32_t s0);", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vm<T, LMUL, ISA_TYPE> {func_name}(const int32_t s0);", file=file)
     if func_name in LOAD_FUNCS:
-        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline rvd<T, LMUL, ISA_TYPE> {func_name}(const T* p0);", file=file)
+        print(f"template <typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> inline vd<T, LMUL, ISA_TYPE> {func_name}(const T* p0);", file=file)
 
 def build_proto(proto, dt_par, dt_ret, isa, func_name, lmul=0, isa_name=True, cpp=False, masked_version=False):
     #build proto for set functions

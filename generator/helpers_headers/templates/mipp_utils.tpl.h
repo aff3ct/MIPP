@@ -4,7 +4,7 @@
 
 #include "mipp/internal/interfaces/c/common.h"
 #include "mipp/c/fun/storeu.h"
-#include "mipp/c/fun/torvd.h"
+#include "mipp/c/fun/tovd.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,19 +67,19 @@ static inline void mipp_fdump_lanes_{{ d.name }}_(FILE* f, const {{ d.cstd }}* p
 {% for l in lmuls %}{% if l.guard %}
 #if {{ l.guard }}{% endif %}
 {% for d in datatypes %}
-static inline void mipp_fdump_{{ d.name }}{{ l.sfx }}(FILE* f, const rvd_{{ d.name }}{{ l.sfx }}_t r)
+static inline void mipp_fdump_{{ d.name }}{{ l.sfx }}(FILE* f, const vd_{{ d.name }}{{ l.sfx }}_t r)
 {
 	{{ d.cstd }} buf[MIPP_N_{{ d.name | upper }}{{ l.n }}];
 	mipp_storeu_{{ d.name }}{{ l.sfx }}(buf, r);
 	mipp_fdump_lanes_{{ d.name }}_(f, buf, MIPP_N_{{ d.name | upper }}{{ l.n }}, 0);
 }
-static inline void mipp_dump_{{ d.name }}{{ l.sfx }}(const rvd_{{ d.name }}{{ l.sfx }}_t r) { mipp_fdump_{{ d.name }}{{ l.sfx }}(stdout, r); }
-static inline void mipp_fdump_k_{{ d.name }}{{ l.sfx }}(FILE* f, const rvm_{{ d.name }}{{ l.sfx }}_t m)
+static inline void mipp_dump_{{ d.name }}{{ l.sfx }}(const vd_{{ d.name }}{{ l.sfx }}_t r) { mipp_fdump_{{ d.name }}{{ l.sfx }}(stdout, r); }
+static inline void mipp_fdump_k_{{ d.name }}{{ l.sfx }}(FILE* f, const vm_{{ d.name }}{{ l.sfx }}_t m)
 {
 	{{ d.cstd }} buf[MIPP_N_{{ d.name | upper }}{{ l.n }}];
-	mipp_storeu_{{ d.name }}{{ l.sfx }}(buf, mipp_torvd_{{ d.name }}{{ l.sfx }}(m));
+	mipp_storeu_{{ d.name }}{{ l.sfx }}(buf, mipp_tovd_{{ d.name }}{{ l.sfx }}(m));
 	mipp_fdump_lanes_{{ d.name }}_(f, buf, MIPP_N_{{ d.name | upper }}{{ l.n }}, 1);
 }
-static inline void mipp_dump_k_{{ d.name }}{{ l.sfx }}(const rvm_{{ d.name }}{{ l.sfx }}_t m) { mipp_fdump_k_{{ d.name }}{{ l.sfx }}(stdout, m); }
+static inline void mipp_dump_k_{{ d.name }}{{ l.sfx }}(const vm_{{ d.name }}{{ l.sfx }}_t m) { mipp_fdump_k_{{ d.name }}{{ l.sfx }}(stdout, m); }
 {% endfor %}{% if l.guard %}#endif // {{ l.guard }}
 {% endif %}{% endfor %}

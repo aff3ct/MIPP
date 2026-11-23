@@ -25,7 +25,7 @@ The options of the script are in the [Command-Line Reference](../reference/cli.m
 
 `generate_c_layer()` (`c_generator.py`) builds the internal C headers of one ISA, in seven steps.
 
-1. **Common header.** `simd_ext/<isa>/c/common.h` receives the `header_template` of the ISA descriptor, the ISA macros (`gen_c_defines()`) and the register types: `rvd_<isa>_<type>_t` for the data registers, `rvm_<isa>_<type>_t` for the masks, and their LMUL variants (`gen_c_structures()`).
+1. **Common header.** `simd_ext/<isa>/c/common.h` receives the `header_template` of the ISA descriptor, the ISA macros (`gen_c_defines()`) and the register types: `vd_<isa>_<type>_t` for the data registers, `vm_<isa>_<type>_t` for the masks, and their LMUL variants (`gen_c_structures()`).
 2. **Hardware LMUL.** For LMUL `0` (the base registers) and each value of `hw_lmul`, the descriptor is specialized for this LMUL (`resolve_lmul_in_isa()`: a `{name}` placeholder in a field of a datatype takes the value of the field `name` of the same datatype, or of its `variables`, for this LMUL), the candidates are registered ([§3](#3-candidates)), resolved ([§4](#4-resolution)) and emitted ([§5](#5-emission)). Positive values come first, then the negative ones (half-vectors).
     With several half-vector representations (`ldiv_modes` in the ISA descriptor, RVV: `MIPP_RVV_LDIV_HW`, `_VL`, `_HYBRID`), the half-vector types of `common.h`, the `d2` functions and the functions that change the LMUL between `m1` and `d2` are written once per mode, under `#if defined(<macro>)`, from a copy of the descriptor where the half-vector of the `vl_datatypes` of the mode is the register of LMUL 1 (`codegen/ldiv_modes.py`: the `lsuffix`, `eew_emul`... of `-2` take their value of LMUL 1, `if_lmul["-2"]` is dropped, `ldiv_vl` is set). The number of lanes, hence the `vl` of the intrinsics (`MIPP_RVV_N_<TYPE>_D2`), does not change: the native templates are the same in every mode. The templates that change the LMUL (`rvv_ldiv_mask.json`) detect a half-vector by `vl` by comparing `ctx.ext(dt, -2)` with `ctx.ext(dt, 1)`. The prototypes, identical in every mode, are written once per mode without guard. The documented levels are the ones of the last mode of the list (the default mode, `hw`).
 3. **Half-vectors on the sub-ISA.** With `"sw_ldiv_type": "sub_isa"`, `gen_c_ldiv()` writes the `_d2` functions as calls to the `sub_isa` functions (AVX `d2` calls SSE).
@@ -38,7 +38,7 @@ The options of the script are in the [Command-Line Reference](../reference/cli.m
 7. **Dependencies and glue.** The `IncludeManager` adds the `#include` lines that each header needs and writes `simd_ext/<isa>/c/mipp_<isa>.h` ([Header Layout](header_layout.md)).
 
 !!! note "LMUL `0` and `1`"
-    Inside an ISA (`isa_name=True`) there is no level without suffix: `lmul_suffix()` of `name_builder.py` writes LMUL `0` (no LMUL) as `_m1`, for the types and for the functions (`rvd_avx_float32_m1_t`, `mipp_avx_add_float32_m1`). These are the definitions. The names without suffix (`rvd_avx_float32_t`, `mipp_avx_add_float32`) are their aliases: the types are `typedef`s written with the structures, and the functions are written by step 5 (`build_func_name_short(..., alias=True)`; in the C layer, `_ci_m1_level()` writes the `_m1` dispatchers and then the aliases). In the public C layer (`isa_name=False`), LMUL `0` stays the name without suffix.
+    Inside an ISA (`isa_name=True`) there is no level without suffix: `lmul_suffix()` of `name_builder.py` writes LMUL `0` (no LMUL) as `_m1`, for the types and for the functions (`vd_avx_float32_m1_t`, `mipp_avx_add_float32_m1`). These are the definitions. The names without suffix (`vd_avx_float32_t`, `mipp_avx_add_float32`) are their aliases: the types are `typedef`s written with the structures, and the functions are written by step 5 (`build_func_name_short(..., alias=True)`; in the C layer, `_ci_m1_level()` writes the `_m1` dispatchers and then the aliases). In the public C layer (`isa_name=False`), LMUL `0` stays the name without suffix.
 
 !!! note "Sections of a header"
     A header of a function is split by banners (`emit_lmul_banner()`): `LMUL = 1 Aliases`, `Emulated LMUL > 1` (software registers) and, for the hardware LMUL > 1 of a coarse header, `Hardware LMUL > 1`. In fine granularity each header has the sections of its own LMUL. In coarse granularity, a single header has them one after the other: the native functions, then the aliases, then the emulated LMUL.
@@ -95,7 +95,7 @@ static inline ... mipp_neon_<function>_float64(...) { /* Level 3 */ }
 
 ### 4.3. Dependencies of the Scalar Fallback
 
-On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fallback converts the masks with `torvd` and `torvm` (`hw_mask_requires_torvd`), and extracts them with `store` (`hw_mask_extract_via_store`); with bitfield masks (`hw_mask_is_bitfield`, AVX-512) it copies the bits directly. These functions are dependencies of the fallback. On scalable layouts, the half-vector fallback is also guarded by the minimum vector length (`layout.vlen_guard_template`).
+On ISAs with hardware masks, the <span class="mipp-isa-badge lvl-3">L3</span> fallback converts the masks with `tovd` and `tovm` (`hw_mask_requires_tovd`), and extracts them with `store` (`hw_mask_extract_via_store`); with bitfield masks (`hw_mask_is_bitfield`, AVX-512) it copies the bits directly. These functions are dependencies of the fallback. On scalable layouts, the half-vector fallback is also guarded by the minimum vector length (`layout.vlen_guard_template`).
 
 ### 4.4. Effective Level
 
@@ -121,9 +121,9 @@ The generic body of a scalar form (`derived_form`, see `forms.py`) then takes th
 An emitted <span class="mipp-isa-badge lvl-0">L0</span> function (`avx/c/functions/arithmetic/u/m1/add.h`, fine granularity):
 
 ```c
-static inline rvd_avx_float32_m1_t mipp_avx_add_float32_m1(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
+static inline vd_avx_float32_m1_t mipp_avx_add_float32_m1(const vd_avx_float32_m1_t r0, const vd_avx_float32_m1_t r1) {
 	// Level 0 (Native Hardware)
-	rvd_avx_float32_m1_t res;
+	vd_avx_float32_m1_t res;
 	res.r = _mm256_add_ps(r0.r, r1.r);
 	return res;
 }
@@ -132,7 +132,7 @@ static inline rvd_avx_float32_m1_t mipp_avx_add_float32_m1(const rvd_avx_float32
 and, in the `LMUL = 1 Aliases` section of the same header, its alias without suffix (step 5 of [§2](#2-one-isa-layer)), which has no `// Level` comment:
 
 ```c
-static inline rvd_avx_float32_m1_t mipp_avx_add_float32(const rvd_avx_float32_m1_t r0, const rvd_avx_float32_m1_t r1) {
+static inline vd_avx_float32_m1_t mipp_avx_add_float32(const vd_avx_float32_m1_t r0, const vd_avx_float32_m1_t r1) {
 	return mipp_avx_add_float32_m1(r0, r1);
 }
 ```
@@ -148,7 +148,7 @@ Some instructions only take a constant encoded in them (an immediate: `palignr`,
 #if defined(__OPTIMIZE__) && (defined(__SSSE3__))
 	if (__builtin_constant_p(s0)) { // immediate when s0 is a constant: palignr
 		switch (s0) {
-		case 1: { rvd_sse_float32_m1_t res; res.r = ..._mm_alignr_epi8(..., 4)...; return res; }
+		case 1: { vd_sse_float32_m1_t res; res.r = ..._mm_alignr_epi8(..., 4)...; return res; }
 		...
 		default: break;
 		}
@@ -160,7 +160,7 @@ Inlined with a constant, `__builtin_constant_p` is true and the switch is resolv
 
 The switch weighs in the size the inliner estimates even when the argument is a variable: a function with a dispatch, and the LMUL > 1 or masked functions that call it, are less often inlined. A function whose dynamic body the compiler already turns into the immediate instruction gets no bodies: `get` keeps its `"imm"` range (for its C++ template) but no ISA writes a case, since `storeu` then `t[s0]` with a constant `s0` already compiles to an extraction (`pextrd`, `vextracti128`, `valignq`, `umov`), with GCC 12 / 13 and Clang 18. With a dispatch, the larger `get` was not inlined any more in big translation units, and passing the AVX-512 mask groups by value to `get_k` revealed a GCC 13 bug (wrong lanes in `cmplt` on a test of 16 files compiled together). The immediate bodies use intrinsics and the types of the DSL only (a call to a MIPP function is an error: the include resolution would not see it). The masked variants call the unmasked function; the LMUL > 1 template of `slide` (`generic_emu_templates_lmulh.json`) has its own constant path, which slides the registers of the groups with the LMUL 1 function.
 
-The C++ APIs get a template per concrete overload, `template <int S> rvd<float32_t,1,SSE> slide(r0, r1)`, with a `static_assert` on the range, which calls the C function with the constant (`_emit_imm_template()` of `cpp_generator.py`), and its `Rvd` / `Rvm` version (`obj_generator.py`).
+The C++ APIs get a template per concrete overload, `template <int S> vd<float32_t,1,SSE> slide(r0, r1)`, with a `static_assert` on the range, which calls the C function with the constant (`_emit_imm_template()` of `cpp_generator.py`), and its `Vd` / `Vm` version (`obj_generator.py`).
 
 ---
 

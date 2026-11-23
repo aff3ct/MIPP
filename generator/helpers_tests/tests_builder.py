@@ -22,7 +22,7 @@ import copy
 import forms
 
 # Auxiliary MIPP functions whose headers must always be included in generated test files.
-_AUX_HEADERS = ["load", "get", "get_k", "torvd", "torvm", "set_k"]
+_AUX_HEADERS = ["load", "get", "get_k", "tovd", "tovm", "set_k"]
 
 # Functions whose vector call gets a pointer shifted by one element: never aligned on the
 # register size (the scalar reference keeps the aligned buffers).
@@ -1546,13 +1546,13 @@ class TestsBuilderEngineCppBase:
             if aux in self.engine.interfaces and aux not in wrapper_fns:
                 wrapper_fns.append(aux)
         if dialect_name == "obj":
-            # Rvd(const T*), Rvd(T), Rvm(bool) are backed by these obj atoms (fine-grained: not pulled by obj/common.hpp)
+            # Vd(const T*), Vd(T), Vm(bool) are backed by these obj atoms (fine-grained: not pulled by obj/common.hpp)
             for aux in ("loadu", "set1", "set1_k"):
                 if aux in self.engine.interfaces and aux not in wrapper_fns:
                     wrapper_fns.append(aux)
-        # Scalar reference headers are self-contained (they pull the ISA detection and rvd/rvm types) and
+        # Scalar reference headers are self-contained (they pull the ISA detection and vd/vm types) and
         # come FIRST: their explicit specializations (hmax<Z,float64_t,-2,SCALAR>, ...) are matched against
-        # every visible same-name template, so the obj overloads (Rvm<T,LMUL>) must not be declared yet.
+        # every visible same-name template, so the obj overloads (Vm<T,LMUL>) must not be declared yet.
         wrapper_lines = sorted(f'#include <mipp/{wrapper_ns}/fun/{wfn}.hpp>' for wfn in wrapper_fns)
 
         headers_set.add(f'#include <mipp/internal/simd_ext/scalar/cpp/functions/{cat_func}/{func_name}.hpp>')

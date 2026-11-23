@@ -97,7 +97,7 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
     if isa.get("hw_mask", False):
         reg_vector_type = build_reg(msk_dt, isa, lmul, True, False)
         reg_scalar_type = build_reg(msk_dt, scalar_isa, lmul, True, False)
-        scalar_torvm_func = build_func_name_internal(scalar_isa, msk_dt_name, msk_dt_name, msk_dt_name, "torvm", lmul=lmul)
+        scalar_tovm_func = build_func_name_internal(scalar_isa, msk_dt_name, msk_dt_name, msk_dt_name, "tovm", lmul=lmul)
         
         is_special_bitfield = False
         if isa.get("hw_mask_is_bitfield", False):
@@ -109,7 +109,7 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
             pre_statements.append(f"\t\ts_{arg_name}.m[i] = ({arg_name}.m & (1ULL << i)) ? ~0 : 0;")
             pre_statements.append(f"\t}}")
         else:
-            torvd_func = build_func_name_internal(isa, msk_dt_name, msk_dt_name, msk_dt_name, "torvd", lmul=lmul)
+            tovd_func = build_func_name_internal(isa, msk_dt_name, msk_dt_name, msk_dt_name, "tovd", lmul=lmul)
             if "if_lmul" in isa["datatypes"].get(msk_dt_name, {}):
                 guard = isa["datatypes"][msk_dt_name]["if_lmul"].get(str(lmul), None)
             else:
@@ -120,10 +120,10 @@ def _prepare_mask_variable(pre_statements, isa, msk_dt, arg_name, cond, lmul, f,
             else:
                 if guard:
                     pre_statements.append(f"#if {guard}")
-                pre_statements.append(f"\t{reg_vector_type} r_{arg_name} = {torvd_func}({arg_name});")
+                pre_statements.append(f"\t{reg_vector_type} r_{arg_name} = {tovd_func}({arg_name});")
                 pre_statements.append(f"\t{reg_scalar_type} s_r_{arg_name} = {{0}};")
                 pre_statements.append(f"\tmemcpy(&s_r_{arg_name}, &r_{arg_name}, MIPP_MIN_SIZEOF(s_r_{arg_name}, r_{arg_name}));")
-                pre_statements.append(f"\ts_{arg_name} = {scalar_torvm_func}(s_r_{arg_name});")
+                pre_statements.append(f"\ts_{arg_name} = {scalar_tovm_func}(s_r_{arg_name});")
                 if guard:
                     pre_statements.append(f"#else")
                     pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, MIPP_MIN_SIZEOF(s_{arg_name}, {arg_name}));")
@@ -137,9 +137,9 @@ def _resolve_arg_datatype(arg, dt_par, dt_ret):
 def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector_ret_type, ret_type_name):
     dt_ret_name = dt_ret["name"]
     if ret_type_name == "msk" and isa.get("hw_mask", False):
-        torvm_func = build_func_name_internal(isa, dt_ret_name, dt_ret_name, dt_ret_name, "torvm", lmul=lmul)
-        torvd_scalar_func = build_func_name_internal(scalar_isa, dt_ret_name, dt_ret_name, dt_ret_name, "torvd", lmul=lmul)
-        if isa.get("hw_mask_is_bitfield", False) and f in ["torvd", "torvm", "cast_k"]:
+        tovm_func = build_func_name_internal(isa, dt_ret_name, dt_ret_name, dt_ret_name, "tovm", lmul=lmul)
+        tovd_scalar_func = build_func_name_internal(scalar_isa, dt_ret_name, dt_ret_name, dt_ret_name, "tovd", lmul=lmul)
+        if isa.get("hw_mask_is_bitfield", False) and f in ["tovd", "tovm", "cast_k"]:
             post_statements.append(f"\t{vector_ret_type} res;")
             post_statements.append(f"\tres.m = 0;")
             n_elements = isa["size"] // get_dt_par_size(dt_ret_name)
@@ -160,10 +160,10 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
                     post_statements.append(f"\t#if {ret_guard}")
                 reg_scalar_type = build_reg(dt_ret, scalar_isa, lmul, True, False)
                 reg_vector_type = build_reg(dt_ret, isa, lmul, True, False)
-                post_statements.append(f"\t{reg_scalar_type} s_r_res = {torvd_scalar_func}(sres);")
+                post_statements.append(f"\t{reg_scalar_type} s_r_res = {tovd_scalar_func}(sres);")
                 post_statements.append(f"\t{reg_vector_type} r_res;")
                 post_statements.append(f"\tmemcpy(&r_res, &s_r_res, MIPP_MIN_SIZEOF(r_res, s_r_res));")
-                post_statements.append(f"\t{vector_ret_type} res = {torvm_func}(r_res);")
+                post_statements.append(f"\t{vector_ret_type} res = {tovm_func}(r_res);")
                 if ret_guard:
                     post_statements.append(f"\t#else")
                     post_statements.append(f"\t{vector_ret_type} res;")
@@ -395,22 +395,22 @@ def resolve_candidates(isa, funcs, lmul=0):
                 if isa["name"] != "scalar":
                     auto_scalar_reqs = {}
                     
-                    if isa.get("hw_mask_requires_torvd", False):
-                        if not (isa.get("hw_mask_is_bitfield", False) and f in ["torvd", "torvm", "cast_k"]):
+                    if isa.get("hw_mask_requires_tovd", False):
+                        if not (isa.get("hw_mask_is_bitfield", False) and f in ["tovd", "tovm", "cast_k"]):
                             has_msk_arg = any(arg["type"] == "msk" for arg in funcs[f]["proto"]["args"]) or mask_kind is not None
                             if has_msk_arg and not isa.get("hw_mask_is_bitfield", False):
                                 single_dt_par = dt_par.split(",")[0]
                                 req_dt_par = single_dt_par + "," + single_dt_par
-                                auto_scalar_reqs.setdefault("torvd", []).append(req_dt_par)
-                                auto_scalar_reqs.setdefault("torvm", []).append(req_dt_par)
+                                auto_scalar_reqs.setdefault("tovd", []).append(req_dt_par)
+                                auto_scalar_reqs.setdefault("tovm", []).append(req_dt_par)
                                 if isa.get("hw_mask_extract_via_store", False):
                                     auto_scalar_reqs.setdefault("store", []).append(req_dt_par)
                             
                             if funcs[f]["proto"]["ret"]["type"] == "msk":
                                 single_dt_ret = dt_ret.split(",")[0]
                                 req_dt_ret = single_dt_ret + "," + single_dt_ret
-                                if req_dt_ret not in auto_scalar_reqs.get("torvm", []):
-                                    auto_scalar_reqs.setdefault("torvm", []).append(req_dt_ret)
+                                if req_dt_ret not in auto_scalar_reqs.get("tovm", []):
+                                    auto_scalar_reqs.setdefault("tovm", []).append(req_dt_ret)
                                     if isa.get("hw_mask_extract_via_store", False):
                                         if req_dt_ret not in auto_scalar_reqs.get("store", []):
                                             auto_scalar_reqs.setdefault("store", []).append(req_dt_ret)
@@ -594,13 +594,13 @@ def resolve_candidates(isa, funcs, lmul=0):
                 for req_f in reqs:
                     for req_dt_key in reqs[req_f]:
                         req_key = (req_f, req_dt_key, None)
-                        # For auto_scalar candidates, torvd/torvm/store deps on
+                        # For auto_scalar candidates, tovd/tovm/store deps on
                         # conditional types (those with an "if" guard in the ISA)
                         # are optional: the emitted code wraps the call in
                         # #if <type_guard> ... #else memcpy(...) #endif,
                         # so the function body is always valid regardless of
                         # whether the type's native path is reachable.
-                        if cand["type"] == "auto_scalar" and req_f in ("torvd", "torvm", "store"):
+                        if cand["type"] == "auto_scalar" and req_f in ("tovd", "tovm", "store"):
                             req_dt_par = req_dt_key.split(",")[0]
                             req_type_guard = isa.get("datatypes", {}).get(req_dt_par, {}).get("if", None)
                             if req_type_guard and req_type_guard != "0":
@@ -674,7 +674,7 @@ def resolve_candidates(isa, funcs, lmul=0):
             if cond == "0":
                 continue
             reqs = _get_candidate_reqs(cand, isa, funcs, lmul=lmul)
-            # For auto_scalar candidates, torvd/torvm/store requirements on
+            # For auto_scalar candidates, tovd/tovm/store requirements on
             # conditional types are handled inline with a #if guard + memcpy
             # fallback in the generated code, and are NOT structural deps that
             # build_ifdef_rec should follow. Strip them out before registering
@@ -682,7 +682,7 @@ def resolve_candidates(isa, funcs, lmul=0):
             if cand["type"] == "auto_scalar":
                 filtered_reqs = {}
                 for req_f, req_dt_keys in reqs.items():
-                    if req_f in ("torvd", "torvm", "store"):
+                    if req_f in ("tovd", "tovm", "store"):
                         kept = []
                         for req_dt_key in req_dt_keys:
                             req_dt_par = req_dt_key.split(",")[0]

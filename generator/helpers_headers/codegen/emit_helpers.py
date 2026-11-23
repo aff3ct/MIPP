@@ -120,8 +120,8 @@ def emit_ifdef_begin(ifd, file):
         print("#if " + ifd, file=file)
 
 def gen_ldiv_structs_sub_isa(isa_base, isa_div, file):
-    template = """typedef rvd_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;
-typedef rvm_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t rvm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
+    template = """typedef vd_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t vd_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;
+typedef vm_{{ isa_div.name }}_{{ datatype.category }}{{ datatype.n_bits }}_t vm_{{ isa.name }}_{{ datatype.category }}{{ datatype.n_bits }}_d2_t;"""
     j2_template = Template(template, undefined=StrictUndefined)
     ldivs = [x for x in (isa_base.get("hw_lmul", []) + isa_base.get("sw_lmul", [])) if int(x) < 0]
     if any(int(x) == -2 for x in ldivs):
@@ -153,15 +153,15 @@ def gen_ldiv_structs_mask(isa, file):
     layout = isa.get("layout", None)
     if layout:
         # VLA ISAs (SVE): the member is the fixed-size type of LMUL 1, as in the LMUL 1 struct
-        j2_rvd = Template(layout["rvd_struct_template"], undefined=StrictUndefined)
-        j2_rvm = Template(layout["rvm_struct_template"], undefined=StrictUndefined)
+        j2_vd = Template(layout["vd_struct_template"], undefined=StrictUndefined)
+        j2_vm = Template(layout["vm_struct_template"], undefined=StrictUndefined)
         for dt in isa["datatypes"]:
             args = dict(
                 isa=isa, datatype=datatypes[dt], isa_datatype=isa["datatypes"][dt], lsuffix_mipp="m1",
                 vla_size=layout.get("size_symbol", None), isa_name_upper=isa["name"].upper(),
                 type_category_upper=datatypes[dt]["category"].upper(),
             )
-            for rendered in (j2_rvd.render(**args), j2_rvm.render(**args)):
+            for rendered in (j2_vd.render(**args), j2_vm.render(**args)):
                 print(re.sub(r"_m1_t;$", "_d2_t;", rendered.strip()), file=file)
         return
     for dt in isa["datatypes"]:
@@ -172,12 +172,12 @@ def gen_ldiv_structs_mask(isa, file):
         n_macro = f"MIPP_{isa['name'].upper()}_N_{d['category'].upper()}{d['n_bits']}_D2"
         if guard:
             print(f"#if {guard}", file=file)
-        print(f"typedef struct {{ {isa_dt['reg']} r; }} rvd_{name}_d2_t;", file=file)
-        print(f"typedef struct {{ {isa_dt['msk']} m; }} rvm_{name}_d2_t;", file=file)
+        print(f"typedef struct {{ {isa_dt['reg']} r; }} vd_{name}_d2_t;", file=file)
+        print(f"typedef struct {{ {isa_dt['msk']} m; }} vm_{name}_d2_t;", file=file)
         if guard:
             print("#else", file=file)
-            print(f"typedef struct {{ {d['category']}{d['n_bits']}_t r[{n_macro}]; }} rvd_{name}_d2_t;", file=file)
-            print(f"typedef struct {{ uint{d['n_bits']}_t m[{n_macro}]; }} rvm_{name}_d2_t;", file=file)
+            print(f"typedef struct {{ {d['category']}{d['n_bits']}_t r[{n_macro}]; }} vd_{name}_d2_t;", file=file)
+            print(f"typedef struct {{ uint{d['n_bits']}_t m[{n_macro}]; }} vm_{name}_d2_t;", file=file)
             print("#endif", file=file)
 
 def gen_ldiv_defines_mask(isa, file):

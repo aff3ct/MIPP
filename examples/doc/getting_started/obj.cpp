@@ -7,14 +7,14 @@
 // Computes y[i] = x[i] > 0 ? x[i] : alpha * x[i] (Leaky ReLU) over an arbitrary size
 void leaky_relu(float alpha, const float* x, float* y, size_t size)
 {
-    constexpr size_t N = mipp::Rvd<float>::N(); // elements per register (e.g. 8 with AVX2)
+    constexpr size_t N = mipp::Vd<float>::N(); // elements per register (e.g. 8 with AVX2)
     const size_t vec_end = (size / N) * N;
 
     // 1. Vector main loop
     for (size_t i = 0; i < vec_end; i += N) {
-        mipp::Rvd<float> vx(&x[i]);                               // load
-        mipp::Rvm<float> pos = vx > 0.f;                          // comparison -> mask
-        mipp::Rvd<float> vy  = mipp::select(pos, vx, vx * alpha); // branch-free
+        mipp::Vd<float> vx(&x[i]);                                // load
+        mipp::Vm<float> pos = vx > 0.f;                           // comparison -> mask
+        mipp::Vd<float> vy  = mipp::select(pos, vx, vx * alpha); // branch-free
         mipp::storeu(&y[i], vy);
     }
     // 2. Scalar tail loop for the remaining elements

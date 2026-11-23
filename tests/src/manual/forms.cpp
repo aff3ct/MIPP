@@ -18,8 +18,8 @@ TEST_CASE("forms - vv aliases and overloads", "[forms]")
 		a[i] = static_cast<float>(i) - 2.f;
 		b[i] = static_cast<float>(3 * i % 7);
 	}
-	const rvd_float32_t va = mipp_loadu_float32(a);
-	const rvd_float32_t vb = mipp_loadu_float32(b);
+	const vd_float32_t va = mipp_loadu_float32(a);
+	const vd_float32_t vb = mipp_loadu_float32(b);
 
 	// C: mipp_<f>_vv_<...> is the base function
 	mipp_storeu_float32(r, mipp_sub_vv_float32(va, vb));
@@ -38,9 +38,9 @@ TEST_CASE("forms - vv aliases and overloads", "[forms]")
 		REQUIRE(r[i] == (a[i] < 0.f ? 0.f : (a[i] > 3.f ? 3.f : a[i])));
 
 	// C++ Object: same overloads, T deduced from the register and the scalar
-	const mipp::Rvd<float> oa(a);
-	const mipp::Rvd<float> oc = mipp::fmadd(oa, oa, 1.f);
-	const mipp::Rvm<float> om = mipp::cmpge(1.f, oa);
+	const mipp::Vd<float> oa(a);
+	const mipp::Vd<float> oc = mipp::fmadd(oa, oa, 1.f);
+	const mipp::Vm<float> om = mipp::cmpge(1.f, oa);
 	for (int i = 0; i < n; i++)
 	{
 		REQUIRE(oc[i] == a[i] * a[i] + 1.f);
@@ -54,9 +54,9 @@ TEST_CASE("forms - vv aliases and overloads", "[forms]")
 		x[i] = i - 3;
 		c[i] = i % 4;
 	}
-	const mipp::Rvd<int32_t> ox(x), occ(c);
-	const mipp::Rvd<int32_t> l1 = ox << occ;
-	const mipp::Rvd<int32_t> l2 = mipp::lshift(ox, 2);
+	const mipp::Vd<int32_t> ox(x), occ(c);
+	const mipp::Vd<int32_t> l1 = ox << occ;
+	const mipp::Vd<int32_t> l2 = mipp::lshift(ox, 2);
 	for (int i = 0; i < MIPP_N_INT32; i++)
 	{
 		REQUIRE(l1[i] == static_cast<int32_t>(static_cast<uint32_t>(x[i]) << c[i]));

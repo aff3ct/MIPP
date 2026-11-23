@@ -51,11 +51,11 @@ int main(int argc, char** argv)
 	std::vector<float> in2(N, 5.0f);
 	std::vector<float> out(N, 0.0f);
 
-	// 1. Load using Rvd constructor
-	mipp::Rvd<float, 1> a(in1.data());
-	mipp::Rvd<float, 1> b(in2.data());
+	// 1. Load using Vd constructor
+	mipp::Vd<float, 1> a(in1.data());
+	mipp::Vd<float, 1> b(in2.data());
 
-	// 2. Operators on Rvd
+	// 2. Operators on Vd
 	auto c = a + b; // 2.0 + 5.0 = 7.0
 	assert(c[0] == 7.0f);
 	std::cout << "[PASS] c = a + b => " << c[0] << std::endl;
@@ -65,21 +65,21 @@ int main(int argc, char** argv)
 	assert(c[0] == 10.0f);
 	std::cout << "[PASS] c = 10.0f => " << c[0] << std::endl;
 
-	// 4. Comparison creating Rvm & Boolean Broadcast
+	// 4. Comparison creating Vm & Boolean Broadcast
 	auto mask = (a < b); // 2.0 < 5.0 => true
 	assert(mask[0] == true);
 	std::cout << "[PASS] mask = (a < b) created, mask[0] = " << mask[0] << std::endl;
 
-	// 4b. Rvm boolean broadcast constructor & assignment
-	mipp::Rvm<float, 1> m_bcast_true(true);
+	// 4b. Vm boolean broadcast constructor & assignment
+	mipp::Vm<float, 1> m_bcast_true(true);
 	assert(m_bcast_true[0] == true);
-	mipp::Rvm<float, 1> m_bcast_false(false);
+	mipp::Vm<float, 1> m_bcast_false(false);
 	assert(m_bcast_false[0] == false);
 	m_bcast_false = true;
 	assert(m_bcast_false[0] == true);
-	std::cout << "[PASS] Rvm boolean broadcast (true/false) verified" << std::endl;
+	std::cout << "[PASS] Vm boolean broadcast (true/false) verified" << std::endl;
 
-	// 5. Masked add directly with Rvm and Rvd
+	// 5. Masked add directly with Vm and Vd
 	auto d = mipp::add(mask, a, b); // 2.0 + 5.0 = 7.0
 	assert(d[0] == 7.0f);
 	std::cout << "[PASS] d = mipp::add(mask, a, b) => " << d[0] << std::endl;
@@ -89,20 +89,20 @@ int main(int argc, char** argv)
 	assert(e[0] == a[0]); // mask is true for a < b, so selects a[0] = 2.0
 	std::cout << "[PASS] select(mask, a, b) => " << e[0] << std::endl;
 
-	// 7. C++ Func interoperability: call mipp::abs (from C++ Func) directly passing Rvd!
-	// Rvd implicitly converts to rvd, and rvd converts to Rvd:
-	mipp::Rvd<float, 1> neg_val(-4.0f);
-	mipp::rvd<float, 1> raw_abs = mipp::abs(neg_val); // Rvd -> rvd
-	mipp::Rvd<float, 1> abs_val = raw_abs;             // rvd -> Rvd
+	// 7. C++ Func interoperability: call mipp::abs (from C++ Func) directly passing Vd!
+	// Vd implicitly converts to vd, and vd converts to Vd:
+	mipp::Vd<float, 1> neg_val(-4.0f);
+	mipp::vd<float, 1> raw_abs = mipp::abs(neg_val); // Vd -> vd
+	mipp::Vd<float, 1> abs_val = raw_abs;              // vd -> Vd
 	assert(abs_val[0] == 4.0f);
-	std::cout << "[PASS] C++ Func mipp::abs(Rvd) interoperability => " << abs_val[0] << std::endl;
+	std::cout << "[PASS] C++ Func mipp::abs(Vd) interoperability => " << abs_val[0] << std::endl;
 
-	// 8. Storeu with Rvd
+	// 8. Storeu with Vd
 	mipp::storeu(out.data(), d);
 	assert(out[0] == 7.0f);
 	std::cout << "[PASS] storeu(out, d) => " << out[0] << std::endl;
 
-	// 9. Masked storeu with Rvm and Rvd
+	// 9. Masked storeu with Vm and Vd
 	mipp::storeu(mask, out.data(), a);
 	assert(out[0] == 2.0f);
 	std::cout << "[PASS] masked storeu(mask, out, a) => " << out[0] << std::endl;
@@ -110,36 +110,36 @@ int main(int argc, char** argv)
 	// 10. Test _obj initializers and free functions
 	// 10a. set0_obj
 	auto r_zero = mipp::set0_obj<float>();
-	static_assert(std::is_same<decltype(r_zero), mipp::Rvd<float, 1>>::value, "Type mismatch for set0_obj");
+	static_assert(std::is_same<decltype(r_zero), mipp::Vd<float, 1>>::value, "Type mismatch for set0_obj");
 	assert(r_zero[0] == 0.0f);
 	std::cout << "[PASS] set0_obj<float>() => " << r_zero[0] << std::endl;
 
 	// 10b. set1_obj
 	auto r_one = mipp::set1_obj<float>(3.14f);
-	static_assert(std::is_same<decltype(r_one), mipp::Rvd<float, 1>>::value, "Type mismatch for set1_obj");
+	static_assert(std::is_same<decltype(r_one), mipp::Vd<float, 1>>::value, "Type mismatch for set1_obj");
 	assert(r_one[0] == 3.14f);
 	std::cout << "[PASS] set1_obj<float>(3.14f) => " << r_one[0] << std::endl;
 
 	// 10c. loadu_obj
 	auto r_loadu = mipp::loadu_obj<float>(in1.data());
-	static_assert(std::is_same<decltype(r_loadu), mipp::Rvd<float, 1>>::value, "Type mismatch for loadu_obj");
+	static_assert(std::is_same<decltype(r_loadu), mipp::Vd<float, 1>>::value, "Type mismatch for loadu_obj");
 	assert(r_loadu[0] == 2.0f);
 	std::cout << "[PASS] loadu_obj<float>(in1.data()) => " << r_loadu[0] << std::endl;
 
 	// 10d. loadu_obj with mask
 	auto r_loadu_maskz = mipp::loadu_obj(mask, in2.data());
-	static_assert(std::is_same<decltype(r_loadu_maskz), mipp::Rvd<float, 1>>::value, "Type mismatch for masked loadu_obj");
+	static_assert(std::is_same<decltype(r_loadu_maskz), mipp::Vd<float, 1>>::value, "Type mismatch for masked loadu_obj");
 	assert(r_loadu_maskz[0] == 5.0f);
 	std::cout << "[PASS] loadu_obj(mask, in2.data()) => " << r_loadu_maskz[0] << std::endl;
 
 	// 10e. set0_k_obj & set1_k_obj
 	auto m_zero = mipp::set0_k_obj<float>();
-	static_assert(std::is_same<decltype(m_zero), mipp::Rvm<float, 1>>::value, "Type mismatch for set0_k_obj");
+	static_assert(std::is_same<decltype(m_zero), mipp::Vm<float, 1>>::value, "Type mismatch for set0_k_obj");
 	assert(m_zero[0] == false);
 	std::cout << "[PASS] set0_k_obj<float>() => " << m_zero[0] << std::endl;
 
 	auto m_one = mipp::set1_k_obj<float>(1);
-	static_assert(std::is_same<decltype(m_one), mipp::Rvm<float, 1>>::value, "Type mismatch for set1_k_obj");
+	static_assert(std::is_same<decltype(m_one), mipp::Vm<float, 1>>::value, "Type mismatch for set1_k_obj");
 	assert(m_one[0] == true);
 	std::cout << "[PASS] set1_k_obj<float>(1) => " << m_one[0] << std::endl;
 
@@ -151,26 +151,26 @@ int main(int argc, char** argv)
 		kvals[i] = (i % 2 == 0) ? 1 : 0;
 	}
 	auto r_set = mipp::set_obj<float>(vals);
-	static_assert(std::is_same<decltype(r_set), mipp::Rvd<float, 1>>::value, "Type mismatch for set_obj");
+	static_assert(std::is_same<decltype(r_set), mipp::Vd<float, 1>>::value, "Type mismatch for set_obj");
 	assert(r_set[0] == 0.0f);
 	if (N > 1) assert(r_set[1] == 10.0f);
 	std::cout << "[PASS] set_obj<float>(vals) => " << r_set[0] << std::endl;
 
 	auto m_set = mipp::set_k_obj<float>(kvals);
-	static_assert(std::is_same<decltype(m_set), mipp::Rvm<float, 1>>::value, "Type mismatch for set_k_obj");
+	static_assert(std::is_same<decltype(m_set), mipp::Vm<float, 1>>::value, "Type mismatch for set_k_obj");
 	assert(m_set[0] == true);
 	if (N > 1) assert(m_set[1] == false);
 	std::cout << "[PASS] set_k_obj<float>(kvals) => " << m_set[0] << std::endl;
 
 	// 10g. load_obj (aligned)
 	auto r_load = mipp::load_obj<float>(vals);
-	static_assert(std::is_same<decltype(r_load), mipp::Rvd<float, 1>>::value, "Type mismatch for load_obj");
+	static_assert(std::is_same<decltype(r_load), mipp::Vd<float, 1>>::value, "Type mismatch for load_obj");
 	assert(r_load[0] == 0.0f);
 	std::cout << "[PASS] load_obj<float>(vals) => " << r_load[0] << std::endl;
 
 	// 11. Mask operator overloads (&, &=, |, |=, ^, ^=, ~, !)
-	mipp::Rvm<float, 1> m1(true);
-	mipp::Rvm<float, 1> m0(false);
+	mipp::Vm<float, 1> m1(true);
+	mipp::Vm<float, 1> m0(false);
 
 	// 11a. Bitwise AND
 	auto m_and = m1 & m0;
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
 	m1 &= false;
 	assert(m1[0] == false);
 	m1 = true;
-	std::cout << "[PASS] Rvm & and &= operators verified" << std::endl;
+	std::cout << "[PASS] Vm & and &= operators verified" << std::endl;
 
 	// 11b. Bitwise OR
 	auto m_or = m1 | m0;
@@ -194,7 +194,7 @@ int main(int argc, char** argv)
 	m0 |= true;
 	assert(m0[0] == true);
 	m0 = false;
-	std::cout << "[PASS] Rvm | and |= operators verified" << std::endl;
+	std::cout << "[PASS] Vm | and |= operators verified" << std::endl;
 
 	// 11c. Bitwise XOR
 	auto m_xor = m1 ^ m0;
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
 	m1 ^= true;
 	assert(m1[0] == false);
 	m1 = true;
-	std::cout << "[PASS] Rvm ^ and ^= operators verified" << std::endl;
+	std::cout << "[PASS] Vm ^ and ^= operators verified" << std::endl;
 
 	// 11d. Bitwise NOT and Logical NOT (~ and !)
 	auto m_not = ~m1;
@@ -217,9 +217,9 @@ int main(int argc, char** argv)
 	assert(m_bang[0] == false);
 	auto m_bang0 = !m0;
 	assert(m_bang0[0] == true);
-	std::cout << "[PASS] Rvm ~ and ! operators verified" << std::endl;
+	std::cout << "[PASS] Vm ~ and ! operators verified" << std::endl;
 
-	// 11e. Free functions without _k on Rvm (andb, orb, xorb, notb, get)
+	// 11e. Free functions without _k on Vm (andb, orb, xorb, notb, get)
 	auto fn_and = mipp::andb(m1, m0);
 	assert(fn_and[0] == false);
 	auto fn_or  = mipp::orb(m1, m0);
@@ -230,8 +230,8 @@ int main(int argc, char** argv)
 	assert(fn_not[0] == false);
 	auto val_get = mipp::get(m1, 0);
 	assert(val_get != 0);
-	std::cout << "[PASS] Rvm free functions without _k (andb, orb, xorb, notb, get) verified" << std::endl;
+	std::cout << "[PASS] Vm free functions without _k (andb, orb, xorb, notb, get) verified" << std::endl;
 
-	std::cout << "\nAll 11 interoperability, _obj initializer, and Rvm operator tests PASSED successfully!" << std::endl;
+	std::cout << "\nAll 11 interoperability, _obj initializer, and Vm operator tests PASSED successfully!" << std::endl;
 	return 0;
 }

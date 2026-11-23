@@ -492,10 +492,10 @@ def match_args_type_cpp(arg_type, cast=False, ret=False, fixed_dtype=False, lmul
     lmul_str = "" if lmul == 1 else (f", {lmul}" if lmul > 0 else f", -2")
     if arg_type == "msk":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
-        return f"rvm<{t_param}{lmul_str}>"
+        return f"vm<{t_param}{lmul_str}>"
     elif arg_type == "reg":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
-        return f"rvd<{t_param}{lmul_str}>"
+        return f"vd<{t_param}{lmul_str}>"
     elif arg_type == "val":
         return f"{fixed_dtype}_t" if fixed_dtype else "T"
     elif arg_type == "ptr":
@@ -509,10 +509,10 @@ def match_args_type_obj(arg_type, cast=False, ret=False, fixed_dtype=False, lmul
     lmul_str = "" if lmul == 1 else (f", {lmul}" if lmul > 0 else f", -2")
     if arg_type == "msk":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
-        return f"Rvm<{t_param}{lmul_str}>"
+        return f"Vm<{t_param}{lmul_str}>"
     elif arg_type == "reg":
         t_param = "T2" if (cast and ret) else ("T1" if cast else "T")
-        return f"Rvd<{t_param}{lmul_str}>"
+        return f"Vd<{t_param}{lmul_str}>"
     elif arg_type == "val":
         return f"{fixed_dtype}_t" if fixed_dtype else "T"
     elif arg_type == "ptr":
@@ -524,9 +524,9 @@ def match_args_type_obj(arg_type, cast=False, ret=False, fixed_dtype=False, lmul
 
 def match_args_type_c(arg_type, cast=False, ret=False, fixed_dtype=False):
     if arg_type == "msk":
-        return "rvm_{type 2}_t" if (cast and ret) else ("rvm_{type 1}_t" if cast else "rvm_{type}_t")
+        return "vm_{type 2}_t" if (cast and ret) else ("vm_{type 1}_t" if cast else "vm_{type}_t")
     elif arg_type == "reg":
-        return "rvd_{type 2}_t" if (cast and ret) else ("rvd_{type 1}_t" if cast else "rvd_{type}_t")
+        return "vd_{type 2}_t" if (cast and ret) else ("vd_{type 1}_t" if cast else "vd_{type}_t")
     elif arg_type == "val":
         return f"{fixed_dtype}_t" if fixed_dtype else "{type}_t"
     elif arg_type == "ptr":
@@ -582,8 +582,8 @@ class SpecFuncInfo:
         if is_pair_func:
             if mask_kind is not None and mask_kind != "unmasked":
                 return ""
-            type_name = "rvm" if self.func_name.endswith("_k") else "rvd"
-            arg_name = "m0" if type_name == "rvm" else "r0"
+            type_name = "vm" if self.func_name.endswith("_k") else "vd"
+            arg_name = "m0" if type_name == "vm" else "r0"
             lmul_arg = f", {lmul}" if lmul != 1 else ""
             rl = ret_lmul_of(self.func_name, lmul)
             ret_lmul_arg = f", {rl}" if rl != 1 else ""
@@ -610,11 +610,11 @@ class SpecFuncInfo:
         if mask_kind and mask_kind != "unmasked":
             lmul_arg = f", {lmul}" if lmul != 1 else ""
             if mask_kind in ("mask", "maskz"):
-                args_parts.append(f"const rvm<T{lmul_arg}> m0")
+                args_parts.append(f"const vm<T{lmul_arg}> m0")
                 cnt_msk += 1
             elif mask_kind == "masks":
-                args_parts.append(f"const rvm<T{lmul_arg}> m0")
-                args_parts.append(f"const rvd<T{lmul_arg}> rsrc")
+                args_parts.append(f"const vm<T{lmul_arg}> m0")
+                args_parts.append(f"const vd<T{lmul_arg}> rsrc")
                 cnt_msk += 1
 
         for arg in self.args:
@@ -663,8 +663,8 @@ class SpecFuncInfo:
                 return ""
             tmpl_parts = ["typename T_DST", "typename T_SRC"]
             tmpl_str = f"template <{', '.join(tmpl_parts)}> "
-            type_name = "Rvm" if self.func_name.endswith("_k") else "Rvd"
-            arg_name = "m0" if type_name == "Rvm" else "r0"
+            type_name = "Vm" if self.func_name.endswith("_k") else "Vd"
+            arg_name = "m0" if type_name == "Vm" else "r0"
             rl = ret_lmul_of(self.func_name, lmul)
             ret_lmul_arg = f", {rl}" if rl != 1 else ""
             return f"{tmpl_str}{type_name}<T_DST{ret_lmul_arg}> {cpp_name}(const {type_name}<T_SRC{lmul_arg}>& {arg_name});"
@@ -692,11 +692,11 @@ class SpecFuncInfo:
 
         if mask_kind and mask_kind != "unmasked":
             if mask_kind in ("mask", "maskz"):
-                args_parts.append(f"const Rvm<T{lmul_arg}>& m0")
+                args_parts.append(f"const Vm<T{lmul_arg}>& m0")
                 cnt_msk += 1
             elif mask_kind == "masks":
-                args_parts.append(f"const Rvm<T{lmul_arg}>& m0")
-                args_parts.append(f"const Rvd<T{lmul_arg}>& rsrc")
+                args_parts.append(f"const Vm<T{lmul_arg}>& m0")
+                args_parts.append(f"const Vd<T{lmul_arg}>& rsrc")
                 cnt_msk += 1
 
         for arg in self.args:
@@ -750,36 +750,36 @@ class SpecFuncInfo:
             if self.func_name in op_map and len(self.args) == 2:
                 op = op_map[self.func_name]
                 if self.func_name.endswith("_k"):
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvm<T{lmul_arg}>& m0, const Rvm<T{lmul_arg}>& m1);")
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvm<T{lmul_arg}>& m0, const bool val);")
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const bool val, const Rvm<T{lmul_arg}>& m1);")
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}>& operator{op}=(Rvm<T{lmul_arg}>& m0, const Rvm<T{lmul_arg}>& m1);")
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}>& operator{op}=(Rvm<T{lmul_arg}>& m0, const bool val);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator{op}(const Vm<T{lmul_arg}>& m0, const Vm<T{lmul_arg}>& m1);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator{op}(const Vm<T{lmul_arg}>& m0, const bool val);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator{op}(const bool val, const Vm<T{lmul_arg}>& m1);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}>& operator{op}=(Vm<T{lmul_arg}>& m0, const Vm<T{lmul_arg}>& m1);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}>& operator{op}=(Vm<T{lmul_arg}>& m0, const bool val);")
                 elif self.func_name in ("cmpeq", "cmpneq", "cmplt", "cmple", "cmpgt", "cmpge"):
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const T val);")
-                    lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator{op}(const T val, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator{op}(const Vd<T{lmul_arg}>& r0, const Vd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator{op}(const Vd<T{lmul_arg}>& r0, const T val);")
+                    lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator{op}(const T val, const Vd<T{lmul_arg}>& r1);")
                 elif self.func_name in ("lshift_vs", "rshift_vs"):
                     # same count for every lane
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const int32_t val);")
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const int32_t val);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator{op}(const Vd<T{lmul_arg}>& r0, const int32_t val);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}>& operator{op}=(Vd<T{lmul_arg}>& r0, const int32_t val);")
                 elif self.func_name in ("lshift", "rshift"):
                     # count of each lane in a register
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator{op}(const Vd<T{lmul_arg}>& r0, const Vd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}>& operator{op}=(Vd<T{lmul_arg}>& r0, const Vd<T{lmul_arg}>& r1);")
                 else:
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const Rvd<T{lmul_arg}>& r0, const T val);")
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator{op}(const T val, const Rvd<T{lmul_arg}>& r1);")
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const Rvd<T{lmul_arg}>& r1);")
-                    lines.append(f"{tmpl_header}Rvd<T{lmul_arg}>& operator{op}=(Rvd<T{lmul_arg}>& r0, const T val);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator{op}(const Vd<T{lmul_arg}>& r0, const Vd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator{op}(const Vd<T{lmul_arg}>& r0, const T val);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator{op}(const T val, const Vd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}>& operator{op}=(Vd<T{lmul_arg}>& r0, const Vd<T{lmul_arg}>& r1);")
+                    lines.append(f"{tmpl_header}Vd<T{lmul_arg}>& operator{op}=(Vd<T{lmul_arg}>& r0, const T val);")
             elif self.func_name == "notb" and len(self.args) == 1:
-                lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator~(const Rvd<T{lmul_arg}>& r0);")
+                lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator~(const Vd<T{lmul_arg}>& r0);")
             elif self.func_name == "notb_k" and len(self.args) == 1:
-                lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator~(const Rvm<T{lmul_arg}>& m0);")
-                lines.append(f"{tmpl_header}Rvm<T{lmul_arg}> operator!(const Rvm<T{lmul_arg}>& m0);")
+                lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator~(const Vm<T{lmul_arg}>& m0);")
+                lines.append(f"{tmpl_header}Vm<T{lmul_arg}> operator!(const Vm<T{lmul_arg}>& m0);")
             elif self.func_name == "neg" and len(self.args) == 1:
-                lines.append(f"{tmpl_header}Rvd<T{lmul_arg}> operator-(const Rvd<T{lmul_arg}>& r0);")
+                lines.append(f"{tmpl_header}Vd<T{lmul_arg}> operator-(const Vd<T{lmul_arg}>& r0);")
 
         return "\n".join(lines)
 

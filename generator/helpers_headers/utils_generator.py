@@ -13,7 +13,7 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
   They pull about 20 rearrangement functions: only the global headers include them, not the utils headers.
 
 These functions are not in the registry: they are not implemented per ISA, they are written once on top of the
-generated functions (storeu, torvd, hadd, combine, ncvts, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
+generated functions (storeu, tovd, hadd, combine, ncvts, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
 """
 import os
 

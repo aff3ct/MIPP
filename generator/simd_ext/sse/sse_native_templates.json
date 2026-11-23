@@ -245,7 +245,7 @@
             "return {{ isa.prefix }}_{{ instr_name }}_si128(m0.m, m1.m);"
         ]
     },
-    "torvd": {
+    "tovd": {
         "format": "short",
         "code": "m0.m;"
     },

@@ -150,8 +150,8 @@
     "reinterpret": [
         "cast",
         "cast_k",
-        "torvd",
-        "torvm"
+        "tovd",
+        "tovm"
     ],
     "selection": [
         "select",

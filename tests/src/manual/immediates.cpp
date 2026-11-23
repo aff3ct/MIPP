@@ -53,8 +53,8 @@ void check_value()
 	data<T, LMUL> d;
 	volatile int32_t vs = S; // a variable: the dynamic body
 	const int32_t v = vs;
-	const mipp::rvd<T, LMUL> a = mipp::loadu<T, LMUL>(d.a), b = mipp::loadu<T, LMUL>(d.b);
-	const mipp::Rvd<T, LMUL> oa(d.a), ob(d.b);
+	const mipp::vd<T, LMUL> a = mipp::loadu<T, LMUL>(d.a), b = mipp::loadu<T, LMUL>(d.b);
+	const mipp::Vd<T, LMUL> oa(d.a), ob(d.b);
 	constexpr int n = data<T, LMUL>::n;
 	constexpr int nb = static_cast<int>(16 / sizeof(T)) < n ? static_cast<int>(16 / sizeof(T)) : n;
 	constexpr int bits = static_cast<int>(8 * sizeof(T));
@@ -62,7 +62,7 @@ void check_value()
 #define MIPP_CHECK_IMM(F, ...)                                                                                         \
 	do {                                                                                                               \
 		INFO(#F << ": S = " << S << ", LMUL = " << LMUL);                                                              \
-		const mipp::rvd<T, LMUL> dyn = mipp::F(__VA_ARGS__, v);                                                        \
+		const mipp::vd<T, LMUL> dyn = mipp::F(__VA_ARGS__, v);                                                        \
 		require_same<T, LMUL>(mipp::F(__VA_ARGS__, S), dyn);                                                           \
 		require_same<T, LMUL>(mipp::F<S>(__VA_ARGS__), dyn);                                                           \
 	} while (0)

@@ -504,11 +504,11 @@
             "if": "!defined(__aarch64__)"
         }
     ],
-    "torvm": [
+    "tovm": [
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": "all_64bit",
-            "template": "torvm_64"
+            "template": "tovm_64"
         }
     ],
     "unziphi_b128": [

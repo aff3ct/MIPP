@@ -114,7 +114,7 @@ def render_datatypes(generator_dir):
     for dt in all_datatypes:
         reg = scalar_types[dt]["reg"]
         scalar = f"`{CXX_SCALAR_NAMES[reg]}` / `{reg}`" if reg in CXX_SCALAR_NAMES else f"`{reg}`"
-        lines.append(f"| `{dt}` | {scalar} | `rvd_{dt}_t` | `rvm_{dt}_t` |")
+        lines.append(f"| `{dt}` | {scalar} | `vd_{dt}_t` | `vm_{dt}_t` |")
     return _header("helpers_headers/datatypes.py and registry_scalar_isa.json") + "\n".join(lines) + "\n"
 
 

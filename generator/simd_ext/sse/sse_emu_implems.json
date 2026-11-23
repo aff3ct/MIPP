@@ -451,9 +451,9 @@
             "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ],
-    "torvm": [
+    "tovm": [
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": [
                 "float32",
                 "int32",
@@ -463,19 +463,19 @@
                 "uint16",
                 "uint8"
             ],
-            "template": "torvm_cmp",
+            "template": "tovm_cmp",
             "if": "defined(__SSE2__)"
         },
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": "all_64bit",
-            "template": "torvm_cmp",
+            "template": "tovm_cmp",
             "if": "defined(__SSE4_1__)"
         },
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": "all_64bit",
-            "template": "torvm_cmp64_sse2",
+            "template": "tovm_cmp64_sse2",
             "if": "defined(__SSE2__) && !defined(__SSE4_1__)"
         }
     ],

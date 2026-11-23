@@ -41,9 +41,9 @@ static void d2_loop(void)
 #ifdef MIPP_LDIV_2
 const size_t n_half = MIPP_N_FLOAT32_D2;
 for (size_t i = 0; i + n_half <= n; i += n_half) {
-    rvd_float32_d2_t a = mipp_loadu_float32_d2(in_a + i);
-    rvd_float32_d2_t b = mipp_loadu_float32_d2(in_b + i);
-    rvd_float32_d2_t c = mipp_add_float32_d2(a, b);
+    vd_float32_d2_t a = mipp_loadu_float32_d2(in_a + i);
+    vd_float32_d2_t b = mipp_loadu_float32_d2(in_b + i);
+    vd_float32_d2_t c = mipp_add_float32_d2(a, b);
     mipp_storeu_float32_d2(out + i, c);
 }
 #endif
@@ -61,7 +61,7 @@ static void d2_guard(void)
 {
     /* --8<-- [start:d2_guard] */
 #ifdef MIPP_LDIV_2
-    rvd_float32_d2_t h = mipp_set0_float32_d2();
+    vd_float32_d2_t h = mipp_set0_float32_d2();
 #endif
     /* --8<-- [end:d2_guard] */
 #ifdef MIPP_LDIV_2
@@ -76,10 +76,10 @@ static void conversions(void)
 {
     const float* ptr = P;
     /* --8<-- [start:conversions] */
-    rvd_float32_t v  = mipp_loadu_float32(ptr);       // {-2.7, -1.4, -0.1, 1.2, ...}
-    rvd_int32_t   vb = mipp_cast_float32_int32(v);    // {0xC02CCCCD, ...}: IEEE-754 bit patterns
-    rvd_int32_t   vi = mipp_cvt_float32_int32(v);     // {-2, -1, 0, 1, ...}: truncation
-    rvd_float64_m2_t vw = mipp_wcvt_float32_float64(v); // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
+    vd_float32_t v  = mipp_loadu_float32(ptr);        // {-2.7, -1.4, -0.1, 1.2, ...}
+    vd_int32_t   vb = mipp_cast_float32_int32(v);     // {0xC02CCCCD, ...}: IEEE-754 bit patterns
+    vd_int32_t   vi = mipp_cvt_float32_int32(v);      // {-2, -1, 0, 1, ...}: truncation
+    vd_float64_m2_t vw = mipp_wcvt_float32_float64(v); // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
     /* --8<-- [end:conversions] */
     int32_t b[DOC_BUF], t[DOC_BUF];
     double w[DOC_BUF];
@@ -103,13 +103,13 @@ static void changing_lmul(void)
 {
     const float* ptr = P;
     /* --8<-- [start:changing_lmul] */
-    rvd_float32_t    a  = mipp_loadu_float32(ptr);
-    rvd_float32_t    b  = mipp_loadu_float32(ptr + MIPP_N_FLOAT32);
-    rvd_float32_m2_t ab = mipp_combine_float32(a, b);        // {a, b}: twice as many elements
-    rvd_float32_t    lo = mipp_lo_float32_m2(ab);            // == a
-    rvd_float32_t    hi = mipp_hi_float32_m2(ab);            // == b
-    rvd_float64_m2_t vw = mipp_wcvt_float32_float64(a);      // a as double, in a register of LMUL 2
-    rvd_float32_t    vn = mipp_ncvt_float64_float32_m2(vw);  // and back to float: == a
+    vd_float32_t    a  = mipp_loadu_float32(ptr);
+    vd_float32_t    b  = mipp_loadu_float32(ptr + MIPP_N_FLOAT32);
+    vd_float32_m2_t ab = mipp_combine_float32(a, b);         // {a, b}: twice as many elements
+    vd_float32_t    lo = mipp_lo_float32_m2(ab);             // == a
+    vd_float32_t    hi = mipp_hi_float32_m2(ab);             // == b
+    vd_float64_m2_t vw = mipp_wcvt_float32_float64(a);       // a as double, in a register of LMUL 2
+    vd_float32_t    vn = mipp_ncvt_float64_float32_m2(vw);   // and back to float: == a
     /* --8<-- [end:changing_lmul] */
     float t[DOC_BUF], l[DOC_BUF], h[DOC_BUF], n[DOC_BUF];
     mipp_storeu_float32_m2(t, ab);

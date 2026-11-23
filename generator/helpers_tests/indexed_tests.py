@@ -36,7 +36,7 @@ _C_STD = ("#include <exception>", "#include <algorithm>", "#include <numeric>", 
 # scalar reference headers (first, as in the other tests: see TestsBuilderEngineCppBase._render_headers)
 _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("load", "gather"), ("store", "store"),
                  ("store", "scatter"), ("store", "get"), ("store", "get_k"),
-                 ("reinterpret", "torvd"), ("reinterpret", "torvm"))
+                 ("reinterpret", "tovd"), ("reinterpret", "tovm"))
 
 
 def _bits(dt: str) -> int:
@@ -146,9 +146,9 @@ def _c_test(func: str, pair: str, sfx: str, mkind: str, lmul: int) -> List[str]:
             "load_data": f"mipp_{prefix}load_{dt}{sfx_u}(src)",
             "set_k": f"mipp_{prefix}set_k_{dt}{sfx_u}(mk)",
             "store": f"mipp_{prefix}store_{dt}{sfx_u}",
-            "r_t": f"rvd_{prefix}{dt}{sfx_u}_t",
-            "ri_t": f"rvd_{prefix}{idt}{isfx}_t",
-            "rm_t": f"rvm_{prefix}{dt}{sfx_u}_t",
+            "r_t": f"vd_{prefix}{dt}{sfx_u}_t",
+            "ri_t": f"vd_{prefix}{idt}{isfx}_t",
+            "rm_t": f"vm_{prefix}{dt}{sfx_u}_t",
         }
 
     tag = f"{mkind}_{sfx}" if mkind else sfx
@@ -242,10 +242,10 @@ def _cpp_test(func: str, dialect: str, variants: List[str]) -> List[str]:
                     f"[[maybe_unused]] auto {p}m = mipp::set_k<T, LMUL{isa}>(mk);",
                     f"[[maybe_unused]] auto {p}src = mipp::load<T, LMUL{isa}>(src);",
                     f"[[maybe_unused]] auto {p}v = mipp::load<T, LMUL{isa}>(src);"]
-        return [f"[[maybe_unused]] auto ri = mipp::Rvd<IDX, LMUL_IDX>(idx);",
-                f"[[maybe_unused]] auto rm = mipp::Rvm<T, LMUL>(mk);",
-                f"[[maybe_unused]] auto rsrc = mipp::Rvd<T, LMUL>(src);",
-                f"[[maybe_unused]] auto rv = mipp::Rvd<T, LMUL>(src);"]
+        return [f"[[maybe_unused]] auto ri = mipp::Vd<IDX, LMUL_IDX>(idx);",
+                f"[[maybe_unused]] auto rm = mipp::Vm<T, LMUL>(mk);",
+                f"[[maybe_unused]] auto rsrc = mipp::Vd<T, LMUL>(src);",
+                f"[[maybe_unused]] auto rv = mipp::Vd<T, LMUL>(src);"]
 
     def dispatch(scalar: bool, void: bool, var: str) -> List[str]:
         out: List[str] = []

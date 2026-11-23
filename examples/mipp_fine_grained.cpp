@@ -19,12 +19,12 @@
 #include <mipp/obj/fun/u/m1/hadd.hpp>
 #include <mipp/obj/fun/u/m1/cast.hpp>   // also exercises the `cast_k` partner pulled at the same granule
 #include <mipp/obj/fun/u/m1/cvt.hpp>
-// Rvd/Rvm members are backed by obj atoms (not pulled by obj/common.hpp): include what you use.
-#include <mipp/obj/fun/u/m1/set1.hpp>    // Rvd(T), Rvd = T
-#include <mipp/obj/fun/u/m1/get.hpp>     // Rvd::operator[]
-#include <mipp/obj/fun/u/m1/set1_k.hpp>  // Rvm(bool), Rvm = bool
-#include <mipp/obj/fun/u/m1/set_k.hpp>   // Rvm(const int32_t[])
-#include <mipp/obj/fun/u/m1/get_k.hpp>   // Rvm::operator[]
+// Vd/Vm members are backed by obj atoms (not pulled by obj/common.hpp): include what you use.
+#include <mipp/obj/fun/u/m1/set1.hpp>    // Vd(T), Vd = T
+#include <mipp/obj/fun/u/m1/get.hpp>     // Vd::operator[]
+#include <mipp/obj/fun/u/m1/set1_k.hpp>  // Vm(bool), Vm = bool
+#include <mipp/obj/fun/u/m1/set_k.hpp>   // Vm(const int32_t[])
+#include <mipp/obj/fun/u/m1/get_k.hpp>   // Vm::operator[]
 
 // --- C++ object API, masked variants (m, z, s), LMUL = 1 --------------------------------------------------------
 #include <mipp/obj/fun/m/m1/add.hpp>
@@ -66,9 +66,9 @@ int main(int argc, char** argv)
 		src[i] = 100.f;
 	}
 
-	const mipp::Rvd<float, 1> ra = mipp::loadu_obj<float, 1>(a);
-	const mipp::Rvd<float, 1> rb = mipp::loadu_obj<float, 1>(b);
-	const mipp::Rvd<float, 1> rs = mipp::loadu_obj<float, 1>(src);
+	const mipp::Vd<float, 1> ra = mipp::loadu_obj<float, 1>(a);
+	const mipp::Vd<float, 1> rb = mipp::loadu_obj<float, 1>(b);
+	const mipp::Vd<float, 1> rs = mipp::loadu_obj<float, 1>(src);
 
 	// unmasked add + operator
 	mipp::storeu(c, mipp::add(ra, rb));
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
 	for (int i = 0; i < N; i++) CHECK(c[i] == a[i] + b[i]);
 
 	// compare -> mask (lane 1 is the only one where a[i] == b[i])
-	const mipp::Rvm<float, 1> m = mipp::cmpeq(ra, rb);
+	const mipp::Vm<float, 1> m = mipp::cmpeq(ra, rb);
 
 	// masked variants: only the active lane (1) has a well defined result for M, zero for Z, `src` for S
 	if (N > 1) {
@@ -102,8 +102,8 @@ int main(int argc, char** argv)
 	CHECK(mipp::hadd(ra) == sum);
 
 	// cast (float <-> int32 bit reinterpretation) round trip, goes through the `cast_k` partner overloads
-	const mipp::Rvd<int32_t, 1> ri = mipp::cast<int32_t>(ra);
-	const mipp::Rvd<float, 1> rf = mipp::cast<float>(ri);
+	const mipp::Vd<int32_t, 1> ri = mipp::cast<int32_t>(ra);
+	const mipp::Vd<float, 1> rf = mipp::cast<float>(ri);
 	mipp::storeu(c, rf);
 	for (int i = 0; i < N; i++) CHECK(c[i] == a[i]);
 
@@ -112,23 +112,23 @@ int main(int argc, char** argv)
 	mipp::storeu(ci, mipp::cvt<int32_t>(ra));
 	for (int i = 0; i < N; i++) CHECK(ci[i] == (int32_t)a[i]);
 
-	// Rvd members backed by atoms: Rvd(const T*), Rvd(T), Rvd = T, operator[]
-	mipp::Rvd<float, 1> rv(a);
+	// Vd members backed by atoms: Vd(const T*), Vd(T), Vd = T, operator[]
+	mipp::Vd<float, 1> rv(a);
 	for (int i = 0; i < N; i++) CHECK(rv[i] == a[i]);
-	mipp::Rvd<float, 1> rk(3.f);
+	mipp::Vd<float, 1> rk(3.f);
 	for (int i = 0; i < N; i++) CHECK(rk[i] == 3.f);
 	rk = 5.f;
 	for (int i = 0; i < N; i++) CHECK(rk[i] == 5.f);
 
-	// Rvm members backed by atoms: Rvm(bool), Rvm = bool, Rvm(const int32_t[]), operator[]
-	mipp::Rvm<float, 1> mt(true);
-	mipp::Rvm<float, 1> mf(false);
+	// Vm members backed by atoms: Vm(bool), Vm = bool, Vm(const int32_t[]), operator[]
+	mipp::Vm<float, 1> mt(true);
+	mipp::Vm<float, 1> mf(false);
 	for (int i = 0; i < N; i++) { CHECK(mt[i]); CHECK(!mf[i]); }
 	mf = true;
 	for (int i = 0; i < N; i++) CHECK(mf[i]);
 	int32_t alt[N];
 	for (int i = 0; i < N; i++) alt[i] = i % 2;
-	const mipp::Rvm<float, 1> malt(alt);
+	const mipp::Vm<float, 1> malt(alt);
 	for (int i = 0; i < N; i++) CHECK(malt[i] == (alt[i] != 0));
 
 	// ---- LMUL = 2 -------------------------------------------------------------------------------------------
@@ -139,19 +139,19 @@ int main(int argc, char** argv)
 		a2[i] = (float)i;
 		b2[i] = 2.f;
 	}
-	const mipp::Rvd<float, 2> ra2 = mipp::loadu_obj<float, 2>(a2);
-	const mipp::Rvd<float, 2> rb2 = mipp::loadu_obj<float, 2>(b2);
+	const mipp::Vd<float, 2> ra2 = mipp::loadu_obj<float, 2>(a2);
+	const mipp::Vd<float, 2> rb2 = mipp::loadu_obj<float, 2>(b2);
 	mipp::storeu(c2, ra2 + rb2);
 	for (int i = 0; i < N2; i++) CHECK(c2[i] == a2[i] + b2[i]);
 
 	// Scalar operator at LMUL = 2: the u/m2/set1 atom is NOT included here, the `add` atom of this LMUL pulls it
-	// itself because its operators build an Rvd from a scalar.
+	// itself because its operators build an Vd from a scalar.
 	mipp::storeu(c2, ra2 + 1.f);
 	for (int i = 0; i < N2; i++) CHECK(c2[i] == a2[i] + 1.f);
 
 	// ---- C++ functional API ---------------------------------------------------------------------------------
-	mipp::rvd<float, 1> fa = mipp::loadu<float, 1>(a);
-	mipp::rvd<float, 1> fb = mipp::loadu<float, 1>(b);
+	mipp::vd<float, 1> fa = mipp::loadu<float, 1>(a);
+	mipp::vd<float, 1> fb = mipp::loadu<float, 1>(b);
 	mipp::storeu(c, mipp::mul(fa, fb));
 	for (int i = 0; i < N; i++) CHECK(c[i] == a[i] * b[i]);
 

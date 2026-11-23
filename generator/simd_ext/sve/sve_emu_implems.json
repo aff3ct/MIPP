@@ -867,18 +867,18 @@
             "template": "form_n_x"
         }
     ],
-    "torvd": [
+    "tovd": [
         {
             "instr_name": "dup",
             "datatypes": "all_datatypes",
-            "template": "torvd_dup"
+            "template": "tovd_dup"
         }
     ],
-    "torvm": [
+    "tovm": [
         {
             "instr_name": "cmpne",
             "datatypes": "all_datatypes",
-            "template": "torvm_cmpne"
+            "template": "tovm_cmpne"
         }
     ],
     "trunc": [

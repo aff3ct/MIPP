@@ -92,13 +92,13 @@ namespace mipp
         print(f"constexpr ISA DEFAULT_ISA = ISA::{isa['name'].upper()};", file=file_common_enum)
     print("#else\n#error \"No ISA defined for cpp wrapper\"\n#endif", file=file_common_enum)
 
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvd_type{};", file=file_common_enum)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct rvm_type{};", file=file_common_enum)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvd = typename rvd_type<T,LMUL,ISA_TYPE>::type;", file=file_common_enum)
-    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using rvm = typename rvm_type<T,LMUL,ISA_TYPE>::type;", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct vd_type{};", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> struct vm_type{};", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using vd = typename vd_type<T,LMUL,ISA_TYPE>::type;", file=file_common_enum)
+    print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> using vm = typename vm_type<T,LMUL,ISA_TYPE>::type;", file=file_common_enum)
     print("template<typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t N(){ return 0; }", file=file_common_enum)
-    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bits(){ return 0; }", file=file_common_enum)
-    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t rvd_sz_bytes(){ return 0; }", file=file_common_enum)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t vd_sz_bits(){ return 0; }", file=file_common_enum)
+    print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t vd_sz_bytes(){ return 0; }", file=file_common_enum)
     print("template<ISA ISA_TYPE=DEFAULT_ISA> constexpr uint32_t req_alignment(){ return 0; }", file=file_common_enum)
 
     print("}\n", file=file_common_enum)
@@ -331,8 +331,8 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
     else:
         ret = "template <VARIANT V=S, typename T, typename U, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>"
 
-    ret += "inline " + ("rvd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
-                      "rvm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
+    ret += "inline " + ("vd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
+                      "vm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
                       "T" if proto["ret"]["type"] == "val" else
                       "void")
     s = "{{ret}} {{cpp_func_name}}("
@@ -345,10 +345,10 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
 
     # the mask has the type of the data (T); the index (U) has its own LMUL (one lane per lane of the data)
     if mask_kind in ("mask", "maskz"):
-        s += "rvm<T,LMUL,ISA_TYPE> m0"
+        s += "vm<T,LMUL,ISA_TYPE> m0"
         is_first = False
     elif mask_kind == "masks":
-        s += "const rvm<T,LMUL,ISA_TYPE> m0, rvd<T,LMUL,ISA_TYPE> rsrc"
+        s += "const vm<T,LMUL,ISA_TYPE> m0, vd<T,LMUL,ISA_TYPE> rsrc"
         is_first = False
     for args in proto["args"]:
 
@@ -361,13 +361,13 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         A = _tpl_scalar_for_arg(args)
 
         if args["type"] == "reg" and args.get("lmul", "same") == "ratio":
-            tmp_str += "rvd<{{A}},details::idx_lmul<T,{{A}}>(LMUL),ISA_TYPE> r" + str(cnt_reg)
+            tmp_str += "vd<{{A}},details::idx_lmul<T,{{A}}>(LMUL),ISA_TYPE> r" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "reg":
-            tmp_str += "rvd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
+            tmp_str += "vd<{{A}},LMUL,ISA_TYPE> r" + str(cnt_reg)
             cnt_reg += 1
         elif args["type"] == "msk":
-            tmp_str += "rvm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
+            tmp_str += "vm<{{A}},LMUL,ISA_TYPE> m" + str(cnt_msk)
             cnt_msk += 1
         elif args["type"] == "val":
             tmp_str += "{{A}} s" + str(cnt_val)
@@ -378,7 +378,7 @@ def _generic_mask_decl_gather_scatter(file, cpp_func_name, proto, mask_kind):
         elif args["type"] == "Nele":
             tmp_str += "{{A}} vals[N<{{A}},LMUL,ISA_TYPE>()]"
         elif args["type"] == "vindex":
-            tmp_str += "rvd<int32_t,LMUL,ISA_TYPE> vi"
+            tmp_str += "vd<int32_t,LMUL,ISA_TYPE> vi"
         else:
             tmp_str += "void* _"
 
@@ -401,9 +401,9 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
     but *types* expressed in terms of T and LMUL.
 
     mask_kind:
-      - "mask": prepend 'rvm<T,LMUL> m0', default variant M (merge-maskable function)
+      - "mask": prepend 'vm<T,LMUL> m0', default variant M (merge-maskable function)
       - "maskz": same signature, default variant Z (zero-mask only, e.g. load / loadu)
-      - "masks": prepend 'const rvm<T,LMUL> m0, rvd<T,LMUL> rsrc'
+      - "masks": prepend 'const vm<T,LMUL> m0, vd<T,LMUL> rsrc'
     """
 
     if "gather" in cpp_func_name or "scatter" in cpp_func_name:
@@ -417,8 +417,8 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
         print("template <VARIANT V=S, typename T, int LMUL=1, ISA ISA_TYPE=DEFAULT_ISA>", file=file)
 
     # Return type: generic on T,LMUL (only valid for non-cast funcs; you already skip casts)
-    ret = "inline " + ("rvd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
-                      "rvm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
+    ret = "inline " + ("vd<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "reg" else
+                      "vm<T,LMUL,ISA_TYPE>" if proto["ret"]["type"] == "msk" else
                       "T" if proto["ret"]["type"] == "val" else
                       "void")
 
@@ -432,10 +432,10 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
 
     # masked prefix args (names must match build_call expectations)
     if mask_kind in ("mask", "maskz"):
-        s += "rvm<T,LMUL,ISA_TYPE> m0"
+        s += "vm<T,LMUL,ISA_TYPE> m0"
         is_first = False
     elif mask_kind == "masks":
-        s += "const rvm<T,LMUL,ISA_TYPE> m0, rvd<T,LMUL,ISA_TYPE> rsrc"
+        s += "const vm<T,LMUL,ISA_TYPE> m0, vd<T,LMUL,ISA_TYPE> rsrc"
         is_first = False
 
     for arg in proto["args"]:
@@ -448,10 +448,10 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
         A = _tpl_scalar_for_arg(arg)
 
         if arg["type"] == "reg":
-            s += f"rvd<{A},LMUL,ISA_TYPE> r{cnt_reg}"
+            s += f"vd<{A},LMUL,ISA_TYPE> r{cnt_reg}"
             cnt_reg += 1
         elif arg["type"] == "msk":
-            s += f"rvm<{A},LMUL,ISA_TYPE> m{cnt_msk}"
+            s += f"vm<{A},LMUL,ISA_TYPE> m{cnt_msk}"
             cnt_msk += 1
         elif arg["type"] == "val":
             s += f"{A} s{cnt_val}"
@@ -462,7 +462,7 @@ def _generic_mask_decl(file, cpp_func_name, proto, mask_kind):
         elif arg["type"] == "Nele":
             s += f"{A} vals[N<{A},LMUL,ISA_TYPE>()]"
         elif arg["type"] == "vindex":
-            s += "rvd<int32_t,LMUL,ISA_TYPE> vi"
+            s += "vd<int32_t,LMUL,ISA_TYPE> vi"
         else:
             s += "void* _"
 
@@ -478,7 +478,7 @@ def _mask_tpl_spec(file, proto, dt_par, dt_ret, cpp_func_name, c_base, mk_letter
 
     Example (storeu, uint32_t, LMUL=2):
       template <>
-      inline void storeu<M, uint32_t, 2>(rvm<uint32_t,2> m0, uint32_t* p0, const rvd<uint32_t,2> r0) {
+      inline void storeu<M, uint32_t, 2>(vm<uint32_t,2> m0, uint32_t* p0, const vd<uint32_t,2> r0) {
           mipp_storeu_uint32_mask_m2(m0, p0, r0);
       }
 
@@ -609,13 +609,13 @@ def _gen_cpp_structures_isa(file, isa):
 
     print(_cpp_custom_prefix_generator(None, isa["name"]), file=file)
 
-    template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}}>{ using type = rvd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
+    template = """template<> struct vd_type<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}}>{ using type = vd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
         for dt in datatypes:
             print(j2_template.render(datatype=datatypes[dt], lmul=str(lmul), isa_cpp_type=isa_cpp_type, isa_c_name=isa_c_name), file=file)
 
-    template = """template<> struct rvm_type<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}}>{ using type = rvm_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
+    template = """template<> struct vm_type<{{ datatype.cstd }}, {{ lmul }}, ISA::{{isa_cpp_type}}>{ using type = vm_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_m{{ lmul }}_t; };"""
     j2_template = Template(template, undefined=StrictUndefined)
     for lmul in all_lmul:
         for dt in datatypes:
@@ -627,8 +627,8 @@ def _gen_cpp_structures_isa(file, isa):
     if has_ldiv:
         ldiv = 2
         ldiv_m = -2
-        template = """template<> struct rvd_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = rvd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
-        template_msk = """template<> struct rvm_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = rvm_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+        template = """template<> struct vd_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = vd_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
+        template_msk = """template<> struct vm_type<{{ datatype.cstd }}, {{ ldiv_m }}, ISA::{{isa_cpp_type}}>{ using type = vm_{{isa_c_name}}_{{ datatype.category }}{{ datatype.n_bits }}_d{{ ldiv }}_t; };"""
         j2_template = Template(template, undefined=StrictUndefined)
         j2_template_msk = Template(template_msk, undefined=StrictUndefined)
         for dt in datatypes:
@@ -639,10 +639,10 @@ def _gen_cpp_structures_isa(file, isa):
 def _gen_cpp_constexpr_functions_isa(file, isa):
     isa_cpp_type = isa["name"].upper()
 
-    template = """template<> constexpr uint32_t rvd_sz_bits<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BIT; }"""
+    template = """template<> constexpr uint32_t vd_sz_bits<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BIT; }"""
     j2_template = Template(template, undefined=StrictUndefined)
     print(j2_template.render(isa_cpp_type=isa_cpp_type), file=file)
-    template = """template<> constexpr uint32_t rvd_sz_bytes<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BYTE; }"""
+    template = """template<> constexpr uint32_t vd_sz_bytes<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BYTE; }"""
     j2_template = Template(template, undefined=StrictUndefined)
     print(j2_template.render(isa_cpp_type=isa_cpp_type), file=file)
     template = """template<> constexpr uint32_t req_alignment<ISA::{{isa_cpp_type}}>(){ return MIPP_{{isa_cpp_type}}_RVD_SIZE_BYTE; } // placeholder """

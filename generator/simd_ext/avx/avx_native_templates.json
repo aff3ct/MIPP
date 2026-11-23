@@ -293,7 +293,7 @@
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi32(s0 ? (int32_t)0xFFFFFFFF : (int32_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %torvm<tp>%(tmp2);"
+            "return %tovm<tp>%(tmp2);"
         ]
     },
     "set1_k-64": {
@@ -302,7 +302,7 @@
             "%r<c:int>% tmp1;",
             "tmp1.r = _mm256_set1_epi64x(s0 ? (int64_t)0xFFFFFFFFFFFFFFFF : (int64_t)0);",
             "%r<tp>% tmp2 = %cast<c:int,tp>%(tmp1);",
-            "return %torvm<tp>%(tmp2);"
+            "return %tovm<tp>%(tmp2);"
         ]
     },
     "set1_k_int": {
@@ -393,7 +393,7 @@
             "return _mm256_testz_si256(m0i.m, m1i.m);"
         ]
     },
-    "torvd": {
+    "tovd": {
         "format": "short",
         "code": "m0.m;"
     },

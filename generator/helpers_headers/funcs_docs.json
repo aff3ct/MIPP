@@ -77,11 +77,11 @@
   },
   "cast": {
     "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",
-    "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{rvd}\\langle T_{\\text{dst}}\\rangle \\rangle(r0)"
+    "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{vd}\\langle T_{\\text{dst}}\\rangle \\rangle(r0)"
   },
   "cast_k": {
     "description": "In-register bitcast/reinterpretation of a mask register to another datatype of identical bitwidth with zero runtime instructions.",
-    "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{rvm}\\langle T_{\\text{dst}}\\rangle \\rangle(m0)"
+    "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{vm}\\langle T_{\\text{dst}}\\rangle \\rangle(m0)"
   },
   "cdiv": {
     "description": "Complex division of the complex numbers of r0 by the ones of r1 (interleaved layout), with the algorithm of Smith: the division by the part of the largest absolute value avoids the overflows and the losses of br^2 + bi^2.",
@@ -515,11 +515,11 @@
     "description": "Tests if the bitwise AND of two mask registers is all zero (returns 1 if disjoint/all zero, 0 otherwise).",
     "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\forall i, \\, (m_{0, i} \\ \\& \\ m_{1, i}) == 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
   },
-  "torvd": {
+  "tovd": {
     "description": "Expands a mask register into an all-ones (~0) / all-zeros (0) vector register.",
     "latex": "\\text{res}_i = m_i ? (\\sim 0) : 0"
   },
-  "torvm": {
+  "tovm": {
     "description": "Converts vector elements to mask elements: a lane is active when its element has at least one non-zero bit (so -0.0 is active), and the resulting mask lane has all its bits set.",
     "latex": "m_i = (\\text{bits}(r0_i) \\neq 0)"
   },

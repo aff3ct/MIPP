@@ -27,7 +27,7 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 | :--- | :--- | :--- |
 | C | `c/<category>/<m1\|m2\|m4\|m8\|d2>/<unmasked\|mask\|maskz\|masks>/<function>.cpp` | One file per function, LMUL and mask variant; one test function per datatype. |
 | C++ Functional | `cpp/<category>/<function>.cpp` | One file per function: one template test (`<VARIANT, T, LMUL>`), instantiated in nested `SECTION`s for each mask variant, datatype and LMUL. |
-| C++ Object | `obj/<category>/<function>.cpp` | Same structure, with `mipp::Rvd` and `mipp::Rvm`. |
+| C++ Object | `obj/<category>/<function>.cpp` | Same structure, with `mipp::Vd` and `mipp::Vm`. |
 
 `--lmul`, `--ldiv` and `--mask-kind` restrict the generated combinations; a function is only tested for the mask variants of its `variants`. `tests/CMakeLists.txt` compiles every `.cpp` found under `tests/src/`, with the helpers of `tests/src/utils/` (random generators, overflow checks, `abs_diff`).
 
@@ -67,7 +67,7 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 
 The C++ code of the tests is not written in Python: it comes from `helpers_tests/tests_templates.json` ([Test Templates](../reference/registries/tests_templates.md)), which holds the file headers, the bodies of the test functions, the `TEST_CASE` and `SECTION` skeletons and the assertions. The templates contain `{{placeholder}}` variables filled by `tests_builder.py`, and `%token<datatype,lmul>(argument)%` markers that depend on the API (`%load<...>(p)%`, `%reg_type<...>%`, `%set_k<...>(p)%`, `%N<...>%`, ...).
 
-These markers are resolved by the **dialect adapters** (`dialect_adapters.py`): for a load with LMUL 2, `CDialectAdapter` writes `mipp_load_float32_m2(p)`, `CppDialectAdapter` writes `mipp::load<T, 2>(p)`, `CppObjDialectAdapter` writes `mipp::Rvd<T, 2>(p)`. The adapters only format expressions; the structure of the test is the same for the three APIs.
+These markers are resolved by the **dialect adapters** (`dialect_adapters.py`): for a load with LMUL 2, `CDialectAdapter` writes `mipp_load_float32_m2(p)`, `CppDialectAdapter` writes `mipp::load<T, 2>(p)`, `CppObjDialectAdapter` writes `mipp::Vd<T, 2>(p)`. The adapters only format expressions; the structure of the test is the same for the three APIs.
 
 ---
 

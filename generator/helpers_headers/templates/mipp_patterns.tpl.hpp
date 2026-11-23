@@ -11,7 +11,7 @@
 // with a constant table of indices (then a select for the zeros).
 //
 //     struct reversed { static constexpr int get(int i, int n) { return n - 1 - i; } };
-//     mipp::rvd<float> r = mipp::permute<reversed>(a); // mipp::reverse(a)
+//     mipp::vd<float> r = mipp::permute<reversed>(a); // mipp::reverse(a)
 //
 // The C++11 API keeps the functions with indices in a register (permute, permute2), which do not need C++17.
 // Included by mipp.hpp (and mipp_obj.hpp), not by mipp/cpp/utils.hpp: it pulls about 20 rearrangement functions.
@@ -132,25 +132,25 @@ namespace mipp
 {
 namespace details
 {
-// element type and LMUL of a register type R (rvd<T, LMUL> is an alias of a C type, not deducible): lmul = 0 when R
+// element type and LMUL of a register type R (vd<T, LMUL> is an alias of a C type, not deducible): lmul = 0 when R
 // is not a register of LMUL 1, 2, 4, 8 or -2 (half-vector)
-template <typename T, int L, typename = void> struct rvd_or_void { using type = void; }; // no such register
-template <typename T, int L> struct rvd_or_void<T, L, std::void_t<typename rvd_type<T, L>::type>>
-{ using type = typename rvd_type<T, L>::type; };
-template <typename R, int L, typename... Ts> struct rvd_find { using type = void; };
-template <typename R, int L, typename T, typename... Ts> struct rvd_find<R, L, T, Ts...>
+template <typename T, int L, typename = void> struct vd_or_void { using type = void; }; // no such register
+template <typename T, int L> struct vd_or_void<T, L, std::void_t<typename vd_type<T, L>::type>>
+{ using type = typename vd_type<T, L>::type; };
+template <typename R, int L, typename... Ts> struct vd_find { using type = void; };
+template <typename R, int L, typename T, typename... Ts> struct vd_find<R, L, T, Ts...>
 {
-	using type = typename std::conditional<std::is_same<R, typename rvd_or_void<T, L>::type>::value, T,
-	                                       typename rvd_find<R, L, Ts...>::type>::type;
+	using type = typename std::conditional<std::is_same<R, typename vd_or_void<T, L>::type>::value, T,
+	                                       typename vd_find<R, L, Ts...>::type>::type;
 };
-template <typename R, int L> using rvd_find_t = typename rvd_find<R, L, float32_t, float64_t, int8_t, int16_t, int32_t,
+template <typename R, int L> using vd_find_t = typename vd_find<R, L, float32_t, float64_t, int8_t, int16_t, int32_t,
                                                                   int64_t, uint8_t, uint16_t, uint32_t, uint64_t>::type;
-template <typename R> struct rvd_info
+template <typename R> struct vd_info
 {
-	static constexpr int lmul = !std::is_void<rvd_find_t<R, 1>>::value ? 1 : !std::is_void<rvd_find_t<R, 2>>::value ? 2 :
-	                            !std::is_void<rvd_find_t<R, 4>>::value ? 4 : !std::is_void<rvd_find_t<R, 8>>::value ? 8 :
-	                            !std::is_void<rvd_find_t<R, -2>>::value ? -2 : 0;
-	using type = rvd_find_t<R, lmul == 0 ? 1 : lmul>;
+	static constexpr int lmul = !std::is_void<vd_find_t<R, 1>>::value ? 1 : !std::is_void<vd_find_t<R, 2>>::value ? 2 :
+	                            !std::is_void<vd_find_t<R, 4>>::value ? 4 : !std::is_void<vd_find_t<R, 8>>::value ? 8 :
+	                            !std::is_void<vd_find_t<R, -2>>::value ? -2 : 0;
+	using type = vd_find_t<R, lmul == 0 ? 1 : lmul>;
 };
 
 // not constexpr: called by the constant evaluation of a pattern with an index out of [-1, n) ([-1, 2n) for permute2),
@@ -269,7 +269,7 @@ template <std::size_t N_> constexpr std::array<int32_t, N_> pattern_mask(const s
 
 // the patterns whose indices do not fit in the index type (8-bit elements, more than 256 lanes): through memory
 template <typename T, int LMUL, std::size_t N_>
-inline rvd<T, LMUL> permute_memory(const T* src, const std::array<int, N_>& a)
+inline vd<T, LMUL> permute_memory(const T* src, const std::array<int, N_>& a)
 {
 	T out[N_];
 	for (std::size_t i = 0; i < N_; i++) out[i] = a[i] < 0 ? T(0) : src[a[i]];
@@ -278,11 +278,11 @@ inline rvd<T, LMUL> permute_memory(const T* src, const std::array<int, N_>& a)
 
 } // namespace details
 
-template <typename P, typename R, typename std::enable_if<details::rvd_info<R>::lmul != 0, int>::type = 0>
+template <typename P, typename R, typename std::enable_if<details::vd_info<R>::lmul != 0, int>::type = 0>
 inline R permute(const R& r)
 {
-	using T = typename details::rvd_info<R>::type;
-	constexpr int LMUL = details::rvd_info<R>::lmul;
+	using T = typename details::vd_info<R>::type;
+	constexpr int LMUL = details::vd_info<R>::lmul;
 	constexpr int n = static_cast<int>(N<T, LMUL>());
 	constexpr std::array<int, n> a = details::pattern_checked<P, n, n>();
 	using U = typename details::uint_of<T>::type;
@@ -305,7 +305,7 @@ inline R permute(const R& r)
 	else
 	{
 		static constexpr std::array<U, n> t = details::pattern_table<U>(a, 0);
-		const rvd<T, LMUL> p = mipp::permute(r, mipp::loadu<U, LMUL>(t.data()));
+		const vd<T, LMUL> p = mipp::permute(r, mipp::loadu<U, LMUL>(t.data()));
 		if constexpr (!details::has_zero(a))
 			return p;
 		else
@@ -316,11 +316,11 @@ inline R permute(const R& r)
 	}
 }
 
-template <typename P, typename R, typename std::enable_if<details::rvd_info<R>::lmul != 0, int>::type = 0>
+template <typename P, typename R, typename std::enable_if<details::vd_info<R>::lmul != 0, int>::type = 0>
 inline R permute2(const R& r0, const R& r1)
 {
-	using T = typename details::rvd_info<R>::type;
-	constexpr int LMUL = details::rvd_info<R>::lmul;
+	using T = typename details::vd_info<R>::type;
+	constexpr int LMUL = details::vd_info<R>::lmul;
 	constexpr int n = static_cast<int>(N<T, LMUL>());
 	constexpr std::array<int, n> a = details::pattern_checked<P, n, 2 * n>();
 	using U = typename details::uint_of<T>::type;
@@ -341,7 +341,7 @@ inline R permute2(const R& r0, const R& r1)
 	else
 	{
 		static constexpr std::array<U, n> t = details::pattern_table<U>(a, 0);
-		const rvd<T, LMUL> p = mipp::permute2(r0, r1, mipp::loadu<U, LMUL>(t.data()));
+		const vd<T, LMUL> p = mipp::permute2(r0, r1, mipp::loadu<U, LMUL>(t.data()));
 		if constexpr (!details::has_zero(a))
 			return p;
 		else

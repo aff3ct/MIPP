@@ -12,13 +12,13 @@
 void leaky_relu(size_t n, float alpha, const float* x, float* y)
 {
     const size_t N = MIPP_N_FLOAT32;
-    const rvd_float32_t vzero  = mipp_set1_float32(0.f);
-    const rvd_float32_t valpha = mipp_set1_float32(alpha);
+    const vd_float32_t vzero  = mipp_set1_float32(0.f);
+    const vd_float32_t valpha = mipp_set1_float32(alpha);
 
     size_t i = 0;
     for (; i + N <= n; i += N) {
-        rvd_float32_t vx  = mipp_loadu_float32(x + i);
-        rvm_float32_t pos = mipp_cmpgt_float32(vx, vzero);
+        vd_float32_t vx  = mipp_loadu_float32(x + i);
+        vm_float32_t pos = mipp_cmpgt_float32(vx, vzero);
         mipp_storeu_float32(y + i, mipp_select_float32(pos, vx, mipp_mul_float32(vx, valpha)));
     }
 
@@ -26,9 +26,9 @@ void leaky_relu(size_t n, float alpha, const float* x, float* y)
         int32_t active[MIPP_N_FLOAT32];
         for (size_t j = 0; j < N; j++)
             active[j] = (i + j < n);
-        rvm_float32_t m   = mipp_set_k_float32(active);         // lane j active iff i + j < n
-        rvd_float32_t vx  = mipp_loadu_float32_maskz(m, x + i); // inactive lanes are not read (set to 0)
-        rvm_float32_t pos = mipp_cmpgt_float32(vx, vzero);
+        vm_float32_t m   = mipp_set_k_float32(active);          // lane j active iff i + j < n
+        vd_float32_t vx  = mipp_loadu_float32_maskz(m, x + i); // inactive lanes are not read (set to 0)
+        vm_float32_t pos = mipp_cmpgt_float32(vx, vzero);
         mipp_storeu_float32_mask(m, y + i, mipp_select_float32(pos, vx, mipp_mul_float32(vx, valpha))); // inactive lanes are not written
     }
 }

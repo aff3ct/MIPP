@@ -815,31 +815,31 @@
             "if": "!defined(__AVX2__)"
         }
     ],
-    "torvm": [
+    "tovm": [
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": [
                 "float32"
             ],
-            "template": "torvm_float32"
+            "template": "tovm_float32"
         },
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": [
                 "float64"
             ],
-            "template": "torvm_float64"
+            "template": "tovm_float64"
         },
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": "all_int_uint",
-            "template": "torvm_int",
+            "template": "tovm_int",
             "if": "defined(__AVX2__)"
         },
         {
-            "instr_name": "torvm",
+            "instr_name": "tovm",
             "datatypes": "all_int_uint",
-            "template": "split_torvm",
+            "template": "split_tovm",
             "if": "!defined(__AVX2__)"
         }
     ],

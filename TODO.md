@@ -46,7 +46,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 
 ### 1.5. Memory Management & Dynamic Buffers
 - [x] `isAligned`: `mipp_is_aligned(p)` / `mipp::is_aligned(p)` against `MIPP_REQUIRED_ALIGNMENT` (the register size).
-- [x] `oloadu`: The unaligned load that returns a register object (`Reg<T>`), not a load with an offset: covered by the Object API (`mipp::Rvd<T>` constructors and `mipp::loadu`).
+- [x] `oloadu`: The unaligned load that returns a register object (`Reg<T>`), not a load with an offset: covered by the Object API (`mipp::Vd<T>` constructors and `mipp::loadu`).
 - [x] `malloc`, `free`: `mipp_malloc` / `mipp_free` (C), `mipp::malloc<T>` / `mipp::free` (C++).
 - [x] `mipp::allocator<T>`: STL-compliant allocator ensuring aligned dynamic allocations for `std::vector`.
 - [x] `mipp::vector<T>`: Type alias for `std::vector<T, mipp::allocator<T>>`.
@@ -55,7 +55,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [x] `reduction<T, OP>`: `mipp::reduce(v, op)` and `mipp::reduce<T, LMUL>(ptr, n, op)` in the Object API, with the operations of `mipp::op` (`add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`) or any functor.
 - [x] `sum`: Reduction alias for horizontal addition (`hadd`), C++ APIs.
 - [x] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation: `clamp(v, lo, hi)`, with its scalar forms (`clamp(v, 0.f, 1.f)`).
-- [x] `dump`: `mipp_dump_<type>[_<lmul>]` / `mipp_fdump_...` (C, `_k` for the masks), `mipp::dump<T, LMUL>` / `mipp::dump_k` (C++ Functional), `operator<<` on `Rvd` and `Rvm` (C++ Object).
+- [x] `dump`: `mipp_dump_<type>[_<lmul>]` / `mipp_fdump_...` (C, `_k` for the masks), `mipp::dump<T, LMUL>` / `mipp::dump_k` (C++ Functional), `operator<<` on `Vd` and `Vm` (C++ Object).
 - [x] `neg(r, s)`, `copysign(r, s)`, `sign(r)`: `xorsign(a, b)` (negates `a` where `b` is negative: the MIPPv1 `neg` / `copysign`), `copysign(a, b)` (IEEE: magnitude of `a`, sign of `b`) and `signbit(v)` (mask of the negative lanes, including -0.0).
 - [x] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`, native on every ISA (movemask, testz/testc, kortest, maxv/minv, ptest, vcpop).
 
@@ -67,8 +67,8 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::cvt<T1, T2>` (all conversions) | `cvt` (same-size), `wcvt` (widening), `ncvt` (narrowing, truncating), `cast` (reinterpreting) | Disambiguates arithmetic casting, widening/narrowing conversions, and zero-cost bit reinterpretation into dedicated primitives. |
 | `mipp::pack<T1, T2>`, `low`, `high` | `ncvts` (saturating), `ncvt` (truncating), `mipp::pack<T_DST>(a, b)`, `lo` / `hi` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives. |
 | `mipp::sat(r, min, max)` | `clamp` | Clamping between runtime bounds. Not to be confused with `adds`/`subs`, the saturated arithmetic at the type boundaries (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
-| Mask arrays `bool[N]` | Strongly typed `rvm<T>` / `rvm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
-| `mipp::toreg<N>(m)` | `torvd(m)` / `torvm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
+| Mask arrays `bool[N]` | Strongly typed `vm<T>` / `vm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
+| `mipp::toreg<N>(m)` | `tovd(m)` / `tovm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
 | `mipp::neg(r, s)`, `mipp::copysign(r, s)`, `mipp::sign(r)` | `xorsign(a, b)`, `copysign(a, b)`, `signbit(v)` | The MIPPv1 `copysign` was a sign flip (`xorsign`); MIPPv2 `copysign` follows IEEE 754. `signbit` is named after C99. |
 | `mipp::blend(r1, r2, m)` | `select(m, r1, r2)` | Renamed after the operation (`m ? r1 : r2`), mask first as in every masked MIPPv2 function. |
 | `mipp::interleavelo/hi`, `interleave2/4`, `deinterleave` | `ziplo` / `ziphi`, `unziplo` / `unziphi`, `_b128` variants | Named after the operation; the blocks are fixed (128 bits) instead of relative to the register size, and two-register results are registers of LMUL 2. |
@@ -93,10 +93,10 @@ The optimization goals for ISA coverage are:
 Currently, MIPPv2 classifies mask execution into native predication (RISC-V Vector), partially native predication (AVX-512, and native masked load/store on RVV), and full-vector emulation (SSE, NEON, AVX, SVE).
 
 - [ ] **AVX-512 Hardware Opmask (`k`-register) Integration** (partially done):
-  - Current state: `rvm<T>` is bound to native opmask types (`__mmask8` ... `__mmask64`). Native masked instructions are used for part of the functions (e.g., `_mm512_mask_add_*`, native masked `load`/`store` including unsigned types); the others are evaluated as an unmasked operation followed by `_mm512_mask_blend_*` (Level 2).
+  - Current state: `vm<T>` is bound to native opmask types (`__mmask8` ... `__mmask64`). Native masked instructions are used for part of the functions (e.g., `_mm512_mask_add_*`, native masked `load`/`store` including unsigned types); the others are evaluated as an unmasked operation followed by `_mm512_mask_blend_*` (Level 2).
   - Target state: Route all masked operations that have a native predicated intrinsic (e.g., `_mm512_maskz_mul_epi32`) to it.
 - [ ] **ARM SVE Predicate (`svbool_t`) Integration** (partially done):
-  - Current state: `rvm<T>` is bound to native `svbool_t`. Predicated forms (`_m`, `_z`) are used for about 35 functions (arithmetic, FMA, comparisons, logic, shifts, reductions, loads/stores, gather/scatter); the other masked operations are emulated through unmasked execution and `svsel` (Level 2).
+  - Current state: `vm<T>` is bound to native `svbool_t`. Predicated forms (`_m`, `_z`) are used for about 35 functions (arithmetic, FMA, comparisons, logic, shifts, reductions, loads/stores, gather/scatter); the other masked operations are emulated through unmasked execution and `svsel` (Level 2).
   - Target state: Generate predicated instruction forms governed by active predicates (`svadd_f32_m`, `svmul_s32_z`).
 
 ---

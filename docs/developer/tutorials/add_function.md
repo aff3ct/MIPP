@@ -71,7 +71,7 @@ The names of the generated functions are derived from this entry: `mipp_absdiff_
 Add a prototype only if none fits. The names follow the pattern `ret_<return>_<n>args_<arguments>`.
 
 !!! note "Object API"
-    The C and C++ Functional APIs are generated for any prototype. The C++ Object API (`generator/helpers_headers/obj_generator.py`) handles automatically the functions that take registers and `int32_t` values and return a register, like `absdiff`: it generates `mipp::absdiff(Rvd, Rvd)` and the masked overloads. Functions with other prototypes (loads, stores, reductions, comparisons, conversions) have a dedicated branch in `obj_generator.py`; a new function of that kind needs one too.
+    The C and C++ Functional APIs are generated for any prototype. The C++ Object API (`generator/helpers_headers/obj_generator.py`) handles automatically the functions that take registers and `int32_t` values and return a register, like `absdiff`: it generates `mipp::absdiff(Vd, Vd)` and the masked overloads. Functions with other prototypes (loads, stores, reductions, comparisons, conversions) have a dedicated branch in `obj_generator.py`; a new function of that kind needs one too.
 
 ---
 
@@ -154,7 +154,7 @@ The generator writes, among others:
 - implementation headers per ISA, mask variant and LMUL, for instance `mipp/internal/simd_ext/neon/c/functions/arithmetic/u/m1/absdiff.h` in fine granularity ([Header Layout](../internals/header_layout.md)), where every resolved function carries a comment with its level:
 
 ```c
-static inline rvd_neon_float32_m1_t mipp_neon_absdiff_float32_m1(const rvd_neon_float32_m1_t r0, const rvd_neon_float32_m1_t r1) {
+static inline vd_neon_float32_m1_t mipp_neon_absdiff_float32_m1(const vd_neon_float32_m1_t r0, const vd_neon_float32_m1_t r1) {
 	// Level 3 (Scalar Fallback)
 	...
 ```
