@@ -13,23 +13,23 @@ Most functions also have a variant **by block of 128 bits**, suffix `_b128`: the
 | Function | Result | `_b128` |
 | :--- | :--- | :---: |
 | `reverse(a)` | `a[N-1], ..., a[0]` | yes |
-| `swap_pairs(a)` | `a1, a0, a3, a2, ...` | (pairs) |
-| `dup_even(a)` / `dup_odd(a)` | `a0, a0, a2, a2, ...` / `a1, a1, a3, a3, ...` | (pairs) |
-| `zip_lo(a, b)` / `zip_hi(a, b)` | `a0, b0, a1, b1, ...` from the lower / upper halves | yes |
-| `unzip_even(a, b)` / `unzip_odd(a, b)` | even / odd lanes of `a` then `b` | yes |
-| `interleave(a)` / `deinterleave(a)` | planar to interleaved layout and back, in one register | — |
+| `swap2(a)` | `a1, a0, a3, a2, ...` | (pairs) |
+| `dupeven(a)` / `dupodd(a)` | `a0, a0, a2, a2, ...` / `a1, a1, a3, a3, ...` | (pairs) |
+| `ziplo(a, b)` / `ziphi(a, b)` | `a0, b0, a1, b1, ...` from the lower / upper halves | yes |
+| `unziplo(a, b)` / `unziphi(a, b)` | even / odd lanes of `a` then `b` | yes |
+| `zip(a)` / `unzip(a)` | planar to interleaved layout and back, in one register | — |
 | `slide(a, b, n)` | window of N lanes at `n` in `a` then `b` (0 ≤ n ≤ N) | yes |
-| `slide_up(a, n)` / `slide_down(a, n)` | lanes moved up / down by `n`, zeros entering | yes |
+| `slideup(a, n)` / `slidedown(a, n)` | lanes moved up / down by `n`, zeros entering | yes |
 | `rotate(a, n)` | lane i receives `a[(i + n) mod N]` (0 ≤ n < N) | yes |
-| `broadcast_lane(a, k)` | `a[k]` in every lane (0 ≤ k < N) | yes |
-| `loadu_unzip(p)` / `storeu_zip(p, a)` | `deinterleave(loadu(p))` / `storeu(p, interleave(a))` | — |
+| `bcast(a, k)` | `a[k]` in every lane (0 ≤ k < N) | yes |
+| `loadu_unzip(p)` / `storeu_zip(p, a)` | `unzip(loadu(p))` / `storeu(p, zip(a))` | — |
 | `permute(a, idx)` | `a[idx[0]], a[idx[1]], ...` (indices < N) | yes |
 | `permute2(a, b, idx)` | the same in `a` then `b` (indices < 2N) | — |
 | `compress(a, m)` / `expand(a, m)` | active lanes packed first, zeros after / the inverse | — |
 | `storeu_compress(p, a, m)` / `storeuf_compress(p, a, m)` | active lanes stored, their count returned | — |
 | `loadu_expand(p, m)` | `count(m)` elements loaded into the active lanes | — |
 
-`swap_pairs`, `dup_even` and `dup_odd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments: a constant or a variable (see §3 for the constants).
+`swap2`, `dupeven` and `dupodd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments: a constant or a variable (see §3 for the constants).
 
 The [mask variants](masking_semantics.md) apply the mask after the rearrangement (the merge masking keeps the lanes of the first register).
 
@@ -37,7 +37,7 @@ The [mask variants](masking_semantics.md) apply the mask after the rearrangement
 
 ## 2. Named Rearrangements
 
-Two registers interleaved, then separated again. The interleaving of two registers of LMUL 1 is a register of LMUL 2: `combine(zip_lo(a, b), zip_hi(a, b))`, whose halves `low` and `high` give back `a` and `b` with `unzip_even` and `unzip_odd`.
+Two registers interleaved, then separated again. The interleaving of two registers of LMUL 1 is a register of LMUL 2: `combine(ziplo(a, b), ziphi(a, b))`, whose halves `lo` and `hi` give back `a` and `b` with `unziplo` and `unziphi`.
 
 === "C API"
 
@@ -61,7 +61,7 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ## 3. Windows and Broadcasts
 
-`slide(a, b, n)` is the `alignr` of x86 and the `ext` of ARM (MIPPv1 `combine<n>`); `rotate(a, n)` is `slide(a, a, n)`, and `slide_down(a, n)` is `slide(a, 0, n)`.
+`slide(a, b, n)` is the `alignr` of x86 and the `ext` of ARM (MIPPv1 `combine<n>`); `rotate(a, n)` is `slide(a, a, n)`, and `slidedown(a, n)` is `slide(a, 0, n)`.
 
 === "C API"
 
@@ -83,7 +83,7 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ### 3.1. Constant Counts
 
-The number of lanes of `slide`, `slide_up`, `slide_down`, `rotate`, `broadcast_lane` (and their `_b128` variants), the lane of `get` and the count of `lshift` / `rshift` (`lshift_vs` / `rshift_vs` in C) are often constants. Many instructions only exist with a constant encoded in them, an **immediate**: `palignr`, `pshufd`, `pextrd` on x86, `ext`, `dup` (element), `umov`, `shl` / `sshr` on NEON. The same function serves both cases:
+The number of lanes of `slide`, `slideup`, `slidedown`, `rotate`, `bcast` (and their `_b128` variants), the lane of `get` and the count of `lshift` / `rshift` (`lshift_vs` / `rshift_vs` in C) are often constants. Many instructions only exist with a constant encoded in them, an **immediate**: `palignr`, `pshufd`, `pextrd` on x86, `ext`, `dup` (element), `umov`, `shl` / `sshr` on NEON. The same function serves both cases:
 
 - with a **variable**, the function runs its dynamic body: `slide` through `permute2` and indices `i + n` (`pshufb`, `vpermps`, `vpermt2ps`, `tbl`), `svsplice` on SVE, `vslidedown` / `vslideup` on RVV;
 - with a **constant**, once the function is inlined (any optimization level but `-O0`), the immediate instruction: the function tests `__builtin_constant_p(n)` and selects it at compile time, at no run-time cost. `get` needs no such test: its dynamic body (store, then read of the lane) already becomes an extraction (`pextrd`, `vextracti128`, `umov`...) when the lane is a constant, with GCC as with Clang.
@@ -108,7 +108,7 @@ The C++ APIs also have a **template version**, `mipp::slide<2>(a, b)`, `mipp::ge
     --8<-- "examples/doc/rearrangements/obj.cpp:immediates"
     ```
 
-The immediate instructions are written for the unmasked functions of LMUL 1 on SSE, AVX2, AVX-512 and NEON (AArch64), where the instruction exists for the type. The masked variants call them; with an LMUL above 1, `slide` (and `rotate`, `slide_up`, `slide_down`) slides the registers of the groups two by two with the LMUL 1 function when the count is a constant, and the other functions work register by register: the constant reaches the immediate instructions through the inlining. With `-O0`, or when the compiler does not inline the function, the dynamic body runs: the result is the same.
+The immediate instructions are written for the unmasked functions of LMUL 1 on SSE, AVX2, AVX-512 and NEON (AArch64), where the instruction exists for the type. The masked variants call them; with an LMUL above 1, `slide` (and `rotate`, `slideup`, `slidedown`) slides the registers of the groups two by two with the LMUL 1 function when the count is a constant, and the other functions work register by register: the constant reaches the immediate instructions through the inlining. With `-O0`, or when the compiler does not inline the function, the dynamic body runs: the result is the same.
 
 ---
 
@@ -193,7 +193,7 @@ The immediate instructions are written for the unmasked functions of LMUL 1 on S
 
 With C++17, `mipp::permute<P>(a)` and `mipp::permute2<P>(a, b)` take the indices from a **pattern** `P`: a type with a function `static constexpr int get(int i, int n)` that gives the source lane of the lane `i` of the result, `n` being the number of lanes of the whole group (`[0, n)` for `permute`, `[0, 2n)` for `permute2`), or `-1` for a zero. The registers can be of any LMUL, half-vectors included. The number of lanes is a constant of the compilation on every ISA (SVE and RVV with a fixed register size), so the indices are known by the compiler:
 
-- a pattern of a named rearrangement is replaced by its function: `reverse`, `rotate`, `broadcast_lane`, `slide_up`, `slide_down`, `swap_pairs`, `dup_even`, `dup_odd` for one register; `slide`, `zip_lo`, `zip_hi`, `unzip_even`, `unzip_odd` for two registers (and `permute` when all the indices of `permute2` are in one register);
+- a pattern of a named rearrangement is replaced by its function: `reverse`, `rotate`, `bcast`, `slideup`, `slidedown`, `swap2`, `dupeven`, `dupodd` for one register; `slide`, `ziplo`, `ziphi`, `unziplo`, `unziphi` for two registers (and `permute` when all the indices of `permute2` are in one register);
 - the other patterns are a `permute` / `permute2` with a constant table of indices, then a `select` for the zeros; with 8-bit elements and more than 256 lanes (or 128 for `permute2`), through memory.
 
 An index out of `[-1, n)` (`[-1, 2n)` for `permute2`) is a compilation error. The patterns are an option of C++17: the C++11 API has the functions with indices in a register (§5). They are in `mipp/cpp/patterns.hpp` and `mipp/obj/patterns.hpp`, included by `mipp.hpp` and `mipp_obj.hpp` but not by the [per-function headers](headers_and_compile_time.md): they pull about twenty rearrangement functions.

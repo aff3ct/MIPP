@@ -412,7 +412,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
             "instr_name": "0xA0",
             "datatypes": [
@@ -440,7 +440,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
             "instr_name": "0xF5",
             "datatypes": [
@@ -1115,7 +1115,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "swap_pairs": [
+    "swap2": [
         {
             "instr_name": "0xB1",
             "datatypes": [
@@ -1181,35 +1181,7 @@
             "if": "defined(__SSE4_1__)"
         }
     ],
-    "unzip_even": [
-        {
-            "instr_name": "0x88",
-            "datatypes": [
-                "float32"
-            ],
-            "template": "rea_shufps2"
-        },
-        {
-            "instr_name": "0x88",
-            "datatypes": [
-                "int32",
-                "uint32"
-            ],
-            "template": "rea_shufps2_i",
-            "if": "defined(__SSE2__)"
-        },
-        {
-            "instr_name": "unpacklo",
-            "datatypes": [
-                "float64",
-                "int64",
-                "uint64"
-            ],
-            "template": "rea_unpack",
-            "if": "defined(__SSE2__)"
-        }
-    ],
-    "unzip_odd": [
+    "unziphi": [
         {
             "instr_name": "0xDD",
             "datatypes": [
@@ -1228,6 +1200,34 @@
         },
         {
             "instr_name": "unpackhi",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack",
+            "if": "defined(__SSE2__)"
+        }
+    ],
+    "unziplo": [
+        {
+            "instr_name": "0x88",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_shufps2"
+        },
+        {
+            "instr_name": "0x88",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shufps2_i",
+            "if": "defined(__SSE2__)"
+        },
+        {
+            "instr_name": "unpacklo",
             "datatypes": [
                 "float64",
                 "int64",
@@ -1283,7 +1283,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "zip_hi": [
+    "ziphi": [
         {
             "instr_name": "unpackhi",
             "datatypes": [
@@ -1308,7 +1308,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "zip_lo": [
+    "ziplo": [
         {
             "instr_name": "unpacklo",
             "datatypes": [

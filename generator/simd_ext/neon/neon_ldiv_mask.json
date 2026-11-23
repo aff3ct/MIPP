@@ -23,7 +23,7 @@
             ]
         }
     ],
-    "high": [
+    "hi": [
         {
             "variants": [
                 "u"
@@ -35,7 +35,7 @@
             ]
         }
     ],
-    "high_k": [
+    "hi_k": [
         {
             "variants": [
                 "u"
@@ -43,6 +43,30 @@
             "code": [
                 "%m<tr>% res;",
                 "res.m = vextq_{{ isa_dt.data_ext_msk }}(m0.m, m0.m, %N<tp|m:tp/2>%);",
+                "return res;"
+            ]
+        }
+    ],
+    "lo": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = r0.r;",
+                "return res;"
+            ]
+        }
+    ],
+    "lo_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "res.m = m0.m;",
                 "return res;"
             ]
         }
@@ -55,30 +79,6 @@
             "code": [
                 "%r<tr>% res;",
                 "res.r = vcombine_{{ isa_dt.data_ext }}(vld1_{{ isa_dt.data_ext }}(p0), vdup_n_{{ isa_dt.data_ext }}(0));",
-                "return res;"
-            ]
-        }
-    ],
-    "low": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%r<tr>% res;",
-                "res.r = r0.r;",
-                "return res;"
-            ]
-        }
-    ],
-    "low_k": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%m<tr>% res;",
-                "res.m = m0.m;",
                 "return res;"
             ]
         }

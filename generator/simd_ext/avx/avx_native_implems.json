@@ -190,7 +190,7 @@
             "template": "arith_2args"
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
             "instr_name": "moveldup_ps",
             "datatypes": [
@@ -224,7 +224,7 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
             "instr_name": "movehdup_ps",
             "datatypes": [
@@ -961,7 +961,7 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "swap_pairs": [
+    "swap2": [
         {
             "instr_name": "0xB1",
             "datatypes": [
@@ -1022,16 +1022,16 @@
             "template": "trunc_float"
         }
     ],
-    "unzip_even_b128": [
+    "unziphi_b128": [
         {
-            "instr_name": "0x88",
+            "instr_name": "0xDD",
             "datatypes": [
                 "float32"
             ],
             "template": "rea_shufps2"
         },
         {
-            "instr_name": "0x88",
+            "instr_name": "0xDD",
             "datatypes": [
                 "int32",
                 "uint32"
@@ -1039,14 +1039,14 @@
             "template": "rea_shufps2_i"
         },
         {
-            "instr_name": "unpacklo",
+            "instr_name": "unpackhi",
             "datatypes": [
                 "float64"
             ],
             "template": "rea_unpack_b128"
         },
         {
-            "instr_name": "unpacklo",
+            "instr_name": "unpackhi",
             "datatypes": [
                 "int64",
                 "uint64"
@@ -1055,16 +1055,16 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "unzip_odd_b128": [
+    "unziplo_b128": [
         {
-            "instr_name": "0xDD",
+            "instr_name": "0x88",
             "datatypes": [
                 "float32"
             ],
             "template": "rea_shufps2"
         },
         {
-            "instr_name": "0xDD",
+            "instr_name": "0x88",
             "datatypes": [
                 "int32",
                 "uint32"
@@ -1072,14 +1072,14 @@
             "template": "rea_shufps2_i"
         },
         {
-            "instr_name": "unpackhi",
+            "instr_name": "unpacklo",
             "datatypes": [
                 "float64"
             ],
             "template": "rea_unpack_b128"
         },
         {
-            "instr_name": "unpackhi",
+            "instr_name": "unpacklo",
             "datatypes": [
                 "int64",
                 "uint64"
@@ -1115,7 +1115,7 @@
             "if": "!defined(__AVX2__)"
         }
     ],
-    "zip_hi_b128": [
+    "ziphi_b128": [
         {
             "instr_name": "unpackhi",
             "datatypes": [
@@ -1147,7 +1147,7 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "zip_lo_b128": [
+    "ziplo_b128": [
         {
             "instr_name": "unpacklo",
             "datatypes": [

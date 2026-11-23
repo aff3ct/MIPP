@@ -148,7 +148,7 @@
             "template": "any_cpop"
         }
     ],
-    "broadcast_lane": [
+    "bcast": [
         {
             "instr_name": "vrgather",
             "datatypes": "all_datatypes",

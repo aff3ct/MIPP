@@ -70,15 +70,15 @@ void check_value()
 	if constexpr (S <= n)
 	{
 		MIPP_CHECK_IMM(slide, a, b);
-		MIPP_CHECK_IMM(slide_up, a);
-		MIPP_CHECK_IMM(slide_down, a);
+		MIPP_CHECK_IMM(slideup, a);
+		MIPP_CHECK_IMM(slidedown, a);
 		INFO("obj slide: S = " << S << ", LMUL = " << LMUL);
 		require_same<T, LMUL>(mipp::slide<S>(oa, ob).r, mipp::slide(a, b, v));
 	}
 	if constexpr (S < n)
 	{
 		MIPP_CHECK_IMM(rotate, a);
-		MIPP_CHECK_IMM(broadcast_lane, a);
+		MIPP_CHECK_IMM(bcast, a);
 		INFO("get: S = " << S << ", LMUL = " << LMUL);
 		REQUIRE(mipp::get(a, S) == mipp::get(a, (uint32_t)v));
 		REQUIRE(mipp::get<S>(a) == mipp::get(a, (uint32_t)v));
@@ -87,13 +87,13 @@ void check_value()
 	if constexpr (S <= nb)
 	{
 		MIPP_CHECK_IMM(slide_b128, a, b);
-		MIPP_CHECK_IMM(slide_up_b128, a);
-		MIPP_CHECK_IMM(slide_down_b128, a);
+		MIPP_CHECK_IMM(slideup_b128, a);
+		MIPP_CHECK_IMM(slidedown_b128, a);
 	}
 	if constexpr (S < nb)
 	{
 		MIPP_CHECK_IMM(rotate_b128, a);
-		MIPP_CHECK_IMM(broadcast_lane_b128, a);
+		MIPP_CHECK_IMM(bcast_b128, a);
 	}
 	if constexpr (S < bits)
 	{

@@ -15,20 +15,20 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_any"
         }
     ],
-    "broadcast_lane": [
+    "bcast": [
         {
-            "instr_name": "broadcast_lane",
+            "instr_name": "bcast",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.broadcast_lane"
+            "template_ref": "tpl_horiz_lmul_generic_emu.bcast"
         }
     ],
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
-            "instr_name": "broadcast_lane_b128",
+            "instr_name": "bcast_b128",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.broadcast_lane_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.bcast_b128"
         }
     ],
     "compress": [
@@ -47,28 +47,20 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.count"
         }
     ],
-    "deinterleave": [
+    "dupeven": [
         {
-            "instr_name": "deinterleave",
+            "instr_name": "dupeven",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.deinterleave"
+            "template_ref": "tpl_horiz_lmul_generic_emu.dupeven"
         }
     ],
-    "dup_even": [
+    "dupodd": [
         {
-            "instr_name": "dup_even",
+            "instr_name": "dupodd",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.dup_even"
-        }
-    ],
-    "dup_odd": [
-        {
-            "instr_name": "dup_odd",
-            "datatypes": "all_datatypes",
-            "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.dup_odd"
+            "template_ref": "tpl_horiz_lmul_generic_emu.dupodd"
         }
     ],
     "expand": [
@@ -141,14 +133,6 @@
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
             "template_ref": "tpl_horiz_lmul_generic_emu.hmul"
-        }
-    ],
-    "interleave": [
-        {
-            "instr_name": "interleave",
-            "datatypes": "all_datatypes",
-            "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.interleave"
         }
     ],
     "loadu_expand": [
@@ -263,36 +247,36 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.slide_b128"
         }
     ],
-    "slide_down": [
+    "slidedown": [
         {
-            "instr_name": "slide_down",
+            "instr_name": "slidedown",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.slide_down"
+            "template_ref": "tpl_horiz_lmul_generic_emu.slidedown"
         }
     ],
-    "slide_down_b128": [
+    "slidedown_b128": [
         {
-            "instr_name": "slide_down_b128",
+            "instr_name": "slidedown_b128",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.slide_down_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.slidedown_b128"
         }
     ],
-    "slide_up": [
+    "slideup": [
         {
-            "instr_name": "slide_up",
+            "instr_name": "slideup",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.slide_up"
+            "template_ref": "tpl_horiz_lmul_generic_emu.slideup"
         }
     ],
-    "slide_up_b128": [
+    "slideup_b128": [
         {
-            "instr_name": "slide_up_b128",
+            "instr_name": "slideup_b128",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.slide_up_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.slideup_b128"
         }
     ],
     "storeu_compress": [
@@ -319,12 +303,12 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.storeuf_compress"
         }
     ],
-    "swap_pairs": [
+    "swap2": [
         {
-            "instr_name": "swap_pairs",
+            "instr_name": "swap2",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.swap_pairs"
+            "template_ref": "tpl_horiz_lmul_generic_emu.swap2"
         }
     ],
     "testz": [
@@ -335,68 +319,84 @@
             "template_ref": "tpl_horiz_lmul_generic_emu.tpl_testz"
         }
     ],
-    "unzip_even": [
+    "unzip": [
         {
-            "instr_name": "unzip_even",
+            "instr_name": "unzip",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_even"
+            "template_ref": "tpl_horiz_lmul_generic_emu.unzip"
         }
     ],
-    "unzip_even_b128": [
+    "unziphi": [
         {
-            "instr_name": "unzip_even_b128",
+            "instr_name": "unziphi",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_even_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.unziphi"
         }
     ],
-    "unzip_odd": [
+    "unziphi_b128": [
         {
-            "instr_name": "unzip_odd",
+            "instr_name": "unziphi_b128",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_odd"
+            "template_ref": "tpl_horiz_lmul_generic_emu.unziphi_b128"
         }
     ],
-    "unzip_odd_b128": [
+    "unziplo": [
         {
-            "instr_name": "unzip_odd_b128",
+            "instr_name": "unziplo",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.unzip_odd_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.unziplo"
         }
     ],
-    "zip_hi": [
+    "unziplo_b128": [
         {
-            "instr_name": "zip_hi",
+            "instr_name": "unziplo_b128",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.zip_hi"
+            "template_ref": "tpl_horiz_lmul_generic_emu.unziplo_b128"
         }
     ],
-    "zip_hi_b128": [
+    "zip": [
         {
-            "instr_name": "zip_hi_b128",
+            "instr_name": "zip",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.zip_hi_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.zip"
         }
     ],
-    "zip_lo": [
+    "ziphi": [
         {
-            "instr_name": "zip_lo",
+            "instr_name": "ziphi",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.zip_lo"
+            "template_ref": "tpl_horiz_lmul_generic_emu.ziphi"
         }
     ],
-    "zip_lo_b128": [
+    "ziphi_b128": [
         {
-            "instr_name": "zip_lo_b128",
+            "instr_name": "ziphi_b128",
             "datatypes": "all_datatypes",
             "mode": "horiz_lmul",
-            "template_ref": "tpl_horiz_lmul_generic_emu.zip_lo_b128"
+            "template_ref": "tpl_horiz_lmul_generic_emu.ziphi_b128"
+        }
+    ],
+    "ziplo": [
+        {
+            "instr_name": "ziplo",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.ziplo"
+        }
+    ],
+    "ziplo_b128": [
+        {
+            "instr_name": "ziplo_b128",
+            "datatypes": "all_datatypes",
+            "mode": "horiz_lmul",
+            "template_ref": "tpl_horiz_lmul_generic_emu.ziplo_b128"
         }
     ]
 }

@@ -299,7 +299,7 @@
           ]
         }
     ],
-    "broadcast_lane": [
+    "bcast": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -309,7 +309,7 @@
             ]
         }
     ],
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -648,17 +648,6 @@
             ]
         }
     ],
-    "deinterleave": [
-        {
-            "type": "element-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
-                "res.r[i] = %!pred_cond!% (i < h ? r0.r[2 * i] : r0.r[2 * (i - h) + 1]) %!pred_alt!%;"
-            ]
-        }
-    ],
     "div": [
         {
             "type": "element-wide",
@@ -721,7 +710,7 @@
             ]
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -731,7 +720,7 @@
             ]
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -938,7 +927,7 @@
             ]
         }
     ],
-    "high": [
+    "hi": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -952,7 +941,7 @@
             ]
         }
     ],
-    "high_k": [
+    "hi_k": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -1072,14 +1061,31 @@
             ]
         }
     ],
-    "interleave": [
+    "lo": [
         {
-            "type": "element-wide",
+            "type": "vector-wide",
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
-                "res.r[i] = %!pred_cond!% ((i & 1) ? r0.r[h + (i >> 1)] : r0.r[i >> 1]) %!pred_alt!%;"
+                "%r<tp|m:tp/2>% res;",
+                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
+                "\tres.r[i] = r0.r[i];",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "lo_k": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "%m<tp|m:tp/2>% res;",
+                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
+                "\tres.m[i] = m0.m[i];",
+                "}",
+                "return res;"
             ]
         }
     ],
@@ -1143,34 +1149,6 @@
             "variants": [],
             "implem": [
                 "res.r[i] = %!pred_cond!% LOGD(r0.r[i]) %!pred_alt!%;"
-            ]
-        }
-    ],
-    "low": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%r<tp|m:tp/2>% res;",
-                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.r[i] = r0.r[i];",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "low_k": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "%m<tp|m:tp/2>% res;",
-                "for (size_t i = 0; i < %N<tp|m:tp/2>%; i++){",
-                "\tres.m[i] = m0.m[i];",
-                "}",
-                "return res;"
             ]
         }
     ],
@@ -1935,7 +1913,7 @@
             ]
         }
     ],
-      "slide_down": [
+      "slidedown": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -1945,7 +1923,7 @@
             ]
         }
     ],
-      "slide_down_b128": [
+      "slidedown_b128": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -1958,7 +1936,7 @@
             ]
         }
     ],
-      "slide_up": [
+      "slideup": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -1968,7 +1946,7 @@
             ]
         }
     ],
-      "slide_up_b128": [
+      "slideup_b128": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2109,7 +2087,7 @@
               ]
           }
       ],
-      "swap_pairs": [
+      "swap2": [
         {
             "type": "element-wide",
             "datatypes": "all_defs",
@@ -2251,57 +2229,18 @@
         ]
       }
     ],
-    "unzip_even": [
+    "unzip": [
         {
-            "type": "vector-wide",
+            "type": "element-wide",
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
-                "%s<tp>% c[2 * %N<tp>%];",
-                "for (size_t k = 0; k < %N<tp>%; k++)",
-                "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
-                "}",
-                "for (size_t i = 0; i < %N<tp>%; i++)",
-                "{",
-                "\tres.r[i] = %!pred_cond!% c[2 * i] %!pred_alt!%;",
-                "}",
-                "return res;"
+                "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
+                "res.r[i] = %!pred_cond!% (i < h ? r0.r[2 * i] : r0.r[2 * (i - h) + 1]) %!pred_alt!%;"
             ]
         }
     ],
-    "unzip_even_b128": [
-        {
-            "type": "vector-wide",
-            "datatypes": "all_defs",
-            "variants": [],
-            "implem": [
-                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
-                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
-                "%r<tr>% res;",
-                "%s<tp>% c[2 * %N<tp>%];",
-                "for (size_t k = 0; k < %N<tp>%; k++)",
-                "{",
-                "\tc[k] = r0.r[k];",
-                "\tc[%N<tp>% + k] = r1.r[k];",
-                "}",
-                "for (size_t i = 0; i < %N<tp>%; i++)",
-                "{",
-                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
-                "\tconst size_t b0 = (i / nb) * nb;",
-                "\tconst size_t l = i - b0;",
-                "\tconst size_t j = 2 * l;",
-                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
-                "}",
-                "return res;"
-            ]
-        }
-    ],
-    "unzip_odd": [
+    "unziphi": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2324,7 +2263,7 @@
             ]
         }
     ],
-    "unzip_odd_b128": [
+    "unziphi_b128": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2345,6 +2284,56 @@
                 "\tconst size_t b0 = (i / nb) * nb;",
                 "\tconst size_t l = i - b0;",
                 "\tconst size_t j = 2 * l + 1;",
+                "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "unziplo": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tres.r[i] = %!pred_cond!% c[2 * i] %!pred_alt!%;",
+                "}",
+                "return res;"
+            ]
+        }
+    ],
+    "unziplo_b128": [
+        {
+            "type": "vector-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "// r0 then r1 in one array: a choice between two registers (r0.r[j] / r1.r[j - N]) is compiled by GCC 13",
+                "// -O2 as a single access with the aliasing of r0 only, and read before r1 is written",
+                "%r<tr>% res;",
+                "%s<tp>% c[2 * %N<tp>%];",
+                "for (size_t k = 0; k < %N<tp>%; k++)",
+                "{",
+                "\tc[k] = r0.r[k];",
+                "\tc[%N<tp>% + k] = r1.r[k];",
+                "}",
+                "for (size_t i = 0; i < %N<tp>%; i++)",
+                "{",
+                "\tconst size_t nb = (16 / sizeof(%s<tp>%)) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%;",
+                "\tconst size_t b0 = (i / nb) * nb;",
+                "\tconst size_t l = i - b0;",
+                "\tconst size_t j = 2 * l;",
                 "\tres.r[i] = %!pred_cond!% (j < nb ? c[b0 + j] : c[%N<tp>% + b0 + j - nb]) %!pred_alt!%;",
                 "}",
                 "return res;"
@@ -2426,7 +2415,18 @@
             ]
         }
     ],
-    "zip_hi": [
+    "zip": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_defs",
+            "variants": [],
+            "implem": [
+                "const size_t h = (%N<tp>% + 1) / 2; // a register of a single lane is unchanged",
+                "res.r[i] = %!pred_cond!% ((i & 1) ? r0.r[h + (i >> 1)] : r0.r[i >> 1]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "ziphi": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2450,7 +2450,7 @@
             ]
         }
     ],
-    "zip_hi_b128": [
+    "ziphi_b128": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2477,7 +2477,7 @@
             ]
         }
     ],
-    "zip_lo": [
+    "ziplo": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",
@@ -2500,7 +2500,7 @@
             ]
         }
     ],
-    "zip_lo_b128": [
+    "ziplo_b128": [
         {
             "type": "vector-wide",
             "datatypes": "all_defs",

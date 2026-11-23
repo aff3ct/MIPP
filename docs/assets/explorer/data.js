@@ -66,7 +66,7 @@ export function maskSupportOf(entry) {
   return flags;
 }
 
-// The functions that change the LMUL (low, high, combine, wcvt, ncvt) do not exist for every LMUL: the
+// The functions that change the LMUL (lo, hi, combine, wcvt, ncvt) do not exist for every LMUL: the
 // index gives the LMULs where they are defined (`prototypes.defined_lmuls`). Absent: defined everywhere.
 export function isLmulUndefined(entry, lmulKey) {
   const defined = entry && entry.prototypes && entry.prototypes.defined_lmuls;

@@ -333,7 +333,7 @@ def resolve_candidates(isa, funcs, lmul=0):
     # 1. Initialize map keys
     for f in funcs:
         if changes_lmul(funcs[f]["proto"]):
-            # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
+            # lo / hi / combine: emitted by lmul_orchestrator (not from ISA implementations)
             continue
         for dt in funcs[f]["datatypes"]:
             if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
@@ -370,7 +370,7 @@ def resolve_candidates(isa, funcs, lmul=0):
     # 3. Add auto_scalar and stub candidates, then sort
     for f in funcs:
         if changes_lmul(funcs[f]["proto"]):
-            # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
+            # lo / hi / combine: emitted by lmul_orchestrator (not from ISA implementations)
             continue
         for dt in funcs[f]["datatypes"]:
             if not is_defined_for_dt_lmul(funcs[f]["proto"], dt, lmul):
@@ -779,7 +779,7 @@ def resolve_and_emit_missing_functions(isa, file, funcs, lmul=0, emit_separators
     # 2. Write code to files
     for f in funcs:
         if changes_lmul(funcs[f]["proto"]):
-            # low / high / combine: emitted by lmul_orchestrator (not from ISA implementations)
+            # lo / hi / combine: emitted by lmul_orchestrator (not from ISA implementations)
             continue
         if emit_separators and is_inc_mgr and getattr(file, "granularity", "coarse") == "coarse":
             file_w = file.get_fd(isa["name"], f)

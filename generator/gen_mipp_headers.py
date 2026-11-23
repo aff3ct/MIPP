@@ -280,7 +280,7 @@ def generate_public_headers(output_dir="../include", granularity="coarse"):
     ]
 
     def _lmuls_of(f_name):
-        """LMULs for which the function exists (no header for the LMULs where low / high / combine / wcvt have no result)."""
+        """LMULs for which the function exists (no header for the LMULs where lo / hi / combine / wcvt have no result)."""
         proto = interfaces[f_name]["proto"]
         return [l for l in ("m1", "m2", "m4", "m8", "d2")
                 if is_defined_for_lmul(proto, -2 if l == "d2" else int(l[1:]))]

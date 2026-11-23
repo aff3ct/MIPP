@@ -182,8 +182,8 @@ struct Rvd {
     T operator[](const size_t index) const; // Reads one element (mipp::get)
 
     // Change of LMUL (see Vector Types & LMUL, section 5.5)
-    Rvd<T, /* LMUL below */> low() const;                  // Lower half (mipp::low)
-    Rvd<T, /* LMUL below */> high() const;                 // Upper half (mipp::high)
+    Rvd<T, /* LMUL below */> lo() const;                   // Lower half (mipp::lo)
+    Rvd<T, /* LMUL below */> hi() const;                   // Upper half (mipp::hi)
     Rvd<T, /* LMUL above */> combine(const Rvd& hi) const; // *this as lower half, hi as upper half (mipp::combine)
 };
 
@@ -210,9 +210,9 @@ struct Rvm {
 
     bool operator[](const size_t index) const; // Reads one lane: true if active
 
-    // Change of LMUL, as for Rvd (mipp::low, mipp::high, mipp::combine on masks)
-    Rvm<T, /* LMUL below */> low() const;
-    Rvm<T, /* LMUL below */> high() const;
+    // Change of LMUL, as for Rvd (mipp::lo, mipp::hi, mipp::combine on masks)
+    Rvm<T, /* LMUL below */> lo() const;
+    Rvm<T, /* LMUL below */> hi() const;
     Rvm<T, /* LMUL above */> combine(const Rvm& hi) const;
 };
 ```
@@ -279,7 +279,7 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
 
 1. **Prefer Operator Overloads**: When an operator exists (`a + b`, `a * b`, `a == b`, `m1 & m2`), use it over named function calls for maximum readability.
 2. **Use Free Functions**: For non-operator routines (e.g. `mipp::fmadd`, `mipp::sqrt`, `mipp::min`, `mipp::store`), use free functions under `namespace mipp::`.
-3. **Few Member Functions**: Apart from `N()`, `operator[]` and the LMUL changes `low()`, `high()` and `combine()`, operations are not exposed as member functions (there is no `a.add(b)`); use operators and free functions.
+3. **Few Member Functions**: Apart from `N()`, `operator[]` and the LMUL changes `lo()`, `hi()` and `combine()`, operations are not exposed as member functions (there is no `a.add(b)`); use operators and free functions.
 
 ---
 

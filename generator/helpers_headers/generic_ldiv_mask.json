@@ -112,7 +112,7 @@
             ]
         }
     ],
-    "high": [
+    "hi": [
         {
             "level": 3,
             "variants": [
@@ -128,7 +128,7 @@
             ]
         }
     ],
-    "high_k": [
+    "hi_k": [
         {
             "level": 3,
             "variants": [
@@ -141,6 +141,32 @@
                 "for (unsigned i = 0; i < %N<tp>%; i++)",
                 "\tbuf[i] = (i < %N<tp|m:tp/2>%) ? (int32_t){{ call1('get_k', 'w_m0', 'i + %N<tp|m:tp/2>%') }} : 0;",
                 "res.m = {{ call1('set_k', 'buf') }}.m;",
+                "return res;"
+            ]
+        }
+    ],
+    "lo": [
+        {
+            "level": 0,
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = r0.r;",
+                "return res;"
+            ]
+        }
+    ],
+    "lo_k": [
+        {
+            "level": 0,
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "res.m = m0.m;",
                 "return res;"
             ]
         }
@@ -173,32 +199,6 @@
                 "\tif ({{ call1('get_k', 'w_m0', 'i') }})",
                 "\t\tbuf[i] = p0[i];",
                 "{{ ret_d2(call1('loadu', 'buf')) }}"
-            ]
-        }
-    ],
-    "low": [
-        {
-            "level": 0,
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%r<tr>% res;",
-                "res.r = r0.r;",
-                "return res;"
-            ]
-        }
-    ],
-    "low_k": [
-        {
-            "level": 0,
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%m<tr>% res;",
-                "res.m = m0.m;",
-                "return res;"
             ]
         }
     ],

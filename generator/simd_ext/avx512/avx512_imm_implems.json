@@ -1,5 +1,5 @@
 {
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
             "instr_name": "vpermilps / vpermilpd",
             "datatypes": [

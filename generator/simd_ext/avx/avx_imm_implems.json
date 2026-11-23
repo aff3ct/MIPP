@@ -1,5 +1,5 @@
 {
-    "broadcast_lane": [
+    "bcast": [
         {
             "instr_name": "vpermpd / vpermq",
             "datatypes": [
@@ -11,7 +11,7 @@
             "if": "defined(__AVX2__)"
         }
     ],
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
             "instr_name": "vpermilps / vpermilpd",
             "datatypes": [

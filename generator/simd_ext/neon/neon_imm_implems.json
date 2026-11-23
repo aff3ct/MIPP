@@ -1,5 +1,5 @@
 {
-    "broadcast_lane": [
+    "bcast": [
         {
             "instr_name": "dup (element)",
             "datatypes": "all_datatypes",

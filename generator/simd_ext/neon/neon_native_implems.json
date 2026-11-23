@@ -368,7 +368,7 @@
             "template": "div4_int"
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
             "instr_name": "trn1q",
             "datatypes": "all_datatypes",
@@ -376,7 +376,7 @@
             "if": "defined(__aarch64__)"
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
             "instr_name": "trn2q",
             "datatypes": "all_datatypes",
@@ -1109,7 +1109,7 @@
             "template": "arith_2args"
         }
     ],
-    "swap_pairs": [
+    "swap2": [
         {
             "instr_name": "rev",
             "datatypes": [
@@ -1151,17 +1151,17 @@
             "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
         }
     ],
-    "unzip_even": [
+    "unziphi": [
         {
-            "instr_name": "uzp1q",
+            "instr_name": "uzp2q",
             "datatypes": "all_datatypes",
             "template": "rea_2",
             "if": "defined(__aarch64__)"
         }
     ],
-    "unzip_odd": [
+    "unziplo": [
         {
-            "instr_name": "uzp2q",
+            "instr_name": "uzp1q",
             "datatypes": "all_datatypes",
             "template": "rea_2",
             "if": "defined(__aarch64__)"
@@ -1186,7 +1186,7 @@
             "template": "logi_m_2args"
         }
     ],
-    "zip_hi": [
+    "ziphi": [
         {
             "instr_name": "zip2q",
             "datatypes": "all_datatypes",
@@ -1194,7 +1194,7 @@
             "if": "defined(__aarch64__)"
         }
     ],
-    "zip_lo": [
+    "ziplo": [
         {
             "instr_name": "zip1q",
             "datatypes": "all_datatypes",

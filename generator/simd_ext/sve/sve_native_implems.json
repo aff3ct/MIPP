@@ -103,7 +103,7 @@
             "template": "form_n_z"
         }
     ],
-    "broadcast_lane": [
+    "bcast": [
         {
             "instr_name": "dup_lane",
             "datatypes": "all_datatypes",
@@ -312,14 +312,14 @@
             "template": "form_n_z"
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
             "instr_name": "trn1",
             "datatypes": "all_datatypes",
             "template": "rea_self2"
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
             "instr_name": "trn2",
             "datatypes": "all_datatypes",
@@ -866,16 +866,16 @@
             "template": "un_s"
         }
     ],
-    "unzip_even": [
+    "unziphi": [
         {
-            "instr_name": "uzp1",
+            "instr_name": "uzp2",
             "datatypes": "all_datatypes",
             "template": "rea_2"
         }
     ],
-    "unzip_odd": [
+    "unziplo": [
         {
-            "instr_name": "uzp2",
+            "instr_name": "uzp1",
             "datatypes": "all_datatypes",
             "template": "rea_2"
         }
@@ -908,14 +908,14 @@
             "template": "form_n_z"
         }
     ],
-    "zip_hi": [
+    "ziphi": [
         {
             "instr_name": "zip2",
             "datatypes": "all_datatypes",
             "template": "rea_2"
         }
     ],
-    "zip_lo": [
+    "ziplo": [
         {
             "instr_name": "zip1",
             "datatypes": "all_datatypes",

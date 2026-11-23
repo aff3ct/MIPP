@@ -285,7 +285,7 @@ def _wrapper_body_memcpy(ctx, params):
 
 def _lane_crossing_body(ctx, params):
     """
-    d2 body of a function that moves lanes across the register (`lane_crossing`: reverse, slide, zip_lo...): the
+    d2 body of a function that moves lanes across the register (`lane_crossing`: reverse, slide, ziplo...): the
     LMUL 1 function would read the upper lanes, which hold garbage. Unmasked: Level 3, through the d2 function of the
     scalar ISA (the lanes of the d2 register are copied to its array, and back). Masked: the unmasked d2 function,
     then the d2 `select` (lane-wise) of the mask variant.
@@ -340,7 +340,7 @@ def _lane_crossing_body(ctx, params):
 
 _level_detectors = {}
 
-# Level of the templates of the functions that change the LMUL (low, high, combine, wcvt, ncvt), per
+# Level of the templates of the functions that change the LMUL (lo, hi, combine, wcvt, ncvt), per
 # (isa, function, "dt_par,dt_ret"): the level of the first template of the chain. Filled by _emit_one,
 # read by the documentation and the API Explorer (see compute_changing_levels).
 CHANGING_LEVELS = {}
@@ -396,7 +396,7 @@ def _emit_one(isa, file, funcs, templates, f, dt, mask_kind, record_call, lmul_i
             call1=ctx.call1, wrap=ctx.wrap, ret_d2=ctx.ret_d2, lanemask=ctx.lanemask, neutral=ctx.neutral,
             UI="uint" + str(datatypes[dt_par]["n_bits"]),
         )
-        # mini-DSL (%r<tp>%, %N<tp>%...) relative to the LMUL of the function: d2, or m1 for low / high
+        # mini-DSL (%r<tp>%, %N<tp>%...) relative to the LMUL of the function: d2, or m1 for lo / hi
         body = parse_placeholders(body, isa, funcs, f, dt_par, dt_ret, lmul=lmul_in, isa_name=True)["converted_ir"]
         if "level" in entry:
             lvl = entry["level"]
@@ -550,7 +550,7 @@ def gen_c_ldiv_mask(isa, include_manager, funcs, only_changing=False, ldiv_pairs
     for f in funcs:
         variant_set = funcs[f]["variants"] if "variants" in funcs[f] else None
         if changes_lmul(funcs[f]["proto"]):
-            # low / high (m1 -> d2) and combine (d2 -> m1), only if the templates of the ISA give them
+            # lo / hi (m1 -> d2) and combine (d2 -> m1), only if the templates of the ISA give them
             proto = funcs[f]["proto"]
             if uses_hw_ldiv_templates(isa):
                 lmuls_in = [int(x) for x in isa.get("hw_lmul", [1])]

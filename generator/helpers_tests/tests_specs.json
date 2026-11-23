@@ -413,11 +413,11 @@
             },
             "comparison": "tolerance"
         },
-        "broadcast_lane": {
+        "bcast": {
             "support_obj": true,
             "lane_index": "lt_n"
         },
-        "broadcast_lane_b128": {
+        "bcast_b128": {
             "support_obj": true,
             "lane_index": "lt_nb"
         },
@@ -727,7 +727,7 @@
             },
             "comparison": "tolerance"
         },
-        "deinterleave": {
+        "unzip": {
             "support_obj": true
         },
         "div": {
@@ -770,10 +770,10 @@
             },
             "comparison": "tolerance"
         },
-        "dup_even": {
+        "dupeven": {
             "support_obj": true
         },
-        "dup_odd": {
+        "dupodd": {
             "support_obj": true
         },
         "exp": {
@@ -951,7 +951,7 @@
                 }
             }
         },
-        "interleave": {
+        "zip": {
             "support_obj": true
         },
         "loadu_unzip": {
@@ -1371,19 +1371,19 @@
             "support_obj": true,
             "lane_index": "le_nb"
         },
-        "slide_down": {
+        "slidedown": {
             "support_obj": true,
             "lane_index": "le_n"
         },
-        "slide_down_b128": {
+        "slidedown_b128": {
             "support_obj": true,
             "lane_index": "le_nb"
         },
-        "slide_up": {
+        "slideup": {
             "support_obj": true,
             "lane_index": "le_n"
         },
-        "slide_up_b128": {
+        "slideup_b128": {
             "support_obj": true,
             "lane_index": "le_nb"
         },
@@ -1578,7 +1578,7 @@
                 }
             }
         },
-        "swap_pairs": {
+        "swap2": {
             "support_obj": true
         },
         "tan": {
@@ -1625,16 +1625,16 @@
         "torvd": {
             "comparison": "bitwise"
         },
-        "unzip_even": {
+        "unziplo": {
             "support_obj": true
         },
-        "unzip_even_b128": {
+        "unziplo_b128": {
             "support_obj": true
         },
-        "unzip_odd": {
+        "unziphi": {
             "support_obj": true
         },
-        "unzip_odd_b128": {
+        "unziphi_b128": {
             "support_obj": true
         },
         "xorb": {
@@ -1685,16 +1685,16 @@
                 }
             }
         },
-        "zip_hi": {
+        "ziphi": {
             "support_obj": true
         },
-        "zip_hi_b128": {
+        "ziphi_b128": {
             "support_obj": true
         },
-        "zip_lo": {
+        "ziplo": {
             "support_obj": true
         },
-        "zip_lo_b128": {
+        "ziplo_b128": {
             "support_obj": true
         }
     }

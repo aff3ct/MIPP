@@ -64,7 +64,7 @@ struct xorb { template <typename R> R operator()(const R& a, const R& b) const {
 
 namespace details
 {
-// The register is halved (low / high) down to the smallest LMUL (d2 when available), then its lanes are
+// The register is halved (lo / hi) down to the smallest LMUL (d2 when available), then its lanes are
 // folded one by one, each lane broadcast to a register (the operation only works on registers).
 #if defined(MIPP_LDIV_2)
 constexpr int reduce_last_lmul = -2;
@@ -86,7 +86,7 @@ inline T reduce_rvd(const Rvd<T, LMUL>& r, OP op, std::true_type /* smallest LMU
 template <typename T, int LMUL, typename OP>
 inline T reduce_rvd(const Rvd<T, LMUL>& r, OP op, std::false_type)
 {
-	const Rvd<T, lmul_down(LMUL)> h = op(r.low(), r.high());
+	const Rvd<T, lmul_down(LMUL)> h = op(r.lo(), r.hi());
 	return reduce_rvd(h, op, std::integral_constant<bool, lmul_down(LMUL) == reduce_last_lmul>());
 }
 } // namespace details

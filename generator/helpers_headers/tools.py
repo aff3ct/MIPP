@@ -201,10 +201,10 @@ def has_sw_lmul_entry(isa, f, lmul, dt_par):
 def isa_provides_lmul(isa, proto, lmul):
     """
     Whether `isa` provides a function with this prototype for the arguments' LMUL `lmul`.
-    Always true for the functions that keep the LMUL. For the functions that change it (low, high,
+    Always true for the functions that keep the LMUL. For the functions that change it (lo, hi,
     combine), only the representations that implement them: the scalar ISA, the software
     LMUL >= 2 registers (a struct of two halves) and, between m1 and d2, the ISAs with mask-based
-    half-vectors that give them in their `<isa>_ldiv_mask.json` (low and high for m1 -> d2, combine
+    half-vectors that give them in their `<isa>_ldiv_mask.json` (lo and hi for m1 -> d2, combine
     for d2 -> m1).
     """
     if int(lmul) == -2 and proto.get("ldiv", True) is False and not isa.get("is_scalar", False):
@@ -230,7 +230,7 @@ def isa_provides_lmul(isa, proto, lmul):
             need = {"wcvt"}
         else:
             msk = "_k" if proto["ret"].get("type") == "msk" else ""
-            need = {"low" + msk, "high" + msk} if proto["ret"].get("lmul") == "down" else {"combine" + msk}
+            need = {"lo" + msk, "hi" + msk} if proto["ret"].get("lmul") == "down" else {"combine" + msk}
         return need <= ldiv_mask_functions(isa)
     if is_narrowing(proto):
         # ncvt: m1 -> d2 is a template (generic_ldiv_mask.json, then the ISA), m2 -> m1 joins the
@@ -244,19 +244,19 @@ def isa_provides_lmul(isa, proto, lmul):
         return isa_provides_lmul(isa, proto, lmul // 2)
     if is_widening(proto):
         # wcvt: d2 -> m1 is a template (generic_ldiv_mask.json, then the ISA), m1 -> m2 is made of
-        # low / high on the argument and of two d2 -> m1 (or written by the ISA in <isa>_sw_lmul.json),
+        # lo / hi on the argument and of two d2 -> m1 (or written by the ISA in <isa>_sw_lmul.json),
         # m2 -> m4... of two m1 -> m2, etc.
         if lmul == -2:
             return uses_ldiv_templates(isa)
         if ret not in sw or ret in hw:
             return False
         if lmul == 1:
-            return {"low", "high"} <= ldiv_mask_functions(isa) and uses_ldiv_templates(isa)
+            return {"lo", "hi"} <= ldiv_mask_functions(isa) and uses_ldiv_templates(isa)
         return isa_provides_lmul(isa, proto, lmul // 2)
     if {lmul, ret} == {1, -2}:
         if not uses_ldiv_templates(isa):
             return False
-        return ("low" if lmul == 1 else "combine") in ldiv_mask_functions(isa)
+        return ("lo" if lmul == 1 else "combine") in ldiv_mask_functions(isa)
     big, small = max(lmul, ret), min(lmul, ret)
     # the larger register must be a software LMUL (a struct of two halves), the smaller one
     # a register (not a half-vector 'd2', provided by the representation of the ISA)
@@ -506,7 +506,7 @@ def _dump_dict_json(di, filename):
     fj.close()
     
 def _parse_lmul(input_str, isa, dt_par, dt_ret, base_lmul, ret_lmul=None):
-    # `ret_lmul`: LMUL of the returned value, when it differs from `base_lmul` (low, high, combine):
+    # `ret_lmul`: LMUL of the returned value, when it differs from `base_lmul` (lo, hi, combine):
     # a plain `tr` is the type of the result, with its own LMUL.
     if base_lmul == 0:
         return 0
@@ -1056,7 +1056,7 @@ def has_sw_ldiv(isa):
 
 def uses_ldiv_templates(isa):
     """
-    True if the functions that change the LMUL (low, high, combine, wcvt, ncvt) of the ISA come from
+    True if the functions that change the LMUL (lo, hi, combine, wcvt, ncvt) of the ISA come from
     templates: the ISAs with half-vectors by mask, and the ISAs with half-vectors on a sub_isa that
     provide a `<isa>_ldiv_mask.json` (their d2 is the register of the sub_isa, the generic file
     does not apply to them).
@@ -1069,7 +1069,7 @@ def uses_hw_ldiv_templates(isa):
     """
     True if the ISA has hardware half-vectors and register groups (-2 and several LMULs in
     "hw_lmul", as RVV) and a `<isa>_ldiv_mask.json` that gives the functions changing the LMUL
-    (low, high, combine, wcvt, ncvt) between every pair of consecutive hardware LMULs.
+    (lo, hi, combine, wcvt, ncvt) between every pair of consecutive hardware LMULs.
     """
     if not isa or isa.get("is_scalar", False) or uses_mask_ldiv(isa) or uses_sub_isa_ldiv(isa):
         return False

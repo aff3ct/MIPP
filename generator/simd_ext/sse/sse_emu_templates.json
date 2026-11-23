@@ -169,11 +169,11 @@
             "return res;"
         ]
     },
-    "rea_b128_broadcast_lane": {
+    "rea_b128_bcast": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %broadcast_lane<tp>%(r0, s0);"
+            "return %bcast<tp>%(r0, s0);"
         ]
     },
     "rea_b128_permute": {
@@ -204,46 +204,46 @@
             "return %slide<tp>%(r0, r1, s0);"
         ]
     },
-    "rea_b128_slide_down": {
+    "rea_b128_slidedown": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slide_down<tp>%(r0, s0);"
+            "return %slidedown<tp>%(r0, s0);"
         ]
     },
-    "rea_b128_slide_up": {
+    "rea_b128_slideup": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %slide_up<tp>%(r0, s0);"
+            "return %slideup<tp>%(r0, s0);"
         ]
     },
-    "rea_b128_unzip_even": {
+    "rea_b128_unziphi": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %unzip_even<tp>%(r0, r1);"
+            "return %unziphi<tp>%(r0, r1);"
         ]
     },
-    "rea_b128_unzip_odd": {
+    "rea_b128_unziplo": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %unzip_odd<tp>%(r0, r1);"
+            "return %unziplo<tp>%(r0, r1);"
         ]
     },
-    "rea_b128_zip_hi": {
+    "rea_b128_ziphi": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %zip_hi<tp>%(r0, r1);"
+            "return %ziphi<tp>%(r0, r1);"
         ]
     },
-    "rea_b128_zip_lo": {
+    "rea_b128_ziplo": {
         "format": "long",
         "code": [
             "// one block of 128 bits: the function on the whole register",
-            "return %zip_lo<tp>%(r0, r1);"
+            "return %ziplo<tp>%(r0, r1);"
         ]
     },
     "rea_compress_32": {
@@ -276,7 +276,7 @@
             "return (int32_t)(__builtin_popcount((unsigned){{ isa.prefix }}_movemask_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(m0.m)) / {{ (dt_par.n_bits // 8) if isa_dt_par.data_ext_logi == 'si128' else 1 }});"
         ]
     },
-    "rea_dup_even_epi8": {
+    "rea_dupeven_epi8": {
         "format": "long",
         "code": [
             "__m128i x = {{ isa.prefix }}_and_si128(r0.r, {{ isa.prefix }}_set1_epi16(0x00FF));",
@@ -285,7 +285,7 @@
             "return res;"
         ]
     },
-    "rea_dup_odd_epi8": {
+    "rea_dupodd_epi8": {
         "format": "long",
         "code": [
             "__m128i x = {{ isa.prefix }}_and_si128(r0.r, {{ isa.prefix }}_set1_epi16((short)0xFF00));",

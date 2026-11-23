@@ -79,7 +79,7 @@
             "level": 3
         }
     ],
-    "high": [
+    "hi": [
         {
             "variants": [
                 "u"
@@ -92,7 +92,7 @@
             ]
         }
     ],
-    "high_k": [
+    "hi_k": [
         {
             "variants": [
                 "u"
@@ -152,7 +152,7 @@
             "level": 3
         }
     ],
-    "low": [
+    "lo": [
         {
             "variants": [
                 "u"
@@ -165,7 +165,7 @@
             ]
         }
     ],
-    "low_k": [
+    "lo_k": [
         {
             "variants": [
                 "u"

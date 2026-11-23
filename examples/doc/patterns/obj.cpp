@@ -24,7 +24,7 @@ int main()
     mipp::Rvd<float> a(A);
     mipp::Rvd<float> b(B);
     mipp::Rvd<float> r = mipp::permute<reversed>(a);  // mipp::reverse(a)
-    mipp::Rvd<float> s = mipp::permute<shifted>(a);   // mipp::slide_down(a, 1)
+    mipp::Rvd<float> s = mipp::permute<shifted>(a);   // mipp::slidedown(a, 1)
     mipp::Rvd<float> m = mipp::permute2<mixed>(a, b); // a0 b1 a2 b3 ...: permute2 and a table
     // --8<-- [end:calls]
     for (int i = 0; i < n; i++) DOC_CHECK(r[i] == A[n - 1 - i]);

@@ -385,7 +385,7 @@ def _ci_alias_writer(f, dt, dt_par, dt_ret, funcs, file, mask_type=None):
 def _ci_m1_level(f, func_name, dt, dt_par, dt_ret, isa_list, funcs, get_file):
     """
     LMUL 1 of a function, for the unmasked variant and the masked ones: the `_m1` functions dispatch to the ISAs, the
-    functions without suffix follow as their aliases. A function that changes the LMUL (low, high, combine, wcvt,
+    functions without suffix follow as their aliases. A function that changes the LMUL (lo, hi, combine, wcvt,
     ncvt...) only has them if an ISA provides it.
     `get_file(variant)` gives the file of a variant (one per variant in fine granularity, a single one in coarse).
     """

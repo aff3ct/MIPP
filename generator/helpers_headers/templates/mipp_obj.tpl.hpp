@@ -11,10 +11,10 @@
 #include "mipp/internal/interfaces/cpp/functions/load/set_k.hpp"
 #include "mipp/internal/interfaces/cpp/functions/store/get.hpp"
 #include "mipp/internal/interfaces/cpp/functions/store/get_k.hpp"
-#include "mipp/internal/interfaces/cpp/functions/combine/low.hpp"
-#include "mipp/internal/interfaces/cpp/functions/combine/low_k.hpp"
-#include "mipp/internal/interfaces/cpp/functions/combine/high.hpp"
-#include "mipp/internal/interfaces/cpp/functions/combine/high_k.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/lo.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/lo_k.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/hi.hpp"
+#include "mipp/internal/interfaces/cpp/functions/combine/hi_k.hpp"
 #include "mipp/internal/interfaces/cpp/functions/combine/combine.hpp"
 #include "mipp/internal/interfaces/cpp/functions/combine/combine_k.hpp"
 
@@ -38,13 +38,13 @@ inline bool mask_get_val(T val, std::false_type)
 	return val != 0;
 }
 
-// low / high / combine: the LMUL of the result is the one below / above the LMUL of the argument(s)
+// lo / hi / combine: the LMUL of the result is the one below / above the LMUL of the argument(s)
 // (m4 -> m2 -> m1 -> d2, d2 is -2). The functions are found by argument-dependent lookup when instantiated,
 // so that they do not need to be declared yet (they only exist for the ISAs and LMULs that provide them).
 constexpr int lmul_down(int lmul) { return lmul == 1 ? -2 : lmul / 2; }
 constexpr int lmul_up(int lmul) { return lmul == -2 ? 1 : lmul * 2; }
-template <typename R> inline auto low_call(const R& r) -> decltype(low(r)) { return low(r); }
-template <typename R> inline auto high_call(const R& r) -> decltype(high(r)) { return high(r); }
+template <typename R> inline auto lo_call(const R& r) -> decltype(lo(r)) { return lo(r); }
+template <typename R> inline auto hi_call(const R& r) -> decltype(hi(r)) { return hi(r); }
 template <typename R> inline auto combine_call(const R& r0, const R& r1) -> decltype(combine(r0, r1)) { return combine(r0, r1); }
 } // namespace details
 
@@ -85,8 +85,8 @@ struct Rvd
 	inline T operator[](const size_t index) const { return mipp::get(this->r, index); }
 
 	// Lower / upper half (LMUL below): m2 -> m1, m1 -> d2, ... (not defined for d2)
-	inline Rvd<T, details::lmul_down(LMUL)> low() const { return Rvd<T, details::lmul_down(LMUL)>(details::low_call(this->r)); }
-	inline Rvd<T, details::lmul_down(LMUL)> high() const { return Rvd<T, details::lmul_down(LMUL)>(details::high_call(this->r)); }
+	inline Rvd<T, details::lmul_down(LMUL)> lo() const { return Rvd<T, details::lmul_down(LMUL)>(details::lo_call(this->r)); }
+	inline Rvd<T, details::lmul_down(LMUL)> hi() const { return Rvd<T, details::lmul_down(LMUL)>(details::hi_call(this->r)); }
 	// Register of the LMUL above made of this register (low half) and `hi` (high half)
 	inline Rvd<T, details::lmul_up(LMUL)> combine(const Rvd& hi) const { return Rvd<T, details::lmul_up(LMUL)>(details::combine_call(this->r, hi.r)); }
 };
@@ -133,8 +133,8 @@ struct Rvm
 	}
 
 	// Lower / upper half (LMUL below): m2 -> m1, m1 -> d2, ... (not defined for d2)
-	inline Rvm<T, details::lmul_down(LMUL)> low() const { return Rvm<T, details::lmul_down(LMUL)>(details::low_call(this->m)); }
-	inline Rvm<T, details::lmul_down(LMUL)> high() const { return Rvm<T, details::lmul_down(LMUL)>(details::high_call(this->m)); }
+	inline Rvm<T, details::lmul_down(LMUL)> lo() const { return Rvm<T, details::lmul_down(LMUL)>(details::lo_call(this->m)); }
+	inline Rvm<T, details::lmul_down(LMUL)> hi() const { return Rvm<T, details::lmul_down(LMUL)>(details::hi_call(this->m)); }
 	// Mask of the LMUL above made of this mask (low half) and `hi` (high half)
 	inline Rvm<T, details::lmul_up(LMUL)> combine(const Rvm& hi) const { return Rvm<T, details::lmul_up(LMUL)>(details::combine_call(this->m, hi.m)); }
 };

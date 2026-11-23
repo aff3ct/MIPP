@@ -628,7 +628,7 @@
             "return res;"
         ]
     },
-    "rea_dup_even": {
+    "rea_dupeven": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",
@@ -640,7 +640,7 @@
             "return res;"
         ]
     },
-    "rea_dup_odd": {
+    "rea_dupodd": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",
@@ -719,7 +719,7 @@
             "return res;"
         ]
     },
-    "rea_slide_up": {
+    "rea_slideup": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",
@@ -738,7 +738,7 @@
             "return (int32_t)c;"
         ]
     },
-    "rea_swap_pairs": {
+    "rea_swap2": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",
@@ -766,7 +766,7 @@
             "return res;"
         ]
     },
-    "rea_zip_hi": {
+    "rea_ziphi": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",
@@ -784,7 +784,7 @@
             "return res;"
         ]
     },
-    "rea_zip_lo": {
+    "rea_ziplo": {
         "format": "long",
         "code": [
             "const size_t n = %N<tp>%;",

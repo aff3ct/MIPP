@@ -49,7 +49,7 @@ def emit_lmul_banner(isa_name, f, file, kind):
         print("// " + _LMUL_BANNERS[kind].rjust(117), file=file)
         print("// " + "=" * 117, file=file)
 
-# The functions that change the LMUL (low, high, combine, wcvt, ncvt...) are written by several generators (templates
+# The functions that change the LMUL (lo, hi, combine, wcvt, ncvt...) are written by several generators (templates
 # of the ISA, half-vectors, software LMUL, scalar): each of them declares here the `_m1` functions it has written,
 # {isa name: {(function, datatype, mask kind): True}}, in the order of writing, for the aliases to be generated once
 # everything is written.
@@ -215,7 +215,7 @@ def gen_c_horiz_lmul(isa, file, funcs, f, dt, lmul, implems_horiz_lmul_generic_e
 def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager):
     """
     wcvt from LMUL 1 or a software LMUL (a struct of two halves) to the next one: each half of the
-    result is the conversion of one half of the argument (`low` / `high` then the d2 -> m1
+    result is the conversion of one half of the argument (`lo` / `hi` then the d2 -> m1
     conversion for m1 -> m2, the conversion of the halves of one LMUL below otherwise). An ISA may write
     the m1 -> m2 body itself (`<isa>_sw_lmul.json`): nothing is written here then.
     """
@@ -234,12 +234,12 @@ def _c_lmul_widening_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
     print("\t// Level 2 (Generic Emulation): each half of the result converts one half of the argument", file=file)
     print(f"\t{res_type} res;", file=file)
     if lmul == 1:
-        low = build_func_name_short(isa, dt_par, "low", True, lmul=1)
-        high = build_func_name_short(isa, dt_par, "high", True, lmul=1)
+        low = build_func_name_short(isa, dt_par, "lo", True, lmul=1)
+        high = build_func_name_short(isa, dt_par, "hi", True, lmul=1)
         conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=-2)
         print(f"\tres.r1 = {conv}({low}(r0));", file=file)
         print(f"\tres.r2 = {conv}({high}(r0));", file=file)
-        callees = [("low", "m1"), ("high", "m1"), (f, "d2")]
+        callees = [("lo", "m1"), ("hi", "m1"), (f, "d2")]
     else:
         conv = build_func_name(isa, dt_par, dt_ret, f, True, lmul=lmul // 2)
         print(f"\tres.r1 = {conv}(r0.r1);", file=file)
@@ -287,7 +287,7 @@ def _c_lmul_narrowing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul
 
 def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul, lmul, include_manager=None):
     """
-    low / high / combine on a software LMUL register (a struct of two halves 'r1' and 'r2', or
+    lo / hi / combine on a software LMUL register (a struct of two halves 'r1' and 'r2', or
     'm1' and 'm2' for masks): no intrinsic, the result is one of the halves or the pair of arguments.
     """
     proto = funcs[f]["proto"]
@@ -311,9 +311,9 @@ def _c_lmul_changing_writer(f, dt_par, dt_ret, isa, funcs, file, func_name_lmul,
         record_lmul1_definition(isa["name"], f, _dt_of(dt_par, dt_ret))
     print("\nstatic " + build_proto(proto, dt_par, dt_ret, isa, func_name_lmul, lmul=lmul, isa_name=True) + " {", file=file)
     print("\t// Level 0 (Native Hardware): half of the software LMUL register", file=file)
-    if base == "low":
+    if base == "lo":
         print(f"\treturn {arg}0.{member}1;", file=file)
-    elif base == "high":
+    elif base == "hi":
         print(f"\treturn {arg}0.{member}2;", file=file)
     else:
         res_type = build_type(kind, datatypes[dt_ret], isa, resolve_ret_lmul(proto["ret"], lmul), True)
@@ -348,7 +348,7 @@ _VARIANT_OF_MASK_TYPE = {None: "u", "mask": "m", "maskz": "z", "masks": "s"}
 def _add_ratio_split_dependencies(f, dt_par, dt_ret, isa, funcs, lmul, mask_type, include_manager):
     """
     The halves of an argument of LMUL `ratio` (index of a gather / scatter with mixed widths) are taken with
-    `low` / `high` when that argument is a register of LMUL 1 (see name_builder._build_call_lmul): the function
+    `lo` / `hi` when that argument is a register of LMUL 1 (see name_builder._build_call_lmul): the function
     then depends on them (the header that defines them must be included).
     """
     if include_manager is None:
@@ -358,7 +358,7 @@ def _add_ratio_split_dependencies(f, dt_par, dt_ret, isa, funcs, lmul, mask_type
             continue
         if resolve_arg_lmul(arg, int(lmul), dt_par, dt_ret) < 2:
             variant = _VARIANT_OF_MASK_TYPE[mask_type]
-            for half in ("low", "high"):
+            for half in ("lo", "hi"):
                 include_manager.add_call_dependency(isa["name"], f, variant, f"m{lmul}", half, "u", "m1")
 
 
@@ -471,7 +471,7 @@ def gen_c_lmul(isa, include_manager, funcs, sw_lmuls=None, lmul1=False):
 def gen_c_lmul1_aliases(isa, include_manager, funcs):
     """
     Aliases without suffix of the LMUL 1 functions (the `_m1` ones, which are the definitions), for every ISA: once all
-    the functions are written, as the ones that change the LMUL (low, high, combine, wcvt, ncvt...) are written by
+    the functions are written, as the ones that change the LMUL (lo, hi, combine, wcvt, ncvt...) are written by
     several generators, which declare what they define (record_lmul1_definition).
     """
     for f in funcs:

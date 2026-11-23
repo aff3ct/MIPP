@@ -871,7 +871,7 @@ class IncludeManager:
                     is_sw_lmul = (l_val in sw_lmuls and l_val > 1)
                     is_sub_isa_wrapper = (l == "d2" and (bool(sub_isa) or uses_mask_ldiv(isa_cfg)))
                     is_horizontal = funcs[func].get("horizontal", False) if funcs and func in funcs else False
-                    # low / high / combine: plain access to the halves, no fallback to other functions
+                    # lo / hi / combine: plain access to the halves, no fallback to other functions
                     is_changing = bool(funcs) and func in funcs and changes_lmul(funcs[func]["proto"])
                     is_sw_wrapper = (is_sw_lmul and not is_horizontal) or is_sub_isa_wrapper or is_changing
 
@@ -1019,7 +1019,7 @@ class IncludeManager:
                 old = ""
 
         if self._is_empty_atomic(old):
-            # nothing to emit (e.g. wcvt / combine for m8, low / high for d2): no empty header
+            # nothing to emit (e.g. wcvt / combine for m8, lo / hi for d2): no empty header
             self._drop_empty_atomic(item)
             return
 

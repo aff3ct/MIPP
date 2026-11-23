@@ -1,9 +1,9 @@
 {
-    "broadcast_lane": {
+    "bcast": {
         "format": "long",
         "code": [
             "{% if mask_kind %}",
-            "%r<tp>% t = %broadcast_lane<tp>%(r0, s0);",
+            "%r<tp>% t = %bcast<tp>%(r0, s0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
@@ -12,20 +12,20 @@
             "{% endif %}"
         ]
     },
-    "broadcast_lane_b128": {
+    "bcast_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %broadcast_lane_b128<tp>%(r0, s0);",
+            "%r<tp>% t = %bcast_b128<tp>%(r0, s0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %broadcast_lane_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, s0);\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %bcast_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, s0);\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
@@ -51,57 +51,38 @@
             "return 0{% for j in range(lmul) %} + %count<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('m0', j, 'm') }}){% endfor %};"
         ]
     },
-    "deinterleave": {
+    "dupeven": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %deinterleave<tp>%(r0);",
-            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
-            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
-            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
-            "{% else %}",
-            "// the even lanes of the two halves, then the odd ones",
-            "%r<tp>% res;",
-            "res.r1 = %unzip_even<c:tp|b:tp|m:tp/2>%(r0.r1, r0.r2);",
-            "res.r2 = %unzip_odd<c:tp|b:tp|m:tp/2>%(r0.r1, r0.r2);",
-            "return res;",
-            "{% endif %}"
-        ]
-    },
-    "dup_even": {
-        "format": "long",
-        "code": [
-            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
-            "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
-            "{% if mask_kind %}",
-            "%r<tp>% t = %dup_even<tp>%(r0);",
+            "%r<tp>% t = %dupeven<tp>%(r0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// lanes of a pair: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %dup_even<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %dupeven<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "dup_odd": {
+    "dupodd": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %dup_odd<tp>%(r0);",
+            "%r<tp>% t = %dupodd<tp>%(r0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// lanes of a pair: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %dup_odd<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %dupodd<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
@@ -221,21 +202,6 @@
             "{% endif %}"
         ]
     },
-    "interleave": {
-        "format": "long",
-        "code": [
-            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
-            "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
-            "{% if mask_kind %}",
-            "%r<tp>% t = %interleave<tp>%(r0);",
-            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
-            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
-            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
-            "{% else %}",
-            "return %zip_lo<tp>%(r0, %slide_down<tp>%(r0, (int32_t)(%N<tp>% / 2)));",
-            "{% endif %}"
-        ]
-    },
     "loadu_expand": {
         "format": "long",
         "code": [
@@ -252,7 +218,7 @@
     "loadu_unzip": {
         "format": "long",
         "code": [
-            "return %deinterleave<tp>%(%loadu<tp>%(p0));"
+            "return %unzip<tp>%(%loadu<tp>%(p0));"
         ]
     },
     "permute": {
@@ -443,11 +409,11 @@
             "{% endif %}"
         ]
     },
-    "slide_down": {
+    "slidedown": {
         "format": "long",
         "code": [
             "{% if mask_kind %}",
-            "%r<tp>% t = %slide_down<tp>%(r0, s0);",
+            "%r<tp>% t = %slidedown<tp>%(r0, s0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
@@ -456,29 +422,29 @@
             "{% endif %}"
         ]
     },
-    "slide_down_b128": {
+    "slidedown_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %slide_down_b128<tp>%(r0, s0);",
+            "%r<tp>% t = %slidedown_b128<tp>%(r0, s0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %slide_down_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, s0);\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %slidedown_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, s0);\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "slide_up": {
+    "slideup": {
         "format": "long",
         "code": [
             "{% if mask_kind %}",
-            "%r<tp>% t = %slide_up<tp>%(r0, s0);",
+            "%r<tp>% t = %slideup<tp>%(r0, s0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
@@ -487,20 +453,20 @@
             "{% endif %}"
         ]
     },
-    "slide_up_b128": {
+    "slideup_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %slide_up_b128<tp>%(r0, s0);",
+            "%r<tp>% t = %slideup_b128<tp>%(r0, s0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %slide_up_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, s0);\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %slideup_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, s0);\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
@@ -519,7 +485,7 @@
     "storeu_zip": {
         "format": "long",
         "code": [
-            "%storeu<tp>%(p0, %interleave<tp>%(r0));"
+            "%storeu<tp>%(p0, %zip<tp>%(r0));"
         ]
     },
     "storeuf_compress": {
@@ -533,20 +499,20 @@
             "return n;"
         ]
     },
-    "swap_pairs": {
+    "swap2": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %swap_pairs<tp>%(r0);",
+            "%r<tp>% t = %swap2<tp>%(r0);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// lanes of a pair: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %swap_pairs<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %swap2<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
@@ -647,13 +613,32 @@
             "{% endif %}"
         ]
     },
-    "unzip_even": {
+    "unzip": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %unzip_even<tp>%(r0, r1);",
+            "%r<tp>% t = %unzip<tp>%(r0);",
+            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
+            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
+            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
+            "{% else %}",
+            "// the even lanes of the two halves, then the odd ones",
+            "%r<tp>% res;",
+            "res.r1 = %unziplo<c:tp|b:tp|m:tp/2>%(r0.r1, r0.r2);",
+            "res.r2 = %unziphi<c:tp|b:tp|m:tp/2>%(r0.r1, r0.r2);",
+            "return res;",
+            "{% endif %}"
+        ]
+    },
+    "unziphi": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
+            "{% if mask_kind %}",
+            "%r<tp>% t = %unziphi<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
@@ -661,36 +646,36 @@
             "// the m1 registers of r0 || r1 two by two",
             "const %r<c:tp|b:tp|m:tp/{{ lmul }}>% x[2 * {{ lmul }}] = { {% for j in range(lmul) %}{{ piece('r0', j) }}, {% endfor %}{% for j in range(lmul) %}{{ piece('r1', j) }}{% if not loop.last %}, {% endif %}{% endfor %} };",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unzip_even<c:tp|b:tp|m:tp/{{ lmul }}>%(x[{{ 2 * j }}], x[{{ 2 * j + 1 }}]);\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unziphi<c:tp|b:tp|m:tp/{{ lmul }}>%(x[{{ 2 * j }}], x[{{ 2 * j + 1 }}]);\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "unzip_even_b128": {
+    "unziphi_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %unzip_even_b128<tp>%(r0, r1);",
+            "%r<tp>% t = %unziphi_b128<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unzip_even_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unziphi_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "unzip_odd": {
+    "unziplo": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %unzip_odd<tp>%(r0, r1);",
+            "%r<tp>% t = %unziplo<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
@@ -698,97 +683,112 @@
             "// the m1 registers of r0 || r1 two by two",
             "const %r<c:tp|b:tp|m:tp/{{ lmul }}>% x[2 * {{ lmul }}] = { {% for j in range(lmul) %}{{ piece('r0', j) }}, {% endfor %}{% for j in range(lmul) %}{{ piece('r1', j) }}{% if not loop.last %}, {% endif %}{% endfor %} };",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unzip_odd<c:tp|b:tp|m:tp/{{ lmul }}>%(x[{{ 2 * j }}], x[{{ 2 * j + 1 }}]);\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unziplo<c:tp|b:tp|m:tp/{{ lmul }}>%(x[{{ 2 * j }}], x[{{ 2 * j + 1 }}]);\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "unzip_odd_b128": {
+    "unziplo_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %unzip_odd_b128<tp>%(r0, r1);",
+            "%r<tp>% t = %unziplo_b128<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unzip_odd_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %unziplo_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "zip_hi": {
+    "zip": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %zip_hi<tp>%(r0, r1);",
+            "%r<tp>% t = %zip<tp>%(r0);",
+            "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
+            "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
+            "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
+            "{% else %}",
+            "return %ziplo<tp>%(r0, %slidedown<tp>%(r0, (int32_t)(%N<tp>% / 2)));",
+            "{% endif %}"
+        ]
+    },
+    "ziphi": {
+        "format": "long",
+        "code": [
+            "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
+            "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
+            "{% if mask_kind %}",
+            "%r<tp>% t = %ziphi<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// the m1 registers of the upper halves, interleaved two by two",
             "%r<tp>% res;",
-            "{% for j in range(lmul // 2) %}{{ piece('res', 2 * j) }} = %zip_lo<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', lmul // 2 + j) }}, {{ piece('r1', lmul // 2 + j) }});\n{{ piece('res', 2 * j + 1) }} = %zip_hi<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', lmul // 2 + j) }}, {{ piece('r1', lmul // 2 + j) }});\n{% endfor %}",
+            "{% for j in range(lmul // 2) %}{{ piece('res', 2 * j) }} = %ziplo<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', lmul // 2 + j) }}, {{ piece('r1', lmul // 2 + j) }});\n{{ piece('res', 2 * j + 1) }} = %ziphi<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', lmul // 2 + j) }}, {{ piece('r1', lmul // 2 + j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "zip_hi_b128": {
+    "ziphi_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %zip_hi_b128<tp>%(r0, r1);",
+            "%r<tp>% t = %ziphi_b128<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %zip_hi_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %ziphi_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "zip_lo": {
+    "ziplo": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %zip_lo<tp>%(r0, r1);",
+            "%r<tp>% t = %ziplo<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// the m1 registers of the lower halves, interleaved two by two",
             "%r<tp>% res;",
-            "{% for j in range(lmul // 2) %}{{ piece('res', 2 * j) }} = %zip_lo<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{{ piece('res', 2 * j + 1) }} = %zip_hi<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
+            "{% for j in range(lmul // 2) %}{{ piece('res', 2 * j) }} = %ziplo<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{{ piece('res', 2 * j + 1) }} = %ziphi<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]
     },
-    "zip_lo_b128": {
+    "ziplo_b128": {
         "format": "long",
         "code": [
             "{% set halves = {2: [1], 4: [2, 1], 8: [4, 2, 1]}[lmul] %}",
             "{% macro piece(v, p) -%}{{ v }}{% set ns = namespace(p=p) %}{% for h in halves %}{% if ns.p >= h %}.r2{% set ns.p = ns.p - h %}{% else %}.r1{% endif %}{% endfor %}{%- endmacro %}",
             "{% if mask_kind %}",
-            "%r<tp>% t = %zip_lo_b128<tp>%(r0, r1);",
+            "%r<tp>% t = %ziplo_b128<tp>%(r0, r1);",
             "{% if mask_kind == 'mask' %}return %select<tp>%(m0, t, r0);",
             "{% elif mask_kind == 'maskz' %}return %select<tp>%(m0, t, %set0<tp>%());",
             "{% else %}return %select<tp>%(m0, t, rsrc);{% endif %}",
             "{% else %}",
             "// blocks of 128 bits: one m1 register after the other",
             "%r<tp>% res;",
-            "{% for j in range(lmul) %}{{ piece('res', j) }} = %zip_lo_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
+            "{% for j in range(lmul) %}{{ piece('res', j) }} = %ziplo_b128<c:tp|b:tp|m:tp/{{ lmul }}>%({{ piece('r0', j) }}, {{ piece('r1', j) }});\n{% endfor %}",
             "return res;",
             "{% endif %}"
         ]

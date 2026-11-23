@@ -226,7 +226,7 @@
             "variant": "z"
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
             "instr_name": "vrgather",
             "datatypes": [
@@ -239,10 +239,10 @@
                 "uint32",
                 "uint16"
             ],
-            "template": "rea_dup_even"
+            "template": "rea_dupeven"
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
             "instr_name": "vrgather",
             "datatypes": [
@@ -255,7 +255,7 @@
                 "uint32",
                 "uint16"
             ],
-            "template": "rea_dup_odd"
+            "template": "rea_dupodd"
         }
     ],
     "expand": [
@@ -1008,11 +1008,11 @@
             "template": "rea_slide"
         }
     ],
-    "slide_up": [
+    "slideup": [
         {
             "instr_name": "vslideup",
             "datatypes": "all_datatypes",
-            "template": "rea_slide_up"
+            "template": "rea_slideup"
         }
     ],
     "sqrt": [
@@ -1074,7 +1074,7 @@
             "variant": "z"
         }
     ],
-    "swap_pairs": [
+    "swap2": [
         {
             "instr_name": "vrgather",
             "datatypes": [
@@ -1087,7 +1087,7 @@
                 "uint32",
                 "uint16"
             ],
-            "template": "rea_swap_pairs"
+            "template": "rea_swap2"
         }
     ],
     "trunc": [
@@ -1097,16 +1097,16 @@
             "template": "trunc_float_rtz"
         }
     ],
-    "unzip_even": [
+    "unziphi": [
         {
-            "instr_name": "0",
+            "instr_name": "1",
             "datatypes": "all_datatypes",
             "template": "rea_unzip"
         }
     ],
-    "unzip_odd": [
+    "unziplo": [
         {
-            "instr_name": "1",
+            "instr_name": "0",
             "datatypes": "all_datatypes",
             "template": "rea_unzip"
         }
@@ -1124,7 +1124,7 @@
             "variant": "z"
         }
     ],
-    "zip_hi": [
+    "ziphi": [
         {
             "instr_name": "vrgather",
             "datatypes": [
@@ -1137,10 +1137,10 @@
                 "uint32",
                 "uint16"
             ],
-            "template": "rea_zip_hi"
+            "template": "rea_ziphi"
         }
     ],
-    "zip_lo": [
+    "ziplo": [
         {
             "instr_name": "vrgather",
             "datatypes": [
@@ -1153,7 +1153,7 @@
                 "uint32",
                 "uint16"
             ],
-            "template": "rea_zip_lo"
+            "template": "rea_ziplo"
         }
     ]
 }

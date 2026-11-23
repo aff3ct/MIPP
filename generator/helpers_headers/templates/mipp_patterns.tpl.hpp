@@ -6,8 +6,8 @@
 // of the lane i of the result, n being the number of lanes of the group (N<T, LMUL>()); the index -1 gives a
 // zero. The number of lanes is a constant of the compilation on every ISA (SVE and RVV with a fixed register
 // size), so the indices are known at compile time: the pattern is recognized among the named rearrangements
-// (reverse, rotate, broadcast_lane, slide_up, slide_down, swap_pairs, dup_even, dup_odd for one register;
-// slide, zip_lo, zip_hi, unzip_even, unzip_odd for two registers), and otherwise computed by permute / permute2
+// (reverse, rotate, bcast, slideup, slidedown, swap2, dupeven, dupodd for one register;
+// slide, ziplo, ziphi, unziplo, unziphi for two registers), and otherwise computed by permute / permute2
 // with a constant table of indices (then a select for the zeros).
 //
 //     struct reversed { static constexpr int get(int i, int n) { return n - 1 - i; } };
@@ -72,60 +72,60 @@
 #else
 #include "mipp/cpp/fun/rotate.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/broadcast_lane.hpp")
-#include "mipp/cpp/fun/u/broadcast_lane.hpp"
+#if __has_include("mipp/cpp/fun/u/bcast.hpp")
+#include "mipp/cpp/fun/u/bcast.hpp"
 #else
-#include "mipp/cpp/fun/broadcast_lane.hpp"
+#include "mipp/cpp/fun/bcast.hpp"
 #endif
 #if __has_include("mipp/cpp/fun/u/slide.hpp")
 #include "mipp/cpp/fun/u/slide.hpp"
 #else
 #include "mipp/cpp/fun/slide.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/slide_up.hpp")
-#include "mipp/cpp/fun/u/slide_up.hpp"
+#if __has_include("mipp/cpp/fun/u/slideup.hpp")
+#include "mipp/cpp/fun/u/slideup.hpp"
 #else
-#include "mipp/cpp/fun/slide_up.hpp"
+#include "mipp/cpp/fun/slideup.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/slide_down.hpp")
-#include "mipp/cpp/fun/u/slide_down.hpp"
+#if __has_include("mipp/cpp/fun/u/slidedown.hpp")
+#include "mipp/cpp/fun/u/slidedown.hpp"
 #else
-#include "mipp/cpp/fun/slide_down.hpp"
+#include "mipp/cpp/fun/slidedown.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/swap_pairs.hpp")
-#include "mipp/cpp/fun/u/swap_pairs.hpp"
+#if __has_include("mipp/cpp/fun/u/swap2.hpp")
+#include "mipp/cpp/fun/u/swap2.hpp"
 #else
-#include "mipp/cpp/fun/swap_pairs.hpp"
+#include "mipp/cpp/fun/swap2.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/dup_even.hpp")
-#include "mipp/cpp/fun/u/dup_even.hpp"
+#if __has_include("mipp/cpp/fun/u/dupeven.hpp")
+#include "mipp/cpp/fun/u/dupeven.hpp"
 #else
-#include "mipp/cpp/fun/dup_even.hpp"
+#include "mipp/cpp/fun/dupeven.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/dup_odd.hpp")
-#include "mipp/cpp/fun/u/dup_odd.hpp"
+#if __has_include("mipp/cpp/fun/u/dupodd.hpp")
+#include "mipp/cpp/fun/u/dupodd.hpp"
 #else
-#include "mipp/cpp/fun/dup_odd.hpp"
+#include "mipp/cpp/fun/dupodd.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/zip_lo.hpp")
-#include "mipp/cpp/fun/u/zip_lo.hpp"
+#if __has_include("mipp/cpp/fun/u/ziplo.hpp")
+#include "mipp/cpp/fun/u/ziplo.hpp"
 #else
-#include "mipp/cpp/fun/zip_lo.hpp"
+#include "mipp/cpp/fun/ziplo.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/zip_hi.hpp")
-#include "mipp/cpp/fun/u/zip_hi.hpp"
+#if __has_include("mipp/cpp/fun/u/ziphi.hpp")
+#include "mipp/cpp/fun/u/ziphi.hpp"
 #else
-#include "mipp/cpp/fun/zip_hi.hpp"
+#include "mipp/cpp/fun/ziphi.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/unzip_even.hpp")
-#include "mipp/cpp/fun/u/unzip_even.hpp"
+#if __has_include("mipp/cpp/fun/u/unziplo.hpp")
+#include "mipp/cpp/fun/u/unziplo.hpp"
 #else
-#include "mipp/cpp/fun/unzip_even.hpp"
+#include "mipp/cpp/fun/unziplo.hpp"
 #endif
-#if __has_include("mipp/cpp/fun/u/unzip_odd.hpp")
-#include "mipp/cpp/fun/u/unzip_odd.hpp"
+#if __has_include("mipp/cpp/fun/u/unziphi.hpp")
+#include "mipp/cpp/fun/u/unziphi.hpp"
 #else
-#include "mipp/cpp/fun/unzip_odd.hpp"
+#include "mipp/cpp/fun/unziphi.hpp"
 #endif
 
 namespace mipp
@@ -216,22 +216,22 @@ template <std::size_t N_> constexpr int broadcast_of(const std::array<int, N_>& 
 	const int k = a[0];
 	return k >= 0 && is(a, [k](int) { return k; }) ? k : -1;
 }
-template <std::size_t N_> constexpr int slide_down_of(const std::array<int, N_>& a) // 1 <= k < n: k = a[0]
+template <std::size_t N_> constexpr int slidedown_of(const std::array<int, N_>& a) // 1 <= k < n: k = a[0]
 {
 	const int k = a[0];
 	return k >= 1 && is(a, [k](int i) { return i + k < static_cast<int>(N_) ? i + k : -1; }) ? k : -1;
 }
-template <std::size_t N_> constexpr int slide_up_of(const std::array<int, N_>& a) // k = number of leading zeros
+template <std::size_t N_> constexpr int slideup_of(const std::array<int, N_>& a) // k = number of leading zeros
 {
 	int k = 0;
 	while (k < static_cast<int>(N_) && a[k] == -1) k++;
 	return k >= 1 && k < static_cast<int>(N_) && is(a, [k](int i) { return i >= k ? i - k : -1; }) ? k : -1;
 }
-template <std::size_t N_> constexpr bool is_swap_pairs(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_swap2(const std::array<int, N_>& a)
 { return N_ % 2 == 0 && is(a, [](int i) { return i ^ 1; }); }
-template <std::size_t N_> constexpr bool is_dup_even(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_dupeven(const std::array<int, N_>& a)
 { return N_ % 2 == 0 && is(a, [](int i) { return i & ~1; }); }
-template <std::size_t N_> constexpr bool is_dup_odd(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_dupodd(const std::array<int, N_>& a)
 { return N_ % 2 == 0 && is(a, [](int i) { return i | 1; }); }
 
 // the named rearrangements of two registers (indices in [0, 2n))
@@ -240,16 +240,16 @@ template <std::size_t N_> constexpr int slide_of(const std::array<int, N_>& a) /
 	const int k = a[0];
 	return k >= 0 && is(a, [k](int i) { return i + k; }) ? k : -1;
 }
-template <std::size_t N_> constexpr bool is_zip_lo(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_ziplo(const std::array<int, N_>& a)
 { return N_ % 2 == 0 && is(a, [](int i) { return (i & 1) ? static_cast<int>(N_) + i / 2 : i / 2; }); }
-template <std::size_t N_> constexpr bool is_zip_hi(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_ziphi(const std::array<int, N_>& a)
 {
 	return N_ % 2 == 0 && is(a, [](int i) {
 		return (i & 1) ? 3 * static_cast<int>(N_) / 2 + i / 2 : static_cast<int>(N_) / 2 + i / 2; });
 }
-template <std::size_t N_> constexpr bool is_unzip_even(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_unziplo(const std::array<int, N_>& a)
 { return is(a, [](int i) { return 2 * i; }); }
-template <std::size_t N_> constexpr bool is_unzip_odd(const std::array<int, N_>& a)
+template <std::size_t N_> constexpr bool is_unziphi(const std::array<int, N_>& a)
 { return is(a, [](int i) { return 2 * i + 1; }); }
 
 // constant tables of the fallback: the indices (the zeros read the lane 0) and the mask of the non-zero lanes
@@ -290,12 +290,12 @@ inline R permute(const R& r)
 	else if constexpr (details::is_identity(a))     return r;
 	else if constexpr (details::is_reverse(a))      return mipp::reverse(r);
 	else if constexpr (details::rotate_of(a) > 0)   return mipp::rotate(r, details::rotate_of(a));
-	else if constexpr (details::broadcast_of(a) >= 0) return mipp::broadcast_lane(r, details::broadcast_of(a));
-	else if constexpr (details::slide_down_of(a) > 0) return mipp::slide_down(r, details::slide_down_of(a));
-	else if constexpr (details::slide_up_of(a) > 0) return mipp::slide_up(r, details::slide_up_of(a));
-	else if constexpr (details::is_swap_pairs(a))   return mipp::swap_pairs(r);
-	else if constexpr (details::is_dup_even(a))     return mipp::dup_even(r);
-	else if constexpr (details::is_dup_odd(a))      return mipp::dup_odd(r);
+	else if constexpr (details::broadcast_of(a) >= 0) return mipp::bcast(r, details::broadcast_of(a));
+	else if constexpr (details::slidedown_of(a) > 0) return mipp::slidedown(r, details::slidedown_of(a));
+	else if constexpr (details::slideup_of(a) > 0) return mipp::slideup(r, details::slideup_of(a));
+	else if constexpr (details::is_swap2(a))   return mipp::swap2(r);
+	else if constexpr (details::is_dupeven(a))     return mipp::dupeven(r);
+	else if constexpr (details::is_dupodd(a))      return mipp::dupodd(r);
 	else if constexpr (static_cast<std::uint64_t>(n) - 1 > static_cast<std::uint64_t>(static_cast<U>(~U(0))))
 	{
 		T buf[n];
@@ -327,10 +327,10 @@ inline R permute2(const R& r0, const R& r1)
 	if constexpr (details::all_in(a, 0, n))          return mipp::permute<details::pattern_lo<P>>(r0);
 	else if constexpr (details::all_in(a, n, 2 * n)) return mipp::permute<details::pattern_hi<P>>(r1);
 	else if constexpr (details::slide_of(a) >= 0)    return mipp::slide(r0, r1, details::slide_of(a));
-	else if constexpr (details::is_zip_lo(a))        return mipp::zip_lo(r0, r1);
-	else if constexpr (details::is_zip_hi(a))        return mipp::zip_hi(r0, r1);
-	else if constexpr (details::is_unzip_even(a))    return mipp::unzip_even(r0, r1);
-	else if constexpr (details::is_unzip_odd(a))     return mipp::unzip_odd(r0, r1);
+	else if constexpr (details::is_ziplo(a))        return mipp::ziplo(r0, r1);
+	else if constexpr (details::is_ziphi(a))        return mipp::ziphi(r0, r1);
+	else if constexpr (details::is_unziplo(a))    return mipp::unziplo(r0, r1);
+	else if constexpr (details::is_unziphi(a))     return mipp::unziphi(r0, r1);
 	else if constexpr (static_cast<std::uint64_t>(2 * n) - 1 > static_cast<std::uint64_t>(static_cast<U>(~U(0))))
 	{
 		T buf[2 * n];

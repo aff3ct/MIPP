@@ -177,7 +177,7 @@ class MippInfo:
             copy_interfaces = copy.deepcopy(interfaces)
             register_all_candidates(resolved_isa, copy_interfaces, native_impl, emu_impl, lmul=0)
             resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=0)
-            # low/high/combine/wcvt/ncvt: given by the half-vector templates, not by the candidates
+            # lo/hi/combine/wcvt/ncvt: given by the half-vector templates, not by the candidates
             changing_levels = compute_changing_levels(resolved_isa, interfaces)
 
             for func in interfaces:

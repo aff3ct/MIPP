@@ -221,7 +221,7 @@ On RVV, a half-vector can be represented in two ways, chosen by defining **one**
 | `MIPP_RVV_LDIV_VL` | register of LMUL 1 used with a vector length `vl` of $N/2$ | register of LMUL 1 with `vl` = $N/2$ (native) |
 | `MIPP_RVV_LDIV_HYBRID` | fractional register (`vfloat32mf2_t`) | register of LMUL 1 with `vl` = $N/2$ (native) |
 
-With a vector length of $N/2$, the RVV instructions only process the lower $N/2$ lanes: the lane-wise operations, the loads, the stores and the reductions of a half-vector are single instructions, with no mask and no access beyond the $N/2$ elements. This is the only native representation of the 64-bit half-vectors, for which RVV has no fractional register type. `low` is then free and `high` / `combine` are a slide of the register.
+With a vector length of $N/2$, the RVV instructions only process the lower $N/2$ lanes: the lane-wise operations, the loads, the stores and the reductions of a half-vector are single instructions, with no mask and no access beyond the $N/2$ elements. This is the only native representation of the 64-bit half-vectors, for which RVV has no fractional register type. `lo` is then free and `hi` / `combine` are a slide of the register.
 
 The API is the same in the three modes (same type names, same functions, same results): only the content of the `d2` types and the implementation change. Since the types change, **all the files of a program must be compiled with the same mode**; passing a `d2` register between files compiled with different modes is not supported. Defining several of these macros is a compilation error. The implementation levels given by the documentation and the API Explorer are the ones of the default mode.
 
@@ -290,13 +290,13 @@ MIPP provides five conversions between data vectors. They differ in what they pr
 
 | Function | Effect | Input $\to$ result |
 | :--- | :--- | :--- |
-| **`low`** | The lower half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
-| **`high`** | The upper half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
+| **`lo`** | The lower half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
+| **`hi`** | The upper half of the register. | `m8` $\to$ `m4` $\to$ `m2` $\to$ `m1` $\to$ `d2` |
 | **`combine`** | Joins two registers: the first one gives the lower half, the second one the upper half. | `d2` $\to$ `m1` $\to$ `m2` $\to$ `m4` $\to$ `m8` |
 
-`low`, `high` and `combine` also exist on masks: `low_k`, `high_k` and `combine_k` in the C API, overloads of `low`, `high` and `combine` taking `rvm` / `Rvm` arguments in the C++ APIs. `combine(low(v), high(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `low` from `d2`, no `combine` or `wcvt` from `m8`).
+`lo`, `hi` and `combine` also exist on masks: `lo_k`, `hi_k` and `combine_k` in the C API, overloads of `lo`, `hi` and `combine` taking `rvm` / `Rvm` arguments in the C++ APIs. `combine(lo(v), hi(v))` gives back `v`. The result `LMUL` is always the next one in the sequence `d2`, `m1`, `m2`, `m4`, `m8`, and a function is not defined where the next one does not exist (no `lo` from `d2`, no `combine` or `wcvt` from `m8`).
 
-The C name carries the **`LMUL` of the arguments**, the one of the result being given by the type (`mipp_low_float32_m2` takes an `m2` register and returns an `m1` one). As for the other functions, no suffix means `m1`. The C++ Functional and Object APIs deduce the `LMUL` from the type of the argument.
+The C name carries the **`LMUL` of the arguments**, the one of the result being given by the type (`mipp_lo_float32_m2` takes an `m2` register and returns an `m1` one). As for the other functions, no suffix means `m1`. The C++ Functional and Object APIs deduce the `LMUL` from the type of the argument.
 
 === "C API"
 

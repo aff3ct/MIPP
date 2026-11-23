@@ -2,7 +2,7 @@
 Software LMUL Module
 Writes the bodies that an ISA gives itself, in `simd_ext/<isa>/<isa>_sw_lmul.json`, for the functions that
 change a software LMUL (a struct of two LMUL 1 registers `r1` / `r2`): wcvt m1 -> m2 and ncvt m2 -> m1.
-Without an entry, lmul_orchestrator writes the generic bodies (low / high and the half-vector conversions,
+Without an entry, lmul_orchestrator writes the generic bodies (lo / hi and the half-vector conversions,
 or combine); with one, it skips them (has_sw_lmul_entry). The entries are rendered by the half-vector
 template engine (ldiv_mask._emit_one): Jinja2 + templating DSL, level detected with the audit rules.
 """

@@ -15,12 +15,12 @@
             "if": "defined(__aarch64__)"
         }
     ],
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
-            "instr_name": "broadcast_lane",
+            "instr_name": "bcast",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_broadcast_lane",
-            "derived_form": "broadcast_lane",
+            "template": "rea_b128_bcast",
+            "derived_form": "bcast",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
@@ -460,22 +460,22 @@
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
-    "slide_down_b128": [
+    "slidedown_b128": [
         {
-            "instr_name": "slide_down",
+            "instr_name": "slidedown",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_slide_down",
-            "derived_form": "slide_down",
+            "template": "rea_b128_slidedown",
+            "derived_form": "slidedown",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
-    "slide_up_b128": [
+    "slideup_b128": [
         {
-            "instr_name": "slide_up",
+            "instr_name": "slideup",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_slide_up",
-            "derived_form": "slide_up",
+            "template": "rea_b128_slideup",
+            "derived_form": "slideup",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
@@ -511,42 +511,42 @@
             "template": "torvm_64"
         }
     ],
-    "unzip_even_b128": [
+    "unziphi_b128": [
         {
-            "instr_name": "unzip_even",
+            "instr_name": "unziphi",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_unzip_even",
-            "derived_form": "unzip_even",
+            "template": "rea_b128_unziphi",
+            "derived_form": "unziphi",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
-    "unzip_odd_b128": [
+    "unziplo_b128": [
         {
-            "instr_name": "unzip_odd",
+            "instr_name": "unziplo",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_unzip_odd",
-            "derived_form": "unzip_odd",
+            "template": "rea_b128_unziplo",
+            "derived_form": "unziplo",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
-    "zip_hi_b128": [
+    "ziphi_b128": [
         {
-            "instr_name": "zip_hi",
+            "instr_name": "ziphi",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_zip_hi",
-            "derived_form": "zip_hi",
+            "template": "rea_b128_ziphi",
+            "derived_form": "ziphi",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }
     ],
-    "zip_lo_b128": [
+    "ziplo_b128": [
         {
-            "instr_name": "zip_lo",
+            "instr_name": "ziplo",
             "datatypes": "all_datatypes",
-            "template": "rea_b128_zip_lo",
-            "derived_form": "zip_lo",
+            "template": "rea_b128_ziplo",
+            "derived_form": "ziplo",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
         }

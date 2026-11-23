@@ -29,8 +29,8 @@ struct p_table     { static constexpr int get(int i, int n) { return (3 * i + 1)
 struct p_table0    { static constexpr int get(int i, int n) { return i % 3 == 0 ? -1 : (5 * i + 2) % n; } };
 // two registers
 struct q_slide     { static constexpr int get(int i, int) { return i + 1; } };
-struct q_zip_lo    { static constexpr int get(int i, int n) { return (i & 1) ? n + i / 2 : i / 2; } };
-struct q_zip_hi    { static constexpr int get(int i, int n) { return (i & 1) ? n + n / 2 + i / 2 : n / 2 + i / 2; } };
+struct q_ziplo    { static constexpr int get(int i, int n) { return (i & 1) ? n + i / 2 : i / 2; } };
+struct q_ziphi    { static constexpr int get(int i, int n) { return (i & 1) ? n + n / 2 + i / 2 : n / 2 + i / 2; } };
 struct q_unzip_e   { static constexpr int get(int i, int) { return 2 * i; } };
 struct q_unzip_o   { static constexpr int get(int i, int) { return 2 * i + 1; } };
 struct q_hi        { static constexpr int get(int i, int n) { return n + n - 1 - i; } };
@@ -85,8 +85,8 @@ void check_all()
 	check1<T, LMUL, p_table>();
 	check1<T, LMUL, p_table0>();
 	check2<T, LMUL, q_slide>();
-	check2<T, LMUL, q_zip_lo>();
-	check2<T, LMUL, q_zip_hi>();
+	check2<T, LMUL, q_ziplo>();
+	check2<T, LMUL, q_ziphi>();
 	check2<T, LMUL, q_unzip_e>();
 	check2<T, LMUL, q_unzip_o>();
 	check2<T, LMUL, q_hi>();
@@ -113,7 +113,7 @@ TEST_CASE("patterns - recognized patterns", "[patterns]")
 	static_assert(mipp::details::is_reverse(mipp::details::pattern_checked<p_reverse, n, n>()), "reverse");
 	static_assert(mipp::details::rotate_of(mipp::details::pattern_checked<p_rotate, n, n>()) == (n > 1 ? 1 : 0), "rotate");
 	static_assert(mipp::details::slide_of(mipp::details::pattern_checked<q_slide, n, 2 * n>()) == 1, "slide");
-	static_assert(!mipp::details::is_zip_lo(mipp::details::pattern_checked<q_table, n, 2 * n>()) || n <= 2, "zip_lo");
+	static_assert(!mipp::details::is_ziplo(mipp::details::pattern_checked<q_table, n, 2 * n>()) || n <= 2, "ziplo");
 	SUCCEED();
 }
 } // namespace mipp_test_patterns

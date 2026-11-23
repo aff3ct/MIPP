@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Half-Vector Templates",
-    "description": "Templates of the half-vectors by mask (`\"sw_ldiv_type\": \"mask\"` in the [ISA Descriptor](isa.md)) and of the functions that change the LMUL between `m1` and `d2` (`low`, `high`, `combine`, `wcvt`, `ncvt`, and the `_k` mask versions). `helpers_headers/generic_ldiv_mask.json` gives the generic version, used by every ISA; `simd_ext/<isa>/<isa>_ldiv_mask.json` overrides it for one ISA, and is also where the ISAs with `sub_isa` half-vectors (AVX, AVX-512) and with hardware LMUL groups (RVV) write these functions. A function without an entry is written as a lane-wise wrapper of its LMUL 1 version on the same register. The code is Jinja2 and [templating DSL](../templating_dsl.md), rendered for the LMUL of the arguments (`d2`, or `m1` for `low` and `high`). Each key is a function name, or several names separated by `|` that share the entries. See [Code Generation](../../internals/code_generation.md#2-one-isa-layer) and [Add an ISA](../../tutorials/add_isa.md#half-vectors-and-functions-that-change-the-lmul).",
+    "description": "Templates of the half-vectors by mask (`\"sw_ldiv_type\": \"mask\"` in the [ISA Descriptor](isa.md)) and of the functions that change the LMUL between `m1` and `d2` (`lo`, `hi`, `combine`, `wcvt`, `ncvt`, and the `_k` mask versions). `helpers_headers/generic_ldiv_mask.json` gives the generic version, used by every ISA; `simd_ext/<isa>/<isa>_ldiv_mask.json` overrides it for one ISA, and is also where the ISAs with `sub_isa` half-vectors (AVX, AVX-512) and with hardware LMUL groups (RVV) write these functions. A function without an entry is written as a lane-wise wrapper of its LMUL 1 version on the same register. The code is Jinja2 and [templating DSL](../templating_dsl.md), rendered for the LMUL of the arguments (`d2`, or `m1` for `lo` and `hi`). Each key is a function name, or several names separated by `|` that share the entries. See [Code Generation](../../internals/code_generation.md#2-one-isa-layer) and [Add an ISA](../../tutorials/add_isa.md#half-vectors-and-functions-that-change-the-lmul).",
     "examples": [
         {
             "combine": [
@@ -48,7 +48,7 @@
                     ]
                 },
                 "if": {
-                    "description": "C preprocessor condition (e.g. `defined(__SSE4_1__)`) under which this entry is used. Otherwise the next matching entry is used (the entries of `<isa>_ldiv_mask.json` come first, then those of `generic_ldiv_mask.json`), down to an entry without `if`, or the lane-wise wrapper of the LMUL 1 function. `low` / `high` / `combine` need a fallback entry without `if` (given by `generic_ldiv_mask.json`).",
+                    "description": "C preprocessor condition (e.g. `defined(__SSE4_1__)`) under which this entry is used. Otherwise the next matching entry is used (the entries of `<isa>_ldiv_mask.json` come first, then those of `generic_ldiv_mask.json`), down to an entry without `if`, or the lane-wise wrapper of the LMUL 1 function. `lo` / `hi` / `combine` need a fallback entry without `if` (given by `generic_ldiv_mask.json`).",
                     "type": "string",
                     "minLength": 1
                 },

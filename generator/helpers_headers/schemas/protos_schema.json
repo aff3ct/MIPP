@@ -98,7 +98,7 @@
                     ]
                 },
                 "changes_type": {
-                    "description": "Return value only. `true` if the datatype of the result differs from the one of the argument (wcvt, ncvt): the LMUL change then keeps the lanes, a wider (`up`) or narrower (`down`) element in a register one step above or below. Without it, `down` / `up` split (low, high) or join (combine) the registers.",
+                    "description": "Return value only. `true` if the datatype of the result differs from the one of the argument (wcvt, ncvt): the LMUL change then keeps the lanes, a wider (`up`) or narrower (`down`) element in a register one step above or below. Without it, `down` / `up` split (lo, hi) or join (combine) the registers.",
                     "type": "boolean"
                 },
                 "offset_lmul": {

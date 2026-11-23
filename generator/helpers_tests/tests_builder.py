@@ -132,7 +132,7 @@ class TestsBuilderEngine:
     def lane_index_kind(self, func_name: str) -> Optional[str]:
         """
         `lane_index` of the spec of the function: its scalar is a number of lanes, valid in [0, N) ("lt_n":
-        broadcast_lane, rotate) or [0, N] ("le_n": slide, slide_up, slide_down), N the number of lanes of the
+        bcast, rotate) or [0, N] ("le_n": slide, slideup, slidedown), N the number of lanes of the
         tested register (it depends on the ISA and on the LMUL: drawn when the test runs); "lt_nb" / "le_nb": the
         same in a block of 128 bits (the `_b128` functions).
         """
@@ -203,7 +203,7 @@ class TestsBuilderEngine:
                 msk_i += 1
             elif atype == "val":
                 if self.lane_index_kind(func_name):
-                    # index of a lane (broadcast_lane, slide...): drawn at run time, see lane_index_decl
+                    # index of a lane (bcast, slide...): drawn at run time, see lane_index_decl
                     args.append("lane_k")
                 elif arg.get("fixeddatatype") in ("uint32", "uint"):
                     args.append("0")
@@ -243,7 +243,7 @@ class TestsBuilderEngine:
 
     def is_test_defined(self, func_name: str, lmul: int) -> bool:
         """False when the function does not exist for this LMUL (a result LMUL that does not exist,
-        e.g. `wcvt` from m8 or `low` from d2). Always true for the functions that keep the LMUL."""
+        e.g. `wcvt` from m8 or `lo` from d2). Always true for the functions that keep the LMUL."""
         proto = self._proto_of(func_name)
         return is_defined_for_lmul(proto, self.test_input_lmul(lmul)) if proto else True
 

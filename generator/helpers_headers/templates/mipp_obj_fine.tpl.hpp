@@ -54,26 +54,26 @@ template <typename T, int LMUL> struct rvm_set_k_op
 { static_assert(sizeof(T) == 0, "Rvm(const int32_t[]): include <mipp/obj/fun/u/m<LMUL>/set_k.hpp> (obj set_k atom of this LMUL)"); };
 template <typename T, int LMUL> struct rvm_get_k_op
 { static_assert(sizeof(T) == 0, "Rvm::operator[]: include <mipp/obj/fun/u/m<LMUL>/get_k.hpp> (obj get_k atom of this LMUL)"); };
-template <typename T, int LMUL> struct rvd_low_op
-{ static_assert(sizeof(T) == 0, "Rvd::low(): include <mipp/obj/fun/u/m<LMUL>/low.hpp> (obj low atom of this LMUL)"); };
-template <typename T, int LMUL> struct rvd_high_op
-{ static_assert(sizeof(T) == 0, "Rvd::high(): include <mipp/obj/fun/u/m<LMUL>/high.hpp> (obj high atom of this LMUL)"); };
+template <typename T, int LMUL> struct rvd_lo_op
+{ static_assert(sizeof(T) == 0, "Rvd::lo(): include <mipp/obj/fun/u/m<LMUL>/lo.hpp> (obj lo atom of this LMUL)"); };
+template <typename T, int LMUL> struct rvd_hi_op
+{ static_assert(sizeof(T) == 0, "Rvd::hi(): include <mipp/obj/fun/u/m<LMUL>/hi.hpp> (obj hi atom of this LMUL)"); };
 template <typename T, int LMUL> struct rvd_combine_op
 { static_assert(sizeof(T) == 0, "Rvd::combine(): include <mipp/obj/fun/u/m<LMUL>/combine.hpp> (obj combine atom of this LMUL)"); };
-template <typename T, int LMUL> struct rvm_low_op
-{ static_assert(sizeof(T) == 0, "Rvm::low(): include <mipp/obj/fun/u/m<LMUL>/low_k.hpp> (obj low_k atom of this LMUL)"); };
-template <typename T, int LMUL> struct rvm_high_op
-{ static_assert(sizeof(T) == 0, "Rvm::high(): include <mipp/obj/fun/u/m<LMUL>/high_k.hpp> (obj high_k atom of this LMUL)"); };
+template <typename T, int LMUL> struct rvm_lo_op
+{ static_assert(sizeof(T) == 0, "Rvm::lo(): include <mipp/obj/fun/u/m<LMUL>/lo_k.hpp> (obj lo_k atom of this LMUL)"); };
+template <typename T, int LMUL> struct rvm_hi_op
+{ static_assert(sizeof(T) == 0, "Rvm::hi(): include <mipp/obj/fun/u/m<LMUL>/hi_k.hpp> (obj hi_k atom of this LMUL)"); };
 template <typename T, int LMUL> struct rvm_combine_op
 { static_assert(sizeof(T) == 0, "Rvm::combine(): include <mipp/obj/fun/u/m<LMUL>/combine_k.hpp> (obj combine_k atom of this LMUL)"); };
 
-// low / high / combine: the LMUL of the result is the one below / above the LMUL of the argument(s)
+// lo / hi / combine: the LMUL of the result is the one below / above the LMUL of the argument(s)
 // (m4 -> m2 -> m1 -> d2, d2 is -2). The functions are found by argument-dependent lookup when instantiated,
 // so that they do not need to be declared yet (they only exist for the ISAs and LMULs that provide them).
 constexpr int lmul_down(int lmul) { return lmul == 1 ? -2 : lmul / 2; }
 constexpr int lmul_up(int lmul) { return lmul == -2 ? 1 : lmul * 2; }
-template <typename R> inline auto low_call(const R& r) -> decltype(low(r)) { return low(r); }
-template <typename R> inline auto high_call(const R& r) -> decltype(high(r)) { return high(r); }
+template <typename R> inline auto lo_call(const R& r) -> decltype(lo(r)) { return lo(r); }
+template <typename R> inline auto hi_call(const R& r) -> decltype(hi(r)) { return hi(r); }
 template <typename R> inline auto combine_call(const R& r0, const R& r1) -> decltype(combine(r0, r1)) { return combine(r0, r1); }
 } // namespace details
 
@@ -114,8 +114,8 @@ struct Rvd
 	inline T operator[](const size_t index) const { return details::rvd_get_op<T, LMUL>::apply(this->r, index); }
 
 	// Lower / upper half (LMUL below): m2 -> m1, m1 -> d2, ... (not defined for d2)
-	inline Rvd<T, details::lmul_down(LMUL)> low() const { return details::rvd_low_op<T, LMUL>::apply(this->r); }
-	inline Rvd<T, details::lmul_down(LMUL)> high() const { return details::rvd_high_op<T, LMUL>::apply(this->r); }
+	inline Rvd<T, details::lmul_down(LMUL)> lo() const { return details::rvd_lo_op<T, LMUL>::apply(this->r); }
+	inline Rvd<T, details::lmul_down(LMUL)> hi() const { return details::rvd_hi_op<T, LMUL>::apply(this->r); }
 	// Register of the LMUL above made of this register (low half) and `hi` (high half)
 	inline Rvd<T, details::lmul_up(LMUL)> combine(const Rvd& hi) const { return details::rvd_combine_op<T, LMUL>::apply(this->r, hi.r); }
 };
@@ -160,8 +160,8 @@ struct Rvm
 	inline bool operator[](const size_t index) const { return details::rvm_get_k_op<T, LMUL>::apply(this->m, index); }
 
 	// Lower / upper half (LMUL below): m2 -> m1, m1 -> d2, ... (not defined for d2)
-	inline Rvm<T, details::lmul_down(LMUL)> low() const { return details::rvm_low_op<T, LMUL>::apply(this->m); }
-	inline Rvm<T, details::lmul_down(LMUL)> high() const { return details::rvm_high_op<T, LMUL>::apply(this->m); }
+	inline Rvm<T, details::lmul_down(LMUL)> lo() const { return details::rvm_lo_op<T, LMUL>::apply(this->m); }
+	inline Rvm<T, details::lmul_down(LMUL)> hi() const { return details::rvm_hi_op<T, LMUL>::apply(this->m); }
 	// Mask of the LMUL above made of this mask (low half) and `hi` (high half)
 	inline Rvm<T, details::lmul_up(LMUL)> combine(const Rvm& hi) const { return details::rvm_combine_op<T, LMUL>::apply(this->m, hi.m); }
 };

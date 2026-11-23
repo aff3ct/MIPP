@@ -239,41 +239,41 @@
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
-    "broadcast_lane": [
+    "bcast": [
         {
-            "instr_name": "broadcast_lane",
+            "instr_name": "bcast",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "broadcast_lane",
+            "instr_name": "bcast",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "broadcast_lane",
+            "instr_name": "bcast",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
         }
     ],
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
-            "instr_name": "broadcast_lane_b128",
+            "instr_name": "bcast_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "broadcast_lane_b128",
+            "instr_name": "bcast_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "broadcast_lane_b128",
+            "instr_name": "bcast_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
@@ -547,26 +547,6 @@
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
-    "deinterleave": [
-        {
-            "instr_name": "deinterleave",
-            "datatypes": "all_datatypes",
-            "variant": "m",
-            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
-        },
-        {
-            "instr_name": "deinterleave",
-            "datatypes": "all_datatypes",
-            "variant": "z",
-            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
-        },
-        {
-            "instr_name": "deinterleave",
-            "datatypes": "all_datatypes",
-            "variant": "s",
-            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
-        }
-    ],
     "div": [
         {
             "instr_name": "div",
@@ -663,41 +643,41 @@
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
-    "dup_even": [
+    "dupeven": [
         {
-            "instr_name": "dup_even",
+            "instr_name": "dupeven",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
-            "instr_name": "dup_even",
+            "instr_name": "dupeven",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
-            "instr_name": "dup_even",
+            "instr_name": "dupeven",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
-    "dup_odd": [
+    "dupodd": [
         {
-            "instr_name": "dup_odd",
+            "instr_name": "dupodd",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
-            "instr_name": "dup_odd",
+            "instr_name": "dupodd",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
-            "instr_name": "dup_odd",
+            "instr_name": "dupodd",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
@@ -991,26 +971,6 @@
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.hmul_maskz"
-        }
-    ],
-    "interleave": [
-        {
-            "instr_name": "interleave",
-            "datatypes": "all_datatypes",
-            "variant": "m",
-            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
-        },
-        {
-            "instr_name": "interleave",
-            "datatypes": "all_datatypes",
-            "variant": "z",
-            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
-        },
-        {
-            "instr_name": "interleave",
-            "datatypes": "all_datatypes",
-            "variant": "s",
-            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
     "load": [
@@ -1659,81 +1619,81 @@
             "template_ref": "tpl_mask_generic_emu.slide_masks_all_datatypes"
         }
     ],
-    "slide_down": [
+    "slidedown": [
         {
-            "instr_name": "slide_down",
+            "instr_name": "slidedown",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "slide_down",
+            "instr_name": "slidedown",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "slide_down",
+            "instr_name": "slidedown",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
         }
     ],
-    "slide_down_b128": [
+    "slidedown_b128": [
         {
-            "instr_name": "slide_down_b128",
+            "instr_name": "slidedown_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "slide_down_b128",
+            "instr_name": "slidedown_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "slide_down_b128",
+            "instr_name": "slidedown_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
         }
     ],
-    "slide_up": [
+    "slideup": [
         {
-            "instr_name": "slide_up",
+            "instr_name": "slideup",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "slide_up",
+            "instr_name": "slideup",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "slide_up",
+            "instr_name": "slideup",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
         }
     ],
-    "slide_up_b128": [
+    "slideup_b128": [
         {
-            "instr_name": "slide_up_b128",
+            "instr_name": "slideup_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.lshift_mask_all_datatypes"
         },
         {
-            "instr_name": "slide_up_b128",
+            "instr_name": "slideup_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.lshift_maskz_all_datatypes"
         },
         {
-            "instr_name": "slide_up_b128",
+            "instr_name": "slideup_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.lshift_masks_all_datatypes"
@@ -1839,21 +1799,21 @@
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "swap_pairs": [
+    "swap2": [
         {
-            "instr_name": "swap_pairs",
+            "instr_name": "swap2",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
         },
         {
-            "instr_name": "swap_pairs",
+            "instr_name": "swap2",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
         },
         {
-            "instr_name": "swap_pairs",
+            "instr_name": "swap2",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
@@ -1919,81 +1879,101 @@
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
-    "unzip_even": [
+    "unzip": [
         {
-            "instr_name": "unzip_even",
+            "instr_name": "unzip",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "unzip",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "unzip",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "unziphi": [
+        {
+            "instr_name": "unziphi",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "unzip_even",
+            "instr_name": "unziphi",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "unzip_even",
+            "instr_name": "unziphi",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "unzip_even_b128": [
+    "unziphi_b128": [
         {
-            "instr_name": "unzip_even_b128",
+            "instr_name": "unziphi_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "unzip_even_b128",
+            "instr_name": "unziphi_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "unzip_even_b128",
+            "instr_name": "unziphi_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "unzip_odd": [
+    "unziplo": [
         {
-            "instr_name": "unzip_odd",
+            "instr_name": "unziplo",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "unzip_odd",
+            "instr_name": "unziplo",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "unzip_odd",
+            "instr_name": "unziplo",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "unzip_odd_b128": [
+    "unziplo_b128": [
         {
-            "instr_name": "unzip_odd_b128",
+            "instr_name": "unziplo_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "unzip_odd_b128",
+            "instr_name": "unziplo_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "unzip_odd_b128",
+            "instr_name": "unziplo_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
@@ -2048,81 +2028,101 @@
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "zip_hi": [
+    "zip": [
         {
-            "instr_name": "zip_hi",
+            "instr_name": "zip",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "zip",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "zip",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
+    "ziphi": [
+        {
+            "instr_name": "ziphi",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "zip_hi",
+            "instr_name": "ziphi",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "zip_hi",
+            "instr_name": "ziphi",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "zip_hi_b128": [
+    "ziphi_b128": [
         {
-            "instr_name": "zip_hi_b128",
+            "instr_name": "ziphi_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "zip_hi_b128",
+            "instr_name": "ziphi_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "zip_hi_b128",
+            "instr_name": "ziphi_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "zip_lo": [
+    "ziplo": [
         {
-            "instr_name": "zip_lo",
+            "instr_name": "ziplo",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "zip_lo",
+            "instr_name": "ziplo",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "zip_lo",
+            "instr_name": "ziplo",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"
         }
     ],
-    "zip_lo_b128": [
+    "ziplo_b128": [
         {
-            "instr_name": "zip_lo_b128",
+            "instr_name": "ziplo_b128",
             "datatypes": "all_datatypes",
             "variant": "m",
             "template_ref": "tpl_mask_generic_emu.binary_mask_all_datatypes"
         },
         {
-            "instr_name": "zip_lo_b128",
+            "instr_name": "ziplo_b128",
             "datatypes": "all_datatypes",
             "variant": "z",
             "template_ref": "tpl_mask_generic_emu.binary_maskz_all_datatypes"
         },
         {
-            "instr_name": "zip_lo_b128",
+            "instr_name": "ziplo_b128",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template_ref": "tpl_mask_generic_emu.binary_masks_all_datatypes"

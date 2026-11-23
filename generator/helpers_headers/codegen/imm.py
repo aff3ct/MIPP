@@ -1,5 +1,5 @@
 """
-Immediate versions of the functions whose integer argument is often a constant (`slide`, `broadcast_lane`, `get`,
+Immediate versions of the functions whose integer argument is often a constant (`slide`, `bcast`, `get`,
 `lshift_vs`...).
 
 The integer argument of these functions is an ordinary argument: a variable or a constant. Many instructions only
@@ -53,8 +53,8 @@ from luts import TEMPLATE_GLOBALS
 # values of the integer argument, from the number of lanes N, the lanes of a block of 128 bits NB and the bits B of
 # the elements (the same names as the `lane_index` of the test specs)
 IMM_RANGES = {
-    "lt_n": lambda n, nb, b: range(0, n),        # broadcast_lane, rotate, get
-    "le_n": lambda n, nb, b: range(0, n + 1),    # slide, slide_up, slide_down
+    "lt_n": lambda n, nb, b: range(0, n),        # bcast, rotate, get
+    "le_n": lambda n, nb, b: range(0, n + 1),    # slide, slideup, slidedown
     "lt_nb": lambda n, nb, b: range(0, nb),      # the _b128 variants of the above
     "le_nb": lambda n, nb, b: range(0, nb + 1),
     "lt_bits": lambda n, nb, b: range(0, b),     # shift counts

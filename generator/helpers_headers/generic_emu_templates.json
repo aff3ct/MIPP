@@ -589,7 +589,7 @@
             "return %xorb<tp>%(result, sign_bit);"
         ]
     },
-    "broadcast_lane": {
+    "bcast": {
         "format": "long",
         "code": [
             "return %set1<tp>%(%get<tp>%(r0, (uint32_t)s0));"
@@ -696,7 +696,7 @@
         "code": [
             "// m sqrt((ar / m)^2 + (ai / m)^2), m the largest absolute value of the parts; divided by 1 when m is 0 or +inf (m == m + m): the result is 0, or +inf as hypot",
             "%r<tp>% m;",
-            "m = %max<tp>%(%abs<tp>%(%dup_even<tp>%(r0)), %abs<tp>%(%dup_odd<tp>%(r0)));",
+            "m = %max<tp>%(%abs<tp>%(%dupeven<tp>%(r0)), %abs<tp>%(%dupodd<tp>%(r0)));",
             "%r<tp>% d;",
             "d = %select<tp>%(%cmpeq<tp>%(m, %add<tp>%(m, m)), %set1<tp>%(1), m);",
             "return %mul<tp>%(m, %sqrt<tp>%(%cnorm<tp>%(%div<tp>%(r0, d))));"
@@ -707,13 +707,13 @@
         "code": [
             "// Smith: q = s / p with p the part of b of the largest absolute value, s the other one, den = p + s q",
             "%r<tp>% c;",
-            "c = %dup_even<tp>%(r1);",
+            "c = %dupeven<tp>%(r1);",
             "%r<tp>% d;",
-            "d = %dup_odd<tp>%(r1);",
+            "d = %dupodd<tp>%(r1);",
             "%r<tp>% ar;",
-            "ar = %dup_even<tp>%(r0);",
+            "ar = %dupeven<tp>%(r0);",
             "%r<tp>% ai;",
-            "ai = %dup_odd<tp>%(r0);",
+            "ai = %dupodd<tp>%(r0);",
             "%m<tp>% big; // |br| >= |bi|",
             "big = %cmpge<tp>%(%abs<tp>%(c), %abs<tp>%(d));",
             "%r<tp>% p;",
@@ -729,7 +729,7 @@
             "%r<tp>% im; // |br| >= |bi|: (ai - ar q) / den, else (ai q - ar) / den",
             "im = %select<tp>%(big, %fnmadd<tp>%(ar, q, ai), %fmsub<tp>%(ai, q, ar));",
             "%m<tp>% odd; // the odd lanes (imaginary parts)",
-            "odd = %cmpneq<tp>%(%zip_lo<tp>%(%set0<tp>%(), %set1<tp>%(1)), %set0<tp>%());",
+            "odd = %cmpneq<tp>%(%ziplo<tp>%(%set0<tp>%(), %set1<tp>%(1)), %set0<tp>%());",
             "return %select<tp>%(odd, %div<tp>%(im, den), %div<tp>%(re, den));"
         ]
     },
@@ -738,10 +738,10 @@
         "code": [
             "// (ar, ar) * (br, bi) + (ai, ai) * (-bi, br) + c",
             "%r<tp>% sgn; // -0, +0, -0, +0...: the sign of the even lanes",
-            "sgn = %zip_lo<tp>%(%set1<tp>%(-0.0), %set0<tp>%());",
+            "sgn = %ziplo<tp>%(%set1<tp>%(-0.0), %set0<tp>%());",
             "%r<tp>% bs;",
-            "bs = %xorb<tp>%(%swap_pairs<tp>%(r1), sgn);",
-            "return %fmadd<tp>%(%dup_odd<tp>%(r0), bs, %fmadd<tp>%(%dup_even<tp>%(r0), r1, r2));"
+            "bs = %xorb<tp>%(%swap2<tp>%(r1), sgn);",
+            "return %fmadd<tp>%(%dupodd<tp>%(r0), bs, %fmadd<tp>%(%dupeven<tp>%(r0), r1, r2));"
         ]
     },
     "complex_cmul": {
@@ -749,10 +749,10 @@
         "code": [
             "// (ar, ar) * (br, bi) + (ai, ai) * (-bi, br)",
             "%r<tp>% sgn; // -0, +0, -0, +0...: the sign of the even lanes",
-            "sgn = %zip_lo<tp>%(%set1<tp>%(-0.0), %set0<tp>%());",
+            "sgn = %ziplo<tp>%(%set1<tp>%(-0.0), %set0<tp>%());",
             "%r<tp>% bs;",
-            "bs = %xorb<tp>%(%swap_pairs<tp>%(r1), sgn);",
-            "return %fmadd<tp>%(%dup_odd<tp>%(r0), bs, %mul<tp>%(%dup_even<tp>%(r0), r1));"
+            "bs = %xorb<tp>%(%swap2<tp>%(r1), sgn);",
+            "return %fmadd<tp>%(%dupodd<tp>%(r0), bs, %mul<tp>%(%dupeven<tp>%(r0), r1));"
         ]
     },
     "complex_cmulconj": {
@@ -760,10 +760,10 @@
         "code": [
             "// (ar, ar) * (br, -bi) + (ai, ai) * (bi, br)",
             "%r<tp>% sgn; // +0, -0, +0, -0...: the sign of the odd lanes",
-            "sgn = %zip_lo<tp>%(%set0<tp>%(), %set1<tp>%(-0.0));",
+            "sgn = %ziplo<tp>%(%set0<tp>%(), %set1<tp>%(-0.0));",
             "%r<tp>% w;",
             "w = %xorb<tp>%(r1, sgn);",
-            "return %fmadd<tp>%(%dup_odd<tp>%(r0), %swap_pairs<tp>%(r1), %mul<tp>%(%dup_even<tp>%(r0), w));"
+            "return %fmadd<tp>%(%dupodd<tp>%(r0), %swap2<tp>%(r1), %mul<tp>%(%dupeven<tp>%(r0), w));"
         ]
     },
     "complex_cnorm": {
@@ -771,14 +771,14 @@
         "code": [
             "%r<tp>% sq;",
             "sq = %mul<tp>%(r0, r0);",
-            "return %add<tp>%(sq, %swap_pairs<tp>%(sq));"
+            "return %add<tp>%(sq, %swap2<tp>%(sq));"
         ]
     },
     "complex_conj": {
         "format": "long",
         "code": [
             "%r<tp>% sgn; // +0, -0, +0, -0...: the sign of the odd lanes",
-            "sgn = %zip_lo<tp>%(%set0<tp>%(), %set1<tp>%(-0.0));",
+            "sgn = %ziplo<tp>%(%set0<tp>%(), %set1<tp>%(-0.0));",
             "return %xorb<tp>%(r0, sgn);"
         ]
     },
@@ -939,11 +939,11 @@
             "return %select<tp>%(overflow_mask, inf_val, result);"
         ]
     },
-    "deinterleave": {
+    "unzip": {
         "format": "long",
         "code": [
             "// [even lanes | even lanes] and [odd lanes | odd lanes]: the second half of the first, then the first half of the second",
-            "return %slide<tp>%(%unzip_even<tp>%(r0, r0), %unzip_odd<tp>%(r0, r0), (int32_t)(%N<tp>% / 2));"
+            "return %slide<tp>%(%unziplo<tp>%(r0, r0), %unziphi<tp>%(r0, r0), (int32_t)(%N<tp>% / 2));"
         ]
     },
     "div2": {
@@ -1160,17 +1160,17 @@
         "format": "long",
         "code": "return %get<tp>%(r0, 0);"
     },
-    "interleave": {
+    "zip": {
         "format": "long",
         "code": [
             "// lower halves of r0 and of r0 slid down by N/2 (its upper half), interleaved",
-            "return %zip_lo<tp>%(r0, %slide_down<tp>%(r0, (int32_t)(%N<tp>% / 2)));"
+            "return %ziplo<tp>%(r0, %slidedown<tp>%(r0, (int32_t)(%N<tp>% / 2)));"
         ]
     },
     "loadu_unzip": {
         "format": "long",
         "code": [
-            "return %deinterleave<tp>%(%loadu<tp>%(p0));"
+            "return %unzip<tp>%(%loadu<tp>%(p0));"
         ]
     },
     "log_f32": {
@@ -1808,7 +1808,7 @@
             "return %xorb<tp>%(result, sign_bit);"
         ]
     },
-    "slide_down": {
+    "slidedown": {
         "format": "long",
         "code": [
             "return %slide<tp>%(r0, %set0<tp>%(), s0);"
@@ -1861,7 +1861,7 @@
             "return %permute2<tp>%(r0, r1, %loadu<c:uint|b:tp>%(idx));{% endif %}"
         ]
     },
-    "broadcast_lane_b128_perm": {
+    "bcast_b128_perm": {
         "format": "long",
         "code": [
             "// in each block of 128 bits, the lane s0 of the block: permute with the indices (first lane of the block) + s0",
@@ -1892,13 +1892,13 @@
             "return %slide_b128<tp>%(r0, r0, s0);"
         ]
     },
-    "slide_down_b128": {
+    "slidedown_b128": {
         "format": "long",
         "code": [
             "return %slide_b128<tp>%(r0, %set0<tp>%(), s0);"
         ]
     },
-    "slide_up_b128": {
+    "slideup_b128": {
         "format": "long",
         "code": [
             "const int32_t nb = (int32_t)(16 / sizeof(%s<tp>%) < %N<tp>% ? 16 / sizeof(%s<tp>%) : %N<tp>%); // lanes of a block",
@@ -1915,7 +1915,7 @@
             "return %loadu<tp>%(buf + s0);"
         ]
     },
-    "slide_up": {
+    "slideup": {
         "format": "long",
         "code": [
             "return %slide<tp>%(%set0<tp>%(), r0, (int32_t)%N<tp>% - s0);"
@@ -1924,7 +1924,7 @@
     "storeu_zip": {
         "format": "long",
         "code": [
-            "%storeu<tp>%(p0, %interleave<tp>%(r0));"
+            "%storeu<tp>%(p0, %zip<tp>%(r0));"
         ]
     },
     "subs_int": {

@@ -673,7 +673,7 @@ def generate_mipp_api_data(project_root=None):
             resolved_map = resolve_candidates(resolved_isa, copy_interfaces, lmul=lm)
             isa_solved_map[isa_name][lm] = (resolved_isa, resolved_map)
 
-    # Levels of the functions that change the LMUL (low, high, combine, wcvt, ncvt): given by the
+    # Levels of the functions that change the LMUL (lo, hi, combine, wcvt, ncvt): given by the
     # half-vector templates of the ISA, which the candidates above do not know
     changing_levels_by_isa = {}
     for isa_name in target_isas:
@@ -900,7 +900,7 @@ def generate_mipp_api_data(project_root=None):
             cpp_samples[lmul_key] = {}
             obj_samples[lmul_key] = {}
             if lmul not in defined_lmuls:
-                # the function does not exist for this LMUL (e.g. wcvt from m8, low from d2)
+                # the function does not exist for this LMUL (e.g. wcvt from m8, lo from d2)
                 continue
 
             for mvariant in mask_variants_list:

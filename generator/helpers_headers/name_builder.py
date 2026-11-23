@@ -714,8 +714,8 @@ def _build_call_lmul(proto, dt_par, dt_ret, isa, func_name, lmul, part, masked_v
             if idx_lmul >= 2:
                 p += "r" + str(cnt_reg) + ".r" + str(int(part))
             else:
-                # a register of LMUL 1 (or less): its lower / upper half with low / high
-                half = "low" if int(part) == 1 else "high"
+                # a register of LMUL 1 (or less): its lower / upper half with lo / hi
+                half = "lo" if int(part) == 1 else "hi"
                 p += build_func_name_short(isa, dt_ret, half, isa_name, lmul=idx_lmul) + "(r" + str(cnt_reg) + ")"
             cnt_reg = cnt_reg + 1
         elif arg["type"] == "reg":

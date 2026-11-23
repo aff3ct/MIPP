@@ -106,8 +106,8 @@ static void changing_lmul(void)
     rvd_float32_t    a  = mipp_loadu_float32(ptr);
     rvd_float32_t    b  = mipp_loadu_float32(ptr + MIPP_N_FLOAT32);
     rvd_float32_m2_t ab = mipp_combine_float32(a, b);        // {a, b}: twice as many elements
-    rvd_float32_t    lo = mipp_low_float32_m2(ab);           // == a
-    rvd_float32_t    hi = mipp_high_float32_m2(ab);          // == b
+    rvd_float32_t    lo = mipp_lo_float32_m2(ab);            // == a
+    rvd_float32_t    hi = mipp_hi_float32_m2(ab);            // == b
     rvd_float64_m2_t vw = mipp_wcvt_float32_float64(a);      // a as double, in a register of LMUL 2
     rvd_float32_t    vn = mipp_ncvt_float64_float32_m2(vw);  // and back to float: == a
     /* --8<-- [end:changing_lmul] */

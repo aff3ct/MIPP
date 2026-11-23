@@ -123,7 +123,7 @@ export function renderAlgoModal(modalData) {
   const currentMask = (modalData.mask && allVariants.includes(modalData.mask)) ? modalData.mask : defaultMask;
 
   const effectiveLmul = (modalData.lmul !== undefined && modalData.lmul !== null) ? String(modalData.lmul) : (state.lmul || "1");
-  // functions that change the LMUL (low, high, combine, wcvt, ncvt) are not defined for every LMUL
+  // functions that change the LMUL (lo, hi, combine, wcvt, ncvt) are not defined for every LMUL
   const lmulUndefined = isLmulUndefined(entry, effectiveLmul);
 
   const isHalfLmul = effectiveLmul === "-2";

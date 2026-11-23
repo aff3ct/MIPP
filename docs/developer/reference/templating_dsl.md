@@ -101,7 +101,7 @@ A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`,
 ```
 
 !!! note "`tr` and the LMUL of the result"
-    For the functions that change the LMUL (`low`, `high`, `combine`), a plain `%r<tr>%` / `%m<tr>%` is the register of the **result**, with its own LMUL (for example `d2` for `low` applied to an `m1`), whereas `tp` and the `m:` expressions start from the LMUL of the arguments.
+    For the functions that change the LMUL (`lo`, `hi`, `combine`), a plain `%r<tr>%` / `%m<tr>%` is the register of the **result**, with its own LMUL (for example `d2` for `lo` applied to an `m1`), whereas `tp` and the `m:` expressions start from the LMUL of the arguments.
 
 ### 3.3. Two Datatypes
 
@@ -128,7 +128,7 @@ You can adjust the register multiplier of a type or of a function call:
 ```
 
 !!! warning "Only in templates rendered for an LMUL"
-    `m:` has an effect only when the template is rendered for a specific LMUL: the horizontal templates of `generic_emu_templates_lmulh.json` (`mode: horiz_lmul`), and the half-vector templates of `generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`, rendered for `d2` (or `m1` for `low` and `high`), where `%N<tp|m:tp*2>%` is the number of elements of the full register. The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32_m1`.
+    `m:` has an effect only when the template is rendered for a specific LMUL: the horizontal templates of `generic_emu_templates_lmulh.json` (`mode: horiz_lmul`), and the half-vector templates of `generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`, rendered for `d2` (or `m1` for `lo` and `hi`), where `%N<tp|m:tp*2>%` is the number of elements of the full register. The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32_m1`.
 
 ### 4.2. Variant Modifiers (`v:`)
 

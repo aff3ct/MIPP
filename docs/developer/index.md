@@ -84,7 +84,7 @@ generator/
 │   ├── registry_scalar_isa.json     # Descriptor of the scalar target
 │   ├── generic_emu_templates*.json  # Generic emulation templates (Level 2)
 │   ├── generic_emu_implems*.json    # Generic emulation entries (Level 2)
-│   ├── generic_ldiv_mask.json       # Generic half-vector and LMUL-changing templates (low, high, combine, wcvt, ncvt)
+│   ├── generic_ldiv_mask.json       # Generic half-vector and LMUL-changing templates (lo, hi, combine, wcvt, ncvt)
 │   ├── funcs_docs.json              # Function descriptions and formulas
 │   ├── jinja_keywords.json          # Jinja2 keywords (not parsed as DSL placeholders)
 │   ├── schemas/                     # JSON Schemas of all the registries and ISA files

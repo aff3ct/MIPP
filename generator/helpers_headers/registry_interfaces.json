@@ -103,7 +103,7 @@
       "horizontal": false,
       "variants": ["u", "m", "z", "s"]
     },
-    "broadcast_lane": {
+    "bcast": {
         "imm": "lt_n",
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -111,7 +111,7 @@
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "broadcast_lane_b128": {
+    "bcast_b128": {
         "imm": "lt_nb",
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -274,13 +274,6 @@
         "horizontal": false,
         "variants": ["u"]
     },
-    "deinterleave": {
-        "proto_ref": "ret_reg_1arg_reg",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "lane_crossing": true,
-        "variants": ["u", "m", "z", "s"]
-    },
     "div": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_float",
@@ -300,14 +293,14 @@
         "horizontal": false,
         "variants": ["u", "m", "z", "s"]
     },
-    "dup_even": {
+    "dupeven": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "dup_odd": {
+    "dupodd": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
@@ -406,18 +399,18 @@
         "horizontal": true,
         "variants": ["u", "z"]
     },
-    "high": {
+    "hi": {
         "proto_ref": "ret_reg_1arg_reg_lmul_down",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "variants": ["u"]
     },
-    "high_k": {
+    "hi_k": {
         "proto_ref": "ret_msk_1arg_msk_lmul_down",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "variants": ["u"],
-        "cpp_name": "high"
+        "cpp_name": "hi"
     },
     "hmax": {
         "proto_ref": "ret_val_1arg_reg",
@@ -437,12 +430,18 @@
         "horizontal": true,
         "variants": ["u", "z"]
     },
-    "interleave": {
-        "proto_ref": "ret_reg_1arg_reg",
+    "lo": {
+        "proto_ref": "ret_reg_1arg_reg_lmul_down",
         "datatypes": "all_datatypes",
         "horizontal": false,
-        "lane_crossing": true,
-        "variants": ["u", "m", "z", "s"]
+        "variants": ["u"]
+    },
+    "lo_k": {
+        "proto_ref": "ret_msk_1arg_msk_lmul_down",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "variants": ["u"],
+        "cpp_name": "lo"
     },
     "load": {
         "proto_ref": "ret_reg_1arg_ptr",
@@ -475,19 +474,6 @@
         "datatypes": "all_float",
         "horizontal": false,
         "variants": ["u", "m", "z", "s"]
-    },
-    "low": {
-        "proto_ref": "ret_reg_1arg_reg_lmul_down",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"]
-    },
-    "low_k": {
-        "proto_ref": "ret_msk_1arg_msk_lmul_down",
-        "datatypes": "all_datatypes",
-        "horizontal": false,
-        "variants": ["u"],
-        "cpp_name": "low"
     },
     "lshift": {
         "proto_ref": "ret_reg_2args_reg",
@@ -763,7 +749,7 @@
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "slide_down": {
+    "slidedown": {
         "imm": "le_n",
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -771,7 +757,7 @@
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "slide_down_b128": {
+    "slidedown_b128": {
         "imm": "le_nb",
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -779,7 +765,7 @@
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "slide_up": {
+    "slideup": {
         "imm": "le_n",
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -787,7 +773,7 @@
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "slide_up_b128": {
+    "slideup_b128": {
         "imm": "le_nb",
         "proto_ref": "ret_reg_2args_reg_val",
         "datatypes": "all_datatypes",
@@ -848,7 +834,7 @@
         "variants": ["u", "m", "z", "s"],
         "forms": ["vs", "sv"]
     },
-    "swap_pairs": {
+    "swap2": {
         "proto_ref": "ret_reg_1arg_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
@@ -891,28 +877,35 @@
       "horizontal": false,
       "variants": ["u", "m", "z", "s"]
     },
-    "unzip_even": {
+    "unzip": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "unziphi": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "unzip_even_b128": {
+    "unziphi_b128": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "unzip_odd": {
+    "unziplo": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "unzip_odd_b128": {
+    "unziplo_b128": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
@@ -946,28 +939,35 @@
         "variants": ["u", "m", "z", "s"],
         "forms": ["vs"]
     },
-    "zip_hi": {
+    "zip": {
+        "proto_ref": "ret_reg_1arg_reg",
+        "datatypes": "all_datatypes",
+        "horizontal": false,
+        "lane_crossing": true,
+        "variants": ["u", "m", "z", "s"]
+    },
+    "ziphi": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "zip_hi_b128": {
+    "ziphi_b128": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "zip_lo": {
+    "ziplo": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,
         "lane_crossing": true,
         "variants": ["u", "m", "z", "s"]
     },
-    "zip_lo_b128": {
+    "ziplo_b128": {
         "proto_ref": "ret_reg_2args_reg",
         "datatypes": "all_datatypes",
         "horizontal": false,

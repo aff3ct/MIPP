@@ -74,4 +74,4 @@ When the real and imaginary parts are in two separate arrays (structure of array
 
 ## 4. Implementation Levels
 
-`cmul`, `cmulconj` and `cfmadd` are native on ARM: `vcmlaq` on NEON (Armv8.3 complex extension, `__ARM_FEATURE_COMPLEX`) and `svcmla` on SVE, two instructions per product. On x86, `cmul` uses `fmaddsub` (with FMA) or `addsub` (SSE3), and `moveldup` / `movehdup` to duplicate the parts. The other functions, and every function on the other ISAs, are generic: they combine `dup_even`, `dup_odd`, `swap_pairs` and arithmetic functions. The levels of each function are in its [reference page](../funcs_support/index.md).
+`cmul`, `cmulconj` and `cfmadd` are native on ARM: `vcmlaq` on NEON (Armv8.3 complex extension, `__ARM_FEATURE_COMPLEX`) and `svcmla` on SVE, two instructions per product. On x86, `cmul` uses `fmaddsub` (with FMA) or `addsub` (SSE3), and `moveldup` / `movehdup` to duplicate the parts. The other functions, and every function on the other ISAs, are generic: they combine `dupeven`, `dupodd`, `swap2` and arithmetic functions. The levels of each function are in its [reference page](../funcs_support/index.md).

@@ -52,14 +52,14 @@ _OBJ_MEMBER_OPS = {
     "set_k": ("rvm_set_k_op", "rvm<T, {L}>", "const int32_t* vals", "mipp::set_k<T, {L}>(vals)"),
     "get_k": ("rvm_get_k_op", "bool", "const rvm<T, {L}>& m0, const size_t idx",
               "mask_get_val<T>(mipp::get(m0, idx), typename std::is_floating_point<T>::type())"),
-    # low / high / combine: `{D}` / `{U}` are the LMULs below / above `{L}`. The functions are called by their
+    # lo / hi / combine: `{D}` / `{U}` are the LMULs below / above `{L}`. The functions are called by their
     # (unqualified) name: the cpp granule of the LMUL is included before, and the register types of the ISAs are
     # not always in namespace mipp (so argument-dependent lookup cannot be relied on).
-    "low": ("rvd_low_op", "Rvd<T, {D}>", "const rvd<T, {L}>& r0", "low(r0)"),
-    "high": ("rvd_high_op", "Rvd<T, {D}>", "const rvd<T, {L}>& r0", "high(r0)"),
+    "lo": ("rvd_lo_op", "Rvd<T, {D}>", "const rvd<T, {L}>& r0", "lo(r0)"),
+    "hi": ("rvd_hi_op", "Rvd<T, {D}>", "const rvd<T, {L}>& r0", "hi(r0)"),
     "combine": ("rvd_combine_op", "Rvd<T, {U}>", "const rvd<T, {L}>& r0, const rvd<T, {L}>& r1", "combine(r0, r1)"),
-    "low_k": ("rvm_low_op", "Rvm<T, {D}>", "const rvm<T, {L}>& m0", "low(m0)"),
-    "high_k": ("rvm_high_op", "Rvm<T, {D}>", "const rvm<T, {L}>& m0", "high(m0)"),
+    "lo_k": ("rvm_lo_op", "Rvm<T, {D}>", "const rvm<T, {L}>& m0", "lo(m0)"),
+    "hi_k": ("rvm_hi_op", "Rvm<T, {D}>", "const rvm<T, {L}>& m0", "hi(m0)"),
     "combine_k": ("rvm_combine_op", "Rvm<T, {U}>", "const rvm<T, {L}>& m0, const rvm<T, {L}>& m1", "combine(m0, m1)"),
 }
 
@@ -207,11 +207,11 @@ def generate_obj_func_file(fn, output_dir="../include", fine=False):
             lines.append(f"{{ return {ret}(mipp::{cpp_fn}<V, T, LMUL>(m0.m, rsrc.r, {raw_str})); }}")
             lines.append("")
 
-    # Category 1b: low / high / combine (the LMUL of the result differs from the one of the arguments)
-    elif fn in ("low", "high", "low_k", "high_k"):
+    # Category 1b: lo / hi / combine (the LMUL of the result differs from the one of the arguments)
+    elif fn in ("lo", "hi", "lo_k", "hi_k"):
         cls = "Rvm" if fn.endswith("_k") else "Rvd"
         mem = "m" if cls == "Rvm" else "r"
-        call = "low" if fn.startswith("low") else "high"
+        call = "lo" if fn.startswith("lo") else "hi"
         ret = f"{cls}<T, details::lmul_down(LMUL)>"
         lines.append("template <typename T, int LMUL = 1>")
         lines.append(f"inline {ret} {cpp_fn}(const {cls}<T, LMUL>& {mem}0)")
@@ -787,7 +787,7 @@ def _write_fine_granules(fn, cat, body, output_dir):
         partner = None
 
     inc = "mipp/internal/interfaces"
-    # low / high / combine / wcvt: no function (so no header) for an LMUL whose resulting LMUL does not exist
+    # lo / hi / combine / wcvt: no function (so no header) for an LMUL whose resulting LMUL does not exist
     fine_lmuls = {l: val for l, val in _FINE_LMULS.items()
                   if is_defined_for_lmul(interfaces[fn]["proto"], val)}
     for v in variants:

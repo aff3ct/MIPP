@@ -25,7 +25,7 @@ int main()
     mipp::rvd<float> a = mipp::load<float>(A);
     mipp::rvd<float> b = mipp::load<float>(B);
     mipp::rvd<float> r = mipp::permute<reversed>(a);  // mipp::reverse(a)
-    mipp::rvd<float> s = mipp::permute<shifted>(a);   // mipp::slide_down(a, 1)
+    mipp::rvd<float> s = mipp::permute<shifted>(a);   // mipp::slidedown(a, 1)
     mipp::rvd<float> m = mipp::permute2<mixed>(a, b); // a0 b1 a2 b3 ...: permute2 and a table
     // --8<-- [end:calls]
     mipp::store(O, r);

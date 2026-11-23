@@ -26,9 +26,9 @@ static void named()
     mipp::Rvd<float> a(A);
     mipp::Rvd<float> b(B);
     mipp::Rvd<float> r = mipp::reverse(a);                                         // a[N-1] ... a[0]
-    mipp::Rvd<float, 2> z = mipp::combine(mipp::zip_lo(a, b), mipp::zip_hi(a, b)); // a0 b0 a1 b1 ...
-    mipp::Rvd<float> e = mipp::unzip_even(z.low(), z.high());                      // a again
-    mipp::Rvd<float> o = mipp::unzip_odd(z.low(), z.high());                       // b again
+    mipp::Rvd<float, 2> z = mipp::combine(mipp::ziplo(a, b), mipp::ziphi(a, b)); // a0 b0 a1 b1 ...
+    mipp::Rvd<float> e = mipp::unziplo(z.lo(), z.hi());                            // a again
+    mipp::Rvd<float> o = mipp::unziphi(z.lo(), z.hi());                            // b again
     // --8<-- [end:named]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(r[i] == A[n - 1 - i]);
@@ -44,7 +44,7 @@ static void slide()
     // --8<-- [start:slide]
     mipp::Rvd<float> s = mipp::slide(a, b, 1);       // a1 ... a[N-1] b0
     mipp::Rvd<float> t = mipp::rotate(a, 1);         // a1 ... a[N-1] a0
-    mipp::Rvd<float> u = mipp::broadcast_lane(a, 2); // a2 a2 ... a2
+    mipp::Rvd<float> u = mipp::bcast(a, 2); // a2 a2 ... a2
     // --8<-- [end:slide]
     const int n = (int)mipp::N<float>();
     for (int i = 0; i < n; i++) DOC_CHECK(s[i] == (i + 1 < n ? A[i + 1] : B[0]));
@@ -65,8 +65,8 @@ static void interleaved()
     // --8<-- [start:interleaved]
     // N pairs (re, im): the real parts in the lower half of the LMUL 2 register, the imaginary ones in the upper half
     mipp::Rvd<float, 2> c = mipp::loadu_unzip_obj<float, 2>(X);
-    mipp::Rvd<float> re = c.low();
-    mipp::Rvd<float> im = c.high();
+    mipp::Rvd<float> re = c.lo();
+    mipp::Rvd<float> im = c.hi();
     mipp::Rvd<float> mag2 = mipp::fmadd(re, re, im * im); // re^2 + im^2
     // --8<-- [end:interleaved]
     const int n = (int)mipp::N<float>();

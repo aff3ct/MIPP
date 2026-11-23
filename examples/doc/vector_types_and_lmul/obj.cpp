@@ -101,8 +101,8 @@ static void changing_lmul()
     mipp::Rvd<float>     a  = mipp::loadu_obj<float>(ptr);
     mipp::Rvd<float>     b  = mipp::loadu_obj<float>(ptr + mipp::Rvd<float>::N());
     mipp::Rvd<float, 2>  ab = mipp::combine(a, b);          // {a, b}: twice as many elements
-    mipp::Rvd<float>     lo = mipp::low(ab);                // == a
-    mipp::Rvd<float>     hi = mipp::high(ab);               // == b
+    mipp::Rvd<float>     lo = mipp::lo(ab);                 // == a
+    mipp::Rvd<float>     hi = mipp::hi(ab);                 // == b
     mipp::Rvd<double, 2> vw = mipp::wcvt<double>(a);        // a as double, in a register of LMUL 2
     mipp::Rvd<float>     vn = mipp::ncvt<float>(vw);        // and back to float: == a
     // --8<-- [end:changing_lmul]

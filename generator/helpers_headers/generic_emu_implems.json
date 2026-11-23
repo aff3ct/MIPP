@@ -214,16 +214,16 @@
             "template_ref": "tpl_generic_emu.atanh_f64"
         }
     ],
-    "broadcast_lane": [
+    "bcast": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.broadcast_lane"
+            "template_ref": "tpl_generic_emu.bcast"
         }
     ],
-    "broadcast_lane_b128": [
+    "bcast_b128": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.broadcast_lane_b128_perm"
+            "template_ref": "tpl_generic_emu.bcast_b128_perm"
         }
     ],
     "cabs": [
@@ -708,12 +708,6 @@
             "template_ref": "tpl_generic_emu.round_int"
         }
     ],
-    "deinterleave": [
-        {
-            "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.deinterleave"
-        }
-    ],
     "div2": [
         {
             "instr_name": "div2",
@@ -934,12 +928,6 @@
                 "avx512"
             ],
             "template_ref": "tpl_generic_emu.getfirst"
-        }
-    ],
-    "interleave": [
-        {
-            "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.interleave"
         }
     ],
     "loadu_expand": [
@@ -1551,28 +1539,28 @@
             "template_ref": "tpl_generic_emu.slide_b128_perm"
         }
     ],
-    "slide_down": [
+    "slidedown": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.slide_down"
+            "template_ref": "tpl_generic_emu.slidedown"
         }
     ],
-    "slide_down_b128": [
+    "slidedown_b128": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.slide_down_b128"
+            "template_ref": "tpl_generic_emu.slidedown_b128"
         }
     ],
-    "slide_up": [
+    "slideup": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.slide_up"
+            "template_ref": "tpl_generic_emu.slideup"
         }
     ],
-    "slide_up_b128": [
+    "slideup_b128": [
         {
             "datatypes": "all_datatypes",
-            "template_ref": "tpl_generic_emu.slide_up_b128"
+            "template_ref": "tpl_generic_emu.slideup_b128"
         }
     ],
     "storeu_compress": [
@@ -1700,6 +1688,12 @@
             "template_ref": "tpl_generic_emu.trunc_magic"
         }
     ],
+    "unzip": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.unzip"
+        }
+    ],
     "xorb": [
         {
             "instr_name": "xorb",
@@ -1751,6 +1745,12 @@
         {
             "datatypes": "all_int",
             "template_ref": "tpl_generic_emu.xorsign_int"
+        }
+    ],
+    "zip": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.zip"
         }
     ]
 }

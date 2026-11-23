@@ -81,7 +81,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "high": [
+    "hi": [
         {
             "variants": [
                 "u"
@@ -122,7 +122,7 @@
             "if": "defined(__SSE2__)"
         }
     ],
-    "high_k": [
+    "hi_k": [
         {
             "variants": [
                 "u"
@@ -161,6 +161,30 @@
                 "uint8"
             ],
             "if": "defined(__SSE2__)"
+        }
+    ],
+    "lo": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%r<tr>% res;",
+                "res.r = r0.r;",
+                "return res;"
+            ]
+        }
+    ],
+    "lo_k": [
+        {
+            "variants": [
+                "u"
+            ],
+            "code": [
+                "%m<tr>% res;",
+                "res.m = m0.m;",
+                "return res;"
+            ]
         }
     ],
     "load|loadu": [
@@ -176,30 +200,6 @@
                 "return res;"
             ],
             "if": "defined(__SSE2__)"
-        }
-    ],
-    "low": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%r<tr>% res;",
-                "res.r = r0.r;",
-                "return res;"
-            ]
-        }
-    ],
-    "low_k": [
-        {
-            "variants": [
-                "u"
-            ],
-            "code": [
-                "%m<tr>% res;",
-                "res.m = m0.m;",
-                "return res;"
-            ]
         }
     ],
     "ncvt": [
