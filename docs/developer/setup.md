@@ -189,7 +189,7 @@ The section is dedented, and takes the indentation of the `--8<--` line (code bl
 
 When an example exists in several APIs, each version goes in a content tab, with the labels `C API`, `C++ Functional API` and `C++ Object API`. These are the labels of the Function Support pages: with `content.tabs.link`, choosing an API in one tab set selects it everywhere on the site. A notion specific to one API (deduction in the Functional API, operators of the Object API) gets a single tab with the label of its API.
 
-The tabs of a set do exactly the same thing: same variables, same order, same comments, same number of lines. Each API uses its own syntax (operators in the Object API: `a + b`, `a < b`, `v[i]`), but the Object API loads with `load_obj` / `loadu_obj` rather than with the constructor, which does not show the alignment. A remark specific to one API (what is deduced, what must be given) goes in the text, not in a comment of one tab. Types are written: no `auto`, except in the examples that present it (programming_model §3.5).
+The tabs of a set do exactly the same thing: same variables, same order, same comments, same number of lines. Each API uses its own syntax (operators in the Object API: `a + b`, `a < b`, `v[i]`), but the Object API loads with `load_obj` / `loadu_obj` rather than with the constructor, which does not show the alignment. A remark specific to one API (what is deduced, what must be given) goes in the text, not in a comment of one tab. Types are written: no `auto`, except in the examples that present it ([Programming Model §3.5](../user/programming_model.md#35-template-deduction-auto-type-inference)).
 
 ```text
 === "C API"

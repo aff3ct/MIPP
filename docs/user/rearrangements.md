@@ -29,7 +29,7 @@ Most functions also have a variant **by block of 128 bits**, suffix `_b128`: the
 | `storeu_compress(p, a, m)` / `storeuf_compress(p, a, m)` | active lanes stored, their count returned | — |
 | `loadu_expand(p, m)` | `count(m)` elements loaded into the active lanes | — |
 
-`swap2`, `dupeven` and `dupodd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments: a constant or a variable (see §3 for the constants).
+`swap2`, `dupeven` and `dupodd` work on pairs of lanes, which never straddle two blocks: they have no `_b128` variant. The numbers of lanes (`n`, `k`) are counted in the whole group, or in a block for the `_b128` variants; a value out of the range is undefined behavior. They are ordinary `int32_t` arguments: a constant or a variable (see [§3.1](#31-constant-counts) for the constants).
 
 The [mask variants](masking_semantics.md) apply the mask after the rearrangement (the merge masking keeps the lanes of the first register).
 
@@ -210,7 +210,7 @@ With C++17, `mipp::permute<P>(a)` and `mipp::permute2<P>(a, b)` take the indices
 - a pattern of a named rearrangement is replaced by its function: `reverse`, `rotate`, `bcast`, `slideup`, `slidedown`, `swap2`, `dupeven`, `dupodd` for one register; `slide`, `ziplo`, `ziphi`, `unziplo`, `unziphi` for two registers (and `permute` when all the indices of `permute2` are in one register);
 - the other patterns are a `permute` / `permute2` with a constant table of indices, then a `select` for the zeros; with 8-bit elements and more than 256 lanes (or 128 for `permute2`), through memory.
 
-An index out of `[-1, n)` (`[-1, 2n)` for `permute2`) is a compilation error. The patterns are an option of C++17: the C++11 API has the functions with indices in a register (§5). They are in `mipp/cpp/patterns.hpp` and `mipp/obj/patterns.hpp`, included by `mipp.hpp` and `mipp_obj.hpp` but not by the [per-function headers](headers_and_compile_time.md): they pull about twenty rearrangement functions.
+An index out of `[-1, n)` (`[-1, 2n)` for `permute2`) is a compilation error. The patterns are an option of C++17: the C++11 API has the functions with indices in a register ([§5](#5-permutations)). They are in `mipp/cpp/patterns.hpp` and `mipp/obj/patterns.hpp`, included by `mipp.hpp` and `mipp_obj.hpp` but not by the [per-function headers](headers_and_compile_time.md): they pull about twenty rearrangement functions.
 
 === "C++ Functional API"
 

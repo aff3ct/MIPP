@@ -89,7 +89,7 @@ You can construct new datatypes by altering the **category** (`c:`) or the **bit
     - `b:64`, `b:32`, `b:16`, `b:8` : Fixed bitwidth
     - `b:tp` or `b:tr` : Copy bitwidth from parameter / return type
 
-A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`, `b:`, and the modifiers `m:` and `v:` of §4; any other part stops the generation with a "Panic" message.
+A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`, `b:`, and the modifiers `m:` and `v:` of [§4](#4-modifiers-lmul-and-masking); any other part stops the generation with a "Panic" message.
 
 #### Examples
 

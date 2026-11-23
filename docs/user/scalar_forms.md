@@ -19,7 +19,7 @@ A form is written with one letter per data register of the function, in order: `
 - **C++ APIs.** The forms are overloads of the function: `mipp::sub(a, s)` and `mipp::sub(s, b)`. The scalar must have the element type exactly in the masked calls and in the Object API (`T` is deduced from it): `mipp::sub<mipp::M>(m, 10.f, va)` with a `float` register, not `10`.
 - **Object API operators.** `va - 1.f`, `10.f - va` and `va < 0.f` already broadcast the scalar: they compute the same thing as the forms.
 
-The forms exist for every datatype, mask variant and LMUL of their function. §6 lists them: the commutative functions have no `sv` form (`add(s, b)` is `add(b, s)`), and the functions whose scalar operand only gives a sign have the `vs` form only (`copysign`, `xorsign`).
+The forms exist for every datatype, mask variant and LMUL of their function. [§6](#6-functions-with-scalar-forms) lists them: the commutative functions have no `sv` form (`add(s, b)` is `add(b, s)`), and the functions whose scalar operand only gives a sign have the `vs` form only (`copysign`, `xorsign`).
 
 ---
 
