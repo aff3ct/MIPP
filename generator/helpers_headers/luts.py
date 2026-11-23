@@ -52,9 +52,15 @@ def iota_mod(n, m):
     return "{" + ", ".join(str(i % m) for i in range(n)) + "}"
 
 
+def iota_block(n, m):
+    """C initializer of a 1D array {0, ..., 0, m, ..., m, 2m, ...} of n elements (first lane of the block of m lanes)."""
+    return "{" + ", ".join(str(i - i % m) for i in range(n)) + "}"
+
+
 # functions available in every implementation template
 TEMPLATE_GLOBALS = {
     "compress_lut": compress_lut,
     "iota": iota,
     "iota_mod": iota_mod,
+    "iota_block": iota_block,
 }

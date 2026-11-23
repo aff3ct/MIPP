@@ -220,6 +220,12 @@
             "template_ref": "tpl_generic_emu.broadcast_lane"
         }
     ],
+    "broadcast_lane_b128": [
+        {
+            "datatypes": "all_datatypes",
+            "template_ref": "tpl_generic_emu.broadcast_lane_b128_perm"
+        }
+    ],
     "cabs": [
         {
             "datatypes": "all_float",
