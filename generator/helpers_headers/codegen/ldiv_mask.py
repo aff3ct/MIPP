@@ -310,10 +310,12 @@ def _lane_crossing_body(ctx, params):
     for p in params:
         n = p["name"]
         if p["kind"] == "reg":
+            # through a union, not a memcpy from the parameter: see candidate_resolver._register_to_scalar
             s_type = build_reg(p["dt"], scalar_isa, -2, True, False)
-            lines.append(f"{s_type} s_{n}; memset(&s_{n}, 0, sizeof(s_{n})); "
-                         f"memcpy(&s_{n}, &{n}, MIPP_MIN_SIZEOF(s_{n}, {n}));")
-            args.append("s_" + n)
+            v_type = build_reg(p["dt"], ctx.isa, -2, True, False)
+            lines.append(f"union {{ {v_type} v; {s_type} s; }} s_{n}; memset(&s_{n}, 0, sizeof(s_{n})); "
+                         f"s_{n}.v = {n};")
+            args.append(f"s_{n}.s")
         elif p["kind"] in ("val", "ptr"):
             args.append(n)
         else:

@@ -172,6 +172,20 @@ def _prepare_return_variable(post_statements, isa, dt_ret, cond, lmul, f, vector
         post_statements.append(f"\t{vector_ret_type} res;")
         post_statements.append(f"\tmemcpy(&res, &sres, MIPP_MIN_SIZEOF(res, sres));")
 
+def _register_to_scalar(pre_statements, name, vector_type, scalar_type):
+    """
+    Copy of the register parameter `name` to the scalar register `s_<name>` (passed as `s_<name>.s`), through a union
+    rather than a memcpy from the parameter: GCC miscompiles the memcpy from a parameter once the fallback is inlined
+    in a function taking a group of registers by value (the LMUL > 1 functions), through its SRA passes. GCC 12 and 13
+    on x86 fail with an internal error in `classify_argument`; GCC 14 on RISC-V returns the wrong lanes (the input of
+    the function or garbage). The union is the same copy (the union reads are defined by GCC, Clang and MSVC, also in
+    C++): the lanes of the smaller of the two, the bytes after them zeroed (a d2 register larger than its scalar array:
+    index of gather / scatter on SSE, NEON, SVE; RVV half-vectors "by vl").
+    """
+    pre_statements.append(f"\tunion {{ {vector_type} v; {scalar_type} s; }} s_{name};")
+    pre_statements.append(f"\tmemset(&s_{name}, 0, sizeof(s_{name}));")
+    pre_statements.append(f"\ts_{name}.v = {name};")
+
 def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_scalar_lmul):
     dt_par, dt_ret = compute_dt_par_dt_ret(None, None, dt, check_support=False)
     proto = funcs[f]["proto"]
@@ -196,9 +210,9 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
 
         if mask_kind == "masks":
             rsrc_scalar_type = build_reg(datatypes[dt_par], scalar_isa, target_scalar_lmul, True, False)
-            pre_statements.append(f"\t{rsrc_scalar_type} s_rsrc = {{0}};")
-            pre_statements.append(f"\tmemcpy(&s_rsrc, &rsrc, MIPP_MIN_SIZEOF(s_rsrc, rsrc));")
-            call_args.append("s_rsrc")
+            rsrc_vector_type = build_reg(datatypes[dt_par], isa, lmul, True, False)
+            _register_to_scalar(pre_statements, "rsrc", rsrc_vector_type, rsrc_scalar_type)
+            call_args.append("s_rsrc.s")
 
     for arg in proto["args"]:
         arg_type_name = arg["type"]
@@ -209,11 +223,9 @@ def _build_fallback_statements(isa, funcs, f, dt, mask_kind, cond, lmul, target_
             cnt_reg += 1
             arg_lmul = resolve_arg_lmul(arg, target_scalar_lmul, dt_par, dt_ret)
             scalar_type = build_type("reg", realdatatype, scalar_isa, arg_lmul, True, False)
-            pre_statements.append(f"\t{scalar_type} s_{arg_name} = {{0}};")
-            # the register of the ISA can be larger than the scalar array (only its lanes are copied): a d2 register
-            # that is a full register (index of gather / scatter on SSE, NEON, SVE; RVV half-vectors "by vl")
-            pre_statements.append(f"\tmemcpy(&s_{arg_name}, &{arg_name}, MIPP_MIN_SIZEOF(s_{arg_name}, {arg_name}));")
-            call_args.append(f"s_{arg_name}")
+            vector_type = build_type("reg", realdatatype, isa, resolve_arg_lmul(arg, lmul, dt_par, dt_ret), True, False)
+            _register_to_scalar(pre_statements, arg_name, vector_type, scalar_type)
+            call_args.append(f"s_{arg_name}.s")
         elif arg_type_name == "msk":
             arg_name = f"m{cnt_msk}"
             cnt_msk += 1
