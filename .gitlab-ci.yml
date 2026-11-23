@@ -201,7 +201,9 @@ analysis-cppcheck:
       variables:
         SIMD_EXT: "-DMIPP_SCALAR -DMIPP_SCALAR_SIZE=1024"
   before_script:
-  # find the number of threads on the computer
+  # find the number of threads on the computer, capped by the available memory: compiling a unity batch of the tests
+  # takes up to 2.5 GiB (gcc-14, -funroll-loops), so 24 jobs need about 47 GiB, and some runners have 24 threads but
+  # only 21 GB of memory (the compilers are then killed by the OOM killer, exit code 137)
   - |
     if [ -z "$THREADS" ]; then
       if command -v nproc >/dev/null 2>&1; then
@@ -210,6 +212,12 @@ analysis-cppcheck:
         THREADS=$(grep -c ^processor /proc/cpuinfo)
       else
         THREADS=1
+      fi
+      if [ -f /proc/meminfo ]; then
+        MEM_THREADS=$(awk '/^MemAvailable:/ { print int($2 / (3 * 1024 * 1024)) }' /proc/meminfo)
+        if [ -n "$MEM_THREADS" ] && [ "$MEM_THREADS" -lt "$THREADS" ]; then
+          THREADS=$(( MEM_THREADS > 0 ? MEM_THREADS : 1 ))
+        fi
       fi
       export THREADS
     fi
