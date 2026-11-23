@@ -915,6 +915,36 @@ class SpecFuncInfo:
             print(f"[Open in the API Explorer →](../../explorer/index.md#focus={self.func_name})"
                   "{ .mipp-explorer-link }\n", file=f)
 
+            print("## Prototypes\n", file=f)
+            print('=== "C API"', file=f)
+            print("    ```c", file=f)
+            for lmul in lmuls_of(self.func_name):
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
+                print(f"    // {lmul_label}", file=f)
+                c_block = self.func_to_str_c(lmul)
+                for line in c_block.splitlines():
+                    print(f"    {line}", file=f)
+            print("    ```\n", file=f)
+
+            print('=== "C++ Functional API"', file=f)
+            print("    ```cpp", file=f)
+            for lmul in lmuls_of(self.func_name):
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
+                print(f"    // {lmul_label}", file=f)
+                for line in self.func_to_str_cpp(lmul).splitlines():
+                    print(f"    {line}", file=f)
+            print("    ```\n", file=f)
+
+            print('=== "C++ Object API"', file=f)
+            print("    ```cpp", file=f)
+            for lmul in lmuls_of(self.func_name):
+                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
+                print(f"    // {lmul_label}", file=f)
+                obj_block = self.func_to_str_obj(lmul)
+                for line in obj_block.splitlines():
+                    print(f"    {line}", file=f)
+            print("    ```\n", file=f)
+
             print("## Headers\n", file=f)
 
             example_var = "m" if (self.variant_set and self.variant_set.is_maskable()) else "u"
@@ -952,36 +982,6 @@ class SpecFuncInfo:
             _print_headers_block("c", "h", "mipp.h", "C API")
             _print_headers_block("cpp", "hpp", "mipp.hpp", "C++ Functional API")
             _print_headers_block("obj", "hpp", "mipp_obj.hpp", "C++ Object API")
-
-            print("## Prototypes\n", file=f)
-            print('=== "C API"', file=f)
-            print("    ```c", file=f)
-            for lmul in lmuls_of(self.func_name):
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
-                print(f"    // {lmul_label}", file=f)
-                c_block = self.func_to_str_c(lmul)
-                for line in c_block.splitlines():
-                    print(f"    {line}", file=f)
-            print("    ```\n", file=f)
-
-            print('=== "C++ Functional API"', file=f)
-            print("    ```cpp", file=f)
-            for lmul in lmuls_of(self.func_name):
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
-                print(f"    // {lmul_label}", file=f)
-                for line in self.func_to_str_cpp(lmul).splitlines():
-                    print(f"    {line}", file=f)
-            print("    ```\n", file=f)
-
-            print('=== "C++ Object API"', file=f)
-            print("    ```cpp", file=f)
-            for lmul in lmuls_of(self.func_name):
-                lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
-                print(f"    // {lmul_label}", file=f)
-                obj_block = self.func_to_str_obj(lmul)
-                for line in obj_block.splitlines():
-                    print(f"    {line}", file=f)
-            print("    ```\n", file=f)
 
             print("## Supported Datatypes\n", file=f)
             if self.func_name in ("cast", "cast_k"):
@@ -1234,10 +1234,11 @@ Each function reference page provides:
 
 1. **Description & Semantics**: Mathematical operation and vector execution behavior.
 2. **Prototypes**: C, C++ Functional and C++ Object API signatures across all LMUL ratios.
-3. **Supported Datatypes & Mask Execution Variants**: Supported element types and masking execution modes.
-4. **ISA & Variant Support Matrix**: Per-architecture hardware capability breakdown across masking variants.
-5. **Reference Algorithm**: Scalar C reference implementation demonstrating exact arithmetic and masking semantics.
-6. **Test & Verification Specifications**: Values drawn by the unit tests and comparison with the scalar reference.
+3. **Headers**: Includes of each API, from the whole library down to one function.
+4. **Supported Datatypes & Mask Execution Variants**: Supported element types and masking execution modes.
+5. **ISA & Variant Support Matrix**: Per-architecture hardware capability breakdown across masking variants.
+6. **Reference Algorithm**: Scalar C reference implementation demonstrating exact arithmetic and masking semantics.
+7. **Test & Verification Specifications**: Values drawn by the unit tests and comparison with the scalar reference.
 
 ---
 

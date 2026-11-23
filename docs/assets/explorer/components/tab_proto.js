@@ -162,20 +162,6 @@ export function renderTabProto(entry) {
     <div class="mipp-proto-group" style="margin-bottom: 0.75rem;">
       <div class="mipp-code-box">
         <div class="mipp-code-box-header">
-          <div class="mipp-code-box-header-left">
-            <span class="mipp-code-box-title">Headers</span>
-          </div>
-          <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(headersText)}" title="Copy headers">
-            ${ICON_COPY}
-          </button>
-        </div>
-        <pre><code>${highlightCpp(headersText)}</code></pre>
-      </div>
-    </div>
-
-    <div class="mipp-proto-group" style="margin-bottom: 0.75rem;">
-      <div class="mipp-code-box">
-        <div class="mipp-code-box-header">
           <div class="mipp-code-box-header-left" style="display: flex; align-items: center; gap: 0.5rem;">
             <span class="mipp-code-box-title">${title}</span>
             ${isUnsupported
@@ -188,6 +174,20 @@ export function renderTabProto(entry) {
           </button>
         </div>
         <pre><code>${highlightCpp(codeText)}</code></pre>
+      </div>
+    </div>
+
+    <div class="mipp-proto-group" style="margin-bottom: 0.75rem;">
+      <div class="mipp-code-box">
+        <div class="mipp-code-box-header">
+          <div class="mipp-code-box-header-left">
+            <span class="mipp-code-box-title">Headers</span>
+          </div>
+          <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(headersText)}" title="Copy headers">
+            ${ICON_COPY}
+          </button>
+        </div>
+        <pre><code>${highlightCpp(headersText)}</code></pre>
       </div>
     </div>
   `;
