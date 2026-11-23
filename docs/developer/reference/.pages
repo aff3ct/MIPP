@@ -3,4 +3,5 @@ nav:
   - Command-Line: cli.md
   - Registries: registries
   - Templating DSL: templating_dsl.md
+  - Naming Conventions: naming.md
   - Audits & Validation: audits.md

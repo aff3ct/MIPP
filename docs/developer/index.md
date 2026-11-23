@@ -12,6 +12,7 @@ MIPP has no hand-written vector code. The headers in `include/`, the unit tests 
 | Support a new instruction set | [Add an ISA](tutorials/add_isa.md) |
 | Understand a warning or an error of the generator | [Audits & Validation](reference/audits.md) |
 | Look up an option of a generator or a field of a JSON file | [Command-Line](reference/cli.md), [Registries](reference/registries/index.md) |
+| Name a new function, type, parameter or template | [Naming Conventions](reference/naming.md) |
 | Work on the generators themselves | [Internals](internals/code_generation.md) |
 | Understand the CI or publish a release | [Continuous Integration](process/ci.md), [Release](process/release.md) |
 
