@@ -82,11 +82,18 @@ static void d2_guard()
 static void conversions()
 {
     const float* ptr = P;
+    int16_t q[DOC_BUF]; // 300, -300, 100, 300, ...
+    for (int i = 0; i < DOC_BUF; i++)
+        q[i] = (int16_t)(i % 3 == 0 ? 300 : i % 3 == 1 ? -300 : 100);
+    const int16_t* ptr16 = q;
     // --8<-- [start:conversions]
     mipp::vd<float>   v  = mipp::loadu<float>(ptr);   // {-2.7, -1.4, -0.1, 1.2, ...}
     mipp::vd<int32_t> vb = mipp::cast_int32(v);       // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     mipp::vd<int32_t> vi = mipp::cvt_int32(v);        // {-2, -1, 0, 1, ...}: truncation
     mipp::vd<double, 2> vw = mipp::wcvt_float64(v);   // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
+    mipp::vd<int16_t, 2> v16 = mipp::loadu<int16_t, 2>(ptr16); // {300, -300, 100, ...} in a register of LMUL 2
+    mipp::vd<int8_t>  vn = mipp::ncvt_int8(v16);      // {44, -44, 100, ...}: truncation, in a register of LMUL 1
+    mipp::vd<int8_t>  vs = mipp::ncvts_int8(v16);     // {127, -128, 100, ...}: saturation to the range of int8
     // --8<-- [end:conversions]
     int32_t b[DOC_BUF], t[DOC_BUF];
     double w[DOC_BUF];
@@ -103,6 +110,15 @@ static void conversions()
     DOC_CHECK(t[0] == -2 && t[1] == -1 && t[2] == 0 && t[3] == 1);
     for (int i = 0; i < (int)mipp::N<float>(); i++)
         DOC_CHECK(w[i] == (double)P[i]);
+    int8_t n8[DOC_BUF], s8[DOC_BUF];
+    mipp::storeu(n8, vn);
+    mipp::storeu(s8, vs);
+    DOC_CHECK(n8[0] == 44 && n8[1] == -44 && n8[2] == 100);
+    DOC_CHECK(s8[0] == 127 && s8[1] == -128 && s8[2] == 100);
+    for (int i = 0; i < (int)mipp::N<int8_t>(); i++) {
+        DOC_CHECK(n8[i] == (int8_t)q[i]);
+        DOC_CHECK(s8[i] == (q[i] > 127 ? 127 : q[i] < -128 ? -128 : q[i]));
+    }
 }
 
 // §5.4: changing the LMUL

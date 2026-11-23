@@ -284,7 +284,7 @@ MIPP provides five conversions between data vectors. They differ in what they pr
 - **Integers**: the value is **truncated** (modulo $2^{n}$ of the destination width), like a C cast. There is no saturation: see `ncvts`.
 - **`float64` to `float32`**: rounded to the nearest representable value.
 
-`ncvts` is the **saturating** version, for the integers of the same signedness (`int16` $	o$ `int8`, ..., `uint64` $	o$ `uint32`): a value out of the range of the destination type gives the nearest bound (`300` gives `127` in `int8`, `-300` gives `-128`; `70000` gives `65535` in `uint16`). It is the `pack` of MIPPv1 on one register of the `LMUL` above; the C++ APIs also have `mipp::pack<T_DST>(a, b)`, which narrows the lanes of `a` then the lanes of `b` into one register (`ncvts(combine(a, b))`). From a signed type to the unsigned type of half the width, clamp the negative values first: `ncvts_uint8(cast_uint16(max(v, 0)))`.
+`ncvts` is the **saturating** version, for the integers of the same signedness (`int16` $\to$ `int8`, ..., `uint64` $\to$ `uint32`): a value out of the range of the destination type gives the nearest bound (`300` gives `127` in `int8`, `-300` gives `-128`; `70000` gives `65535` in `uint16`). It is the `pack` of MIPPv1 on one register of the `LMUL` above; the C++ APIs also have `mipp::pack<T_DST>(a, b)`, which narrows the lanes of `a` then the lanes of `b` into one register (`ncvts(combine(a, b))`). From a signed type to the unsigned type of half the width, clamp the negative values first: `ncvts_uint8(cast_uint16(max(v, 0)))`.
 
 ### 5.5. Changing the LMUL
 

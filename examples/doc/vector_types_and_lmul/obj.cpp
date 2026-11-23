@@ -75,11 +75,18 @@ static void d2_guard()
 static void conversions()
 {
     const float* ptr = P;
+    int16_t q[DOC_BUF]; // 300, -300, 100, 300, ...
+    for (int i = 0; i < DOC_BUF; i++)
+        q[i] = (int16_t)(i % 3 == 0 ? 300 : i % 3 == 1 ? -300 : 100);
+    const int16_t* ptr16 = q;
     // --8<-- [start:conversions]
     mipp::Vd<float>   v  = mipp::loadu_obj<float>(ptr); // {-2.7, -1.4, -0.1, 1.2, ...}
     mipp::Vd<int32_t> vb = mipp::cast<int32_t>(v);       // {0xC02CCCCD, ...}: IEEE-754 bit patterns
     mipp::Vd<int32_t> vi = mipp::cvt<int32_t>(v);        // {-2, -1, 0, 1, ...}: truncation
     mipp::Vd<double, 2> vw = mipp::wcvt<double>(v);      // {-2.7, -1.4, ...}: every element, in a register of LMUL 2
+    mipp::Vd<int16_t, 2> v16 = mipp::loadu_obj<int16_t, 2>(ptr16); // {300, -300, 100, ...} in a register of LMUL 2
+    mipp::Vd<int8_t>  vn = mipp::ncvt<int8_t>(v16);      // {44, -44, 100, ...}: truncation, in a register of LMUL 1
+    mipp::Vd<int8_t>  vs = mipp::ncvts<int8_t>(v16);     // {127, -128, 100, ...}: saturation to the range of int8
     // --8<-- [end:conversions]
     DOC_CHECK((uint32_t)vb[0] == 0xC02CCCCDu);
     for (int i = 0; i < mipp::Vd<float>::N(); i++) {
@@ -91,6 +98,12 @@ static void conversions()
     DOC_CHECK(vi[0] == -2 && vi[1] == -1 && vi[2] == 0 && vi[3] == 1);
     for (int i = 0; i < mipp::Vd<float>::N(); i++)
         DOC_CHECK(vw[i] == (double)P[i]);
+    DOC_CHECK(vn[0] == 44 && vn[1] == -44 && vn[2] == 100);
+    DOC_CHECK(vs[0] == 127 && vs[1] == -128 && vs[2] == 100);
+    for (int i = 0; i < mipp::Vd<int8_t>::N(); i++) {
+        DOC_CHECK(vn[i] == (int8_t)q[i]);
+        DOC_CHECK(vs[i] == (q[i] > 127 ? 127 : q[i] < -128 ? -128 : q[i]));
+    }
 }
 
 // §5.4: changing the LMUL
