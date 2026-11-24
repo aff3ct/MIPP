@@ -9,15 +9,19 @@
     "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
     "display_name": "SSE",
     "features": {
-        "mode": "hierarchy",
+        "mode": "mixed",
         "default": "SSE4.2",
         "items": [
-            { "id": "SSE",    "label": "SSE",    "define": "__SSE__",    "flag": "-msse",    "default": true, "locked": true,  "description": "Streaming SIMD Extensions (Base)" },
-            { "id": "SSE2",   "label": "SSE2",   "define": "__SSE2__",   "flag": "-msse2",   "default": true, "locked": false, "description": "Streaming SIMD Extensions 2" },
-            { "id": "SSE3",   "label": "SSE3",   "define": "__SSE3__",   "flag": "-msse3",   "default": true, "locked": false, "description": "Streaming SIMD Extensions 3" },
-            { "id": "SSSE3",  "label": "SSSE3",  "define": "__SSSE3__",  "flag": "-mssse3",  "default": true, "locked": false, "description": "Supplemental Streaming SIMD Extensions 3" },
-            { "id": "SSE4.1", "label": "SSE4.1", "define": "__SSE4_1__", "flag": "-msse4.1", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.1" },
-            { "id": "SSE4.2", "label": "SSE4.2", "define": "__SSE4_2__", "flag": "-msse4.2", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.2" }
+            { "id": "SSE",    "label": "SSE",    "define": "__SSE__",    "flag": "-msse",    "type": "tier", "default": true, "locked": true,  "description": "Streaming SIMD Extensions (Base)" },
+            { "id": "SSE2",   "label": "SSE2",   "define": "__SSE2__",   "flag": "-msse2",   "type": "tier", "default": true, "locked": false, "description": "Streaming SIMD Extensions 2" },
+            { "id": "SSE3",   "label": "SSE3",   "define": "__SSE3__",   "flag": "-msse3",   "type": "tier", "default": true, "locked": false, "description": "Streaming SIMD Extensions 3" },
+            { "id": "SSSE3",  "label": "SSSE3",  "define": "__SSSE3__",  "flag": "-mssse3",  "type": "tier", "default": true, "locked": false, "description": "Supplemental Streaming SIMD Extensions 3" },
+            { "id": "SSE4.1", "label": "SSE4.1", "define": "__SSE4_1__", "flag": "-msse4.1", "type": "tier", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.1" },
+            { "id": "SSE4.2", "label": "SSE4.2", "define": "__SSE4_2__", "flag": "-msse4.2", "type": "tier", "default": true, "locked": false, "description": "Streaming SIMD Extensions 4.2" },
+            { "id": "FMA",      "label": "FMA",       "define": "__FMA__",      "flag": "-mfma",      "type": "flag", "default": false, "locked": false, "description": "Fused Multiply-Add (FMA3) on 128-bit registers: a CPU that also has AVX" },
+            { "id": "AVX2",     "label": "AVX2",      "define": "__AVX2__",     "flag": "-mavx2",     "type": "flag", "default": false, "locked": false, "description": "AVX2 instructions on 128-bit registers (per-element shifts)" },
+            { "id": "AVX512VL", "label": "AVX-512VL", "define": "__AVX512VL__", "flag": "-mavx512vl", "type": "flag", "default": false, "locked": false, "description": "AVX-512 Vector Length Extensions: the AVX-512 instructions on 128-bit registers" },
+            { "id": "AVX512BW", "label": "AVX-512BW", "define": "__AVX512BW__", "flag": "-mavx512bw", "type": "flag", "default": false, "locked": false, "description": "AVX-512 Byte and Word Instructions (8-bit and 16-bit elements): on 128-bit registers, together with AVX-512VL" }
         ]
     },
     "headers": ["<immintrin.h>"],

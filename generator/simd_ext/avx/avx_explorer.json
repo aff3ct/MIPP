@@ -14,7 +14,9 @@
         "items": [
             { "id": "AVX",  "label": "AVX",  "define": "__AVX__",  "flag": "-mavx",  "type": "tier", "default": true, "locked": false, "description": "Advanced Vector Extensions (Base 256-bit Float)" },
             { "id": "AVX2", "label": "AVX2", "define": "__AVX2__", "flag": "-mavx2", "type": "tier", "default": true, "locked": false, "description": "Advanced Vector Extensions 2 (256-bit Integer)" },
-            { "id": "FMA",  "label": "FMA",  "define": "__FMA__",  "flag": "-mfma",  "type": "flag", "default": true, "locked": false, "description": "Fused Multiply-Add Extensions (FMA3)" }
+            { "id": "FMA",      "label": "FMA",       "define": "__FMA__",      "flag": "-mfma",      "type": "flag", "default": true,  "locked": false, "description": "Fused Multiply-Add Extensions (FMA3)" },
+            { "id": "AVX512VL", "label": "AVX-512VL", "define": "__AVX512VL__", "flag": "-mavx512vl", "type": "flag", "default": false, "locked": false, "description": "AVX-512 Vector Length Extensions: the AVX-512 instructions on 256-bit registers" },
+            { "id": "AVX512BW", "label": "AVX-512BW", "define": "__AVX512BW__", "flag": "-mavx512bw", "type": "flag", "default": false, "locked": false, "description": "AVX-512 Byte and Word Instructions (8-bit and 16-bit elements): on 256-bit registers, together with AVX-512VL" }
         ]
     },
     "headers": ["<immintrin.h>"],

@@ -115,8 +115,10 @@ function requiredFeatures(uses, isa) {
     common = common ? new Set([...common].filter((d) => found.has(d))) : found;
   }
   const req = items.filter((it) => common.has(it.define));
-  if (fMeta.mode === "hierarchy" && req.length) return [req[req.length - 1].label];
-  return req.map((it) => it.label);
+  // of the tiers (SSE2 < ... < SSE4.2), only the highest one
+  const isTier = (it) => fMeta.mode === "hierarchy" || (fMeta.mode === "mixed" && it.type === "tier");
+  const tiers = req.filter(isTier);
+  return [...tiers.slice(-1), ...req.filter((it) => !isTier(it))].map((it) => it.label);
 }
 
 let navigate = null;

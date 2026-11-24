@@ -378,6 +378,25 @@ export function initApiDataIndexes(data, metadata = null) {
   DYNAMIC_INTRINSIC_PREFIXES = Array.from(prefixSet).sort((a, b) => b.length - a.length);
 }
 
+/**
+ * Key of a feature flag in the state of the Algorithm modal (`algoModalData.features`). The
+ * identifiers are unique within an ISA only (FMA is a flag of SSE, AVX and NEON, with its own
+ * default on each): the state is kept per ISA. The selected tier of an ISA is under its name.
+ */
+export const flagKey = (isa, id) => `${isa}:${id}`;
+
+/** Label of a feature of an ISA (`AVX-512VL` for `AVX512VL`), its identifier when unknown. */
+export function featureLabel(isa, id) {
+  const items = (apiMetadata.isas && apiMetadata.isas[isa] && apiMetadata.isas[isa].features && apiMetadata.isas[isa].features.items) || [];
+  const item = items.find((it) => it.id === id);
+  return item ? (item.label || item.id) : id;
+}
+
+/**
+ * State of the features of every ISA when the Algorithm modal opens: the defaults, plus on
+ * `currentIsa` the features a level requires (`reqFeature`: identifiers, as an array or separated
+ * by commas).
+ */
 export function getDefaultFeaturesForModal(reqFeature = null, currentIsa = null) {
   const features = {};
   if (apiMetadata && apiMetadata.isas) {
@@ -395,21 +414,18 @@ export function getDefaultFeaturesForModal(reqFeature = null, currentIsa = null)
       }
       if (flagItems.length > 0) {
         for (const it of flagItems) {
-          features[it.id] = (it.default !== false);
+          features[flagKey(isaName, it.id)] = (it.default !== false);
         }
       }
     }
   }
-  if (reqFeature) {
-    features[reqFeature] = true;
-    if (currentIsa && apiMetadata && apiMetadata.isas && apiMetadata.isas[currentIsa]) {
-      const fMeta = apiMetadata.isas[currentIsa].features;
-      if (fMeta && (fMeta.mode === "hierarchy" || fMeta.mode === "mixed")) {
-        const tierItems = (fMeta.items || []).filter((it) => fMeta.mode === "hierarchy" || it.type === "tier");
-        if (tierItems.some((it) => it.id === reqFeature)) {
-          features[currentIsa] = reqFeature;
-        }
-      }
+  const required = [].concat(reqFeature || []).flatMap((id) => String(id).split(",")).filter(Boolean);
+  for (const id of currentIsa ? required : []) {
+    features[flagKey(currentIsa, id)] = true;
+    const fMeta = apiMetadata && apiMetadata.isas && apiMetadata.isas[currentIsa] && apiMetadata.isas[currentIsa].features;
+    if (fMeta && (fMeta.mode === "hierarchy" || fMeta.mode === "mixed")) {
+      const tierItems = (fMeta.items || []).filter((it) => fMeta.mode === "hierarchy" || it.type === "tier");
+      if (tierItems.some((it) => it.id === id)) features[currentIsa] = id;
     }
   }
   return features;

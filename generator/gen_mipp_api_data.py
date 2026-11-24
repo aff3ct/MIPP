@@ -115,23 +115,29 @@ def build_obj_prototype(func, interfaces_dict):
     return f"inline {ret_type} vd0.{method_name}({', '.join(arg_strs)}) const;"
 
 
-def extract_required_feature(cond, isa_features=None):
-    if not cond or cond in ('0', '1'):
-        return None
-    if isa_features and "items" in isa_features:
-        for item in reversed(isa_features["items"]):
-            if item.get("locked"):
-                continue
-            define = item.get("define", "")
-            if not define:
-                continue
-            if define in cond:
-                neg1 = f"!defined({define})"
-                neg2 = f"!{define}"
-                if neg1 not in cond and neg2 not in cond:
-                    return item["id"]
-        return None
-    return None
+def extract_required_features(cond, isa_features=None):
+    """
+    Features of the ISA that a condition requires: the identifiers, in the order of their declaration,
+    of the non-locked items whose macro the condition tests (non-negated). Of several tiers only the
+    highest one is kept, since it includes the others.
+    """
+    if not cond or cond in ('0', '1') or not isa_features:
+        return []
+    mode = isa_features.get("mode")
+
+    def is_tier(item):
+        return mode == "hierarchy" or (mode == "mixed" and item.get("type") == "tier")
+
+    found = []
+    for item in isa_features.get("items", []):
+        define = item.get("define", "")
+        if item.get("locked") or not define or define not in cond:
+            continue
+        if f"!defined({define})" in cond or f"!{define}" in cond:
+            continue
+        found.append(item)
+    tiers = [item for item in found if is_tier(item)]
+    return [item["id"] for item in found if not is_tier(item) or item is tiers[-1]]
 
 
 def format_scalar_proto(code):
@@ -802,12 +808,12 @@ def generate_mipp_api_data(project_root=None):
                 lvl = by_datatype[dt]
 
                 # Detect if the candidate of the level (0 or 1: one that names instructions)
-                # requires a sub-extension / feature flag
+                # requires sub-extensions / feature flags (a list: AVX-512VL and AVX-512BW on SSE)
                 for cand, cond in cands:
                     if lvl in (0, 1) and cand.get("level") == lvl:
-                        feat = extract_required_feature(cond, isas_meta.get(isa_name, {}).get("features"))
-                        if feat:
-                            required_features[dt] = feat
+                        feats = extract_required_features(cond, isas_meta.get(isa_name, {}).get("features"))
+                        if feats:
+                            required_features[dt] = feats
                             for cand_fb, cond_fb in cands:
                                 if cand_fb.get("level") != lvl:
                                     fallback_levels[dt] = cand_fb.get("level", 2)

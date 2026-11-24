@@ -187,8 +187,10 @@ export function targetMacros(isa, options, simdWidth = 256, overrides = {}) {
       if (X86_FLAGS[t] !== undefined) level = Math.max(level, X86_FLAGS[t]);
       if (t.startsWith("-mavx512")) level = Math.max(level, 7);
       if (t === "-mfma" || t.startsWith("-mavx512")) set("__FMA__");
+      if (t === "-mfma") level = Math.max(level, 6); // FMA3 is VEX-encoded: the compiler enables AVX
       const a5 = t.match(/^-mavx512(\w+)$/);
       if (a5) { set("__AVX512F__"); set(`__AVX512${a5[1].toUpperCase()}__`); }
+      if (/^-mavx512vbmi2?$/.test(t)) set("__AVX512BW__"); // VBMI and VBMI2 enable BW
     }
     for (let k = 0; k <= level; k++) set(X86_CHAIN[k]);
   } else if (isa === "neon" || isa === "sve") {
@@ -220,7 +222,11 @@ export function targetMacros(isa, options, simdWidth = 256, overrides = {}) {
   // defined by GCC and clang at any optimization level but -O0: guards the dispatch of the
   // immediate versions (see the views of applyImm)
   if (toks.some((t) => /^-O([1-9sgz]|fast)$/.test(t))) set("__OPTIMIZE__");
-  for (const [k, v] of Object.entries(overrides || {})) {
+  // Features switched off that have no compiler flag (NEON directed rounding, ...). On x86
+  // every macro comes from the flags: a flag that is off defines nothing, and what another
+  // flag implies stays (-mavx512vl defines __FMA__ and __AVX2__ whatever the FMA and AVX2 flags)
+  const x86 = ["sse", "avx", "avx512"].includes(isa);
+  for (const [k, v] of Object.entries(x86 ? {} : (overrides || {}))) {
     if (!k.startsWith("__")) continue;
     if (v === false) m.delete(k);
   }

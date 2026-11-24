@@ -65,6 +65,8 @@ To make `mkdocs serve` pick up new data files without a restart, the script also
 
 The Algorithm modal (button of the Hardware Matrix tab) shows the code of one function for one ISA, datatype, mask variant, LMUL and set of compiler flags. This code is not rebuilt from the templates: it is the code of the generated headers, so it cannot drift from what the CI compiles.
 
+The Hardware Matrix says which features of the ISA a level needs (`(req. AVX-512VL + AVX-512BW)`), and its button opens the modal with these features enabled. They are the features of `simd_ext/<isa>/<isa>_explorer.json` whose macro the condition of the implementation tests (`extract_required_features()` in `gen_mipp_api_data.py`, key `required_features` of the data: a list per datatype). An extension that an implementation tests has to be declared there, otherwise the matrix announces a level that the modal cannot reach.
+
 #### Data
 
 `helpers_docs/algo_sources.py` (called by `gen_mipp_docs.py --only explorer`, after `gen_mipp_headers.py`) splits the C headers of each ISA (`include/mipp/internal/simd_ext/<isa>/c/`) into top-level symbols (macros, types, functions) and writes `assets/data/algo/<isa>.json`:

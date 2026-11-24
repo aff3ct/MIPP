@@ -161,7 +161,7 @@
                                 "description": "Tooltip or documentation string"
                             },
                             "id": {
-                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2)",
+                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2). Two ISAs can use the same identifier: the Explorer keeps the state of a flag per ISA",
                                 "type": "string"
                             },
                             "label": {

@@ -11,8 +11,11 @@ export function isFeatureSupported(info, targetDt, targetIsa, targetDefines) {
     const parts = targetDt.split(",").map((s) => s.trim());
     req = info.required_features[parts[0]] || info.required_features[parts[1]];
   }
-  if (!req) return true;
+  // a level can require several features (a tier and flags): all of them are needed
+  return [].concat(req || []).every((r) => isOneFeatureSupported(r, targetIsa, targetDefines));
+}
 
+function isOneFeatureSupported(req, targetIsa, targetDefines) {
   const isaMeta = apiMetadata.isas ? apiMetadata.isas[targetIsa] : null;
   const featuresMeta = isaMeta ? isaMeta.features : null;
 

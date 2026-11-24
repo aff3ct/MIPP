@@ -6,7 +6,7 @@
  */
 import { escapeHtml, ICON_COPY, ICON_GRIP, ICON_GODBOLT, ICON_RUN, ICON_LINK, ICON_WARNING, ICON_INFO, ICON_CONTEXT, ICON_CLOCK } from "../explorer.config.js";
 import { highlightCpp } from "../syntax.js";
-import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
+import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice, flagKey } from "../data.js";
 import { state } from "../state.js";
 import { renderFormSelector } from "./card.js";
 import { boxSizeStyle, boxResizeHandles } from "./box_layout.js";
@@ -148,43 +148,35 @@ export function renderAlgoModal(modalData) {
   const isaMeta = apiMetadata.isas ? apiMetadata.isas[currentIsa] : null;
   const featuresMeta = (isaMeta && isaMeta.features) ? isaMeta.features : { mode: "none", items: [] };
 
-  // Build flatDefines dynamically across all ISAs from explorer metadata
-  const flatDefines = {};
-  if (apiMetadata.isas) {
-    for (const [isaName, iMeta] of Object.entries(apiMetadata.isas)) {
-      const fMeta = iMeta.features;
-      if (!fMeta || !Array.isArray(fMeta.items)) continue;
-      const isHierarchy = fMeta.mode === "hierarchy";
-      const isMixed = fMeta.mode === "mixed";
-      const tierItems = fMeta.items.filter((it) => isHierarchy || (isMixed && it.type === "tier"));
-      const flagItems = fMeta.items.filter((it) => it.type === "flag" || (!isHierarchy && !isMixed));
-
-      if (tierItems.length > 0) {
-        const selectedTier = features[isaName] || fMeta.default || (tierItems.length ? tierItems[tierItems.length - 1].id : "");
-        const targetIdx = tierItems.findIndex((it) => it.id === selectedTier);
-        const effectiveIdx = targetIdx !== -1 ? targetIdx : (tierItems.length - 1);
-        tierItems.forEach((it, idx) => {
-          const isPassed = (idx <= effectiveIdx);
-          flatDefines[it.define] = isPassed;
-          flatDefines[it.id] = isPassed;
-        });
-      }
-      if (flagItems.length > 0) {
-        for (const it of flagItems) {
-          if (it.locked) {
-            flatDefines[it.define] = true;
-            flatDefines[it.id] = true;
-          } else {
-            const val = (features[it.id] !== undefined)
-              ? Boolean(features[it.id])
-              : (features[it.define] !== undefined ? Boolean(features[it.define]) : (it.default !== false));
-            flatDefines[it.define] = val;
-            flatDefines[it.id] = val;
-          }
-        }
-      }
+  // Features of an ISA as {define: bool, id: bool}: its tiers up to the selected one, and its
+  // flags. Per ISA: the same macro can be a feature of several ISAs (__FMA__, __AVX2__), with
+  // a state of its own on each.
+  const definesOf = (isaName) => {
+    const defines = {};
+    const fMeta = apiMetadata.isas && apiMetadata.isas[isaName] ? apiMetadata.isas[isaName].features : null;
+    if (!fMeta || !Array.isArray(fMeta.items)) return defines;
+    const hierarchy = fMeta.mode === "hierarchy";
+    const mixed = fMeta.mode === "mixed";
+    const tiers = fMeta.items.filter((it) => hierarchy || (mixed && it.type === "tier"));
+    const flags = fMeta.items.filter((it) => it.type === "flag" || (!hierarchy && !mixed));
+    if (tiers.length > 0) {
+      const selectedTier = features[isaName] || fMeta.default || tiers[tiers.length - 1].id;
+      const targetIdx = tiers.findIndex((it) => it.id === selectedTier);
+      const effectiveIdx = targetIdx !== -1 ? targetIdx : (tiers.length - 1);
+      tiers.forEach((it, idx) => {
+        defines[it.define] = idx <= effectiveIdx;
+        defines[it.id] = idx <= effectiveIdx;
+      });
     }
-  }
+    for (const it of flags) {
+      const chosen = features[flagKey(isaName, it.id)];
+      const val = it.locked ? true : (chosen !== undefined ? Boolean(chosen) : (it.default !== false));
+      defines[it.define] = val;
+      defines[it.id] = val;
+    }
+    return defines;
+  };
+  const flatDefines = definesOf(currentIsa);
 
   // Effective level of the shown code (set from the real code once the tables are loaded)
   let currentImplLvl = "na";
@@ -289,8 +281,9 @@ export function renderAlgoModal(modalData) {
       const cell = (box) => `<div class="mipp-box-cell" data-box-key="${isa}" style="${boxSizeStyle(state.compareBoxSizes[isa])}">${box}${boxResizeHandles(label)}</div>`;
       const grip = `<span class="mipp-box-grip" data-box-grip role="button" tabindex="0" aria-label="Move or resize the ${escapeHtml(label)} box: arrow keys to move, Shift and arrow keys to resize, Delete for the automatic size" title="Drag the header to move this box. Keyboard: arrow keys to move, Shift + arrow keys to resize.">${ICON_GRIP}</span>`;
       if (!src) return cell(`<div class="mipp-code-box"><div class="mipp-code-box-header" data-box-handle draggable="true"><div class="mipp-code-box-header-left">${grip}<span class="mipp-code-lang">${escapeHtml(label)}</span></div></div><pre><code>Loading…</code></pre></div>`);
-      const cc = getCompilerConfigForFlat(isa, flatDefines, currentScalarSize);
-      const r = buildAbstractCode(entry, src, { ...algoCfg, isa, options: cc.options, compilerLabel: cc.compilerLabel });
+      const isaDefines = definesOf(isa);
+      const cc = getCompilerConfigForFlat(isa, isaDefines, currentScalarSize);
+      const r = buildAbstractCode(entry, src, { ...algoCfg, isa, options: cc.options, compilerLabel: cc.compilerLabel, overrides: isaDefines });
       const lv = r.rootFound ? r.effectiveLevel : null;
       return cell(`<div class="mipp-code-box">
         <div class="mipp-code-box-header" data-box-handle draggable="true">
@@ -302,7 +295,7 @@ export function renderAlgoModal(modalData) {
           </div>
           <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(r.code)}" title="Copy ${escapeHtml(label)} code">${ICON_COPY}</button>
         </div>
-        <pre><code>${highlightCpp(r.code, {}, { isa, imm: entry.imm && immChoices(src, { ...algoCfg, isa, options: cc.options }) ? entry.imm : null })}</code></pre>
+        <pre><code>${highlightCpp(r.code, {}, { isa, imm: entry.imm && immChoices(src, { ...algoCfg, isa, options: cc.options, overrides: isaDefines }) ? entry.imm : null })}</code></pre>
       </div>`);
     }).join("");
     compareHtml = `

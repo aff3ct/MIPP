@@ -2,7 +2,7 @@
  * MIPP API Explorer - Reactive State & URL Synchronization
  */
 import { VALID_CARD_TABS } from "./explorer.config.js";
-import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES, ALL_LEVELS, getDefaultFeaturesForModal, apiMetadata } from "./data.js";
+import { ALL_SIMD_EXTS, ALL_CATEGORIES, ALL_DATATYPES, ALL_MASK_MODES, ALL_LEVELS, getDefaultFeaturesForModal, apiMetadata, flagKey } from "./data.js";
 
 export const state = {
   query: "",
@@ -171,7 +171,7 @@ export function syncUrlHash(replace = false) {
           const enabled = [];
           for (const item of flagItems) {
             const isDef = item.default !== false;
-            const currentVal = mData.features[item.id];
+            const currentVal = mData.features[flagKey(currentIsa, item.id)];
             if (isDef && currentVal === false) {
               disabled.push(item.id);
             } else if (!isDef && currentVal === true) {
@@ -309,10 +309,10 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
         features[isa] = target;
       }
       for (const d of disabledList) {
-        if (d) features[d] = false;
+        if (d) features[flagKey(isa, d)] = false;
       }
       for (const e of enabledList) {
-        if (e) features[e] = true;
+        if (e) features[flagKey(isa, e)] = true;
       }
 
       state.algoModalData = {

@@ -4,7 +4,7 @@
  * featuring intelligent family grouping and direct links to the View Algorithm modal.
  */
 import { escapeHtml, ICON_INSPECT } from "../explorer.config.js";
-import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, maskSupportOf } from "../data.js";
+import { ALL_SIMD_EXTS, SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, maskSupportOf, featureLabel } from "../data.js";
 import { getDtBadgeClass } from "../syntax.js";
 import { state } from "../state.js";
 
@@ -134,16 +134,16 @@ export function renderTabHw(entry) {
                 return lvl;
               };
 
-              // Group datatypes by (level, reqFeature)
+              // Group datatypes by (level, required features)
               const groupsMap = new Map();
               for (const dt of dtsToConsider) {
                 const lvl = getDtLevel(dt);
                 // required_features describes the unmasked function, of Level 0 or 1
                 const featLevel = lvl === 0 || (lvl === 1 && currentMask === "unmasked");
-                const feat = (featLevel && reqFeatures[dt]) ? reqFeatures[dt] : null;
-                const groupKey = `${lvl}::${feat || ""}`;
+                const feats = (featLevel && reqFeatures[dt]) ? [].concat(reqFeatures[dt]) : [];
+                const groupKey = `${lvl}::${feats.join(",")}`;
                 if (!groupsMap.has(groupKey)) {
-                  groupsMap.set(groupKey, { level: lvl, reqFeature: feat, dts: [] });
+                  groupsMap.set(groupKey, { level: lvl, reqFeatures: feats, dts: [] });
                 }
                 groupsMap.get(groupKey).dts.push(dt);
               }
@@ -163,7 +163,7 @@ export function renderTabHw(entry) {
               return groups.map((group, idx) => {
                 const isFirst = idx === 0;
                 const defaultGroupDt = group.dts[0] || "float32";
-                const reqFeatureAttr = group.reqFeature || "";
+                const reqFeatureAttr = group.reqFeatures.join(",");
 
                 const extCell = isFirst
                   ? `<td class="mipp-hw-col-ext" ${groups.length > 1 ? `rowspan="${groups.length}"` : ""}>
@@ -182,7 +182,7 @@ export function renderTabHw(entry) {
                 return `
                   <tr class="mipp-hw-row ${isFirst ? "mipp-hw-group-first" : "mipp-hw-group-sub"}">
                     ${extCell}
-                    <td class="mipp-hw-col-dts">${formatGroupBadges(group.dts, group.reqFeature)}</td>
+                    <td class="mipp-hw-col-dts">${formatGroupBadges(group.dts, group.reqFeatures.map((id) => featureLabel(isa, id)).join(" + "))}</td>
                     <td class="mipp-hw-col-tier">${tierBadge}</td>
                     <td class="mipp-hw-col-action">${algoBtn}</td>
                   </tr>

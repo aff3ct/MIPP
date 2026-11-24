@@ -12,7 +12,8 @@ import {
   ALL_CATEGORIES,
   ALL_DATATYPES,
   ALL_MASK_MODES,
-  getDefaultFeaturesForModal
+  getDefaultFeaturesForModal,
+  flagKey
 } from "./data.js";
 import { state, syncUrlHash, readUrlHash, setFocusedCard, closeCard } from "./state.js";
 import { filterEntries } from "./filters.js";
@@ -881,8 +882,9 @@ function updateModals(modalsContainerEl) {
           if (!state.algoModalData.features) {
             state.algoModalData.features = getDefaultFeaturesForModal();
           }
-          const curVal = state.algoModalData.features[feat] !== false;
-          state.algoModalData.features[feat] = !curVal;
+          // flags that are off by default are false in the state, never undefined
+          const key = flagKey(algoModalIsa(state.algoModalData), feat);
+          state.algoModalData.features[key] = !state.algoModalData.features[key];
           updateModals(modalsContainerEl);
           syncUrlHash(true);
         }
