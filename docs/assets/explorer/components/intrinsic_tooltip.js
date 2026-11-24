@@ -6,6 +6,7 @@
 import { escapeHtml } from "../explorer.config.js";
 import { SIMD_EXT_DISPLAY_NAMES, apiMetadata } from "../data.js";
 import { getLoadedSources, parseCName } from "../algo_source.js";
+import { tooltipWanted, openTooltip, hideTooltip } from "../syntax.js";
 
 // RVV: no anchor per intrinsic in the official documentation, one page per family
 const RVV_DOC = "https://github.com/riscv-non-isa/rvv-intrinsic-doc/blob/main/auto-generated/intrinsic_funcs/";
@@ -122,22 +123,9 @@ let navigate = null;
 /** Called with {func, isa, dt, mask, lmul} when a MIPP function of the tooltip is clicked. */
 export function setIntrinsicNavigate(fn) { navigate = fn; }
 
-export function hideIntrinsicTooltip() {
-  const t = document.querySelector(".mipp-intrinsic-tooltip");
-  if (t) {
-    if (t._target) t._target.classList.remove("active");
-    t.remove();
-  }
-}
-
-export function toggleIntrinsicTooltip(el) {
-  const existing = document.querySelector(".mipp-intrinsic-tooltip");
-  if (existing && existing._target === el) { hideIntrinsicTooltip(); return; }
-  // one tooltip at a time (macro or intrinsic)
-  document.querySelectorAll(".mipp-macro-tooltip").forEach((x) => {
-    if (x._targetMacro) x._targetMacro.classList.remove("active");
-    x.remove();
-  });
+/** Opens the tooltip of an intrinsic; `pinned`: kept open by a click. */
+export function showIntrinsicTooltip(el, pinned = false) {
+  if (!tooltipWanted(el, pinned)) return;
   const name = el.getAttribute("data-intrinsic");
   const isa = el.getAttribute("data-isa");
   const label = (SIMD_EXT_DISPLAY_NAMES[isa] || isa.toUpperCase());
@@ -161,9 +149,6 @@ export function toggleIntrinsicTooltip(el) {
 
   const t = document.createElement("div");
   t.className = "mipp-macro-tooltip mipp-intrinsic-tooltip";
-  t._target = el;
-  t._targetMacro = el; // so that hideMacroTooltip() also closes it cleanly
-  el.classList.add("active");
   t.innerHTML = `
     <div class="mipp-macro-tooltip-header">
       <span class="mipp-macro-tooltip-title"><code>${escapeHtml(name)}</code> <span class="mipp-intrinsic-isa">${escapeHtml(label)}${features.length ? ` · requires ${escapeHtml(features.join(", "))}` : ""}</span></span>
@@ -173,23 +158,12 @@ export function toggleIntrinsicTooltip(el) {
       ${funcs.length ? `<div class="mipp-intrinsic-label">Used by ${funcs.length} MIPP function${funcs.length > 1 ? "s" : ""} on ${escapeHtml(label)}${funcs.length > shown.length ? ` (first ${shown.length})` : ""}:</div><div class="mipp-intrinsic-uses">${usedBy}</div>` : ""}
       ${doc ? `<a class="mipp-intrinsic-doc" href="${doc.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(doc.label)} ↗</a>` : ""}
     </div>`;
-  document.body.appendChild(t);
+  openTooltip(t, el, pinned, 560);
 
-  const rect = el.getBoundingClientRect();
-  const pad = 12;
-  const maxW = Math.min(560, window.innerWidth - 2 * pad);
-  t.style.maxWidth = `${maxW}px`;
-  let left = rect.left + window.scrollX;
-  const right = window.scrollX + window.innerWidth - pad;
-  if (left + (t.offsetWidth || maxW) > right) left = Math.max(window.scrollX + pad, right - (t.offsetWidth || maxW));
-  t.style.top = `${rect.bottom + window.scrollY + 6}px`;
-  t.style.left = `${left}px`;
-
-  t.querySelector(".mipp-macro-tooltip-close").addEventListener("click", (ev) => { ev.stopPropagation(); hideIntrinsicTooltip(); });
   t.querySelectorAll(".mipp-intrinsic-use").forEach((b) => b.addEventListener("click", (ev) => {
     ev.stopPropagation();
     const p = JSON.parse(b.getAttribute("data-nav"));
-    hideIntrinsicTooltip();
+    hideTooltip();
     if (navigate) navigate(p);
   }));
 }

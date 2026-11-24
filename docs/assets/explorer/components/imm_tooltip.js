@@ -9,7 +9,7 @@
  * The tooltip opens on hover, and a click keeps it open (to follow its link).
  */
 import { escapeHtml } from "../explorer.config.js";
-import { renderDescription, typesetMath } from "../syntax.js";
+import { renderDescription, typesetMath, tooltipWanted, openTooltip } from "../syntax.js";
 import { SIMD_EXT_DISPLAY_NAMES, apiMetadata } from "../data.js";
 
 /**
@@ -26,25 +26,9 @@ export function immTargetsSentence(imm) {
   return `MIPP has a body of its own for an immediate on ${list}. On the other targets, the same code runs in both cases.`;
 }
 
-export function hideImmTooltip({ onlyUnpinned = false } = {}) {
-  const t = document.querySelector(".mipp-imm-tooltip");
-  if (!t || (onlyUnpinned && t._pinned)) return;
-  if (t._target) t._target.classList.remove("active");
-  t.remove();
-}
-
-/** Opens the tooltip of `el`; `pinned`: stays open until a click outside or Escape. */
+/** Opens the tooltip of `el`; `pinned`: kept open by a click. */
 export function showImmTooltip(el, pinned = false) {
-  const existing = document.querySelector(".mipp-imm-tooltip");
-  if (existing && existing._target === el) {
-    existing._pinned = existing._pinned || pinned;
-    return;
-  }
-  // one tooltip at a time (macro, intrinsic or parameter)
-  document.querySelectorAll(".mipp-macro-tooltip").forEach((x) => {
-    if (x._targetMacro) x._targetMacro.classList.remove("active");
-    x.remove();
-  });
+  if (!tooltipWanted(el, pinned)) return;
   let imm;
   try {
     imm = JSON.parse(el.getAttribute("data-imm"));
@@ -69,10 +53,6 @@ export function showImmTooltip(el, pinned = false) {
 
   const t = document.createElement("div");
   t.className = "mipp-macro-tooltip mipp-imm-tooltip";
-  t._target = el;
-  t._targetMacro = el; // so that hideMacroTooltip() also closes it cleanly
-  t._pinned = pinned;
-  el.classList.add("active");
   t.innerHTML = `
     <div class="mipp-macro-tooltip-header">
       <span class="mipp-macro-tooltip-title">${isTemplate ? "Template argument" : "Parameter"} <code>${escapeHtml(name)}</code>: ${isTemplate ? "always an immediate" : "variable or immediate"}</span>
@@ -81,25 +61,6 @@ export function showImmTooltip(el, pinned = false) {
     <div class="mipp-imm-body">${body}
       <a class="mipp-intrinsic-doc" href="../user/rearrangements/#31-constant-counts">Constant Counts →</a>
     </div>`;
-  document.body.appendChild(t);
+  openTooltip(t, el, pinned, 460);
   typesetMath(t);
-
-  const rect = el.getBoundingClientRect();
-  const pad = 12;
-  const maxW = Math.min(460, window.innerWidth - 2 * pad);
-  t.style.maxWidth = `${maxW}px`;
-  let left = rect.left + window.scrollX;
-  const right = window.scrollX + window.innerWidth - pad;
-  if (left + (t.offsetWidth || maxW) > right) left = Math.max(window.scrollX + pad, right - (t.offsetWidth || maxW));
-  t.style.top = `${rect.bottom + window.scrollY + 6}px`;
-  t.style.left = `${left}px`;
-
-  t.querySelector(".mipp-macro-tooltip-close").addEventListener("click", (ev) => { ev.stopPropagation(); hideImmTooltip(); });
-}
-
-/** Click on the parameter: keeps the tooltip open, or closes the one it had kept open. */
-export function toggleImmTooltip(el) {
-  const existing = document.querySelector(".mipp-imm-tooltip");
-  if (existing && existing._target === el && existing._pinned) { hideImmTooltip(); return; }
-  showImmTooltip(el, true);
 }

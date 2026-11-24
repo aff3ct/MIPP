@@ -85,11 +85,11 @@ In `docs/assets/explorer/algo_source.js`, `targetMacros()` gives the macros the 
 - **Flat C Code** (`buildFlatCode()`): the macros, types and functions of the closure, then a `test` function that calls the function in a loop over `n` registers. In the assembly of `test` (Compiler Explorer, "Open in Godbolt"), the MIPP calls are gone and the loop only contains the instructions of the operation; the header of the code says when a scalar fallback (Level 3) may stay a function call. The "Run in Godbolt" button opens the same code with `buildFlatCode(..., { verify: true })`: a `main` runs `test` once on values of the test domain of the function (`test_specs`) and compares the result with the scalar reference of MIPP.
 - **Abstract C++ Implementation** (`buildAbstractCode()`): the body of the function with the types `vd<T, LMUL>` / `vm<T, LMUL>` and the calls of the C++ Functional API (`mipp::select(mipp::cmplt(vd0, vd1), vd0, vd1)`). The functions and types of another ISA (scalar fallback, SSE half-vectors of AVX) keep their C names. The code compiles with `#include <mipp.hpp>`. Below the code:
     - **How it is built** (`callTree()`): the MIPP functions called, recursively, each with what its body is (native, dedicated emulation, composition, scalar fallback, LMUL wrapper; `sourceOf()` reads it from the code) and its level, the highest level of everything it uses. This is where the level propagation shows: `min<int64>` on AVX is a composition of `select` (L0) and `cmplt` (L3, scalar fallback), so it is L3. Each function opens in the modal (with a back button).
-- **Compare ISAs**: the abstract view of the same function on several ISAs, side by side.
+- **Compare ISAs**: the abstract view of the same function on several ISAs, side by side. The boxes can be moved and resized (`components/box_layout.js`): the header of a box is dragged to move it, and the gutters right of and below a box change its width and its height (double-click for the automatic size). On the grip of a header, the arrow keys move the box and `Shift` with the arrow keys resizes it. The order of the boxes is in the URL (`algo_cmp`); their sizes last for the visit.
 
 #### Vendor Intrinsics
 
-In the three views (`components/intrinsic_tooltip.js`), `highlightCpp(code, macros, { isa })` makes the intrinsics of the ISA clickable (`_mm*`, NEON `v...q_...`, `sv...`, `__riscv_...`). The tooltip shows:
+In the three views (`components/intrinsic_tooltip.js`), `highlightCpp(code, macros, { isa })` gives a tooltip to the intrinsics of the ISA (`_mm*`, NEON `v...q_...`, `sv...`, `__riscv_...`). The tooltip shows:
 
 - the extension the intrinsic needs: the feature macros that every definition using it tests (`defined(__AVX2__)`, `defined(__AVX512BW__)`, ...), only the highest one on the SSE hierarchy;
 - the MIPP functions of the ISA that use it, found in the tables already loaded; each one opens in the modal;
@@ -98,6 +98,8 @@ In the three views (`components/intrinsic_tooltip.js`), `highlightCpp(code, macr
 No external data is embedded.
 
 Above the code, a line explains the LMUL (software registers, halves `lo` and `hi`, or RVV register groups, the half-vector of each target) and the mask variant (native predication or `select` after the operation, from the call tree), with links to the user guide. The level shown in the modal is the effective level computed from the real code (`effectiveLevel()`): the `// Level N` comment of the headers already gives this effective level, not the kind of the body.
+
+The elements of the code that have a tooltip behave the same way (`tooltipWanted()`, `openTooltip()` and `toggleTooltip()` in `syntax.js`): the tooltip shows while the pointer is on the element (help cursor), and a click keeps it open until a click elsewhere, `Escape` or its close button. One colour per kind, on the element and on the edge of its tooltip: black for a macro, blue for a vendor intrinsic, violet for a parameter that can be an immediate. An open tooltip stays under its element when something scrolls (`followTooltipAnchors()`).
 
 #### Checking
 

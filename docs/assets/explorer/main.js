@@ -8,6 +8,7 @@ import {
   loadApiData,
   loadApiDetails,
   ALL_SIMD_EXTS,
+  SIMD_EXT_DISPLAY_NAMES,
   ALL_CATEGORIES,
   ALL_DATATYPES,
   ALL_MASK_MODES,
@@ -18,12 +19,23 @@ import { filterEntries } from "./filters.js";
 import { renderSidebar, updateSidebarUI, bindSidebarEvents } from "./components/sidebar.js";
 import { renderSearchBar, updateSearchBarUI, bindSearchBarEvents, scrollToSearchResults } from "./components/search_bar.js";
 import { renderCard, switchCardTab, renderCardExpandedDetails } from "./components/card.js";
-import { renderAlgoModal, algoModalIsa } from "./components/modal_algo.js";
+import { renderAlgoModal, algoModalIsa, algoCompareIsas } from "./components/modal_algo.js";
+import { bindBoxLayout } from "./components/box_layout.js";
 import { getLoadedSources, loadAlgoSources } from "./algo_source.js";
 import { renderCompareModal } from "./components/modal_compare.js";
-import { showMacroTooltip, hideMacroTooltip, toggleMacroTooltip, typesetMath } from "./syntax.js";
-import { toggleIntrinsicTooltip, hideIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
-import { showImmTooltip, hideImmTooltip, toggleImmTooltip } from "./components/imm_tooltip.js";
+import { showMacroTooltip, hideTooltip, toggleTooltip, typesetMath, followTooltipAnchors } from "./syntax.js";
+import { showIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
+import { showImmTooltip } from "./components/imm_tooltip.js";
+
+// Elements of the code that have a tooltip: a parameter that can be an immediate, a vendor
+// intrinsic, a macro. The three behave the same way: tooltip on hover, kept open by a click.
+const TOOLTIP_REFS = ".mipp-imm-ref, .mipp-intrinsic-ref, .mipp-macro-ref";
+
+function showRefTooltip(el, pinned = false) {
+  if (el.classList.contains("mipp-imm-ref")) showImmTooltip(el, pinned);
+  else if (el.classList.contains("mipp-intrinsic-ref")) showIntrinsicTooltip(el, pinned);
+  else showMacroTooltip(el, pinned);
+}
 
 let headerResizeObserver = null;
 
@@ -349,9 +361,7 @@ function bindCardEvents(cardsContainerEl) {
   cardsContainerEl.querySelectorAll(".mipp-macro-ref").forEach((el) => {
     el.addEventListener("click", (e) => {
       e.stopPropagation();
-      const mName = el.getAttribute("data-macro-name");
-      const mDef = el.getAttribute("data-macro-def");
-      toggleMacroTooltip(el, mName, mDef);
+      toggleTooltip(el, showRefTooltip);
     });
   });
 
@@ -618,6 +628,28 @@ function rememberModalSizes() {
   }
 }
 
+/**
+ * Closes a modal on a click on its backdrop. The press must start on the backdrop too: a drag
+ * that starts in the modal and ends outside of it (resize of the modal from its corner, which
+ * shrinks under the pointer; selection of text) ends with a click on the backdrop, their common
+ * ancestor, and must not close the modal.
+ */
+function onBackdropClick(backdropEl, close) {
+  if (!backdropEl) return;
+  let pressedOnBackdrop = false;
+  backdropEl.addEventListener("mousedown", (e) => {
+    pressedOnBackdrop = e.target === backdropEl;
+  });
+  backdropEl.addEventListener("click", (e) => {
+    const fromBackdrop = pressedOnBackdrop;
+    pressedOnBackdrop = false;
+    if (e.target === backdropEl && fromBackdrop) close();
+  });
+}
+
+// Box of the Compare ISAs view moved with the keyboard: its handle keeps the focus in the next render
+let movedCompareBox = null;
+
 function updateModals(modalsContainerEl) {
   if (!modalsContainerEl) return;
 
@@ -714,13 +746,35 @@ function updateModals(modalsContainerEl) {
         const md = state.algoModalData;
         if (!md) return;
         const isa = btn.getAttribute("data-modal-compare-isa");
-        const cur = [...modalsContainerEl.querySelectorAll("[data-modal-compare-isa].active")].map((b) => b.getAttribute("data-modal-compare-isa"));
+        const cur = algoCompareIsas(md); // in the order of the boxes: a new ISA comes last
         const next = cur.includes(isa) ? cur.filter((i) => i !== isa) : [...cur, isa];
         if (!next.length) return;
         md.compareIsas = next;
         updateModals(modalsContainerEl);
       });
     });
+
+    // Compare view: boxes moved (the order is in the URL, algo_cmp) and resized
+    const compareBoxesEl = modalsContainerEl.querySelector(".mipp-algo-compare");
+    if (compareBoxesEl && state.algoModalData) {
+      const focusKey = movedCompareBox;
+      movedCompareBox = null;
+      bindBoxLayout(compareBoxesEl, {
+        sizes: state.compareBoxSizes,
+        labels: SIMD_EXT_DISPLAY_NAMES,
+        focusKey,
+        onReorder: (order, key, keyboard) => {
+          if (!state.algoModalData) return;
+          state.algoModalData.compareIsas = order;
+          movedCompareBox = keyboard ? key : null;
+          updateModals(modalsContainerEl);
+        },
+        onResize: (key, size) => {
+          if (size) state.compareBoxSizes[key] = size;
+          else delete state.compareBoxSizes[key];
+        },
+      });
+    }
 
     const algoShareBtn = modalsContainerEl.querySelector("#mipp-algo-modal-share");
     if (algoShareBtn) {
@@ -735,17 +789,12 @@ function updateModals(modalsContainerEl) {
       });
     }
 
-    const algoBackdrop = modalsContainerEl.querySelector("#mipp-algo-modal-backdrop");
-    if (algoBackdrop) {
-      algoBackdrop.addEventListener("click", (e) => {
-        if (e.target === algoBackdrop) {
-          state.algoModalOpen = false;
-          state.algoModalData = null;
-          updateModals(modalsContainerEl);
-          syncUrlHash(true);
-        }
-      });
-    }
+    onBackdropClick(modalsContainerEl.querySelector("#mipp-algo-modal-backdrop"), () => {
+      state.algoModalOpen = false;
+      state.algoModalData = null;
+      updateModals(modalsContainerEl);
+      syncUrlHash(true);
+    });
 
     // View Mode Switcher: Abstract C++ vs Flat C99 Code
     modalsContainerEl.querySelectorAll("[data-modal-view]").forEach((btn) => {
@@ -903,15 +952,10 @@ function updateModals(modalsContainerEl) {
       });
     }
 
-    const compareBackdrop = modalsContainerEl.querySelector("#mipp-compare-modal-backdrop");
-    if (compareBackdrop) {
-      compareBackdrop.addEventListener("click", (e) => {
-        if (e.target === compareBackdrop) {
-          state.compareModalOpen = false;
-          updateModals(modalsContainerEl);
-        }
-      });
-    }
+    onBackdropClick(modalsContainerEl.querySelector("#mipp-compare-modal-backdrop"), () => {
+      state.compareModalOpen = false;
+      updateModals(modalsContainerEl);
+    });
 
     const clearCompareBtn = modalsContainerEl.querySelector("#mipp-clear-compare-btn");
     if (clearCompareBtn) {
@@ -1079,13 +1123,18 @@ export async function initExplorer() {
       // End of a resize of a modal (see rememberModalSizes)
       document.addEventListener("mouseup", rememberModalSizes);
 
-      // Immediate argument of a prototype: its tooltip on hover (a click keeps it open)
+      // An open tooltip stays under its element, whatever scrolls (scroll events do not bubble:
+      // they are caught on their way down)
+      document.addEventListener("scroll", followTooltipAnchors, { capture: true, passive: true });
+      window.addEventListener("resize", followTooltipAnchors);
+
+      // Macros, intrinsics and immediate parameters: their tooltip on hover (a click keeps it open)
       document.addEventListener("mouseover", (e) => {
-        const immEl = e.target.closest && e.target.closest(".mipp-imm-ref");
-        if (immEl) showImmTooltip(immEl);
+        const ref = e.target.closest && e.target.closest(TOOLTIP_REFS);
+        if (ref) showRefTooltip(ref);
       });
       document.addEventListener("mouseout", (e) => {
-        if (e.target.closest && e.target.closest(".mipp-imm-ref")) hideImmTooltip({ onlyUnpinned: true });
+        if (e.target.closest && e.target.closest(TOOLTIP_REFS)) hideTooltip({ onlyUnpinned: true });
       });
 
       // "/" on the Explorer page: focus the search bar of the Explorer instead of
@@ -1186,43 +1235,24 @@ export async function initExplorer() {
         }
 
         // 4. Macro, intrinsic and immediate argument tooltips toggle & outside dismissal
-        const immEl = e.target.closest(".mipp-imm-ref");
-        if (immEl) {
+        const ref = e.target.closest(TOOLTIP_REFS);
+        if (ref) {
           e.stopPropagation();
-          toggleImmTooltip(immEl);
-          return;
-        }
-        const intrinsicEl = e.target.closest(".mipp-intrinsic-ref");
-        if (intrinsicEl) {
-          e.stopPropagation();
-          toggleIntrinsicTooltip(intrinsicEl);
-          return;
-        }
-        const macroEl = e.target.closest(".mipp-macro-ref");
-        if (macroEl) {
-          e.stopPropagation();
-          toggleMacroTooltip(macroEl);
+          toggleTooltip(ref, showRefTooltip);
           return;
         }
         if (!e.target.closest(".mipp-macro-tooltip")) {
-          hideMacroTooltip();
+          hideTooltip();
         }
       });
 
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") {
-          hideMacroTooltip();
-          hideIntrinsicTooltip();
-          hideImmTooltip();
-        }
-        if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".mipp-imm-ref")) {
+        if (e.key === "Escape") hideTooltip();
+        // Enter / Space on a focused macro, intrinsic or immediate parameter: as a click
+        const ref = (e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(TOOLTIP_REFS);
+        if (ref) {
           e.preventDefault();
-          toggleImmTooltip(e.target.closest(".mipp-imm-ref"));
-        }
-        // Enter / Space on a focused macro or intrinsic opens its tooltip
-        if ((e.key === "Enter" || e.key === " ") && e.target.closest && e.target.closest(".mipp-intrinsic-ref")) {
-          e.preventDefault();
-          toggleIntrinsicTooltip(e.target.closest(".mipp-intrinsic-ref"));
+          toggleTooltip(ref, showRefTooltip);
         }
       });
     }

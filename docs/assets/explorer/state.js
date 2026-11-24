@@ -36,6 +36,9 @@ export const state = {
   compareModalOpen: false,
   algoModalOpen: false,
   algoModalData: null, // { entry, simdExt, dt, mask, lmul }
+  // Compare ISAs view of the Algorithm modal: size given by the user to the box of an ISA
+  // (isa -> { w, h } in pixels). The order of the boxes is algoModalData.compareIsas (URL: algo_cmp).
+  compareBoxSizes: {},
   cardTabs: {}, // cardName -> "hw" | "proto" | "scalar" | "specs" | "flat"
   cardFlatState: {}, // cardName -> { simdExt, dt, mask, lmul, scalarSize, defines }
   // Scalar form shown by the card of a function: function name -> name of the entry of the

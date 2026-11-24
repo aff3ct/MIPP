@@ -1755,13 +1755,15 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   }
 }
 
-/* Macro Interactive Reference (Click/Tap to view definition) */
+/* Elements of the code with a tooltip (hover, kept open by a click): one colour per kind, on
+   the element and on the edge of its tooltip. Macro: the colour of the text (black); vendor
+   intrinsic: blue; parameter that can be an immediate: violet. */
 .mipp-hl-macro,
 .mipp-macro-ref {
-  color: #0284c7;
+  color: var(--md-code-fg-color, #0f172a);
   font-weight: 700;
-  border-bottom: 1.5px dotted #0284c7;
-  cursor: pointer;
+  border-bottom: 1.5px dotted currentColor;
+  cursor: help;
   padding: 0.05rem 0.25rem;
   margin: 0 1px;
   border-radius: 3px;
@@ -1774,29 +1776,29 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 .mipp-macro-ref:hover,
 .mipp-hl-macro.active,
 .mipp-macro-ref.active {
-  background: rgba(2, 132, 199, 0.18);
+  background: rgba(100, 116, 139, 0.22);
   border-bottom-style: solid;
 }
 
 [data-md-color-scheme="slate"] .mipp-hl-macro,
 [data-md-color-scheme="slate"] .mipp-macro-ref {
-  color: #38bdf8;
-  border-bottom-color: #38bdf8;
+  color: var(--md-code-fg-color, #e2e8f0);
 }
 
 [data-md-color-scheme="slate"] .mipp-hl-macro:hover,
 [data-md-color-scheme="slate"] .mipp-macro-ref:hover,
 [data-md-color-scheme="slate"] .mipp-hl-macro.active,
 [data-md-color-scheme="slate"] .mipp-macro-ref.active {
-  background: rgba(56, 189, 248, 0.22);
+  background: rgba(148, 163, 184, 0.28);
 }
 
 /* Floating Macro Definition Tooltip / Popover */
 .mipp-macro-tooltip {
+  --mipp-tooltip-edge: #0f172a; /* macro; the other kinds set their own below */
   position: absolute;
   z-index: 1000;
   background: var(--md-default-bg-color, #ffffff);
-  border: 1px solid var(--mipp-accent, #0284c7);
+  border: 1.5px solid var(--mipp-tooltip-edge);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
   padding: 0.6rem 0.8rem;
@@ -1818,7 +1820,7 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 .mipp-macro-tooltip-title {
   font-weight: 700;
-  color: var(--mipp-accent, #0284c7);
+  color: var(--mipp-tooltip-edge);
   font-size: var(--mipp-fs-base, 0.72rem);
 }
 
@@ -1852,8 +1854,8 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 [data-md-color-scheme="slate"] .mipp-macro-tooltip {
+  --mipp-tooltip-edge: #e2e8f0;
   background: #1e293b;
-  border-color: #38bdf8;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -1871,8 +1873,8 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 
 /* Vendor intrinsics of the Algorithm modal (click for details, see intrinsic_tooltip.js) */
 .mipp-intrinsic-ref {
-  cursor: pointer;
-  border-bottom: 1px dotted currentColor;
+  cursor: help;
+  border-bottom: 1.5px dotted var(--mipp-accent, #0284c7);
   border-radius: 2px;
   transition: background 0.15s ease;
 }
@@ -1886,7 +1888,20 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
 }
 
 .mipp-intrinsic-tooltip {
+  --mipp-tooltip-edge: var(--mipp-accent, #0284c7);
   max-width: 560px;
+}
+
+.mipp-imm-tooltip {
+  --mipp-tooltip-edge: #7c3aed;
+}
+
+[data-md-color-scheme="slate"] .mipp-intrinsic-tooltip {
+  --mipp-tooltip-edge: #38bdf8;
+}
+
+[data-md-color-scheme="slate"] .mipp-imm-tooltip {
+  --mipp-tooltip-edge: #a78bfa;
 }
 
 .mipp-intrinsic-tooltip .mipp-macro-tooltip-title code {
@@ -2970,6 +2985,19 @@ html:not(.js) .mipp-explorer-loading {
   display: flex;
 }
 
+/* The page does not scroll under an open modal. The room of its scrollbar is kept, so the
+   page does not shift when the modal opens. */
+html:has(.mipp-modal-backdrop.visible),
+html:has(.mipp-modal-backdrop.active) {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* The end of a scroll inside a modal does not go on in what is behind */
+.mipp-modal-content {
+  overscroll-behavior: contain;
+}
+
 .mipp-modal-content,
 .mipp-modal-container {
   background: var(--md-default-bg-color, #ffffff);
@@ -3522,10 +3550,197 @@ html:not(.js) .mipp-explorer-loading {
 
 /* Compare ISAs: one code box per ISA, side by side */
 .mipp-algo-compare {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 0.75rem;
   min-width: 0;
+}
+
+/* Boxes side by side that can be moved and resized (components/box_layout.js). A wrapping
+   row: a box takes its share of the row until the user gives it a width (flex: 0 0 <w>px,
+   written by the script). The gutters right of and below a box are its resize handles: the
+   row has a gutter of its own after its last column and its last line, taken from the
+   padding of what contains it. */
+.mipp-box-row {
+  --mipp-box-gap: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--mipp-box-gap);
+  margin-right: calc(-1 * var(--mipp-box-gap));
+  padding: 0 var(--mipp-box-gap) var(--mipp-box-gap) 0;
+}
+
+.mipp-box-cell {
+  position: relative;
+  display: flex;
+  flex: 1 1 300px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.mipp-box-cell > .mipp-code-box {
+  flex: 1 1 auto;
+  width: auto;
+  min-height: 0;
+}
+
+/* a box with a height of its own scrolls its code */
+.mipp-box-cell > .mipp-code-box > pre {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+/* The header of a box is the handle that moves it */
+.mipp-box-cell [data-box-handle] {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mipp-box-cell [data-box-handle]:active {
+  cursor: grabbing;
+}
+
+.mipp-box-grip {
+  display: inline-flex;
+  align-items: center;
+  margin-left: -0.3rem;
+  padding: 0.1rem;
+  border-radius: 4px;
+  color: var(--md-default-fg-color--lighter, #94a3b8);
+  cursor: grab;
+}
+
+.mipp-box-cell [data-box-handle]:hover .mipp-box-grip {
+  color: var(--mipp-accent, #0ea5e9);
+}
+
+.mipp-box-grip:focus-visible {
+  outline: 2px solid var(--mipp-accent, #0ea5e9);
+  outline-offset: 1px;
+  color: var(--mipp-accent, #0ea5e9);
+}
+
+.mipp-box-cell.is-dragging {
+  opacity: 0.4;
+}
+
+/* Where the dragged box goes: a bar in the gutter before or after the box under the pointer */
+.mipp-box-cell.drop-before::before,
+.mipp-box-cell.drop-after::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--mipp-accent, #0ea5e9);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.mipp-box-cell.drop-before::before {
+  left: calc(-0.5 * var(--mipp-box-gap) - 1.5px);
+}
+
+.mipp-box-cell.drop-after::after {
+  right: calc(-0.5 * var(--mipp-box-gap) - 1.5px);
+}
+
+/* Resize handles: the gutters of the box, with a line that shows on hover */
+.mipp-box-resize {
+  position: absolute;
+  z-index: 2;
+  touch-action: none;
+}
+
+.mipp-box-resize::after {
+  content: "";
+  position: absolute;
+  border-radius: 2px;
+  background: var(--mipp-accent, #0ea5e9);
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+
+.mipp-box-resize:hover::after,
+.mipp-box-resize.active::after {
+  opacity: 0.75;
+}
+
+.mipp-box-resize-x {
+  top: 0;
+  bottom: 0;
+  right: calc(-1 * var(--mipp-box-gap));
+  width: var(--mipp-box-gap);
+  cursor: col-resize;
+}
+
+.mipp-box-resize-x::after {
+  top: 0.35rem;
+  bottom: 0.35rem;
+  left: calc(50% - 1.5px);
+  width: 3px;
+}
+
+.mipp-box-resize-y {
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * var(--mipp-box-gap));
+  height: var(--mipp-box-gap);
+  cursor: row-resize;
+}
+
+.mipp-box-resize-y::after {
+  left: 0.35rem;
+  right: 0.35rem;
+  top: calc(50% - 1.5px);
+  height: 3px;
+}
+
+.mipp-box-resize-xy {
+  right: calc(-1 * var(--mipp-box-gap));
+  bottom: calc(-1 * var(--mipp-box-gap));
+  width: var(--mipp-box-gap);
+  height: var(--mipp-box-gap);
+  cursor: nwse-resize;
+}
+
+.mipp-box-resize-xy::after {
+  inset: calc(50% - 3px);
+  border-radius: 50%;
+}
+
+/* During a resize: the cursor of the handle everywhere, and no text selection */
+.mipp-box-resizing,
+.mipp-box-resizing * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/* Narrow screens: the boxes are stacked on the whole width, only the order can change */
+@media (max-width: 768px) {
+  .mipp-box-cell {
+    flex: 1 1 100% !important;
+    height: auto !important;
+  }
+
+  .mipp-box-resize {
+    display: none;
+  }
+}
+
+/* For screen readers only */
+.mipp-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .mipp-algo-compare .mipp-code-box pre code {

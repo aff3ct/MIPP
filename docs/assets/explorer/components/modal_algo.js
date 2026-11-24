@@ -4,11 +4,12 @@
  * flags, taken from the generated headers (algo_source.js): the Abstract C++ view (C++ Functional
  * API) and the Flat C view (self-contained, runs on Compiler Explorer).
  */
-import { escapeHtml, ICON_COPY, ICON_GODBOLT, ICON_RUN, ICON_LINK, ICON_WARNING, ICON_INFO, ICON_CONTEXT, ICON_CLOCK } from "../explorer.config.js";
+import { escapeHtml, ICON_COPY, ICON_GRIP, ICON_GODBOLT, ICON_RUN, ICON_LINK, ICON_WARNING, ICON_INFO, ICON_CONTEXT, ICON_CLOCK } from "../explorer.config.js";
 import { highlightCpp } from "../syntax.js";
 import { SIMD_EXT_DISPLAY_NAMES, ALL_MASK_MODES, LEVEL_DESCRIPTIONS, apiMetadata, apiData, maskSupportOf, isLmulUndefined, undefinedLmulNotice } from "../data.js";
 import { state } from "../state.js";
 import { renderFormSelector } from "./card.js";
+import { boxSizeStyle, boxResizeHandles } from "./box_layout.js";
 import { getCompilerConfigForFlat, buildGodboltUrlForFlat } from "../codegen.js";
 import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName, immChoices } from "../algo_source.js";
 
@@ -21,6 +22,18 @@ export function algoModalIsa(modalData) {
   const all = getAllModalIsas();
   const raw = modalData && (modalData.isa || modalData.simdExt);
   return all.includes(raw) ? raw : (all[0] || "");
+}
+
+/**
+ * ISAs of the Compare view, in the order of their boxes: the ones chosen by the user (picker,
+ * drag and drop), else the ISA of the modal followed by two others.
+ */
+export function algoCompareIsas(modalData) {
+  const all = getAllModalIsas();
+  const chosen = [...new Set((modalData && modalData.compareIsas) || [])].filter((i) => all.includes(i));
+  if (chosen.length) return chosen;
+  const current = algoModalIsa(modalData);
+  return [current, ...["sse", "neon", "rvv", "avx", "sve"].filter((i) => i !== current && all.includes(i))].slice(0, 3);
 }
 
 const DOCS = "../user/";
@@ -266,21 +279,23 @@ export function renderAlgoModal(modalData) {
     }
   }
   // Compare view: the same function on several ISAs, side by side
-  const compareIsas = (modalData.compareIsas && modalData.compareIsas.length)
-    ? modalData.compareIsas.filter((i) => allModalIsas.includes(i))
-    : [currentIsa, ...["sse", "neon", "rvv", "avx", "sve"].filter((i) => i !== currentIsa && allModalIsas.includes(i))].slice(0, 3);
+  const compareIsas = algoCompareIsas(modalData);
   let compareHtml = "";
   if (currentView === "compare" && !lmulUndefined) {
     const cols = compareIsas.map((isa) => {
       const src = getLoadedSources(isa);
       const label = namesMap[isa] || isa.toUpperCase();
-      if (!src) return `<div class="mipp-code-box"><div class="mipp-code-box-header"><span class="mipp-code-lang">${escapeHtml(label)}</span></div><pre><code>Loading…</code></pre></div>`;
+      // a box that can be moved (its header, or the arrow keys on its grip) and resized (its gutters)
+      const cell = (box) => `<div class="mipp-box-cell" data-box-key="${isa}" style="${boxSizeStyle(state.compareBoxSizes[isa])}">${box}${boxResizeHandles(label)}</div>`;
+      const grip = `<span class="mipp-box-grip" data-box-grip role="button" tabindex="0" aria-label="Move or resize the ${escapeHtml(label)} box: arrow keys to move, Shift and arrow keys to resize, Delete for the automatic size" title="Drag the header to move this box. Keyboard: arrow keys to move, Shift + arrow keys to resize.">${ICON_GRIP}</span>`;
+      if (!src) return cell(`<div class="mipp-code-box"><div class="mipp-code-box-header" data-box-handle draggable="true"><div class="mipp-code-box-header-left">${grip}<span class="mipp-code-lang">${escapeHtml(label)}</span></div></div><pre><code>Loading…</code></pre></div>`);
       const cc = getCompilerConfigForFlat(isa, flatDefines, currentScalarSize);
       const r = buildAbstractCode(entry, src, { ...algoCfg, isa, options: cc.options, compilerLabel: cc.compilerLabel });
       const lv = r.rootFound ? r.effectiveLevel : null;
-      return `<div class="mipp-code-box">
-        <div class="mipp-code-box-header">
+      return cell(`<div class="mipp-code-box">
+        <div class="mipp-code-box-header" data-box-handle draggable="true">
           <div class="mipp-code-box-header-left">
+            ${grip}
             <span class="mipp-code-lang">${escapeHtml(label)}</span>
             ${levelBadge(lv, lv === null ? "Not defined" : `Effective level ${lv}`)}
             <span class="mipp-algo-tree-own mipp-algo-compare-flags" title="${escapeHtml(cc.options)}">${escapeHtml(cc.options)}</span>
@@ -288,7 +303,7 @@ export function renderAlgoModal(modalData) {
           <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(r.code)}" title="Copy ${escapeHtml(label)} code">${ICON_COPY}</button>
         </div>
         <pre><code>${highlightCpp(r.code, {}, { isa, imm: entry.imm && immChoices(src, { ...algoCfg, isa, options: cc.options }) ? entry.imm : null })}</code></pre>
-      </div>`;
+      </div>`);
     }).join("");
     compareHtml = `
       <div class="mipp-modal-ctrl-group mipp-compare-picker">
@@ -297,7 +312,7 @@ export function renderAlgoModal(modalData) {
           ${allModalIsas.map((isa) => `<button type="button" class="mipp-segment-btn ${compareIsas.includes(isa) ? "active" : ""}" data-modal-compare-isa="${isa}">${escapeHtml((namesMap[isa] || isa.toUpperCase()).replace("ARM ", ""))}</button>`).join("")}
         </div>
       </div>
-      <div class="mipp-algo-compare">${cols}</div>`;
+      <div class="mipp-algo-compare mipp-box-row">${cols}</div>`;
   }
   const treeHas = (n, f) => Boolean(n) && (f(n) || n.children.some((c) => treeHas(c, f)));
   const maskBySelect = treeHas(callTreeRoot, (n) => { const p = parseCName(n.cName); return Boolean(p) && p.func === "select"; });

@@ -198,9 +198,9 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
     } else if (customMacros && customMacros[token]) {
       const macroInfo = customMacros[token];
       const macroDef = typeof macroInfo === "object" ? (macroInfo.definition || macroInfo.body || "") : String(macroInfo);
-      html += `<span class="mipp-hl-macro mipp-macro-ref" data-macro-name="${escapeHtml(token)}" data-macro-def="${escapeHtml(macroDef)}" tabindex="0" role="button" title="Click to view macro definition">${escapeHtml(token)}</span>`;
+      html += `<span class="mipp-hl-macro mipp-macro-ref" data-macro-name="${escapeHtml(token)}" data-macro-def="${escapeHtml(macroDef)}" tabindex="0" role="button" aria-label="${escapeHtml(token)}: macro, its definition">${escapeHtml(token)}</span>`;
     } else if (match[7] && options.isa && isIntrinsicName(token, options.isa) && /^\s*\(/.test(cleanCode.slice(tokenRegex.lastIndex))) {
-      html += `<span class="mipp-hl-fn mipp-intrinsic-ref" data-intrinsic="${escapeHtml(token)}" data-isa="${escapeHtml(options.isa)}" tabindex="0" role="button" title="${escapeHtml(token)}: click for details">${escapeHtml(token)}</span>`;
+      html += `<span class="mipp-hl-fn mipp-intrinsic-ref" data-intrinsic="${escapeHtml(token)}" data-isa="${escapeHtml(options.isa)}" tabindex="0" role="button" aria-label="${escapeHtml(token)}: intrinsic, its details">${escapeHtml(token)}</span>`;
     } else if (cls) {
       html += `<span class="${cls}">${escapeHtml(token)}</span>`;
     } else {
@@ -216,29 +216,118 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
   return html;
 }
 
-export function toggleMacroTooltip(macroEl, macroName, macroDef) {
-  if (!macroEl) return;
-  const existing = document.querySelector(".mipp-macro-tooltip");
-  if (existing && existing._targetMacro === macroEl) {
-    hideMacroTooltip();
-    return;
-  }
-  showMacroTooltip(macroEl, macroName, macroDef);
+/**
+ * Puts a tooltip under the element it describes, inside the viewport. The tooltips are children
+ * of the body, in page coordinates: `followTooltipAnchors()` calls this again when something
+ * scrolls. `maxWidth` (pixels) is kept for these later calls.
+ */
+export function placeTooltip(tooltip, anchor, maxWidth) {
+  const pad = 12;
+  if (maxWidth) tooltip._maxWidth = maxWidth;
+  const maxW = Math.min(tooltip._maxWidth || 560, window.innerWidth - 2 * pad);
+  tooltip.style.maxWidth = `${maxW}px`;
+  tooltip.style.boxSizing = "border-box";
+  const rect = anchor.getBoundingClientRect();
+  const width = tooltip.offsetWidth || maxW;
+  const right = window.scrollX + window.innerWidth - pad;
+  let left = rect.left + window.scrollX;
+  if (left + width > right) left = right - width;
+  left = Math.max(window.scrollX + pad, left);
+  tooltip.style.top = `${rect.bottom + window.scrollY + 6}px`;
+  tooltip.style.left = `${left}px`;
 }
 
-export function showMacroTooltip(macroEl, macroName, macroDef) {
-  if (!macroEl) return;
-  hideMacroTooltip();
+/** True when a scrolling ancestor of `el` hides it entirely (scrolled out of a modal, of a code box...). */
+function isScrolledOut(el) {
+  const rect = el.getBoundingClientRect();
+  for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+    const style = getComputedStyle(p);
+    if (style.overflowX === "visible" && style.overflowY === "visible") continue;
+    const box = p.getBoundingClientRect();
+    if (rect.bottom < box.top || rect.top > box.bottom || rect.right < box.left || rect.left > box.right) return true;
+  }
+  return false;
+}
 
-  if (!macroName && macroEl) macroName = macroEl.getAttribute("data-macro-name") || "";
-  if (!macroDef && macroEl) macroDef = macroEl.getAttribute("data-macro-def") || "";
-  if (!macroDef) return;
+/**
+ * Keeps the open tooltip under its element when something scrolls (the page, a modal, a code
+ * box) or when the window is resized; closes it when its element is gone or scrolled out of
+ * sight. For the scroll and resize listeners of the page.
+ */
+export function followTooltipAnchors() {
+  document.querySelectorAll(".mipp-macro-tooltip").forEach((tooltip) => {
+    const anchor = tooltip._targetMacro;
+    if (!anchor) return;
+    if (!anchor.isConnected || isScrolledOut(anchor)) {
+      anchor.classList.remove("active");
+      tooltip.remove();
+    } else {
+      placeTooltip(tooltip, anchor);
+    }
+  });
+}
+
+// ---- Tooltips of the code: macros, vendor intrinsics, parameters that can be an immediate ------
+// One tooltip at a time, a child of the body with the class .mipp-macro-tooltip. They behave the
+// same way: shown while the pointer is on their element, kept open by a click on it (`pinned`),
+// until a click elsewhere, Escape, their close button or another click on the element.
+
+const currentTooltip = () => document.querySelector(".mipp-macro-tooltip");
+
+/** Closes the open tooltip; `onlyUnpinned`: unless a click keeps it open. */
+export function hideTooltip({ onlyUnpinned = false } = {}) {
+  const t = currentTooltip();
+  if (!t || (onlyUnpinned && t._pinned)) return;
+  if (t._targetMacro) t._targetMacro.classList.remove("active");
+  t.remove();
+}
+
+/**
+ * To call before building the tooltip of `anchor`: false when there is nothing to build. Its
+ * tooltip is already open (a click then keeps it open), or the pointer only passes over
+ * `anchor` while a click keeps the tooltip of another element open.
+ */
+export function tooltipWanted(anchor, pinned) {
+  const t = currentTooltip();
+  if (t && t._targetMacro === anchor) {
+    t._pinned = t._pinned || pinned;
+    return false;
+  }
+  if (t && t._pinned && !pinned) return false;
+  hideTooltip();
+  return true;
+}
+
+/** Shows the tooltip built for `anchor` under it, and binds its close button. */
+export function openTooltip(tooltip, anchor, pinned, maxWidth) {
+  tooltip._targetMacro = anchor;
+  tooltip._pinned = pinned;
+  anchor.classList.add("active");
+  document.body.appendChild(tooltip);
+  placeTooltip(tooltip, anchor, maxWidth);
+  const closeBtn = tooltip.querySelector(".mipp-macro-tooltip-close");
+  if (closeBtn) closeBtn.addEventListener("click", (ev) => { ev.stopPropagation(); hideTooltip(); });
+}
+
+/** Click on `anchor`: keeps its tooltip open (`show(anchor, true)`), or closes the one a click kept open. */
+export function toggleTooltip(anchor, show) {
+  const t = currentTooltip();
+  if (t && t._targetMacro === anchor && t._pinned) {
+    hideTooltip();
+    return;
+  }
+  show(anchor, true);
+}
+
+/** Opens the tooltip of a macro (its definition); `pinned`: kept open by a click. */
+export function showMacroTooltip(macroEl, pinned = false) {
+  if (!macroEl) return;
+  const macroName = macroEl.getAttribute("data-macro-name") || "";
+  const macroDef = macroEl.getAttribute("data-macro-def") || "";
+  if (!macroDef || !tooltipWanted(macroEl, pinned)) return;
 
   const tooltip = document.createElement("div");
-  tooltip.className = "mipp-macro-tooltip";
-  tooltip._targetMacro = macroEl;
-  macroEl.classList.add("active");
-
+  tooltip.className = "mipp-macro-tooltip mipp-macro-def-tooltip";
   tooltip.innerHTML = `
     <div class="mipp-macro-tooltip-header">
       <span class="mipp-macro-tooltip-title">Macro: <code>${escapeHtml(macroName)}</code></span>
@@ -249,46 +338,7 @@ export function showMacroTooltip(macroEl, macroName, macroDef) {
     </div>
     <pre class="mipp-macro-tooltip-code"><code>${escapeHtml(macroDef)}</code></pre>
   `;
-
-  document.body.appendChild(tooltip);
-
-  const rect = macroEl.getBoundingClientRect();
-  const pad = 12;
-  const maxW = Math.min(650, window.innerWidth - 2 * pad);
-  tooltip.style.maxWidth = `${maxW}px`;
-  tooltip.style.boxSizing = "border-box";
-
-  let top = rect.bottom + window.scrollY + 6;
-  let left = rect.left + window.scrollX;
-
-  const tooltipWidth = tooltip.offsetWidth || maxW;
-  const viewportRight = window.scrollX + window.innerWidth - pad;
-
-  if (left + tooltipWidth > viewportRight) {
-    left = Math.max(window.scrollX + pad, viewportRight - tooltipWidth);
-  }
-  if (left < window.scrollX + pad) {
-    left = window.scrollX + pad;
-  }
-
-  tooltip.style.top = `${top}px`;
-  tooltip.style.left = `${left}px`;
-
-  tooltip.querySelector(".mipp-macro-tooltip-close").addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    macroEl.classList.remove("active");
-    tooltip.remove();
-  });
-}
-
-export function hideMacroTooltip() {
-  const existing = document.querySelector(".mipp-macro-tooltip");
-  if (existing) {
-    if (existing._targetMacro) {
-      existing._targetMacro.classList.remove("active");
-    }
-    existing.remove();
-  }
+  openTooltip(tooltip, macroEl, pinned, 650);
 }
 
 /**
