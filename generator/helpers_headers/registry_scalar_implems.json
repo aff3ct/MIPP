@@ -14,7 +14,10 @@
         "datatypes": "all_int",
         "variants": [],
         "implem": [
-          "res.vd[i] = %!pred_cond!% (vd0.vd[i] < 0) ? -vd0.vd[i] : vd0.vd[i] %!pred_alt!%;"
+          "// negation in the unsigned type: wraps around for the minimum value, as the SIMD code",
+          "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)vd0.vd[i];",
+          "%s<tp>% neg0 = (%s<tp>%)(%s<c:uint|b:tp>%)(0u - u0);",
+          "res.vd[i] = %!pred_cond!% (vd0.vd[i] < 0 ? neg0 : vd0.vd[i]) %!pred_alt!%;"
         ]
       },
       {
@@ -1392,10 +1395,18 @@
     "neg": [
         {
             "type": "element-wide",
-            "datatypes": [
-                "all_int",
-                "all_float"
-            ],
+            "datatypes": "all_int",
+            "variants": [],
+            "implem": [
+                "// negation in the unsigned type: wraps around for the minimum value, as the SIMD code",
+                "%s<c:uint|b:tp>% u0 = (%s<c:uint|b:tp>%)vd0.vd[i];",
+                "%s<tp>% neg0 = (%s<tp>%)(%s<c:uint|b:tp>%)(0u - u0);",
+                "res.vd[i] = %!pred_cond!% neg0 %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
             "variants": [],
             "implem": [
                 "res.vd[i] = %!pred_cond!% -vd0.vd[i] %!pred_alt!%;"

@@ -196,6 +196,8 @@ class DomainResolver:
         def _lit(dt, v):
             if isinstance(v, str):
                 return f"({dt}_t){named[v]}"
+            if v == -(2 ** 63) and not dt.startswith("float"):
+                return "INT64_MIN"  # not a literal: 9223372036854775808 does not fit in a signed type
             return repr(float(v)) if isinstance(v, float) or dt.startswith("float") else str(v)
         def _arr(dt, vals):
             lits = ", ".join(_lit(dt, v) for v in vals)

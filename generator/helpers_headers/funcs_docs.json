@@ -1,6 +1,6 @@
 {
   "abs": {
-    "description": "Computes the absolute value of each element in a vector register.",
+    "description": "Computes the absolute value of each element in a vector register. The most negative integer has no positive counterpart: its absolute value is itself (`-128` in `int8`).",
     "latex": "\\text{res}_i = |vd0_i|"
   },
   "acos": {
@@ -332,7 +332,7 @@
     "latex": "\\text{res}_i = \\min(\\max(vd0_i, \\text{MIN}), \\text{MAX})"
   },
   "neg": {
-    "description": "Negates each element of a vector register.",
+    "description": "Negates each element of a vector register. The most negative integer has no positive counterpart: its negation is itself (`-128` in `int8`).",
     "latex": "\\text{res}_i = -vd0_i"
   },
   "none": {
