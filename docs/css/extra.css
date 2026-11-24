@@ -1794,6 +1794,45 @@ body:has(.mipp-hero) #mipp-toc-restore-btn {
     box-shadow: 0 0 8px #0ea5e9;
   }
 
+  /* A section that has a page of its own: its row is a container (.md-nav__container) that holds
+     the link to the page and the toggle of the submenu, and each of the three is a .md-nav__link.
+     The container is the pill: the link and the toggle inside it are plain */
+  .md-nav--primary .md-nav__container>.md-nav__link:not([for="__toc"]) {
+    padding: 0 !important;
+    border-radius: 0;
+    box-shadow: none !important;
+    transform: none !important;
+    /* the colour and the weight of the row (active, hovered), without a transition of their own:
+       they follow the one of the row */
+    color: inherit;
+    font-weight: inherit;
+    transition: none;
+  }
+
+  /* ... on hover too: the row is highlighted as a whole (the selectors repeat the ones of the hover
+     rules above, the dark one included, to take precedence over them) */
+  .md-nav--primary .md-nav__container>.md-nav__link:not([for="__toc"]),
+  .md-nav--primary .md-nav__container>.md-nav__link:not([for="__toc"]):hover,
+  [data-md-color-scheme="slate"] .md-nav--primary .md-nav__container>.md-nav__link:not([for="__toc"]):hover {
+    background: none !important;
+  }
+
+  .md-nav--primary .md-nav__container>.md-nav__link:not([for="__toc"])::before {
+    content: none;
+  }
+
+  .md-nav--primary .md-nav__container>a.md-nav__link {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* the toggle keeps a touch target of the height of the row (the margins cancel the padding) */
+  .md-nav--primary .md-nav__container>label.md-nav__link:not([for="__toc"]) {
+    flex: 0 0 auto;
+    padding: 0.55rem 0.85rem 0.55rem 0.5rem !important;
+    margin: -0.55rem -0.85rem -0.55rem 0;
+  }
+
   /* Chevrons of the nested menu items */
   .md-nav--primary .md-nav__link .md-nav__icon {
     width: 1rem;
