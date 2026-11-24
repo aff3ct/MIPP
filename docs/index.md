@@ -117,6 +117,7 @@ MIPP supports 10 fundamental numeric data types across all vector abstractions:
 - **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
 - **[Headers & Compile Time](user/headers_and_compile_time.md)**: Header tree, monolithic / per-function / fine-grained inclusion, and measured compile times.
 - **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
+- **[Migrating from MIPPv1](user/migrating_from_mippv1.md)**: What changes in depth, the functions that keep their name and change their result, and the correspondence tables.
 - **[API Explorer](explorer/index.md)**: Interactive catalog with instant search, reverse vendor intrinsic lookup, and switching between the three APIs.
 - **[Specifications](funcs_support/index.md)**: Complete function prototypes, mathematical descriptions, and target ISA capability matrices.
 - **[Developer Guide](developer/index.md)**: Generation pipeline, setup, and tutorials to add a function, an implementation or an ISA.

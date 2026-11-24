@@ -10,4 +10,5 @@ nav:
   - Complex Numbers: complex_numbers.md
   - Headers & Compile Time: headers_and_compile_time.md
   - Implementation Levels: implementation_levels.md
+  - Migrating from MIPPv1: migrating_from_mippv1.md
   - ...

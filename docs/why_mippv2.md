@@ -64,7 +64,7 @@ See [Masking Semantics](user/masking_semantics.md) for the complete reference.
 <a id="3-comparison-with-existing-simd-solutions"></a>
 ## 3. Comparison with Existing SIMD Solutions
 
-Choosing the right SIMD library depends on language requirements, compilation constraints, and portability goals. The tables below reflect the state of each project as of October 2026.
+Choosing the right SIMD library depends on language requirements, compilation constraints, and portability goals. The tables below reflect the state of each project as of October 2026. To port a program written for MIPPv1, see [Migrating from MIPPv1](user/migrating_from_mippv1.md).
 
 ### Features
 

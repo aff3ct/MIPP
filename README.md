@@ -128,6 +128,7 @@ The documentation is online at [aff3ct.github.io/MIPP](https://aff3ct.github.io/
 - [API Explorer](https://aff3ct.github.io/MIPP/explorer/): search the 92 functions, including by vendor intrinsic
 - [Programming Model](https://aff3ct.github.io/MIPP/user/programming_model/): the C, C++ Functional and C++ Object APIs
 - [Why MIPPv2](https://aff3ct.github.io/MIPP/why_mippv2/): design and comparison with Highway, xsimd, Eve and others
+- [Migrating from MIPPv1](https://aff3ct.github.io/MIPP/user/migrating_from_mippv1/): what changes, the functions whose result changes, the correspondence tables
 - [Specifications](https://aff3ct.github.io/MIPP/funcs_support/): semantics and implementation matrix of each function
 - [Developer Guide](https://aff3ct.github.io/MIPP/developer/): generation pipeline, adding a function, an implementation or an ISA
 
