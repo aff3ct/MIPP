@@ -101,6 +101,7 @@
     "exp_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "__m256 x = vd0.vd;",
             "__m256 tmp = _mm256_setzero_ps(), fx;",
             "__m256i imm0;",
@@ -199,6 +200,7 @@
     "log_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "__m256 x = vd0.vd;",
             "__m256i imm0;",
             "__m256 one = _mm256_set1_ps(1.0f);",

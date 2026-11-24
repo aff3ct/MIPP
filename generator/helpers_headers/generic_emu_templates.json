@@ -16,6 +16,7 @@
     "acos_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Range Validation & Transform Branching */",
@@ -49,6 +50,7 @@
     "acos_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Range Validation & Transform Branching */",
@@ -95,6 +97,7 @@
     "acosh_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Validation & Range Boundary Masks */",
@@ -119,6 +122,7 @@
     "acosh_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Validation & Range Boundary Masks */",
@@ -216,6 +220,7 @@
     "asin_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Range Validation & Transform Branching */",
@@ -242,6 +247,7 @@
     "asin_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Range Validation & Transform Branching */",
@@ -282,6 +288,7 @@
     "asinh_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Range Validation */",
@@ -305,6 +312,7 @@
     "asinh_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Range Validation */",
@@ -328,6 +336,7 @@
     "atan2_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_y = vd0;",
             "%vd<tp>% input_x = vd1;",
             "%vd<tp>% abs_y = %abs<tp>%(input_y);",
@@ -398,6 +407,7 @@
     "atan2_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_y = vd0;",
             "%vd<tp>% input_x = vd1;",
             "%vd<tp>% abs_y = %abs<tp>%(input_y);",
@@ -468,6 +478,7 @@
     "atan_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Range Validation & Transform Branching */",
@@ -503,6 +514,7 @@
     "atan_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Range Validation & Transform Branching */",
@@ -552,6 +564,7 @@
     "atanh_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Ratio Formulation */",
@@ -572,6 +585,7 @@
     "atanh_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Ratio Formulation */",
@@ -810,6 +824,7 @@
     "cos_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Validation & Range Reduction (Payne-Hanek 3-Part) */",
@@ -855,6 +870,7 @@
     "cos_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "%vd<tp>% reduced_x = input_x;",
             "%vd<tp>% result = input_x;",
@@ -913,6 +929,7 @@
     "cosh_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% abs_x = %abs<tp>%(vd0);",
             "%vd<tp>% h = %exp<tp>%(%mul<tp>%(abs_x, %set1<tp>%(0.5f)));",
             "%vd<tp>% m = %mul<tp>%(h, %mul<tp>%(h, %set1<tp>%(0.5f)));  // e^|x| / 2",
@@ -923,6 +940,7 @@
     "cosh_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Range Validation */",
@@ -977,6 +995,7 @@
     "exp_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "%vd<tp>% x0 = vd0;",
             "%vd<tp>% exp_hi = %set1<tp>%(88.3762626647949f);",
             "%vd<tp>% exp_lo = %set1<tp>%(-88.3762626647949f);",
@@ -1037,6 +1056,7 @@
     "exp_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "%vd<tp>% x0 = vd0;",
             "%vd<tp>% exp_hi = %set1<tp>%(709.782712893384);",
             "%vd<tp>% exp_lo = %set1<tp>%(-708.3964185322641);",
@@ -1176,6 +1196,7 @@
     "log_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "%vd<tp>% x0 = vd0;",
             "%vd<tp>% one = %set1<tp>%(1.0f);",
             "%vd<tp>% half = %set1<tp>%(0.5f);",
@@ -1256,6 +1277,7 @@
     "log_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "%vd<tp>% x0 = vd0;",
             "%vd<tp>% one = %set1<tp>%(1.0);",
             "%vd<tp>% half = %set1<tp>%(0.5);",
@@ -1667,6 +1689,7 @@
     "sin_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the Cephes library: https://www.netlib.org/cephes/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Validation & Range Reduction (Payne-Hanek 3-Part) */",
@@ -1713,6 +1736,7 @@
     "sin_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "%vd<tp>% reduced_x = input_x;",
             "%vd<tp>% result = input_x;",
@@ -1772,6 +1796,7 @@
     "sinh_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% abs_x = %abs<tp>%(vd0);",
             "%vd<tp>% h = %exp<tp>%(%mul<tp>%(abs_x, %set1<tp>%(0.5f)));",
             "%vd<tp>% m = %mul<tp>%(h, %mul<tp>%(h, %set1<tp>%(0.5f)));  // e^|x| / 2",
@@ -1788,6 +1813,7 @@
     "sinh_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Range Validation */",
@@ -1946,6 +1972,7 @@
     "tan_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Validation & Range Reduction (Cody-Waite 3-Part Reduction) */",
@@ -1994,6 +2021,7 @@
     "tan_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "%vd<tp>% reduced_x;",
             "",
@@ -2055,6 +2083,7 @@
     "tanh_f32": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Range Validation */",
@@ -2079,6 +2108,7 @@
     "tanh_f64": {
         "format": "long",
         "code": [
+            "/* Implementation inspired by the SLEEF library: https://sleef.org/ */",
             "%vd<tp>% input_x = vd0;",
             "",
             "/* 1. Input Processing & Range Validation */",
