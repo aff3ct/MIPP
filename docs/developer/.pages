@@ -6,4 +6,5 @@ nav:
   - Reference: reference
   - Internals: internals
   - Process: process
+  - Generative AI: generative_ai.md
   - ...

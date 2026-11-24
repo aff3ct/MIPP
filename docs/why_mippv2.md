@@ -9,21 +9,35 @@ MIPPv2 provides portable, zero-overhead SIMD computing across x86, ARM, and RISC
 
 ---
 
-## 1. Key Architectural Principles
+## 1. Motivation & Philosophy
+
+Several mature SIMD wrappers exist today (see the [comparison](#simd-wrappers-comparison) below), and MIPP does not try to replace them. Its place is the one it has had since MIPPv1, in 2016: a wrapper born in an academic setting, made for teaching and research as much as for production code.
+
+- **Made to be read.** Opening a function shows the instructions it runs. The [API Explorer](explorer/index.md) shows, for a function, a datatype and a target, the code that is compiled and what it is built from.
+- **For beginners and experts.** The same library serves a first SIMD loop (`a + b` on two `mipp::Vd`) and fine control over masking, register groups and targets.
+- **Made to follow the hardware.** Supporting a new SIMD extension means describing it, not rewriting the library ([Adding an ISA](developer/tutorials/add_isa.md)).
+- **Not bound to one language.** The registry of the functions (names, prototypes, datatypes, mask variants) does not depend on a language: the generator writes each API from it. MIPPv2 generates C and C++ today; another language would be an extension to the generator.
+- **Open source.** MIPP is released under the MIT license, and will remain so.
+
+MIPPv2 was written with the help of generative AI, in a way its design keeps under control: see [Generative AI in MIPPv2](developer/generative_ai.md).
+
+---
+
+## 2. Key Architectural Principles
 
 ![MIPPv2 architecture: three APIs (C, C++ Functional, C++ Object) share one implementation that picks, per function, datatype and target, the first available level among L0 native, L1 dedicated emulation, L2 generic emulation and L3 scalar fallback; targets SSE, AVX, AVX-512, NEON, SVE, RVV and Scalar](assets/images/architecture.svg){ width="680" }
 
-### 1.1. Three APIs
+### 2.1. Three APIs
 Three complementary interfaces mapping to the same inlined instructions:
 
 - **C API (`<mipp.h>`, C11)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
 - **C++ Functional API (`<mipp.hpp>`, C++11)**: Overloaded functions under namespace `mipp::` (`mipp::add(a, b)`), with datatype and LMUL deduced from the register types.
 - **C++ Object API (`<mipp_obj.hpp>`, C++11)**: Register classes (`mipp::Vd`, `mipp::Vm`) with complete operator overloading.
 
-### 1.2. Deterministic 4-Level Fallback Hierarchy
+### 2.2. Deterministic 4-Level Fallback Hierarchy
 Every function compiles on every target, for all its data types, and uses the best available level: **Level 0 (Native Hardware)**, **Level 1 (Dedicated Emulation)**, **Level 2 (Generic Emulation)** or **Level 3 (Scalar Fallback)**. A few functions are not implemented yet in two configurations (ARMv7 NEON, RVV without 64-bit elements): they compile but stop at run time. See [Implementation Levels](user/implementation_levels.md) and its [known limitations](user/implementation_levels.md#known-limitations).
 
-### 1.3. Generalized Length Multiplier (LMUL)
+### 2.3. Generalized Length Multiplier (LMUL)
 
 Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$), plus half-vectors (`d2`, $\text{LMUL} = 1/2$):
 
@@ -33,14 +47,14 @@ Uniform vector register grouping ($\text{LMUL} \in \{1, 2, 4, 8\}$), plus half-v
 
 See [Vector Types & LMUL](user/vector_types_and_lmul.md).
 
-### 1.4. Explicit 4-Variant Masking Model
+### 2.4. Explicit 4-Variant Masking Model
 
 Standardized execution semantics across all operations:
 
 - **Unmasked** (`U`, no suffix): Unconditional vector computation.
-- **Merge-Masked** (`M`, `_mask`): Inactive elements keep the first operand ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : a_i$).
-- **Zero-Masked** (`Z`, `_maskz`): Zeroes inactive elements ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : 0$).
-- **Source-Masked** (`S`, `_masks`): Inactive elements take the values of a source vector ($\text{res}_i = m_i \ ? \ f(a_i, b_i) : \text{src}_i$).
+- **Merge-Masked** (`M`, `_mask`): Inactive elements keep the first operand: $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ a_i & \text{if } m_i = 0 \end{cases}$
+- **Zero-Masked** (`Z`, `_maskz`): Zeroes inactive elements: $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ 0 & \text{if } m_i = 0 \end{cases}$
+- **Source-Masked** (`S`, `_masks`): Inactive elements take the values of a source vector: $\text{res}_i = \begin{cases} f(a_i, b_i) & \text{if } m_i = 1 \\ \text{src}_i & \text{if } m_i = 0 \end{cases}$
 
 See [Masking Semantics](user/masking_semantics.md) for the complete reference.
 
@@ -48,7 +62,7 @@ See [Masking Semantics](user/masking_semantics.md) for the complete reference.
 
 <a id="simd-wrappers-comparison"></a>
 <a id="3-comparison-with-existing-simd-solutions"></a>
-## 2. Comparison with Existing SIMD Solutions
+## 3. Comparison with Existing SIMD Solutions
 
 Choosing the right SIMD library depends on language requirements, compilation constraints, and portability goals. The tables below reflect the state of each project as of October 2026.
 
@@ -94,10 +108,10 @@ Choosing the right SIMD library depends on language requirements, compilation co
 
 ### Key Differentiators for MIPPv2
 
-1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 provides clean, strongly-typed C11 inline functions (C API) alongside the C++ Functional and C++ Object APIs.
+1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 has a C11 API next to its two C++11 APIs ([§2.1](#21-three-apis)).
 2. **Expressive Syntax without Portability Sacrifices**: While Google Highway restricts operator overloading to fixed-width targets to accommodate sizeless SVE / RVV vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
-3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures. MIPP falls back hierarchically through ISA emulation, generic portable primitives, or scalar loops, covering the function / datatype matrix across all 10 datatypes (except the few [known limitations](user/implementation_levels.md#known-limitations)).
-4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`), straightforward struct layouts, and standard operator syntax without runtime stripmining overhead.
+3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures: every function compiles on every target, for its 10 datatypes ([§2.2](#22-deterministic-4-level-fallback-hierarchy)).
+4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`) and straightforward struct layouts, without runtime stripmining overhead.
 5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.
 6. **Automated Offline Code Generation**: Shifting metaprogramming offline into a Python engine (`generator/`) yields three major engineering benefits:
     - **Fine-Grained Modular Headers**: Programmatic synthesis enables headers restricted to one function, one masking variant and one LMUL (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). Including only what is needed makes compilation 2× to 4× faster than with the umbrella header (see [Headers & Compile Time](user/headers_and_compile_time.md)).
