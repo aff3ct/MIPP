@@ -12,7 +12,7 @@
     "latex": "\\text{res}_i = \\operatorname{arcosh}(vd0_i)"
   },
   "add": {
-    "description": "Adds two vector registers element-wise.",
+    "description": "Adds two vector registers element-wise. The integer additions wrap around (modulo $2^n$: `100 + 100` is `-56` in `int8`); `adds` saturates instead.",
     "latex": "\\text{res}_i = vd0_i + vd1_i"
   },
   "adds": {
@@ -96,23 +96,23 @@
     "latex": "\\text{res}_i = \\min(\\max(vd0_i, vd1_i), vd2_i)"
   },
   "cmpeq": {
-    "description": "Compares two vector registers element-wise for equality ($a = b$).",
+    "description": "Compares two vector registers element-wise for equality ($a = b$). False when one of the two elements is NaN.",
     "latex": "m_i = (vd0_i == vd1_i)"
   },
   "cmpge": {
-    "description": "Compares two vector registers element-wise for greater-than-or-equal ($a \\ge b$).",
+    "description": "Compares two vector registers element-wise for greater-than-or-equal ($a \\ge b$). False when one of the two elements is NaN.",
     "latex": "m_i = (vd0_i \\ge vd1_i)"
   },
   "cmpgt": {
-    "description": "Compares two vector registers element-wise for greater-than ($a > b$).",
+    "description": "Compares two vector registers element-wise for greater-than ($a > b$). False when one of the two elements is NaN.",
     "latex": "m_i = (vd0_i > vd1_i)"
   },
   "cmple": {
-    "description": "Compares two vector registers element-wise for less-than-or-equal ($a \\le b$).",
+    "description": "Compares two vector registers element-wise for less-than-or-equal ($a \\le b$). False when one of the two elements is NaN.",
     "latex": "m_i = (vd0_i \\le vd1_i)"
   },
   "cmplt": {
-    "description": "Compares two vector registers element-wise for less-than ($a < b$).",
+    "description": "Compares two vector registers element-wise for less-than ($a < b$). False when one of the two elements is NaN.",
     "latex": "m_i = (vd0_i < vd1_i)"
   },
   "cmpneq": {
@@ -172,7 +172,7 @@
     "latex": "\\text{res} = \\#\\{i \\mid vm0_i \\neq 0\\}"
   },
   "cvt": {
-    "description": "Converts elements of a vector register to another datatype with numerical casting.",
+    "description": "Converts elements of a vector register to another datatype with numerical casting. A floating-point element converted to an integer is truncated toward zero, as a C cast: `2.7` gives `2` (call `round` first to round to the nearest integer). An integer without an exact floating-point representation is rounded to the nearest one. The conversion to an integer of a NaN, or of a value out of the range of the destination, gives a result that depends on the target.",
     "latex": "\\text{res}_i = (T_{\\text{dst}}) vd0_i"
   },
   "unzip": {
@@ -184,11 +184,11 @@
     "latex": "\\text{res}_i = \\frac{vd0_i}{vd1_i}"
   },
   "div2": {
-    "description": "Divides each element of a vector register by 2 (via arithmetic shift for integers or multiplication/division for floats).",
+    "description": "Divides each element of a vector register by 2 (via arithmetic shift for integers or multiplication/division for floats). For the negative integers the shift rounds toward $-\\infty$, where the C division rounds toward zero: `-7` gives `-4`, not `-3`.",
     "latex": "\\text{res}_i = \\frac{vd0_i}{2}"
   },
   "div4": {
-    "description": "Divides each element of a vector register by 4 (via arithmetic shift for integers or multiplication/division for floats).",
+    "description": "Divides each element of a vector register by 4 (via arithmetic shift for integers or multiplication/division for floats). For the negative integers the shift rounds toward $-\\infty$, where the C division rounds toward zero: `-7` gives `-2`, not `-1`.",
     "latex": "\\text{res}_i = \\frac{vd0_i}{4}"
   },
   "dupeven": {
@@ -212,19 +212,19 @@
     "latex": "\\text{res}_i = vm0_i\\ ?\\ p0_{\\#\\{j < i \\mid vm0_j\\}} : 0"
   },
   "fmadd": {
-    "description": "Computes the fused multiply-add of three vector registers ($a \\times b + c$).",
+    "description": "Computes the fused multiply-add of three vector registers ($a \\times b + c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = (vd0_i \\cdot vd1_i) + vd2_i"
   },
   "fmsub": {
-    "description": "Computes the fused multiply-subtract of three vector registers ($a \\times b - c$).",
+    "description": "Computes the fused multiply-subtract of three vector registers ($a \\times b - c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = (vd0_i \\cdot vd1_i) - vd2_i"
   },
   "fnmadd": {
-    "description": "Computes the fused negative multiply-add of three vector registers ($-(a \\times b) + c$).",
+    "description": "Computes the fused negative multiply-add of three vector registers ($-(a \\times b) + c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = -(vd0_i \\cdot vd1_i) + vd2_i"
   },
   "fnmsub": {
-    "description": "Computes the fused negative multiply-subtract of three vector registers ($-(a \\times b) - c$).",
+    "description": "Computes the fused negative multiply-subtract of three vector registers ($-(a \\times b) - c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = -(vd0_i \\cdot vd1_i) - vd2_i"
   },
   "gather": {
@@ -244,7 +244,7 @@
     "latex": "\\text{res} = vd0[0]"
   },
   "hadd": {
-    "description": "Computes the horizontal addition (reduction sum) of all elements in a vector register.",
+    "description": "Computes the horizontal addition (reduction sum) of all elements in a vector register. For the floating-point types, the order of the additions depends on the target: the last bits of the result can differ from one target to another, and from a sequential sum.",
     "latex": "\\text{res} = \\sum_{i=0}^{N-1} vd0_i"
   },
   "hadds": {
@@ -260,15 +260,15 @@
     "latex": "m_{\\text{res}, i} = m_{0, i + N/2}, \\quad 0 \\le i < N / 2"
   },
   "hmax": {
-    "description": "Computes the horizontal maximum (reduction maximum) of all elements in a vector register.",
+    "description": "Computes the horizontal maximum (reduction maximum) of all elements in a vector register. With a NaN element, the result depends on the target.",
     "latex": "\\text{res} = \\max_{i=0}^{N-1} vd0_i"
   },
   "hmin": {
-    "description": "Computes the horizontal minimum (reduction minimum) of all elements in a vector register.",
+    "description": "Computes the horizontal minimum (reduction minimum) of all elements in a vector register. With a NaN element, the result depends on the target.",
     "latex": "\\text{res} = \\min_{i=0}^{N-1} vd0_i"
   },
   "hmul": {
-    "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register.",
+    "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register. For the floating-point types, the order of the multiplications depends on the target: the last bits of the result can differ from one target to another, and from a sequential product.",
     "latex": "\\text{res} = \\prod_{i=0}^{N-1} vd0_i"
   },
   "zip": {
@@ -308,11 +308,11 @@
     "latex": "\\text{res}_i = vd0_i \\ll s0"
   },
   "max": {
-    "description": "Selects the maximum value element-wise between two vector registers.",
+    "description": "Selects the maximum value element-wise between two vector registers. When an element is NaN, the result depends on the target (the NaN or the other element), and so does the sign of the zero returned for `-0.0` and `0.0`.",
     "latex": "\\text{res}_i = \\max(vd0_i, vd1_i)"
   },
   "min": {
-    "description": "Selects the minimum value element-wise between two vector registers.",
+    "description": "Selects the minimum value element-wise between two vector registers. When an element is NaN, the result depends on the target (the NaN or the other element), and so does the sign of the zero returned for `-0.0` and `0.0`.",
     "latex": "\\text{res}_i = \\min(vd0_i, vd1_i)"
   },
   "msb": {
@@ -320,7 +320,7 @@
     "latex": "\\text{res}_i = vd0_i \\ \\& \\ \\text{MSB_MASK}"
   },
   "mul": {
-    "description": "Multiplies two vector registers element-wise.",
+    "description": "Multiplies two vector registers element-wise. The integer multiplications keep the low bits of the product (modulo $2^n$).",
     "latex": "\\text{res}_i = vd0_i \\cdot vd1_i"
   },
   "ncvt": {
@@ -392,7 +392,7 @@
     "latex": "\\text{res}_{b+l} = vd0_{b + (l + s0) \\bmod n_b}"
   },
   "round": {
-    "description": "Rounds each floating-point element to the nearest integer.",
+    "description": "Rounds each floating-point element to the nearest integer. A tie is rounded away from zero, as the C function `round`: `2.5` gives `3` and `-2.5` gives `-3`.",
     "latex": "\\text{res}_i = \\operatorname{round}(vd0_i)"
   },
   "rshift": {
@@ -404,7 +404,7 @@
     "latex": "\\text{res}_i = vd0_i \\gg s0"
   },
   "rsqrt": {
-    "description": "Computes the reciprocal square root of each floating-point element ($1 / \\sqrt{a}$).",
+    "description": "Computes an estimate of the reciprocal square root of each floating-point element ($1 / \\sqrt{a}$). Its precision is the one of the instruction of the target: from two or three significant digits (the estimates of NEON and RVV) to the exact value. Divide by `sqrt` when the last digits matter.",
     "latex": "\\text{res}_i = \\frac{1}{\\sqrt{vd0_i}}"
   },
   "scatter": {
@@ -492,7 +492,7 @@
     "latex": "\\text{p0}[i] = vd0_i"
   },
   "sub": {
-    "description": "Subtracts the second vector register from the first element-wise.",
+    "description": "Subtracts the second vector register from the first element-wise. The integer subtractions wrap around (modulo $2^n$); `subs` saturates instead.",
     "latex": "\\text{res}_i = vd0_i - vd1_i"
   },
   "subs": {
