@@ -208,7 +208,7 @@
         "code": [
             "// r0 is given as indexes => cvt to byte offsets",
             "%r<c:uint|b:tp>% tmp;",
-            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
+            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, {{dt_par.log2_n_bytes}}, %N<tp>%);",
             "",
             "%r<tp>% res;",
             "res.r ={{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, %N<tp>%);",
@@ -219,7 +219,7 @@
         "format": "long",
         "code": [
             "%r<c:uint|b:tp>% tmp;",
-            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
+            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, {{dt_par.log2_n_bytes}}, %N<tp>%);",
             "%r<tp>% res;",
             "res.r = {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, rsrc.r, p0, tmp.r, %N<tp>%);",
             "return res;"
@@ -232,7 +232,7 @@
             "zeroes = %set0<tp>%();",
             "",
             "%r<c:uint|b:tp>% tmp;",
-            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
+            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, {{dt_par.log2_n_bytes}}, %N<tp>%);",
             "",
             "res.r = {{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_mu(m0.m, zeroes.r, p0, tmp.r, %N<tp>%);",
             "return res;"
@@ -491,7 +491,7 @@
         "format": "long",
         "code": [
             "%r<c:uint|b:tp>% tmp;",
-            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
+            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, {{dt_par.log2_n_bytes}} , %N<tp>%);",
             "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, r1.r, %N<tp>%);"
         ]
     },
@@ -499,7 +499,7 @@
         "format": "long",
         "code": [
             "%r<c:uint|b:tp>% tmp;",
-            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
+            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, {{dt_par.log2_n_bytes}}, %N<tp>%);",
             "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}_m(m0.m, p0, tmp.r, r1.r, %N<tp>%);"
         ]
     },
@@ -511,7 +511,7 @@
             "zeroes = %set0<tp>%();",
             "blended.r = {{isa.prefix}}_vmerge_vvm_{{isa_dt_par.data_ext}}(zeroes.r, r1.r, m0.m, %N<tp>%);",
             "",
-            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, sizeof({{isa_dt_par.to_ptr}}), %N<tp>%);",
+            "tmp.r = {{isa.prefix}}_vsll_vx_{{isa_dt_par.uint_data_ext}}(r0.r, {{dt_par.log2_n_bytes}}, %N<tp>%);",
             "{{ isa.prefix }}_v{{ instr_name }}{{isa_dt_par.width}}_v_{{ isa_dt_par.data_ext }}(p0, tmp.r, blended.r, %N<tp>%);"
         ]
     },
