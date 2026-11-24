@@ -19,8 +19,11 @@
         "format": "long",
         "code": [
             "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+            "{% if isa.get('hw_mask', False) %}// hardware masks: a selection with zeros, which the compilers can fold into a zero-masked instruction",
+            "%vd<tp>% res = %select<tp>%(vm0, op, %set0<tp>%());",
+            "{%- else -%}",
             "%vd<tp>% tmp = %tovd<tp>%(vm0);",
-            "%vd<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);{% endif %}",
             "return res;"
         ]
     },
@@ -251,8 +254,11 @@
         "format": "long",
         "code": [
             "%vd<tp>% op = %{{func_name}}<tp>%(vd0, s0);",
+            "{% if isa.get('hw_mask', False) %}// hardware masks: a selection with zeros, which the compilers can fold into a zero-masked instruction",
+            "%vd<tp>% res = %select<tp>%(vm0, op, %set0<tp>%());",
+            "{%- else -%}",
             "%vd<tp>% tmp = %tovd<tp>%(vm0);",
-            "%vd<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);{% endif %}",
             "return res;"
         ]
     },
@@ -298,8 +304,11 @@
         "format": "long",
         "code": [
             "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1, s0);",
+            "{% if isa.get('hw_mask', False) %}// hardware masks: a selection with zeros, which the compilers can fold into a zero-masked instruction",
+            "return %select<tp>%(vm0, op, %set0<tp>%());",
+            "{%- else -%}",
             "%vd<tp>% tmp = %tovd<tp>%(vm0);",
-            "return %andb<tp>%(op, tmp);"
+            "return %andb<tp>%(op, tmp);{% endif %}"
         ]
     },
     "store_msk": {
@@ -378,8 +387,11 @@
         "format": "long",
         "code": [
             "%vd<tp>% op = %{{func_name}}<tp>%( vd0, vd1, vd2);",
+            "{% if isa.get('hw_mask', False) %}// hardware masks: a selection with zeros, which the compilers can fold into a zero-masked instruction",
+            "%vd<tp>% res = %select<tp>%(vm0, op, %set0<tp>%());",
+            "{%- else -%}",
             "%vd<tp>% tmp = %tovd<tp>%(vm0);",
-            "%vd<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);{% endif %}",
             "return res;"
         ]
     },
@@ -403,8 +415,11 @@
         "format": "long",
         "code": [
             "%vd<tp>% op = %{{func_name}}<tp>%(vd0);",
+            "{% if isa.get('hw_mask', False) %}// hardware masks: a selection with zeros, which the compilers can fold into a zero-masked instruction",
+            "%vd<tp>% res = %select<tp>%(vm0, op, %set0<tp>%());",
+            "{%- else -%}",
             "%vd<tp>% tmp = %tovd<tp>%(vm0);",
-            "%vd<tp>% res = %andb<tp>%(op, tmp);",
+            "%vd<tp>% res = %andb<tp>%(op, tmp);{% endif %}",
             "return res;"
         ]
     }

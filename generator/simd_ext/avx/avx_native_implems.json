@@ -393,6 +393,61 @@
             "template": "gather_i32_64_masks_i",
             "variant": "s",
             "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "float64,uint64"
+            ],
+            "template": "gather_maskz_f64",
+            "if": "defined(__AVX2__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "int64,uint64"
+            ],
+            "template": "gather_maskz_i64",
+            "if": "defined(__AVX2__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "float32,uint32"
+            ],
+            "template": "gather_maskz_f32",
+            "if": "defined(__AVX2__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "int32,uint32"
+            ],
+            "template": "gather_maskz_i32",
+            "if": "defined(__AVX2__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "gather_i32_64_maskz_f",
+            "variant": "z",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_i32_64_maskz_i",
+            "variant": "z",
+            "if": "defined(__AVX2__)"
         }
     ],
     "getfirst": [
@@ -653,6 +708,17 @@
                 "uint8"
             ],
             "template": "rea_shuffle_epi8_b128",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "pow2": [
+        {
+            "instr_name": "pow2",
+            "datatypes": [
+                "uint32",
+                "uint64"
+            ],
+            "template": "pow2_sllv",
             "if": "defined(__AVX2__)"
         }
     ],

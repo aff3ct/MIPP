@@ -967,8 +967,9 @@
     "div2": {
         "format": "long",
         "code": [
-            "%vd<tp>% tmp = %set1<tp>%(2);",
-            "%vd<tp>% res = %div<tp>%(vd0, tmp);",
+            "// multiplication by the exact inverse: same result as the division (including the subnormals), much cheaper",
+            "%vd<tp>% tmp = %set1<tp>%(0.5);",
+            "%vd<tp>% res = %mul<tp>%(vd0, tmp);",
             "return res;"
         ]
     },
@@ -981,8 +982,9 @@
     "div4": {
         "format": "long",
         "code": [
-            "%vd<tp>% tmp = %set1<tp>%(4);",
-            "%vd<tp>% res = %div<tp>%(vd0, tmp);",
+            "// multiplication by the exact inverse: same result as the division (including the subnormals), much cheaper",
+            "%vd<tp>% tmp = %set1<tp>%(0.25);",
+            "%vd<tp>% res = %mul<tp>%(vd0, tmp);",
             "return res;"
         ]
     },

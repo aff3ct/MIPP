@@ -1,4 +1,29 @@
 {
+    "abs": [
+        {
+            "instr_name": "fabs",
+            "datatypes": "all_float",
+            "template": "arith_1arg"
+        },
+        {
+            "instr_name": "fabs",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "fabs",
+            "datatypes": "all_float",
+            "template": "arith_1arg_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "fabs",
+            "datatypes": "all_float",
+            "template": "arith_1arg_mskz",
+            "variant": "z"
+        }
+    ],
     "add": [
         {
             "instr_name": "fadd",
@@ -33,6 +58,18 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fadd",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "add_vs": [
@@ -93,6 +130,18 @@
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "sadd",
+            "datatypes": "all_int",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "saddu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "andb": [
@@ -112,6 +161,12 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "andb_k": [
@@ -153,6 +208,24 @@
             "instr_name": "vrgather",
             "datatypes": "all_datatypes",
             "template": "rea_gather_vx"
+        },
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vx_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vx_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vx_mskz",
+            "variant": "z"
         }
     ],
     "cast": [
@@ -447,6 +520,38 @@
             "template": "form_vf_cmp"
         }
     ],
+    "compress": [
+        {
+            "instr_name": "vcompress",
+            "datatypes": "all_datatypes",
+            "template": "rea_compress"
+        }
+    ],
+    "copysign": [
+        {
+            "instr_name": "fsgnj",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "fsgnj",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "fsgnj",
+            "datatypes": "all_float",
+            "template": "arith_2args_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "fsgnj",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        }
+    ],
     "count": [
         {
             "instr_name": "cpop",
@@ -521,6 +626,12 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "fdiv",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "div2": [
@@ -574,6 +685,24 @@
             "datatypes": "all_float",
             "template": "div2_float_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "div2_scalar_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "div2_scalar_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fdiv",
+            "datatypes": "all_float",
+            "template": "div2_float_mskz",
+            "variant": "z"
         }
     ],
     "div4": [
@@ -627,6 +756,24 @@
             "datatypes": "all_float",
             "template": "div4_float_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "div4_scalar_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "div4_scalar_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fdiv",
+            "datatypes": "all_float",
+            "template": "div4_float_mskz",
+            "variant": "z"
         }
     ],
     "div_sv": [
@@ -704,11 +851,37 @@
             "template": "form_vf_fma_vsv"
         }
     ],
+    "fnmadd": [
+        {
+            "instr_name": "fnmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args"
+        },
+        {
+            "instr_name": "fnmsub",
+            "datatypes": "all_float",
+            "template": "arith_3args_msk",
+            "variant": "m"
+        }
+    ],
     "fnmadd_vsv": [
         {
             "instr_name": "fnmsub",
             "datatypes": "all_float",
             "template": "form_vf_fma_vsv"
+        }
+    ],
+    "fnmsub": [
+        {
+            "instr_name": "fnmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args"
+        },
+        {
+            "instr_name": "fnmadd",
+            "datatypes": "all_float",
+            "template": "arith_3args_msk",
+            "variant": "m"
         }
     ],
     "fnmsub_vsv": [
@@ -760,6 +933,12 @@
             "datatypes": "all_datatypes",
             "template": "load_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "load",
+            "datatypes": "all_datatypes",
+            "template": "load_mskz",
+            "variant": "z"
         }
     ],
     "loadu": [
@@ -773,6 +952,12 @@
             "datatypes": "all_datatypes",
             "template": "load_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "loadu",
+            "datatypes": "all_datatypes",
+            "template": "load_mskz",
+            "variant": "z"
         }
     ],
     "lshift": [
@@ -792,6 +977,12 @@
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "lshift_vs": [
@@ -811,6 +1002,12 @@
             "datatypes": "all_int_uint",
             "template": "shift_scalar_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int_uint",
+            "template": "shift_scalar_mskz",
+            "variant": "z"
         }
     ],
     "max": [
@@ -864,6 +1061,24 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": "all_int",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "maxu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fmax",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "max_vs": [
@@ -952,6 +1167,24 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": "all_int",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "minu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fmin",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "min_vs": [
@@ -1023,6 +1256,18 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fmul",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "mul_vs": [
@@ -1083,6 +1328,18 @@
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "neg",
+            "datatypes": "all_int",
+            "template": "arith_1arg_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fneg",
+            "datatypes": "all_float",
+            "template": "arith_1arg_mskz",
+            "variant": "z"
         }
     ],
     "none": [
@@ -1109,6 +1366,12 @@
             "datatypes": "all_int_uint",
             "template": "scalar_notb_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "scalar_notb_mskz",
+            "variant": "z"
         }
     ],
     "notb_k": [
@@ -1135,6 +1398,12 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "orb_k": [
@@ -1162,6 +1431,24 @@
             "instr_name": "vrgather",
             "datatypes": "all_datatypes",
             "template": "rea_gather_vv"
+        },
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vv_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vv_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "vrgather",
+            "datatypes": "all_datatypes",
+            "template": "rea_gather_vv_mskz",
+            "variant": "z"
         }
     ],
     "round": [
@@ -1189,6 +1476,12 @@
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "rshift_vs": [
@@ -1225,6 +1518,18 @@
             "datatypes": "all_int",
             "template": "shift_scalar_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shift_scalar_mskz",
+            "variant": "z"
         }
     ],
     "rsqrt": [
@@ -1244,6 +1549,12 @@
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "frsqrt7",
+            "datatypes": "all_float",
+            "template": "arith_1arg_mskz",
+            "variant": "z"
         }
     ],
     "scatter": [
@@ -1291,6 +1602,13 @@
             "template": "float_set0"
         }
     ],
+    "slideup": [
+        {
+            "instr_name": "vslideup",
+            "datatypes": "all_datatypes",
+            "template": "rea_slideup"
+        }
+    ],
     "sqrt": [
         {
             "instr_name": "fsqrt",
@@ -1308,6 +1626,12 @@
             "datatypes": "all_float",
             "template": "arith_1arg_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "fsqrt",
+            "datatypes": "all_float",
+            "template": "arith_1arg_mskz",
+            "variant": "z"
         }
     ],
     "store": [
@@ -1370,6 +1694,18 @@
             "datatypes": "all_float",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "fsub",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "sub_sv": [
@@ -1442,6 +1778,18 @@
             "datatypes": "all_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "ssub",
+            "datatypes": "all_int",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "ssubu",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "xorb": [
@@ -1461,6 +1809,12 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_msks",
             "variant": "s"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_int_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ],
     "xorb_k": [
@@ -1481,6 +1835,31 @@
             "datatypes": "all_int_uint",
             "template": "form_vx_msk",
             "variant": "m"
+        }
+    ],
+    "xorsign": [
+        {
+            "instr_name": "fsgnjx",
+            "datatypes": "all_float",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "fsgnjx",
+            "datatypes": "all_float",
+            "template": "arith_2args_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "fsgnjx",
+            "datatypes": "all_float",
+            "template": "arith_2args_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "fsgnjx",
+            "datatypes": "all_float",
+            "template": "arith_2args_mskz",
+            "variant": "z"
         }
     ]
 }

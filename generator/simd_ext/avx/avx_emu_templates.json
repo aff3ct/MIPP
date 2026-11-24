@@ -169,34 +169,6 @@
             ""
         ]
     },
-    "gather_i32_64_maskz_f": {
-        "format": "short",
-        "code": [
-            "_mm256_mask_i32gather_pd(_mm256_setzero_pd(), p0, vd0.vd, vm0.vm, 8);"
-        ]
-    },
-    "gather_i32_64_maskz_i": {
-        "format": "short",
-        "code": [
-            "_mm256_mask_i32gather_epi64(_mm256_setzero_si256(), (const long long*)p0, vd0.vd, vm0.vm, 8);"
-        ]
-    },
-    "gather_maskz_f32": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,4);"
-    },
-    "gather_maskz_f64": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,8);"
-    },
-    "gather_maskz_i32": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,4);"
-    },
-    "gather_maskz_i64": {
-        "format": "short",
-        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,(long long*)p0,vd0.vd,vm0.vm,8);"
-    },
     "log_f32": {
         "format": "long",
         "code": [
@@ -332,14 +304,6 @@
             "{% if isa_dt_par.data_ext_msk == 'ps' %}res.vm = _mm256_xor_ps(vm0.vm, ones);",
             "{% elif isa_dt_par.data_ext_msk == 'pd' %}res.vm = _mm256_xor_pd(vm0.vm, _mm256_castps_pd(ones));",
             "{% else %}res.vm = _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(vm0.vm), ones));{% endif %}",
-            "return res;"
-        ]
-    },
-    "pow2_sllv": {
-        "format": "long",
-        "code": [
-            "%vd<tp>% res;",
-            "res.vd = _mm256_sllv_epi{{ dt_par.n_bits }}(_mm256_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(1), vd0.vd);",
             "return res;"
         ]
     },

@@ -109,6 +109,18 @@
             "_mm256_mask_i32gather_epi64(vdsrc.vd, (const long long*)p0, vd0.vd, vm0.vm, 8);"
         ]
     },
+    "gather_i32_64_maskz_f": {
+        "format": "short",
+        "code": [
+            "_mm256_mask_i32gather_pd(_mm256_setzero_pd(), p0, vd0.vd, vm0.vm, 8);"
+        ]
+    },
+    "gather_i32_64_maskz_i": {
+        "format": "short",
+        "code": [
+            "_mm256_mask_i32gather_epi64(_mm256_setzero_si256(), (const long long*)p0, vd0.vd, vm0.vm, 8);"
+        ]
+    },
     "gather_i64": {
         "format": "short",
         "code": "{{ isa.prefix }}_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}((long long*)p0,vd0.vd,{{dt_par.n_bits//8}});"
@@ -128,6 +140,22 @@
     "gather_masks_i64": {
         "format": "short",
         "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vdsrc.vd,(long long*)p0,vd0.vd,vm0.vm,8);"
+    },
+    "gather_maskz_f32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,4);"
+    },
+    "gather_maskz_f64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,8);"
+    },
+    "gather_maskz_i32": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,p0,vd0.vd,vm0.vm,4);"
+    },
+    "gather_maskz_i64": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,(long long*)p0,vd0.vd,vm0.vm,8);"
     },
     "getfirst": {
         "format": "long",
@@ -170,6 +198,14 @@
     "maskstore_m": {
         "format": "short",
         "code": "_mm256_maskstore_{% if dt_par.category == 'float' %}{{ isa_dt_par.data_ext }}{% else %}epi{{ dt_par.n_bits }}{% endif %}(({% if dt_par.n_bits == 64 and dt_par.category != 'float' %}long long{% elif dt_par.category != 'float' %}int{% else %}{{ isa_dt_par.to_ptr }}{% endif %}*)p0, {% if dt_par.category == 'float' %}_mm256_cast{{ isa_dt_par.data_ext }}_si256(vm0.vm){% else %}vm0.vm{% endif %}, vd0.vd);"
+    },
+    "pow2_sllv": {
+        "format": "long",
+        "code": [
+            "%vd<tp>% res;",
+            "res.vd = _mm256_sllv_epi{{ dt_par.n_bits }}(_mm256_set1_epi{{ dt_par.n_bits }}{{ 'x' if dt_par.n_bits == 64 else '' }}(1), vd0.vd);",
+            "return res;"
+        ]
     },
     "rea_dup_f": {
         "format": "short",

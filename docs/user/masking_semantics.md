@@ -77,9 +77,9 @@ The mask type follows the hardware of each target. How a masked operation is exe
 
 | Architecture | Mask Representation in MIPP | Execution of Masked Operations |
 | :--- | :--- | :--- |
-| **RISC-V Vector 1.0** | Boolean mask registers (`vbool*_t`). | Native predicated instructions (`vadd.vv ..., v0.t`) for a large part of the functions. |
-| **x86 AVX-512** | Opmask registers (`__mmask8` ... `__mmask64`). | Native masked intrinsics for part of the functions (e.g. `_mm512_mask_add_ps`, masked `load` / `store` for the 10 datatypes); the others run the unmasked operation, then `_mm512_mask_blend_*`. |
-| **ARM SVE** | Predicate registers (`svbool_t`). | Unmasked operation, then `svsel`. The predicated instruction forms (`svadd_f32_m`) are not used yet. |
+| **RISC-V Vector 1.0** | Boolean mask registers (`vbool*_t`). | Native predicated instructions (`vadd.vv ..., v0.t`, `_mu` policy) for most functions: arithmetic, FMA, logic, shifts, `clamp`, `copysign`, the gathers of the rearrangements, reductions, memory accesses. The slides, `zip` / `unzip` and the compositions (math) run the unmasked operation, then `vmerge`. |
+| **x86 AVX-512** | Opmask registers (`__mmask8` ... `__mmask64`). | Native masked intrinsics (`_mm512_mask_add_ps`, `_mm512_maskz_permutexvar_ps`...) for the functions whose instruction has a masked form at the granularity of the lanes. The others (math, complex numbers, functions with an immediate count) run the unmasked operation, then a `select`, which GCC and Clang fold into the masked instruction when the last instruction has one. |
+| **ARM SVE** | Predicate registers (`svbool_t`). | Predicated instruction forms (`svadd_f32_m`, `svnot_u32_z`...) for the functions that have one. The rearrangements (`svtbl`, `svzip1`...) have none: unmasked operation, then `svsel`. |
 | **x86 AVX / AVX2** | Full-vector masks: all bits of a lane set (active) or cleared (inactive). | Unmasked operation, then `_mm256_blendv_*`. |
 | **ARM NEON** | Full-vector masks (`uint32x4_t`, ...). | Unmasked operation, then `vbslq_*`. |
 | **x86 SSE** | Full-vector masks (`__m128`, `__m128d`, `__m128i`). | Scalar fallback: SSE has no `select` implementation yet. |
@@ -89,7 +89,7 @@ The level of each masked function on each target is listed in the masked [Hardwa
 
 !!! note "Hardware and MIPP limitations"
     - SSE, AVX and NEON have no predicated arithmetic: a blend (`blendv`, `vbsl`) after the unmasked operation is the expected implementation. SSE still lacks it in MIPP (scalar fallback).
-    - AVX-512 and SVE have predicated instructions, and MIPP already uses their native mask types. The remaining blend-based (AVX-512) and `svsel`-based (SVE) masked operations are a MIPP limitation, to be replaced by native predicated forms.
+    - On AVX-512, SVE and RVV, a masked function without a predicated form of its instruction runs the unmasked operation, then a `select`; the Zero-Masked variant selects zeros (`select(m, op, set0())`), which costs one instruction on SVE and RVV and is folded into the zero-masked instruction (`{z}`) on AVX-512.
 
 ---
 

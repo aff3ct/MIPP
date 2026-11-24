@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import sys
 from jsonschema import Draft7Validator, validators
 
@@ -264,6 +265,61 @@ def validate_logical_integrity(isa, implems, implems_emu):
     # Audit implementation levels
     audit_and_validate_implementation_levels(isa, implems, implems_emu)
 
+# Calls that only materialize a constant: broadcasts of a scalar and constant predicates (names of the template
+# text, Jinja expressions included). Their arguments must be constant too (see `_is_constant_args`).
+_NEGLIGIBLE_MIPP = ("set0", "set1")
+_NEGLIGIBLE_INTRINSICS = re.compile(
+    r"(_set1_|_setzero_|ptrue|pfalse|vmset_m|vmclr_m|vdupq_n_|vdup_n_|vmovq_n_|vmov_n_|svdup_n_|vmv_v_x_|vmv_v_i_|vfmv_v_f_)")
+_CALL_NAME = re.compile(r"((?:[A-Za-z0-9_]|\{\{[^}]*\}\})+)\s*\(")
+_MIPP_CALL = re.compile(r"%([A-Za-z0-9_]+)<[^%\n]*>%\s*\(")
+# identifiers allowed in the arguments of a constant: types, sizeof, macros (upper case: INT32_MIN, _MM_PERM_...)
+_CONST_IDENT = re.compile(r"^(?:[A-Z_][A-Z0-9_]*|u?int(?:8|16|32|64)_t|size_t|float(?:32|64)_t|float|double|int|unsigned|"
+                          r"signed|long|short|char|sizeof|JINJA|PH)$")
+
+def _matching_paren(code, i):
+    """index of the parenthesis that closes the one at `i`, or -1"""
+    depth = 0
+    for j in range(i, len(code)):
+        if code[j] == "(":
+            depth += 1
+        elif code[j] == ")":
+            depth -= 1
+            if depth == 0:
+                return j
+    return -1
+
+def _is_constant_args(args):
+    """True when the arguments only contain literals, macros, types and generation-time values (Jinja, %...%)"""
+    clean = re.sub(r"\{\{[^}]*\}\}", " JINJA ", args)
+    clean = re.sub(r"%[^%\n]+%", " PH ", clean)
+    clean = re.sub(r"\b0[xX][0-9a-fA-F]+[uUlL]*\b|\b\d+(?:\.\d*)?(?:[eE][-+]?\d+)?[fFuUlL]*\b|\.\d+[fF]?\b", " ", clean)
+    return all(_CONST_IDENT.match(w) for w in re.findall(r"[A-Za-z_][A-Za-z0-9_]*", clean))
+
+def strip_negligible_calls(code):
+    """the template code without the calls that materialize a constant (replaced by 0), see make_level_detector"""
+    if not code:
+        return code
+    out, pos = [], 0
+    events = []
+    for m in _MIPP_CALL.finditer(code):
+        if m.group(1) in _NEGLIGIBLE_MIPP:
+            events.append((m.start(), m.end() - 1))
+    for m in _CALL_NAME.finditer(code):
+        name = re.sub(r"\{\{[^}]*\}\}", "J", m.group(1))
+        if _NEGLIGIBLE_INTRINSICS.search(name):
+            events.append((m.start(), m.end() - 1))
+    for start, paren in sorted(events):
+        if start < pos:
+            continue
+        end = _matching_paren(code, paren)
+        if end < 0 or not _is_constant_args(code[paren + 1:end]):
+            continue
+        out.append(code[pos:start])
+        out.append("0")
+        pos = end + 1
+    out.append(code[pos:])
+    return "".join(out)
+
 def make_level_detector(isa):
     """
     Returns `detect(code) -> (level, deps, has_hardware)` for the templates of `isa`: the rules of the level
@@ -271,6 +327,9 @@ def make_level_detector(isa):
     - 0: one hardware intrinsic of the ISA and no MIPP function;
     - 1: hardware intrinsics mixed with MIPP functions (%f<...>%), or several intrinsics;
     - 2: no hardware intrinsic (only MIPP functions).
+    The constants do not count (`strip_negligible_calls`): a broadcast of a constant (`%set1<tp>%(0.5)`,
+    `%set0<tp>%()`, `_mm512_set1_epi32(INT32_MIN)`, `vdupq_n_f32(1.f)`, `__riscv_vmv_v_x_u32m1(1, vl)`) and a
+    constant predicate (`svptrue_b32()`, `__riscv_vmset_m_b32(vl)`) are materialized once, out of the loops.
     """
     import re
     # Build dynamic hardware intrinsic matching set/regex from datatypes
@@ -406,11 +465,13 @@ def make_level_detector(isa):
         clean_code = re.sub(r"%[^%\n]+%", "", code)
         clean_code = re.sub(r"\{\{[^}]*\}\}", "JINJA", clean_code)
         calls = re.findall(r"\b([a-zA-Z0-9_]+)\s*\(", clean_code)
-        ignore = {"if", "for", "while", "switch", "return", "defined", "sizeof", "cast", "tovd", "tovm", "cast_k"}
+        # "JINJA": a call whose name is one Jinja expression ({{ ci }}(x), {{ ro }}(x)): a cast chosen at generation time
+        ignore = {"if", "for", "while", "switch", "return", "defined", "sizeof", "cast", "tovd", "tovm", "cast_k", "jinja"}
         useful_calls = [c for c in calls if c.lower() not in ignore and "cast" not in c.lower()]
         return len(useful_calls)
 
     def detect(code):
+        code = strip_negligible_calls(code)
         has_hardware = has_hw(code)
         deps = get_mipp_dependencies(code, None)
         if has_hardware:

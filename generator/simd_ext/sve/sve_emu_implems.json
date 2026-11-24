@@ -1,36 +1,10 @@
 {
-    "abs": [
-        {
-            "instr_name": "abs",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int64",
-                "int32",
-                "int16",
-                "int8"
-            ],
-            "template": "std_1_reg_z"
-        }
-    ],
     "add": [
-        {
-            "instr_name": "add",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        },
         {
             "instr_name": "add",
             "datatypes": "all_datatypes",
             "variant": "s",
             "template": "bin_s"
-        }
-    ],
-    "add_vs": [
-        {
-            "instr_name": "add",
-            "datatypes": "all_datatypes",
-            "template": "form_n_x"
         }
     ],
     "all": [
@@ -53,39 +27,17 @@
             "template": "bin_s"
         }
     ],
-    "andb_k": [
-        {
-            "instr_name": "and",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
-        }
-    ],
-    "andb_vs": [
-        {
-            "instr_name": "and",
-            "datatypes": "all_int_uint",
-            "template": "form_n_x"
-        }
-    ],
     "andnb": [
         {
             "instr_name": "bic",
             "datatypes": "all_datatypes",
             "template": "logic_bic_z"
-        }
-    ],
-    "andnb_k": [
+        },
         {
             "instr_name": "bic",
             "datatypes": "all_datatypes",
-            "template": "andnb_k"
-        }
-    ],
-    "any": [
-        {
-            "instr_name": "ptest_any",
-            "datatypes": "all_datatypes",
-            "template": "any_ptest"
+            "variant": "z",
+            "template": "mask_andnb_z"
         }
     ],
     "cfmadd": [
@@ -95,116 +47,18 @@
             "template": "complex_cmla"
         }
     ],
-    "cmpeq": [
+    "clamp": [
         {
-            "instr_name": "cmpeq",
+            "instr_name": "max",
             "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmpeq_vs": [
+            "variant": "m",
+            "template": "mask_clamp_m"
+        },
         {
-            "instr_name": "cmpeq",
+            "instr_name": "max",
             "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmpge": [
-        {
-            "instr_name": "cmpge",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmpge_sv": [
-        {
-            "instr_name": "cmple",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmpge_vs": [
-        {
-            "instr_name": "cmpge",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmpgt": [
-        {
-            "instr_name": "cmpgt",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmpgt_sv": [
-        {
-            "instr_name": "cmplt",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmpgt_vs": [
-        {
-            "instr_name": "cmpgt",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmple": [
-        {
-            "instr_name": "cmple",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmple_sv": [
-        {
-            "instr_name": "cmpge",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmple_vs": [
-        {
-            "instr_name": "cmple",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmplt": [
-        {
-            "instr_name": "cmplt",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmplt_sv": [
-        {
-            "instr_name": "cmpgt",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmplt_vs": [
-        {
-            "instr_name": "cmplt",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
-        }
-    ],
-    "cmpneq": [
-        {
-            "instr_name": "cmpne",
-            "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk"
-        }
-    ],
-    "cmpneq_vs": [
-        {
-            "instr_name": "cmpne",
-            "datatypes": "all_datatypes",
-            "template": "form_n_cmp"
+            "variant": "z",
+            "template": "mask_clamp_z"
         }
     ],
     "cmul": [
@@ -221,35 +75,21 @@
             "template": "complex_cmla"
         }
     ],
-    "count": [
+    "copysign": [
         {
-            "instr_name": "count",
-            "datatypes": "all_datatypes",
-            "template": "rea_count"
-        }
-    ],
-    "cvt": [
+            "instr_name": "eor",
+            "datatypes": "all_float",
+            "variant": "m",
+            "template": "mask_copysign_m"
+        },
         {
-            "instr_name": "cvt",
-            "datatypes": [
-                "float64,int64",
-                "float64,uint64",
-                "int64,float64",
-                "uint64,float64",
-                "float32,int32",
-                "float32,uint32",
-                "int32,float32",
-                "uint32,float32"
-            ],
-            "template": "cvt_z"
+            "instr_name": "eor",
+            "datatypes": "all_float",
+            "variant": "z",
+            "template": "mask_copysign_z"
         }
     ],
     "div": [
-        {
-            "instr_name": "div",
-            "datatypes": "all_float",
-            "template": "std_2_reg_in_no_msk_z"
-        },
         {
             "instr_name": "div",
             "datatypes": "all_float",
@@ -257,33 +97,7 @@
             "template": "bin_s"
         }
     ],
-    "div_sv": [
-        {
-            "instr_name": "divr",
-            "datatypes": "all_float",
-            "template": "form_n_x"
-        }
-    ],
-    "div_vs": [
-        {
-            "instr_name": "div",
-            "datatypes": "all_float",
-            "template": "form_n_x"
-        }
-    ],
     "fmadd": [
-        {
-            "instr_name": "mla",
-            "datatypes": "all_float",
-            "template": "std_3_reg_in_no_msk_z"
-        },
-        {
-            "instr_name": "mla",
-            "datatypes": [
-                "int32"
-            ],
-            "template": "std_3_reg_in_no_msk_z"
-        },
         {
             "instr_name": "mad",
             "datatypes": [
@@ -293,60 +107,18 @@
             ],
             "variant": "s",
             "template": "ter_s"
-        }
-    ],
-    "fmadd_vsv": [
-        {
-            "instr_name": "mla",
-            "datatypes": "all_float",
-            "template": "form_n_fma_acc"
-        }
-    ],
-    "fmadd_vvs": [
-        {
-            "instr_name": "mad",
-            "datatypes": "all_float",
-            "template": "form_n_fma_mad"
         }
     ],
     "fmsub": [
         {
-            "instr_name": "nmls",
-            "datatypes": "all_float",
-            "template": "std_3_reg_in_no_msk_z"
-        },
-        {
             "instr_name": "nmsb",
             "datatypes": "all_float",
             "variant": "s",
             "template": "ter_s"
-        }
-    ],
-    "fmsub_vsv": [
-        {
-            "instr_name": "nmls",
-            "datatypes": "all_float",
-            "template": "form_n_fma_acc"
-        }
-    ],
-    "fmsub_vvs": [
-        {
-            "instr_name": "nmsb",
-            "datatypes": "all_float",
-            "template": "form_n_fma_mad"
         }
     ],
     "fnmadd": [
         {
-            "instr_name": "mls",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int32"
-            ],
-            "template": "std_3_reg_in_no_msk_z"
-        },
-        {
             "instr_name": "msb",
             "datatypes": [
                 "float64",
@@ -355,62 +127,17 @@
             ],
             "variant": "s",
             "template": "ter_s"
-        }
-    ],
-    "fnmadd_vsv": [
-        {
-            "instr_name": "mls",
-            "datatypes": "all_float",
-            "template": "form_n_fma_acc"
-        }
-    ],
-    "fnmadd_vvs": [
-        {
-            "instr_name": "msb",
-            "datatypes": "all_float",
-            "template": "form_n_fma_mad"
         }
     ],
     "fnmsub": [
         {
-            "instr_name": "nmla",
-            "datatypes": "all_float",
-            "template": "std_3_reg_in_no_msk_z"
-        },
-        {
             "instr_name": "nmad",
             "datatypes": "all_float",
             "variant": "s",
             "template": "ter_s"
         }
     ],
-    "fnmsub_vsv": [
-        {
-            "instr_name": "nmla",
-            "datatypes": "all_float",
-            "template": "form_n_fma_acc"
-        }
-    ],
-    "fnmsub_vvs": [
-        {
-            "instr_name": "nmad",
-            "datatypes": "all_float",
-            "template": "form_n_fma_mad"
-        }
-    ],
     "gather": [
-        {
-            "instr_name": "gather",
-            "datatypes": [
-                "float64,uint64",
-                "int64,uint64",
-                "uint64,uint64",
-                "float32,uint32",
-                "int32,uint32",
-                "uint32,uint32"
-            ],
-            "template": "gather"
-        },
         {
             "instr_name": "gather",
             "datatypes": [
@@ -454,40 +181,7 @@
             "variant": "s"
         }
     ],
-    "getfirst": [
-        {
-            "instr_name": "lasta",
-            "datatypes": "all_datatypes",
-            "template": "getfirst_lasta"
-        }
-    ],
-    "hadd": [
-        {
-            "instr_name": "addv",
-            "datatypes": "all_datatypes",
-            "template": "reduce"
-        }
-    ],
-    "hmax": [
-        {
-            "instr_name": "maxv",
-            "datatypes": "all_datatypes",
-            "template": "reduce"
-        }
-    ],
-    "hmin": [
-        {
-            "instr_name": "minv",
-            "datatypes": "all_datatypes",
-            "template": "reduce"
-        }
-    ],
     "load": [
-        {
-            "instr_name": "ld1",
-            "datatypes": "all_datatypes",
-            "template": "load"
-        },
         {
             "instr_name": "ld1",
             "datatypes": "all_datatypes",
@@ -499,21 +193,11 @@
         {
             "instr_name": "ld1",
             "datatypes": "all_datatypes",
-            "template": "load"
-        },
-        {
-            "instr_name": "ld1",
-            "datatypes": "all_datatypes",
             "variant": "s",
             "template": "load_s"
         }
     ],
     "lshift": [
-        {
-            "instr_name": "lsl",
-            "datatypes": "all_uint",
-            "template": "shv_x_u"
-        },
         {
             "instr_name": "lsl",
             "datatypes": "all_int",
@@ -536,11 +220,6 @@
         {
             "instr_name": "lsl",
             "datatypes": "all_int_uint",
-            "template": "shift_n_z"
-        },
-        {
-            "instr_name": "lsl",
-            "datatypes": "all_int_uint",
             "variant": "s",
             "template": "shift_s"
         }
@@ -549,81 +228,38 @@
         {
             "instr_name": "max",
             "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        },
-        {
-            "instr_name": "max",
-            "datatypes": "all_datatypes",
             "variant": "s",
             "template": "bin_s"
-        }
-    ],
-    "max_vs": [
-        {
-            "instr_name": "max",
-            "datatypes": "all_datatypes",
-            "template": "form_n_x"
         }
     ],
     "min": [
         {
             "instr_name": "min",
             "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        },
-        {
-            "instr_name": "min",
-            "datatypes": "all_datatypes",
             "variant": "s",
             "template": "bin_s"
         }
     ],
-    "min_vs": [
+    "msb": [
         {
-            "instr_name": "min",
+            "instr_name": "and",
             "datatypes": "all_datatypes",
-            "template": "form_n_x"
+            "variant": "m",
+            "template": "mask_msb_m"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "mask_msb_z"
         }
     ],
     "mul": [
         {
             "instr_name": "mul",
             "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        },
-        {
-            "instr_name": "mul",
-            "datatypes": "all_datatypes",
             "variant": "s",
             "template": "bin_s"
-        }
-    ],
-    "mul_vs": [
-        {
-            "instr_name": "mul",
-            "datatypes": "all_datatypes",
-            "template": "form_n_x"
-        }
-    ],
-    "neg": [
-        {
-            "instr_name": "neg",
-            "datatypes": [
-                "float64",
-                "float32",
-                "int64",
-                "int32",
-                "int16",
-                "int8"
-            ],
-            "template": "std_1_reg_z"
-        }
-    ],
-    "none": [
-        {
-            "instr_name": "ptest_any",
-            "datatypes": "all_datatypes",
-            "template": "testz_1arg"
         }
     ],
     "notb": [
@@ -631,13 +267,24 @@
             "instr_name": "not",
             "datatypes": "all_datatypes",
             "template": "logic_not_z"
-        }
-    ],
-    "notb_k": [
+        },
         {
             "instr_name": "not",
             "datatypes": "all_datatypes",
-            "template": "notb_k"
+            "variant": "m",
+            "template": "mask_notb_m"
+        },
+        {
+            "instr_name": "not",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template": "mask_notb_s"
+        },
+        {
+            "instr_name": "not",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template": "mask_notb_z"
         }
     ],
     "orb": [
@@ -653,20 +300,6 @@
             "template": "bin_s"
         }
     ],
-    "orb_k": [
-        {
-            "instr_name": "orr",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
-        }
-    ],
-    "orb_vs": [
-        {
-            "instr_name": "orr",
-            "datatypes": "all_int_uint",
-            "template": "form_n_x"
-        }
-    ],
     "permute2": [
         {
             "instr_name": "tbl",
@@ -675,19 +308,7 @@
             "if": "!defined(__ARM_FEATURE_SVE2)"
         }
     ],
-    "round": [
-        {
-            "instr_name": "rinta",
-            "datatypes": "all_float",
-            "template": "std_1_reg_z"
-        }
-    ],
     "rshift": [
-        {
-            "instr_name": "lsr",
-            "datatypes": "all_uint",
-            "template": "shv_x_u"
-        },
         {
             "instr_name": "asr",
             "datatypes": "all_int",
@@ -710,16 +331,6 @@
         {
             "instr_name": "asr",
             "datatypes": "all_int",
-            "template": "shift_n_z"
-        },
-        {
-            "instr_name": "lsr",
-            "datatypes": "all_uint",
-            "template": "shift_n_z"
-        },
-        {
-            "instr_name": "asr",
-            "datatypes": "all_int",
             "variant": "s",
             "template": "shift_s"
         },
@@ -731,18 +342,6 @@
         }
     ],
     "scatter": [
-        {
-            "instr_name": "scatter",
-            "datatypes": [
-                "float64,uint64",
-                "int64,uint64",
-                "uint64,uint64",
-                "float32,uint32",
-                "int32,uint32",
-                "uint32,uint32"
-            ],
-            "template": "scatter"
-        },
         {
             "instr_name": "scatter",
             "datatypes": [
@@ -793,19 +392,7 @@
             "template": "rea_splice"
         }
     ],
-    "sqrt": [
-        {
-            "instr_name": "sqrt",
-            "datatypes": "all_float",
-            "template": "std_1_reg_z"
-        }
-    ],
     "store": [
-        {
-            "instr_name": "st1",
-            "datatypes": "all_datatypes",
-            "template": "store"
-        },
         {
             "instr_name": "st1",
             "datatypes": "all_datatypes",
@@ -814,11 +401,6 @@
         }
     ],
     "storeu": [
-        {
-            "instr_name": "st1",
-            "datatypes": "all_datatypes",
-            "template": "store"
-        },
         {
             "instr_name": "st1",
             "datatypes": "all_datatypes",
@@ -844,27 +426,8 @@
         {
             "instr_name": "sub",
             "datatypes": "all_datatypes",
-            "template": "std_2_reg_in_no_msk_z"
-        },
-        {
-            "instr_name": "sub",
-            "datatypes": "all_datatypes",
             "variant": "s",
             "template": "bin_s"
-        }
-    ],
-    "sub_sv": [
-        {
-            "instr_name": "subr",
-            "datatypes": "all_datatypes",
-            "template": "form_n_x"
-        }
-    ],
-    "sub_vs": [
-        {
-            "instr_name": "sub",
-            "datatypes": "all_datatypes",
-            "template": "form_n_x"
         }
     ],
     "swap2": [
@@ -892,13 +455,6 @@
             "template": "tovm_cmpne"
         }
     ],
-    "trunc": [
-        {
-            "instr_name": "rintz",
-            "datatypes": "all_float",
-            "template": "std_1_reg_z"
-        }
-    ],
     "xorb": [
         {
             "instr_name": "eor",
@@ -912,18 +468,18 @@
             "template": "bin_s"
         }
     ],
-    "xorb_k": [
+    "xorsign": [
         {
             "instr_name": "eor",
-            "datatypes": "all_datatypes",
-            "template": "andb_k"
-        }
-    ],
-    "xorb_vs": [
+            "datatypes": "all_float",
+            "variant": "m",
+            "template": "mask_xorsign_m"
+        },
         {
             "instr_name": "eor",
-            "datatypes": "all_int_uint",
-            "template": "form_n_x"
+            "datatypes": "all_float",
+            "variant": "z",
+            "template": "mask_xorsign_z"
         }
     ]
 }

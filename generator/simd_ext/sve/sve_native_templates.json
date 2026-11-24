@@ -1,4 +1,22 @@
 {
+    "andb_k": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm, vm1.vm);"
+        ]
+    },
+    "andnb_k": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm1.vm, vm0.vm);"
+        ]
+    },
+    "any_ptest": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm);"
+        ]
+    },
     "bin_m": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, vd1.vd);"
@@ -27,25 +45,91 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd, vd1.vd);"
     },
+    "cvt_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}cvt_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}_z({% if dt_par.n_bits >= dt_ret.n_bits %}svptrue_{{ isa_dt_par.data_ext_logi }}(){% else %}svptrue_{{ isa_dt_ret.data_ext_logi }}(){% endif %}, vd0.vd);"
+    },
+    "div2_shift_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, 1);"
+    },
+    "div2_shift_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, 1);"
+    },
+    "div4_shift_m": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, 2);"
+    },
+    "div4_shift_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, 2);"
+    },
+    "form_n_cmp": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, s0);"
+        ]
+    },
     "form_n_cmp_z": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd, s0);"
+    },
+    "form_n_fma_acc": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd1.vd, vd0.vd, s0);"
+        ]
+    },
+    "form_n_fma_mad": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd, s0);"
+        ]
     },
     "form_n_m": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, s0);"
     },
+    "form_n_x": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, s0);"
+        ]
+    },
     "form_n_z": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, s0);"
+    },
+    "gather": {
+        "format": "short",
+        "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, vd0.vd);"
     },
     "gather_z": {
         "format": "short",
         "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(vm0.vm, p0, vd0.vd);"
     },
+    "getfirst_lasta": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}lasta_{{ isa_dt_par.data_ext }}(svpfalse_b(), vd0.vd);"
+        ]
+    },
+    "load": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0);"
+        ]
+    },
     "load_z": {
         "format": "short",
         "code": "{{ isa.prefix }}ld1_{{ isa_dt_par.data_ext }}(vm0.vm, ({{ isa_dt_par.to_ptr }}*) p0);"
+    },
+    "notb_k": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm);"
+        ]
     },
     "rea_1": {
         "format": "short",
@@ -58,6 +142,12 @@
     "rea_compact": {
         "format": "short",
         "code": "{{ isa.prefix }}compact_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd);"
+    },
+    "rea_count": {
+        "format": "long",
+        "code": [
+            "return (int32_t)((int32_t){{ isa.prefix }}cntp_{{ isa_dt_par.data_ext_logi }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm));"
+        ]
     },
     "rea_dup_lane": {
         "format": "short",
@@ -79,11 +169,21 @@
         "format": "short",
         "code": "{{ isa.prefix }}tbl2_{{ isa_dt_par.data_ext }}({{ isa.prefix }}create2_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd), vd2.vd);"
     },
+    "reduce": {
+        "format": "long",
+        "code": [
+            "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd);"
+        ]
+    },
     "reduce_z": {
         "format": "long",
         "code": [
             "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd);"
         ]
+    },
+    "scatter": {
+        "format": "short",
+        "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, vd0.vd, vd1.vd);"
     },
     "scatter_m": {
         "format": "short",
@@ -123,6 +223,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, (uint{{ dt_par.n_bits }}_t)s0);"
     },
+    "shift_n_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, (uint{{ dt_par.n_bits }}_t)s0);"
+    },
     "shift_z": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, (uint{{ dt_par.n_bits }}_t)s0);"
@@ -131,13 +235,45 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, vd1.vd);"
     },
+    "shv_x_u": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
+    },
     "shv_z_u": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, vd1.vd);"
     },
+    "std_1_reg_z": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd);"
+    },
+    "std_2_reg_in_no_msk": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
+        ]
+    },
+    "std_2_reg_in_no_msk_z": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
+        ]
+    },
     "std_2_reg_unpred": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd);"
+    },
+    "std_3_reg_in_no_msk_z": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd2.vd, vd1.vd, vd0.vd);"
+        ]
+    },
+    "store": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, vd0.vd);"
+        ]
     },
     "store_m": {
         "format": "short",
@@ -150,6 +286,12 @@
     "ter_z": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, vd1.vd, vd2.vd);"
+    },
+    "testz_1arg": {
+        "format": "long",
+        "code": [
+            "\treturn !{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm);"
+        ]
     },
     "testz_2args": {
         "format": "long",

@@ -6,24 +6,6 @@
             "return !{{ isa.prefix }}{{ instr_name }}(pg, svnot_b_z(pg, vm0.vm));"
         ]
     },
-    "andb_k": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm, vm1.vm);"
-        ]
-    },
-    "andnb_k": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm1.vm, vm0.vm);"
-        ]
-    },
-    "any_ptest": {
-        "format": "long",
-        "code": [
-            "return {{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm);"
-        ]
-    },
     "bin_s": {
         "format": "long",
         "code": [
@@ -41,38 +23,6 @@
             "res.vd = {{ isa.prefix }}cmla_{{ isa_dt_par.data_ext }}_x(pg, {{ isa.prefix }}cmla_{{ isa_dt_par.data_ext }}_x(pg, {{ acc }}, {{ x }}, {{ y }}, 0), {{ x }}, {{ y }}, {{ rot }});",
             "return res;"
         ]
-    },
-    "cvt_z": {
-        "format": "short",
-        "code": "{{ isa.prefix }}cvt_{{ isa_dt_ret.data_ext }}_{{ isa_dt_par.data_ext }}_z({% if dt_par.n_bits >= dt_ret.n_bits %}svptrue_{{ isa_dt_par.data_ext_logi }}(){% else %}svptrue_{{ isa_dt_ret.data_ext_logi }}(){% endif %}, vd0.vd);"
-    },
-    "form_n_cmp": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, s0);"
-        ]
-    },
-    "form_n_fma_acc": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd1.vd, vd0.vd, s0);"
-        ]
-    },
-    "form_n_fma_mad": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd, s0);"
-        ]
-    },
-    "form_n_x": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, s0);"
-        ]
-    },
-    "gather": {
-        "format": "short",
-        "code": "{{ isa.prefix }}ld1_gather_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, vd0.vd);"
     },
     "gather_s": {
         "format": "long",
@@ -98,18 +48,6 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}ld1_gather_u64index_{{ isa_dt_par.data_ext }}(vm0.vm, p0, {{ isa.prefix }}unpklo_u64(vd0.vd));"
-        ]
-    },
-    "getfirst_lasta": {
-        "format": "long",
-        "code": [
-            "return {{ isa.prefix }}lasta_{{ isa_dt_par.data_ext }}(svpfalse_b(), vd0.vd);"
-        ]
-    },
-    "load": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0);"
         ]
     },
     "load_s": {
@@ -144,10 +82,112 @@
             "return res;"
         ]
     },
-    "notb_k": {
-        "format": "short",
+    "mask_andnb_z": {
+        "format": "long",
         "code": [
-            "{{ isa.prefix }}{{ instr_name }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm);"
+            "// ~vd0 & vd1 = vd1 bic vd0 (zeroing predication; no merging form: {{ isa.prefix }}bic_m would keep vd1)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}bic_{{ e }}_z(vm0.vm, {{ ri }}(vd1.vd), {{ ri }}(vd0.vd)));",
+            "return res;"
+        ]
+    },
+    "mask_clamp_m": {
+        "format": "long",
+        "code": [
+            "// max then min, with the same predicate (merging predication)",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}min_{{ isa_dt_par.data_ext }}_m(vm0.vm, {{ isa.prefix }}max_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, vd1.vd), vd2.vd);",
+            "return res;"
+        ]
+    },
+    "mask_clamp_z": {
+        "format": "long",
+        "code": [
+            "// max then min, with the same predicate (zeroing predication)",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}min_{{ isa_dt_par.data_ext }}_z(vm0.vm, {{ isa.prefix }}max_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, vd1.vd), vd2.vd);",
+            "return res;"
+        ]
+    },
+    "mask_copysign_m": {
+        "format": "long",
+        "code": [
+            "// sign bit of vd1, other bits of vd0: vd0 ^ ((vd0 ^ vd1) & sign) (merging predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}eor_{{ u }}_m(vm0.vm, {{ ri }}(vd0.vd), {{ isa.prefix }}and_n_{{ u }}_x(vm0.vm, {{ isa.prefix }}eor_{{ u }}_x(vm0.vm, {{ ri }}(vd0.vd), {{ ri }}(vd1.vd)), ((uint{{ dt_par.n_bits }}_t)1 << {{ dt_par.n_bits - 1 }}))));",
+            "return res;"
+        ]
+    },
+    "mask_copysign_z": {
+        "format": "long",
+        "code": [
+            "// sign bit of vd1, other bits of vd0: vd0 ^ ((vd0 ^ vd1) & sign) (zeroing predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}eor_{{ u }}_z(vm0.vm, {{ ri }}(vd0.vd), {{ isa.prefix }}and_n_{{ u }}_x(vm0.vm, {{ isa.prefix }}eor_{{ u }}_x(vm0.vm, {{ ri }}(vd0.vd), {{ ri }}(vd1.vd)), ((uint{{ dt_par.n_bits }}_t)1 << {{ dt_par.n_bits - 1 }}))));",
+            "return res;"
+        ]
+    },
+    "mask_msb_m": {
+        "format": "long",
+        "code": [
+            "// sign bit of the active lanes (merging predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category != 'uint' %}{% set u = 'u' ~ dt_par.n_bits %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}and_n_{{ u }}_m(vm0.vm, {{ ri }}(vd0.vd), (uint{{ dt_par.n_bits }}_t)1 << {{ dt_par.n_bits - 1 }}));",
+            "return res;"
+        ]
+    },
+    "mask_msb_z": {
+        "format": "long",
+        "code": [
+            "// sign bit of the active lanes (zeroing predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category != 'uint' %}{% set u = 'u' ~ dt_par.n_bits %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}and_n_{{ u }}_z(vm0.vm, {{ ri }}(vd0.vd), (uint{{ dt_par.n_bits }}_t)1 << {{ dt_par.n_bits - 1 }}));",
+            "return res;"
+        ]
+    },
+    "mask_notb_m": {
+        "format": "long",
+        "code": [
+            "// bitwise not of the active lanes (merging predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}not_{{ e }}_m({{ ri }}(vd0.vd), vm0.vm, {{ ri }}(vd0.vd)));",
+            "return res;"
+        ]
+    },
+    "mask_notb_s": {
+        "format": "long",
+        "code": [
+            "// bitwise not of the active lanes, vdsrc in the inactive lanes (merging predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}not_{{ e }}_m({{ ri }}(vdsrc.vd), vm0.vm, {{ ri }}(vd0.vd)));",
+            "return res;"
+        ]
+    },
+    "mask_notb_z": {
+        "format": "long",
+        "code": [
+            "// bitwise not of the active lanes (zeroing predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}not_{{ e }}_z(vm0.vm, {{ ri }}(vd0.vd)));",
+            "return res;"
+        ]
+    },
+    "mask_xorsign_m": {
+        "format": "long",
+        "code": [
+            "// vd0 xor the sign bit of vd1 (merging predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}eor_{{ u }}_m(vm0.vm, {{ ri }}(vd0.vd), {{ isa.prefix }}and_n_{{ u }}_x(vm0.vm, {{ ri }}(vd1.vd), ((uint{{ dt_par.n_bits }}_t)1 << {{ dt_par.n_bits - 1 }}))));",
+            "return res;"
+        ]
+    },
+    "mask_xorsign_z": {
+        "format": "long",
+        "code": [
+            "// vd0 xor the sign bit of vd1 (zeroing predication)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set u = 'u' ~ dt_par.n_bits %}{% set e = u if fl else isa_dt_par.data_ext %}{% set ri = ('svreinterpret_' ~ u ~ '_' ~ isa_dt_par.data_ext) if fl else '' %}{% set ro = ('svreinterpret_' ~ isa_dt_par.data_ext ~ '_' ~ u) if fl else '' %}res.vd = {{ ro }}({{ isa.prefix }}eor_{{ u }}_z(vm0.vm, {{ ri }}(vd0.vd), {{ isa.prefix }}and_n_{{ u }}_x(vm0.vm, {{ ri }}(vd1.vd), ((uint{{ dt_par.n_bits }}_t)1 << {{ dt_par.n_bits - 1 }}))));",
+            "return res;"
         ]
     },
     "rea_compact_store": {
@@ -156,12 +196,6 @@
             "const uint64_t n = {{ isa.prefix }}cntp_{{ isa_dt_par.data_ext_logi }}(vm0.vm, vm0.vm);",
             "{{ isa.prefix }}st1_{{ isa_dt_par.data_ext }}({{ isa.prefix }}whilelt_{{ isa_dt_par.data_ext_logi }}_u64(0, n), p0, {{ isa.prefix }}compact_{{ isa_dt_par.data_ext }}(vm0.vm, vd0.vd));",
             "return (int32_t)n;"
-        ]
-    },
-    "rea_count": {
-        "format": "long",
-        "code": [
-            "return (int32_t)((int32_t){{ isa.prefix }}cntp_{{ isa_dt_par.data_ext_logi }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm));"
         ]
     },
     "rea_splice": {
@@ -187,16 +221,6 @@
             "return res;"
         ]
     },
-    "reduce": {
-        "format": "long",
-        "code": [
-            "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd);"
-        ]
-    },
-    "scatter": {
-        "format": "short",
-        "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, vd0.vd, vd1.vd);"
-    },
     "scatter_u32idx_64": {
         "format": "short",
         "code": [
@@ -219,10 +243,6 @@
         "format": "short",
         "code": "{{ isa.prefix }}st1_scatter_u{{ dt_par.n_bits }}index_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), p0, vd0.vd, {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(vm0.vm, vd1.vd, {{ isa.prefix }}dup_n_{{ isa_dt_par.data_ext }}(0)));"
     },
-    "shift_n_z": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, (uint{{ dt_par.n_bits }}_t)s0);"
-    },
     "shift_s": {
         "format": "long",
         "code": [
@@ -239,41 +259,9 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
     },
-    "shv_x_u": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
-    },
     "shv_z_s": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
-    },
-    "std_1_reg_z": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd);"
-    },
-    "std_2_reg_in_no_msk": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
-        ]
-    },
-    "std_2_reg_in_no_msk_z": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
-        ]
-    },
-    "std_3_reg_in_no_msk_z": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd2.vd, vd1.vd, vd0.vd);"
-        ]
-    },
-    "store": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), ({{ isa_dt_par.to_ptr }}*) p0, vd0.vd);"
-        ]
     },
     "store_z": {
         "format": "long",
@@ -287,12 +275,6 @@
             "%vd<tp>% res;",
             "res.vd = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(vm0.vm, {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(vm0.vm, vd0.vd, vd1.vd, vd2.vd), vdsrc.vd);",
             "return res;"
-        ]
-    },
-    "testz_1arg": {
-        "format": "long",
-        "code": [
-            "\treturn !{{ isa.prefix }}{{ instr_name }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), vm0.vm);"
         ]
     },
     "tovd_dup": {

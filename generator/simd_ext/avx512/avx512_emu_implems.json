@@ -1,9 +1,108 @@
 {
+    "abs": [
+        {
+            "instr_name": "and",
+            "datatypes": "all_float",
+            "template": "abs_float_maskz",
+            "variant": "z"
+        }
+    ],
+    "clamp": [
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "clamp_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "clamp_mask",
+            "variant": "m",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "clamp_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "clamp_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "clamp_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "clamp_masks",
+            "variant": "s",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
     "cmul": [
         {
             "instr_name": "cmul",
             "datatypes": "all_float",
             "template": "complex_cmul"
+        }
+    ],
+    "copysign": [
+        {
+            "instr_name": "ternarylogic",
+            "datatypes": "all_float",
+            "template": "copysign_ternlog_m",
+            "variant": "m"
+        },
+        {
+            "instr_name": "ternarylogic",
+            "datatypes": "all_float",
+            "template": "copysign_ternlog_z",
+            "variant": "z"
         }
     ],
     "fmadd": [
@@ -36,47 +135,6 @@
             "datatypes": "all_float",
             "template": "m3_s",
             "variant": "s"
-        }
-    ],
-    "gather": [
-        {
-            "instr_name": "gather",
-            "datatypes": [
-                "float64,uint64",
-                "int64,uint64"
-            ],
-            "template": "gather_maskz_64",
-            "if": "defined(__AVX512F__)",
-            "variant": "z"
-        },
-        {
-            "instr_name": "gather",
-            "datatypes": [
-                "float32,uint32",
-                "int32,uint32"
-            ],
-            "template": "gather_maskz_32",
-            "if": "defined(__AVX512F__)",
-            "variant": "z"
-        },
-        {
-            "instr_name": "i32gather",
-            "datatypes": [
-                "float64,uint32"
-            ],
-            "template": "gather_i32_64_maskz_f",
-            "variant": "z",
-            "if": "defined(__AVX512F__)"
-        },
-        {
-            "instr_name": "i32gather",
-            "datatypes": [
-                "int64,uint32",
-                "uint64,uint32"
-            ],
-            "template": "gather_i32_64_maskz_i",
-            "variant": "z",
-            "if": "defined(__AVX512F__)"
         }
     ],
     "hadd": [
@@ -309,23 +367,45 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
-    "pow2": [
+    "notb": [
         {
-            "instr_name": "pow2",
+            "instr_name": "ternarylogic",
             "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
                 "uint64",
                 "uint32"
             ],
-            "template": "pow2_sllv",
-            "if": "defined(__AVX512F__)"
+            "template": "notb_ternlog_m",
+            "variant": "m"
         },
         {
-            "instr_name": "pow2",
+            "instr_name": "ternarylogic",
             "datatypes": [
-                "uint16"
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
             ],
-            "template": "pow2_sllv",
-            "if": "defined(__AVX512BW__)"
+            "template": "notb_ternlog_z",
+            "variant": "z"
+        },
+        {
+            "instr_name": "ternarylogic",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "notb_ternlog_s",
+            "variant": "s"
         }
     ],
     "reverse": [
@@ -346,6 +426,66 @@
                 "uint64"
             ],
             "template": "rea_perm_64"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm_32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm_32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm_32_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm_64_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm_64_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0, 1, 2, 3, 4, 5, 6, 7",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm_64_masks",
+            "variant": "s"
         }
     ],
     "reverse_b128": [
@@ -366,6 +506,36 @@
             ],
             "template": "rea_reverse_b128_epi8",
             "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_reverse_b128_epi8_mask",
+            "if": "defined(__AVX512BW__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_reverse_b128_epi8_maskz",
+            "if": "defined(__AVX512BW__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_reverse_b128_epi8_masks",
+            "if": "defined(__AVX512BW__)",
+            "variant": "s"
         }
     ],
     "rshift_vs": [
@@ -470,6 +640,46 @@
                 "uint64"
             ],
             "template": "rea_perm2_64"
+        },
+        {
+            "instr_name": "31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "15, 13, 11, 9, 7, 5, 3, 1",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "15, 13, 11, 9, 7, 5, 3, 1",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_maskz",
+            "variant": "z"
         }
     ],
     "unziplo": [
@@ -490,6 +700,46 @@
                 "uint64"
             ],
             "template": "rea_perm2_64"
+        },
+        {
+            "instr_name": "30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "14, 12, 10, 8, 6, 4, 2, 0",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "14, 12, 10, 8, 6, 4, 2, 0",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_maskz",
+            "variant": "z"
         }
     ],
     "ziphi": [
@@ -510,6 +760,46 @@
                 "uint64"
             ],
             "template": "rea_perm2_64"
+        },
+        {
+            "instr_name": "31, 15, 30, 14, 29, 13, 28, 12, 27, 11, 26, 10, 25, 9, 24, 8",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "31, 15, 30, 14, 29, 13, 28, 12, 27, 11, 26, 10, 25, 9, 24, 8",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "15, 7, 14, 6, 13, 5, 12, 4",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "15, 7, 14, 6, 13, 5, 12, 4",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_maskz",
+            "variant": "z"
         }
     ],
     "ziplo": [
@@ -530,6 +820,46 @@
                 "uint64"
             ],
             "template": "rea_perm2_64"
+        },
+        {
+            "instr_name": "23, 7, 22, 6, 21, 5, 20, 4, 19, 3, 18, 2, 17, 1, 16, 0",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "23, 7, 22, 6, 21, 5, 20, 4, 19, 3, 18, 2, 17, 1, 16, 0",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_perm2_32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "11, 3, 10, 2, 9, 1, 8, 0",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "11, 3, 10, 2, 9, 1, 8, 0",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_perm2_64_maskz",
+            "variant": "z"
         }
     ]
 }

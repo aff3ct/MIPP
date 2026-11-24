@@ -1,4 +1,43 @@
 {
+    "abs_float_maskz": {
+        "format": "long",
+        "code": [
+            "// magnitude bits of the active lanes, zeros elsewhere (no _mm512_maskz_abs)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set ci = ('_mm512_cast' ~ isa_dt_par.data_ext ~ '_si512') if fl else '' %}{% set co = ('_mm512_castsi512_' ~ isa_dt_par.data_ext) if fl else '' %}res.vd = {{ co }}(_mm512_maskz_and_epi{{ dt_par.n_bits }}(vm0.vm, {{ ci }}(vd0.vd), _mm512_set1_epi{{ dt_par.n_bits }}(INT{{ dt_par.n_bits }}_MAX)));",
+            "return res;"
+        ]
+    },
+    "clamp_mask": {
+        "format": "long",
+        "code": [
+            "// max then min, with the same mask",
+            "%vd<tp>% res;",
+            "res.vd = _mm512_mask_{{ 'max_' ~ (isa_dt_par.data_ext if dt_par.category == 'float' else ('epu' if dt_par.category == 'uint' else 'epi') ~ dt_par.n_bits) }}(vd0.vd, vm0.vm, vd0.vd, vd1.vd);",
+            "res.vd = _mm512_mask_{{ 'min_' ~ (isa_dt_par.data_ext if dt_par.category == 'float' else ('epu' if dt_par.category == 'uint' else 'epi') ~ dt_par.n_bits) }}(res.vd, vm0.vm, res.vd, vd2.vd);",
+            "return res;"
+        ]
+    },
+    "clamp_masks": {
+        "format": "long",
+        "code": [
+            "// max then min, with the same mask",
+            "%vd<tp>% res;",
+            "res.vd = _mm512_mask_{{ 'max_' ~ (isa_dt_par.data_ext if dt_par.category == 'float' else ('epu' if dt_par.category == 'uint' else 'epi') ~ dt_par.n_bits) }}(vdsrc.vd, vm0.vm, vd0.vd, vd1.vd);",
+            "res.vd = _mm512_mask_{{ 'min_' ~ (isa_dt_par.data_ext if dt_par.category == 'float' else ('epu' if dt_par.category == 'uint' else 'epi') ~ dt_par.n_bits) }}(res.vd, vm0.vm, res.vd, vd2.vd);",
+            "return res;"
+        ]
+    },
+    "clamp_maskz": {
+        "format": "long",
+        "code": [
+            "// max then min, with the same mask",
+            "%vd<tp>% res;",
+            "res.vd = _mm512_maskz_{{ 'max_' ~ (isa_dt_par.data_ext if dt_par.category == 'float' else ('epu' if dt_par.category == 'uint' else 'epi') ~ dt_par.n_bits) }}(vm0.vm, vd0.vd, vd1.vd);",
+            "res.vd = _mm512_maskz_{{ 'min_' ~ (isa_dt_par.data_ext if dt_par.category == 'float' else ('epu' if dt_par.category == 'uint' else 'epi') ~ dt_par.n_bits) }}(vm0.vm, res.vd, vd2.vd);",
+            "return res;"
+        ]
+    },
     "complex_cmul": {
         "format": "long",
         "code": [
@@ -8,28 +47,22 @@
             "return res;"
         ]
     },
-    "gather_i32_64_maskz_f": {
-        "format": "short",
+    "copysign_ternlog_m": {
+        "format": "long",
         "code": [
-            "_mm512_mask_i32gather_pd(_mm512_setzero_pd(), vm0.vm, vd0.vd, p0, 8);"
+            "// sign bit of vd1, other bits of vd0: ternary logic C ? B : A (0xD8), the inactive lanes are those of vd0",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set ci = ('_mm512_cast' ~ isa_dt_par.data_ext ~ '_si512') if fl else '' %}{% set co = ('_mm512_castsi512_' ~ isa_dt_par.data_ext) if fl else '' %}res.vd = {{ co }}(_mm512_mask_ternarylogic_epi{{ dt_par.n_bits }}({{ ci }}(vd0.vd), vm0.vm, {{ ci }}(vd1.vd), _mm512_set1_epi{{ dt_par.n_bits }}(INT{{ dt_par.n_bits }}_MIN), 0xD8));",
+            "return res;"
         ]
     },
-    "gather_i32_64_maskz_i": {
-        "format": "short",
+    "copysign_ternlog_z": {
+        "format": "long",
         "code": [
-            "_mm512_mask_i32gather_epi64(_mm512_setzero_si512(), vm0.vm, vd0.vd, p0, 8);"
-        ]
-    },
-    "gather_maskz_32": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,vm0.vm, vd0.vd, p0,4);"
-        ]
-    },
-    "gather_maskz_64": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}_mask_i{{ dt_par.n_bits }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(%set0<tp>%().vd,vm0.vm, vd0.vd, p0,8);"
+            "// sign bit of vd1, other bits of vd0: ternary logic C ? B : A (0xD8), zeros in the inactive lanes",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set ci = ('_mm512_cast' ~ isa_dt_par.data_ext ~ '_si512') if fl else '' %}{% set co = ('_mm512_castsi512_' ~ isa_dt_par.data_ext) if fl else '' %}res.vd = {{ co }}(_mm512_maskz_ternarylogic_epi{{ dt_par.n_bits }}(vm0.vm, {{ ci }}(vd0.vd), {{ ci }}(vd1.vd), _mm512_set1_epi{{ dt_par.n_bits }}(INT{{ dt_par.n_bits }}_MIN), 0xD8));",
+            "return res;"
         ]
     },
     "lshift8": {
@@ -69,11 +102,30 @@
             "return res;"
         ]
     },
-    "pow2_sllv": {
+    "notb_ternlog_m": {
         "format": "long",
         "code": [
+            "// bitwise not of the active lanes: ternary logic ~C (0x55), the inactive lanes are those of vd0",
             "%vd<tp>% res;",
-            "res.vd = _mm512_sllv_epi{{ dt_par.n_bits }}(_mm512_set1_epi{{ dt_par.n_bits }}(1), vd0.vd);",
+            "{% set fl = dt_par.category == 'float' %}{% set ci = ('_mm512_cast' ~ isa_dt_par.data_ext ~ '_si512') if fl else '' %}{% set co = ('_mm512_castsi512_' ~ isa_dt_par.data_ext) if fl else '' %}res.vd = {{ co }}(_mm512_mask_ternarylogic_epi{{ dt_par.n_bits }}({{ ci }}(vd0.vd), vm0.vm, {{ ci }}(vd0.vd), {{ ci }}(vd0.vd), 0x55));",
+            "return res;"
+        ]
+    },
+    "notb_ternlog_s": {
+        "format": "long",
+        "code": [
+            "// bitwise not of the active lanes: ternary logic ~C (0x55), which ignores the first operand (vdsrc, kept in the inactive lanes)",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set ci = ('_mm512_cast' ~ isa_dt_par.data_ext ~ '_si512') if fl else '' %}{% set co = ('_mm512_castsi512_' ~ isa_dt_par.data_ext) if fl else '' %}res.vd = {{ co }}(_mm512_mask_ternarylogic_epi{{ dt_par.n_bits }}({{ ci }}(vdsrc.vd), vm0.vm, {{ ci }}(vd0.vd), {{ ci }}(vd0.vd), 0x55));",
+            "return res;"
+        ]
+    },
+    "notb_ternlog_z": {
+        "format": "long",
+        "code": [
+            "// bitwise not of the active lanes: ternary logic ~C (0x55), zeros in the inactive lanes",
+            "%vd<tp>% res;",
+            "{% set fl = dt_par.category == 'float' %}{% set ci = ('_mm512_cast' ~ isa_dt_par.data_ext ~ '_si512') if fl else '' %}{% set co = ('_mm512_castsi512_' ~ isa_dt_par.data_ext) if fl else '' %}res.vd = {{ co }}(_mm512_maskz_ternarylogic_epi{{ dt_par.n_bits }}(vm0.vm, {{ ci }}(vd0.vd), {{ ci }}(vd0.vd), {{ ci }}(vd0.vd), 0x55));",
             "return res;"
         ]
     },
@@ -81,17 +133,57 @@
         "format": "short",
         "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(vd0.vd, {{ isa.prefix }}_set_epi32({{ instr_name }}), vd1.vd);"
     },
+    "rea_perm2_32_mask": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(vd0.vd, vm0.vm, {{ isa.prefix }}_set_epi32({{ instr_name }}), vd1.vd);"
+    },
+    "rea_perm2_32_maskz": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(vm0.vm, vd0.vd, {{ isa.prefix }}_set_epi32({{ instr_name }}), vd1.vd);"
+    },
     "rea_perm2_64": {
         "format": "short",
         "code": "{{ isa.prefix }}_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(vd0.vd, {{ isa.prefix }}_set_epi64({{ instr_name }}), vd1.vd);"
+    },
+    "rea_perm2_64_mask": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(vd0.vd, vm0.vm, {{ isa.prefix }}_set_epi64({{ instr_name }}), vd1.vd);"
+    },
+    "rea_perm2_64_maskz": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_permutex2var_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(vm0.vm, vd0.vd, {{ isa.prefix }}_set_epi64({{ instr_name }}), vd1.vd);"
     },
     "rea_perm_32": {
         "format": "short",
         "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}({{ isa.prefix }}_set_epi32({{ instr_name }}), vd0.vd);"
     },
+    "rea_perm_32_mask": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(vd0.vd, vm0.vm, {{ isa.prefix }}_set_epi32({{ instr_name }}), vd0.vd);"
+    },
+    "rea_perm_32_masks": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(vdsrc.vd, vm0.vm, {{ isa.prefix }}_set_epi32({{ instr_name }}), vd0.vd);"
+    },
+    "rea_perm_32_maskz": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi32' }}(vm0.vm, {{ isa.prefix }}_set_epi32({{ instr_name }}), vd0.vd);"
+    },
     "rea_perm_64": {
         "format": "short",
         "code": "{{ isa.prefix }}_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}({{ isa.prefix }}_set_epi64({{ instr_name }}), vd0.vd);"
+    },
+    "rea_perm_64_mask": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(vd0.vd, vm0.vm, {{ isa.prefix }}_set_epi64({{ instr_name }}), vd0.vd);"
+    },
+    "rea_perm_64_masks": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(vdsrc.vd, vm0.vm, {{ isa.prefix }}_set_epi64({{ instr_name }}), vd0.vd);"
+    },
+    "rea_perm_64_maskz": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_permutexvar_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi64' }}(vm0.vm, {{ isa.prefix }}_set_epi64({{ instr_name }}), vd0.vd);"
     },
     "rea_reverse_b128_epi16": {
         "format": "short",
@@ -100,6 +192,18 @@
     "rea_reverse_b128_epi8": {
         "format": "short",
         "code": "{{ isa.prefix }}_shuffle_epi8(vd0.vd, _mm512_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));"
+    },
+    "rea_reverse_b128_epi8_mask": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_shuffle_epi8(vd0.vd, vm0.vm, vd0.vd, _mm512_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));"
+    },
+    "rea_reverse_b128_epi8_masks": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_mask_shuffle_epi8(vdsrc.vd, vm0.vm, vd0.vd, _mm512_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));"
+    },
+    "rea_reverse_b128_epi8_maskz": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_maskz_shuffle_epi8(vm0.vm, vd0.vd, _mm512_set_epi8(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15));"
     },
     "rea_slide_b128_pshufb": {
         "format": "long",

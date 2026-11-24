@@ -1083,6 +1083,172 @@
             "variant": "s"
         }
     ],
+    "div2": [
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "div2_shift_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "div2_shift_mask",
+            "variant": "m",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "div2_shift_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "div2_shift_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "div2_shift_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "div2_shift_masks",
+            "variant": "s",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "div2_mul_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "div2_mul_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "div2_mul_masks",
+            "variant": "s"
+        }
+    ],
+    "div4": [
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "div4_shift_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "div4_shift_mask",
+            "variant": "m",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "div4_shift_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "div4_shift_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "div4_shift_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "sr",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "div4_shift_masks",
+            "variant": "s",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "div4_mul_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "div4_mul_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": "all_float",
+            "template": "div4_mul_masks",
+            "variant": "s"
+        }
+    ],
     "dupeven": [
         {
             "instr_name": "moveldup_ps",
@@ -1113,6 +1279,108 @@
                 "uint64"
             ],
             "template": "rea_unpack_self"
+        },
+        {
+            "instr_name": "moveldup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "moveldup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "moveldup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "movedup_pd",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_dup_f_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "movedup_pd",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_dup_f_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "movedup_pd",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_dup_f_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0xA0",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0xA0",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0xA0",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "unpacklo",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self_masks",
+            "variant": "s"
         }
     ],
     "dupodd": [
@@ -1145,6 +1413,108 @@
                 "uint64"
             ],
             "template": "rea_unpack_self"
+        },
+        {
+            "instr_name": "movehdup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "movehdup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "movehdup_ps",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_dup_f_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0xFF",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0xFF",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0xFF",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0xF5",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0xF5",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0xF5",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "unpackhi",
+            "datatypes": [
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_unpack_self_masks",
+            "variant": "s"
         }
     ],
     "expand": [
@@ -1322,6 +1692,45 @@
             "template": "gather_i32_64_masks_i",
             "variant": "s",
             "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "float64,uint64",
+                "int64,uint64"
+            ],
+            "template": "gather_maskz_64",
+            "if": "defined(__AVX512F__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "gather",
+            "datatypes": [
+                "float32,uint32",
+                "int32,uint32"
+            ],
+            "template": "gather_maskz_32",
+            "if": "defined(__AVX512F__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "float64,uint32"
+            ],
+            "template": "gather_i32_64_maskz_f",
+            "variant": "z",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "i32gather",
+            "datatypes": [
+                "int64,uint32",
+                "uint64,uint32"
+            ],
+            "template": "gather_i32_64_maskz_i",
+            "variant": "z",
+            "if": "defined(__AVX512F__)"
         }
     ],
     "getfirst": [
@@ -1375,6 +1784,28 @@
             ],
             "template": "reduce_intrin",
             "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": [
+                "float64",
+                "float32"
+            ],
+            "template": "reduce_intrin_float_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        },
+        {
+            "instr_name": "add",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "reduce_intrin_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
     "hmax": [
@@ -1387,6 +1818,28 @@
             ],
             "template": "reduce_intrin",
             "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "float64",
+                "float32"
+            ],
+            "template": "reduce_intrin_float_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        },
+        {
+            "instr_name": "max",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "reduce_intrin_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
     "hmin": [
@@ -1399,6 +1852,28 @@
             ],
             "template": "reduce_intrin",
             "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": [
+                "float64",
+                "float32"
+            ],
+            "template": "reduce_intrin_float_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        },
+        {
+            "instr_name": "min",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "reduce_intrin_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
     "hmul": [
@@ -1412,6 +1887,28 @@
             ],
             "template": "reduce_intrin",
             "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "float64",
+                "float32"
+            ],
+            "template": "reduce_intrin_float_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        },
+        {
+            "instr_name": "mul",
+            "datatypes": [
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "reduce_intrin_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
         }
     ],
     "load": [
@@ -2018,6 +2515,47 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "msb": [
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "msb_and_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "msb_and_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": [
+                "float64",
+                "float32",
+                "int64",
+                "int32",
+                "uint64",
+                "uint32"
+            ],
+            "template": "msb_and_masks",
+            "variant": "s"
+        }
+    ],
     "mul": [
         {
             "instr_name": "mul",
@@ -2169,6 +2707,83 @@
             "if": "defined(__AVX512DQ__)"
         }
     ],
+    "neg": [
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "neg_xor_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int64",
+                "int32"
+            ],
+            "template": "neg_sub_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int16",
+                "int8"
+            ],
+            "template": "neg_sub_mask",
+            "variant": "m",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "neg_xor_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int64",
+                "int32"
+            ],
+            "template": "neg_sub_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int16",
+                "int8"
+            ],
+            "template": "neg_sub_maskz",
+            "variant": "z",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "neg_xor_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int64",
+                "int32"
+            ],
+            "template": "neg_sub_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int16",
+                "int8"
+            ],
+            "template": "neg_sub_masks",
+            "variant": "s",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
     "none": [
         {
             "instr_name": "kortestz",
@@ -2205,6 +2820,44 @@
             "datatypes": "all_float",
             "template": "testz_1arg",
             "if": "defined(__AVX512DQ__)"
+        }
+    ],
+    "notb": [
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "notb_sub_m",
+            "variant": "m",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "notb_sub_z",
+            "variant": "z",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "sub",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "notb_sub_s",
+            "variant": "s",
+            "if": "defined(__AVX512BW__)"
         }
     ],
     "notb_k": [
@@ -2383,6 +3036,105 @@
             ],
             "template": "rea_permutexvar",
             "if": "defined(__AVX512VBMI__)"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutexvar_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutexvar_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutexvar_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutexvar_mask",
+            "if": "defined(__AVX512BW__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutexvar_maskz",
+            "if": "defined(__AVX512BW__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutexvar_masks",
+            "if": "defined(__AVX512BW__)",
+            "variant": "s"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutexvar_mask",
+            "if": "defined(__AVX512VBMI__) && defined(__AVX512BW__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutexvar_maskz",
+            "if": "defined(__AVX512VBMI__) && defined(__AVX512BW__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutexvar",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutexvar_masks",
+            "if": "defined(__AVX512VBMI__) && defined(__AVX512BW__)",
+            "variant": "s"
         }
     ],
     "permute2": [
@@ -2415,6 +3167,72 @@
             ],
             "template": "rea_permutex2var",
             "if": "defined(__AVX512VBMI__)"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutex2var_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32",
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_permutex2var_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutex2var_mask",
+            "if": "defined(__AVX512BW__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_permutex2var_maskz",
+            "if": "defined(__AVX512BW__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutex2var_mask",
+            "if": "defined(__AVX512VBMI__) && defined(__AVX512BW__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutex2var",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_permutex2var_maskz",
+            "if": "defined(__AVX512VBMI__) && defined(__AVX512BW__)",
+            "variant": "z"
         }
     ],
     "permute_b128": [
@@ -2440,6 +3258,106 @@
                 "uint8"
             ],
             "template": "rea_shuffle_epi8_b128",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permutevar_b128_f_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permutevar_b128_f_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permutevar_b128_f_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_permutevar_b128_ps_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_permutevar_b128_ps_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "permutevar",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_permutevar_b128_ps_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_shuffle_epi8_b128_mask",
+            "if": "defined(__AVX512BW__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_shuffle_epi8_b128_maskz",
+            "if": "defined(__AVX512BW__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "shuffle",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_shuffle_epi8_b128_masks",
+            "if": "defined(__AVX512BW__)",
+            "variant": "s"
+        }
+    ],
+    "pow2": [
+        {
+            "instr_name": "pow2",
+            "datatypes": [
+                "uint64",
+                "uint32"
+            ],
+            "template": "pow2_sllv",
+            "if": "defined(__AVX512F__)"
+        },
+        {
+            "instr_name": "pow2",
+            "datatypes": [
+                "uint16"
+            ],
+            "template": "pow2_sllv",
             "if": "defined(__AVX512BW__)"
         }
     ],
@@ -2473,6 +3391,81 @@
                 "uint64"
             ],
             "template": "rea_shuffle_epi32_b128"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_b128_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_b128_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_b128_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0x55",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_b128_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0x55",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_b128_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0x55",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_b128_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_b128_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_b128_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0x1B",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_b128_masks",
+            "variant": "s"
         }
     ],
     "rshift": [
@@ -2764,6 +3757,24 @@
             "instr_name": "rsqrt14",
             "datatypes": "all_float",
             "template": "arith_1arg"
+        },
+        {
+            "instr_name": "rsqrt14",
+            "datatypes": "all_float",
+            "template": "arith_1arg_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "rsqrt14",
+            "datatypes": "all_float",
+            "template": "arith_1arg_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "rsqrt14",
+            "datatypes": "all_float",
+            "template": "arith_1arg_masks",
+            "variant": "s"
         }
     ],
     "scatter": [
@@ -3217,6 +4228,81 @@
                 "uint64"
             ],
             "template": "rea_shuffle_epi32"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_self_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_self_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "rea_permute_self_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0x55",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0x55",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0x55",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "rea_permute_self_masks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_mask",
+            "variant": "m"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_maskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "0xB1",
+            "datatypes": [
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_shuffle_epi32_masks",
+            "variant": "s"
         }
     ],
     "testz": [
@@ -3269,6 +4355,48 @@
             "datatypes": "all_float",
             "template": "trunc",
             "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        },
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "truncf_mask",
+            "if": "(defined(__MIC__) || defined(__KNCNI__))",
+            "variant": "m"
+        },
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "truncf_maskz",
+            "if": "(defined(__MIC__) || defined(__KNCNI__))",
+            "variant": "z"
+        },
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "truncf_masks",
+            "if": "(defined(__MIC__) || defined(__KNCNI__))",
+            "variant": "s"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "trunc_mask",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "trunc_maskz",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "trunc_masks",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)",
+            "variant": "s"
         }
     ],
     "unziphi_b128": [
@@ -3442,6 +4570,20 @@
             "datatypes": "all_8bit",
             "template": "bitwise_2args",
             "if": "defined(__AVX512BW__)"
+        }
+    ],
+    "xorsign": [
+        {
+            "instr_name": "ternarylogic",
+            "datatypes": "all_float",
+            "template": "xorsign_ternlog_m",
+            "variant": "m"
+        },
+        {
+            "instr_name": "ternarylogic",
+            "datatypes": "all_float",
+            "template": "xorsign_ternlog_z",
+            "variant": "z"
         }
     ],
     "ziphi_b128": [

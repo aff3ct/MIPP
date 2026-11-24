@@ -10,7 +10,7 @@ An ISA that has no single instruction but can build the operation from a few of 
 
 | Level | Code made of | Templates | Entries |
 | :--- | :--- | :--- | :--- |
-| <span class="mipp-isa-badge lvl-0">L0</span> Native | one intrinsic | `simd_ext/<isa>/<isa>_native_templates.json` | `simd_ext/<isa>/<isa>_native_implems.json` |
+| <span class="mipp-isa-badge lvl-0">L0</span> Native | one intrinsic (the constants it uses do not count: broadcast of a literal, all-true predicate) | `simd_ext/<isa>/<isa>_native_templates.json` | `simd_ext/<isa>/<isa>_native_implems.json` |
 | <span class="mipp-isa-badge lvl-1">L1</span> Dedicated emulation | several intrinsics of the ISA, possibly MIPP calls | `simd_ext/<isa>/<isa>_emu_templates.json` | `simd_ext/<isa>/<isa>_emu_implems.json` |
 | <span class="mipp-isa-badge lvl-2">L2</span> Generic emulation | MIPP calls only, for all ISAs | `helpers_headers/generic_emu_templates*.json` | `helpers_headers/generic_emu_implems*.json` |
 
@@ -162,12 +162,17 @@ At this point `mipp_neon_absdiff_float32_maskz_m1` is still <span class="mipp-is
     "format": "long",
     "code": [
         "%vd<tp>% op = %{{func_name}}<tp>%(vd0, vd1);",
+        "{% if isa.get('hw_mask', False) %}// hardware masks: a selection with zeros, which the compilers can fold into a zero-masked instruction",
+        "%vd<tp>% res = %select<tp>%(vm0, op, %set0<tp>%());",
+        "{%- else -%}",
         "%vd<tp>% tmp = %tovd<tp>%(vm0);",
-        "%vd<tp>% res = %andb<tp>%(op, tmp);",
+        "%vd<tp>% res = %andb<tp>%(op, tmp);{% endif %}",
         "return res;"
     ]
 }
 ```
+
+On the ISAs with hardware masks (`hw_mask`: AVX-512, SVE, RVV), the inactive lanes are zeroed by a selection: GCC and clang fold `select(m, op, set0())` into the zero-masked instruction when the last operation of `op` has one (`vaddps zmm0{k1}{z}`), and it costs one instruction instead of two (`tovd` then `andb`) on SVE and RVV. Elsewhere a mask is a register of all-ones or zero lanes, and `andb` with it is the cheapest.
 
 Reuse them in `helpers_headers/generic_emu_implems_mask.json`, as `add`, `max` or `min` do:
 
@@ -253,7 +258,7 @@ The entry in `neon_emu_implems.json` is restricted to 32-bit Arm, since AArch64 
 ]
 ```
 
-The `levels` audit checks that each entry is in the right file: a native entry must contain exactly one intrinsic and no MIPP call, a dedicated emulation several intrinsics or intrinsics and MIPP calls. Code without any intrinsic belongs to the generic files. When an exception is justified, set `"skip_audit_level": true` and explain it in `skip_audit_level_reason`.
+The `levels` audit checks that each entry is in the right file: a native entry must contain exactly one intrinsic and no MIPP call (the broadcasts of constants and the constant predicates do not count, see [Audits](../reference/audits.md#21-levels-implementation-level-placement)), a dedicated emulation several intrinsics or intrinsics and MIPP calls. Code without any intrinsic belongs to the generic files. When an exception is justified, set `"skip_audit_level": true` and explain it in `skip_audit_level_reason`.
 
 ---
 

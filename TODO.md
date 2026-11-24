@@ -9,6 +9,7 @@ This document tracks pending engineering tasks, missing functionality relative t
 MIPPv2 currently defines and generates **144 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, selection, rearrangements and complex numbers, plus their scalar forms (`sub_vs`, `fmadd_vsv`...). The MIPPv1 families below are migrated on the `feat/mippv1-parity` branch; what is left is postponed with the register tuples (`sincos`, transposes, `interleavex*`), low priority (shift of the lanes of a mask, `MIPP_STATIC_LIB` tables of `compress`) or deliberately not reproduced (`cmask`).
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
+
 MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components). MIPPv2 works on the interleaved layout, in ordinary `float32` / `float64` registers (category `complex`, see `docs/user/complex_numbers.md`); the split layout is written with the real functions:
 - [x] `cadd`: Complex addition $((a_r + b_r) + i(a_i + b_i))$: `add` on the interleaved layout.
 - [x] `csub`: Complex subtraction $((a_r - b_r) + i(a_i - b_i))$: `sub`.
@@ -20,6 +21,7 @@ MIPPv1 provided complex-number vector arithmetic defined on register pairs (`reg
 - [ ] `sincos`, `cossin`: Simultaneous evaluation of sine and cosine returning register pairs (`regx2` with sine/cosine or cosine/sine components). Postponed with the register tuples (`sin` and `cos` exist).
 
 ### 1.2. Vector Interleaving & Deinterleaving
+
 MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives for vector transpositions:
 - [x] `interleavelo`, `interleavehi`: Low/high lane interleaving of two registers: `ziplo`, `ziphi` (and `unziplo`, `unziphi` for the inverse).
 - [x] `interleavelo2`, `interleavehi2`: 2-element granular low/high interleaving: `ziplo_b128`, `ziphi_b128` (per 128-bit block, see below).
@@ -29,6 +31,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [ ] `interleavex2`, `interleavex4`, `interleavex16`: Cross-lane intra-register interleaving permutations.
 
 ### 1.3. Permutation, Shuffling & Packing
+
 - [x] `shuff`, `shuff2`, `shuff4`: Arbitrary intra-vector element shuffling governed by **runtime index registers only** (MIPPv1 has no immediate shuffle masks). `shuff2`/`shuff4` apply the same pattern to each half/quarter of the register. Done as `permute` / `permute2` (whole vector) and `permute_b128`, plus `permute<P>` / `permute2<P>` with a pattern known at compile time (C++17).
 - [ ] `cmask`, `cmask2`, `cmask4`: Opaque, ISA-specific encoding of the shuffle indices (byte indices for `pshufb`/`vtbl`), prepared once. MIPPv2 starts with plain index registers; a prepared type will only be added if measurements require it.
 - [x] `combine<S>(a, b)`: Lanes `S` to `S + N - 1` of the concatenation of `a` and `b` (`alignr` / `ext`). Done as `slide(a, b, n)` (and `slideup`, `slidedown`, `_b128`), since `combine` is the concatenation of two halves in MIPPv2. The count is an ordinary argument, not an immediate.
@@ -40,12 +43,14 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
   > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`lo`/`hi`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
+
 - [x] `lrot`, `rrot`: Rotation of the **lanes** of a register by one position (not a bitwise rotation of the elements): `rotate(v, n)` (`rotate(v, 1)`, `rotate(v, N - 1)`), and `rotate_b128`.
 - [x] `lshiftr`, `rshiftr`: Variable element-wise vector-by-vector left and right logical/arithmetic bit shifts (where shift counts vary per lane, e.g., `_mm256_sllv_epi32`): `lshift(a, n)` / `rshift(a, n)` with a register of counts; the same count for every lane is `lshift_vs` / `rshift_vs`.
 - [x] Immediate arguments (`alignr`, `vext`, `svext`, shifts by a constant): with a constant count, `slide`, `slideup`, `slidedown`, `rotate`, `bcast` (and their `_b128` variants) and the shifts select the immediate instructions at compile time (`__builtin_constant_p`), in C and C++; the C++ APIs also have `mipp::slide<S>(a, b)`, `mipp::lshift<3>(a)`... (see `docs/user/rearrangements.md`, Constant Counts).
 - [ ] `lshift<N>`, `rshift<N>` on `msk`, `Msk << n`: shift of the lanes of a mask. Low priority (rarely used): native only on AVX-512 (`kshift`) and RVV (`vslideup` / `vslidedown` of the mask register); elsewhere through `tovd`, `slideup` / `slidedown` and `tovm`.
 
 ### 1.5. Memory Management & Dynamic Buffers
+
 - [x] `isAligned`: `mipp_is_aligned(p)` / `mipp::is_aligned(p)` against `MIPP_REQUIRED_ALIGNMENT` (the register size).
 - [x] `oloadu`: The unaligned load that returns a register object (`Reg<T>`), not a load with an offset: covered by the Object API (`mipp::Vd<T>` constructors and `mipp::loadu`).
 - [x] `malloc`, `free`: `mipp_malloc` / `mipp_free` (C), `mipp::malloc<T>` / `mipp::free` (C++).
@@ -53,6 +58,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [x] `mipp::vector<T>`: Type alias for `std::vector<T, mipp::allocator<T>>`.
 
 ### 1.6. Reductions, Aliases & Diagnostics
+
 - [x] `reduction<T, OP>`: `mipp::reduce(v, op)` and `mipp::reduce<T, LMUL>(ptr, n, op)` in the Object API, with the operations of `mipp::op` (`add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`) or any functor.
 - [x] `sum`: Reduction alias for horizontal addition (`hadd`), C++ APIs.
 - [x] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation: `clamp(v, lo, hi)`, with its scalar forms (`clamp(v, 0.f, 1.f)`).
@@ -61,6 +67,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [x] `any`, `all` (with `none` and `testz`): Boolean mask reductions returning `int32_t`, native on every ISA (movemask, testz/testc, kortest, maxv/minv, ptest, vcpop).
 
 ### 1.7. Summary of Function Renames & Architectural Evolution in MIPPv2
+
 | MIPPv1 Concept | MIPPv2 Implementation | Architectural Rationale |
 | :--- | :--- | :--- |
 | `mipp::load_2<T>`, `mipp::loadu_2<T>` | `mipp::load<T, -2>` / `mipp_load_*_d2` | Handled natively via MIPPv2 Length Division ($\text{LDIV} / LMUL=-2$). |
@@ -89,16 +96,19 @@ The optimization goals for ISA coverage are:
 
 ---
 
-## 3. Hardware Predication on AVX-512 & SVE
+## 3. Hardware Predication on AVX-512, SVE & RVV
 
-Currently, MIPPv2 classifies mask execution into native predication (RISC-V Vector), partially native predication (AVX-512, and native masked load/store on RVV), and full-vector emulation (SSE, NEON, AVX, SVE).
+AVX-512, SVE and RVV have hardware masks (`hw_mask`): a masked function uses the predicated form of its instruction when the ISA has one. The other masked functions compute the unmasked operation and select the inactive lanes (`select`, with zeros for the Zero-Masked variant): GCC and Clang fold this selection into the masked instruction on AVX-512, not on RVV. SSE, AVX and NEON have no predication: a mask is a register of all-ones or zero lanes.
 
-- [ ] **AVX-512 Hardware Opmask (`k`-register) Integration** (partially done):
-  - Current state: `vm<T>` is bound to native opmask types (`__mmask8` ... `__mmask64`). Native masked instructions are used for part of the functions (e.g., `_mm512_mask_add_*`, native masked `load`/`store` including unsigned types); the others are evaluated as an unmasked operation followed by `_mm512_mask_blend_*` (Level 2).
-  - Target state: Route all masked operations that have a native predicated intrinsic (e.g., `_mm512_maskz_mul_epi32`) to it.
-- [ ] **ARM SVE Predicate (`svbool_t`) Integration** (partially done):
-  - Current state: `vm<T>` is bound to native `svbool_t`. Predicated forms (`_m`, `_z`) are used for about 35 functions (arithmetic, FMA, comparisons, logic, shifts, reductions, loads/stores, gather/scatter); the other masked operations are emulated through unmasked execution and `svsel` (Level 2).
-  - Target state: Generate predicated instruction forms governed by active predicates (`svadd_f32_m`, `svmul_s32_z`).
+- [x] **AVX-512 Hardware Opmask (`k`-register) Integration**:
+  - `vm<T>` is bound to the opmask types (`__mmask8` ... `__mmask64`). The masked variants call the `_mm512_mask_*` / `_mm512_maskz_*` form of the instruction when the unmasked function is one intrinsic (arithmetic, logic, FMA, comparisons, shifts, `sqrt`, `rsqrt`, `trunc`, `permute`, `permute2`, `permute_b128`, `reverse`, `dupeven`, `dupodd`, `swap2`, `zip` / `unzip` halves, loads, stores, gather, scatter), and when a short sequence ends with such a form (`neg`, `notb`, `copysign`, `xorsign`, `msb`, `clamp`, `div2`, `div4`, the reductions with `_mm512_mask_reduce_*`).
+  - Without a masked form at the granularity of the lanes (8 and 16-bit shifts and logic, `shuffle_epi32` on 64-bit lanes), for the functions with an immediate count (`slide`, `rotate`, `bcast`, dispatched to the immediate instructions) and for the compositions (math, complex numbers, `round`), the selection after the unmasked operation is kept.
+- [x] **ARM SVE Predicate (`svbool_t`) Integration**:
+  - `vm<T>` is bound to `svbool_t`. The predicated forms (`_m`, `_z`) are used for the arithmetic, FMA, comparisons, logic (`notb`, `andnb` Zero-Masked), shifts, `div2` / `div4`, `neg`, `abs`, `round`, `trunc`, `sqrt`, `clamp`, `msb`, `copysign`, `xorsign`, the saturated `adds` / `subs` (SVE2), the reductions, loads, stores, gather and scatter.
+  - The rearrangements (`svtbl`, `svzip1`, `svrev`, `svext`...), `rsqrte` / `recpe` and `hmul` have no predicated form, and the Merge-Masked `andnb` cannot use `svbic_m` (it keeps the other operand): `svsel` after the unmasked operation.
+- [x] **RISC-V Vector Mask Policies**:
+  - The masked variants use the `_mu` policy (inactive lanes from the merge operand: the first register, the source register, or a register of zeros for the Zero-Masked variant) for the arithmetic, FMA (`fnmadd` / `fnmsub` with `vfnmsub` / `vfnmadd`), logic, shifts, `abs`, `neg`, `clamp`, `msb`, `copysign` / `xorsign` (`vfsgnj` / `vfsgnjx`), the gathers of `permute`, `bcast`, `reverse`, `dupeven`, `dupodd` and `swap2`, the reductions, loads, stores, gather and scatter.
+  - The slides (`slide`, `rotate`), `zip` / `unzip` and the compositions keep the selection (`vmerge`) after the unmasked operation.
 
 ---
 
@@ -149,11 +159,13 @@ The header and documentation generation pipeline requires developer tools to ana
 ## 6. Metaprogramming & Auto-Tuning Roadmap
 
 ### 6.1. `min_lmul` Constexpr Trait
+
 - *Status*: Specified design, pending implementation in constexpr type traits.
 - [ ] Implement compile-time metaprogramming helper `mipp::min_lmul<T>(size_t vector_length)` to deduce the smallest valid Length Multiplier ($\text{LMUL}$) needed to store `vector_length` elements of type `T` in a register. This could be used to automatically select the appropriate register width for different datatypes and ISAs to perform automatic loop unrolling at compile time. For example, `mipp::min_lmul<float>(16)` should return
 4 on `SSE` or `NEON`, 2 on `AVX` or `RVV-256`, 1 on `RVV-512` or `AVX-512`.  
 
 ### 6.2. `Tuple` Type for Transparent Register Blocking
+
 - *Status*: Well-defined concept and user experience goals, but implementation strategy, scope, edge cases, and code generation mechanisms are unfinalized (currently unsupported).
 - [ ] Implement `mipp::Tuple<T, N_VECTORS, int LMUL = 1>` template abstraction for transparent multi-register unrolling, register tiling, and register blocking.
 - [ ] **Transparent Register Block Manipulation**:
@@ -172,6 +184,7 @@ The header and documentation generation pipeline requires developer tools to ana
   - Maximizes instruction-level parallelism (ILP) and hides functional unit latency on out-of-order superscalar pipelines without manual register management.
 
 ### 6.3. Micro-Benchmark & Empirical Auto-Tuning Suite
+
 - *Status*: Long-term vision / distant roadmap goal. The high-level intent is established, but the architectural design, harness infrastructure, and feedback loop into the generator remain to be designed.
 - [ ] Implement an automated micro-benchmarking test harness measuring throughput (cycles/vector), instruction latency, and cache/pipeline metrics across Level 0 (Native), Level 1 (Dedicated Emulation), and Level 2 (Generic Emulation) candidates for each ISA.
 - [ ] **Precision & Accuracy Profiles (ULP Targets)**:
