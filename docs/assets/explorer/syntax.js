@@ -259,7 +259,7 @@ export function followTooltipAnchors() {
     const anchor = tooltip._targetMacro;
     if (!anchor) return;
     if (!anchor.isConnected || isScrolledOut(anchor)) {
-      anchor.classList.remove("active");
+      if (tooltip._marksAnchor) anchor.classList.remove("active");
       tooltip.remove();
     } else {
       placeTooltip(tooltip, anchor);
@@ -278,7 +278,7 @@ const currentTooltip = () => document.querySelector(".mipp-macro-tooltip");
 export function hideTooltip({ onlyUnpinned = false } = {}) {
   const t = currentTooltip();
   if (!t || (onlyUnpinned && t._pinned)) return;
-  if (t._targetMacro) t._targetMacro.classList.remove("active");
+  if (t._targetMacro && t._marksAnchor) t._targetMacro.classList.remove("active");
   t.remove();
 }
 
@@ -298,11 +298,16 @@ export function tooltipWanted(anchor, pinned) {
   return true;
 }
 
-/** Shows the tooltip built for `anchor` under it, and binds its close button. */
-export function openTooltip(tooltip, anchor, pinned, maxWidth) {
+/**
+ * Shows the tooltip built for `anchor` under it, and binds its close button. `markAnchor`: the
+ * element gets the class `active` while its tooltip is open (not for a button, where this
+ * class says that it is selected).
+ */
+export function openTooltip(tooltip, anchor, pinned, maxWidth, markAnchor = true) {
   tooltip._targetMacro = anchor;
   tooltip._pinned = pinned;
-  anchor.classList.add("active");
+  tooltip._marksAnchor = markAnchor;
+  if (markAnchor) anchor.classList.add("active");
   document.body.appendChild(tooltip);
   placeTooltip(tooltip, anchor, maxWidth);
   const closeBtn = tooltip.querySelector(".mipp-macro-tooltip-close");

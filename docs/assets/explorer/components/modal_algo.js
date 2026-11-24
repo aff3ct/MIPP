@@ -375,7 +375,7 @@ export function renderAlgoModal(modalData) {
       tierGroupHtml = `
         <div class="mipp-segmented-group" id="mipp-modal-tier-group">
           ${selectableItems.map((it) => `
-            <button type="button" class="mipp-segment-btn ${activeTier === it.id ? "active" : ""}" data-modal-tier="${it.id}" title="${escapeHtml(it.description || it.label)}">${escapeHtml(it.label)}</button>
+            <button type="button" class="mipp-segment-btn ${activeTier === it.id ? "active" : ""}" data-modal-tier="${it.id}" data-feature-isa="${currentIsa}" data-feature-id="${escapeHtml(it.id)}">${escapeHtml(it.label)}</button>
           `).join("")}
         </div>
       `;
@@ -388,9 +388,10 @@ export function renderAlgoModal(modalData) {
           ${flagItems.map((it) => {
             const isActive = flatDefines[it.define] !== false;
             const isLocked = Boolean(it.locked);
-            const style = isLocked ? 'style="pointer-events: none; opacity: 0.85;"' : '';
+            // a locked feature cannot be switched (main.js ignores the click), but it has its tooltip
+            const style = isLocked ? 'style="cursor: default; opacity: 0.85;" aria-disabled="true"' : '';
             return `
-              <button type="button" class="mipp-segment-btn ${isActive ? "active" : ""}" data-modal-toggle-feature="${it.id}" ${isLocked ? 'data-modal-locked="true"' : ""} title="${escapeHtml(it.description || it.label)}" ${style}>
+              <button type="button" class="mipp-segment-btn ${isActive ? "active" : ""}" data-modal-toggle-feature="${it.id}" ${isLocked ? 'data-modal-locked="true"' : ""} data-feature-isa="${currentIsa}" data-feature-id="${escapeHtml(it.id)}" ${style}>
                 ${escapeHtml(it.label)}
               </button>
             `;

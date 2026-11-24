@@ -27,6 +27,7 @@ import { renderCompareModal } from "./components/modal_compare.js";
 import { showMacroTooltip, hideTooltip, toggleTooltip, typesetMath, followTooltipAnchors } from "./syntax.js";
 import { showIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
 import { showImmTooltip } from "./components/imm_tooltip.js";
+import { showFeatureTooltip } from "./components/feature_tooltip.js";
 
 // Elements of the code that have a tooltip: a parameter that can be an immediate, a vendor
 // intrinsic, a macro. The three behave the same way: tooltip on hover, kept open by a click.
@@ -660,6 +661,7 @@ function updateModals(modalsContainerEl) {
   `;
 
   applyModalSizes(modalsContainerEl);
+  followTooltipAnchors(); // the tooltip of an element that this render replaced is closed
 
   // The URL always encodes the current view (shareable link): every render of
   // the app ends here (renderApp), like every change of a modal
@@ -1138,6 +1140,21 @@ export async function initExplorer() {
       document.addEventListener("mouseout", (e) => {
         if (e.target.closest && e.target.closest(TOOLTIP_REFS)) hideTooltip({ onlyUnpinned: true });
       });
+
+      // Hardware features of the Algorithm modal: their tooltip on hover and on keyboard focus
+      // (never kept open: a click on the button switches the feature)
+      const featureBtn = (e) => (e.target.closest ? e.target.closest("[data-feature-id]") : null);
+      for (const type of ["mouseover", "focusin"]) {
+        document.addEventListener(type, (e) => {
+          const btn = featureBtn(e);
+          if (btn && (type === "mouseover" || btn.matches(":focus-visible"))) showFeatureTooltip(btn);
+        });
+      }
+      for (const type of ["mouseout", "focusout"]) {
+        document.addEventListener(type, (e) => {
+          if (featureBtn(e)) hideTooltip({ onlyUnpinned: true });
+        });
+      }
 
       // "/" on the Explorer page: focus the search bar of the Explorer instead of
       // opening the site search (Material listens on the document; "s" and "f"

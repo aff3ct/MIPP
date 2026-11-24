@@ -1896,6 +1896,54 @@ body.mipp-has-explorer .md-typeset>h1:first-child {
   --mipp-tooltip-edge: #7c3aed;
 }
 
+/* Hardware feature of the Algorithm modal (feature_tooltip.js): neutral grey */
+.mipp-feature-tooltip {
+  --mipp-tooltip-edge: #64748b;
+  max-width: 560px;
+}
+
+.mipp-feature-body p {
+  margin: 0 0 0.45rem 0;
+  line-height: 1.45;
+}
+
+.mipp-feature-body dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 0.7rem;
+  align-items: baseline;
+  margin: 0;
+}
+
+.mipp-feature-body dt {
+  margin: 0;
+  font-size: var(--mipp-fs-base, 0.72rem);
+  font-weight: 600;
+  color: var(--md-default-fg-color--light, #64748b);
+}
+
+/* a long macro (__ARM_FEATURE_DIRECTED_ROUNDING) widens the tooltip, and breaks on a
+   narrow screen rather than leaving it */
+.mipp-feature-body dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.mipp-feature-body code {
+  font-size: var(--mipp-fs-base, 0.72rem);
+}
+
+.mipp-feature-body .mipp-feature-note {
+  margin: 0.45rem 0 0 0;
+  font-size: var(--mipp-fs-base, 0.72rem);
+  color: var(--md-default-fg-color--light, #64748b);
+}
+
+[data-md-color-scheme="slate"] .mipp-feature-tooltip {
+  --mipp-tooltip-edge: #94a3b8;
+}
+
 [data-md-color-scheme="slate"] .mipp-intrinsic-tooltip {
   --mipp-tooltip-edge: #38bdf8;
 }
