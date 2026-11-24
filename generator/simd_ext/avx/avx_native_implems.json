@@ -24,6 +24,19 @@
             "if": "defined(__AVX2__)"
         }
     ],
+    "adds": [
+        {
+            "instr_name": "adds",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "andb": [
         {
             "instr_name": "and",
@@ -958,6 +971,19 @@
             "instr_name": "sub",
             "datatypes": "all_int_uint",
             "template": "arith_2args_int",
+            "if": "defined(__AVX2__)"
+        }
+    ],
+    "subs": [
+        {
+            "instr_name": "subs",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
             "if": "defined(__AVX2__)"
         }
     ],

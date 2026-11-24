@@ -213,6 +213,17 @@
                 "uint16",
                 "uint8"
             ],
+            "template": "arith_2args",
+            "if": "defined(__AVX512BW__)"
+        },
+        {
+            "instr_name": "adds",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
             "template": "m2_m",
             "variant": "m",
             "if": "defined(__AVX512BW__)"
@@ -3128,6 +3139,17 @@
         }
     ],
     "subs": [
+        {
+            "instr_name": "subs",
+            "datatypes": [
+                "int16",
+                "int8",
+                "uint16",
+                "uint8"
+            ],
+            "template": "arith_2args",
+            "if": "defined(__AVX512BW__)"
+        },
         {
             "instr_name": "subs",
             "datatypes": [
