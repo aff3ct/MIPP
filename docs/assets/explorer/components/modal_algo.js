@@ -295,7 +295,7 @@ export function renderAlgoModal(modalData) {
           </div>
           <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(r.code)}" title="Copy ${escapeHtml(label)} code">${ICON_COPY}</button>
         </div>
-        <pre><code>${highlightCpp(r.code, {}, { isa, imm: entry.imm && immChoices(src, { ...algoCfg, isa, options: cc.options, overrides: isaDefines }) ? entry.imm : null })}</code></pre>
+        <pre><code>${highlightCpp(r.code, {}, { isa, imm: entry.imm && immChoices(src, { ...algoCfg, isa, options: cc.options, overrides: isaDefines }) ? entry.imm : null, immFunc: [entry.name, entry.form_of] })}</code></pre>
       </div>`);
     }).join("");
     compareHtml = `
@@ -517,7 +517,7 @@ export function renderAlgoModal(modalData) {
                   ${ICON_COPY}
                 </button>
               </div>
-              <pre><code>${highlightCpp(fullCode, {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null })}</code></pre>
+              <pre><code>${highlightCpp(fullCode, {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null, immFunc: [entry.name, entry.form_of] })}</code></pre>
             </div>
             ${treeHtml}
           ` : `
@@ -548,7 +548,7 @@ export function renderAlgoModal(modalData) {
                   </button>
                 </div>
               </div>
-              <pre><code>${highlightCpp(flatStandaloneCode, entry.scalar_macros || {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null })}</code></pre>
+              <pre><code>${highlightCpp(flatStandaloneCode, entry.scalar_macros || {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null, immFunc: [entry.name, entry.form_of] })}</code></pre>
             </div>
           `}
         </div>

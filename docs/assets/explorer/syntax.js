@@ -3,6 +3,25 @@
  */
 import { escapeHtml, ICON_COPY } from "./explorer.config.js";
 import { isIntrinsicName } from "./components/intrinsic_tooltip.js";
+import { parseCName } from "./algo_source.js";
+
+/**
+ * Name of the function whose parameter list contains the position `index` of `code` (the
+ * identifier before the parenthesis that is still open there), null outside of one.
+ */
+function declaredFunction(code, index) {
+  let depth = 0;
+  for (let i = index - 1; i >= 0; i--) {
+    const c = code[i];
+    if (c === ")") depth++;
+    else if (c === "(") {
+      if (depth > 0) { depth--; continue; }
+      const m = code.slice(Math.max(0, i - 120), i).match(/([A-Za-z_]\w*)\s*$/);
+      return m ? m[1] : null;
+    } else if (c === ";" || c === "{" || c === "}") return null;
+  }
+  return null;
+}
 
 export function formatCppObjProto(str, lmulKey = "1") {
   if (!str) return "";
@@ -189,7 +208,17 @@ export function highlightCpp(code, customMacros = {}, options = {}) {
     // declaration of the parameter (`const int32_t s0`), or of the constant of
     // the C++ template version (`template <int S, ...>`)
     const before = imm ? cleanCode.slice(Math.max(0, match.index - 12), match.index) : "";
-    const isImmDecl = imm && ((token === imm.arg && /\bu?int32_t\s+$/.test(before)) || (token === "S" && /<int\s+$/.test(before)));
+    let isImmDecl = imm && ((token === imm.arg && /\bu?int32_t\s+$/.test(before)) || (token === "S" && /<int\s+$/.test(before)));
+    // In the code of a whole function and of what it calls (`options.immFunc`: its names, the
+    // C++ one of a scalar form being the name of its function), only its own parameter: the
+    // other functions have an `int32_t s0` too (the scalar of `set1`, of the scalar forms...),
+    // which is not this immediate
+    if (isImmDecl && options.immFunc && token === imm.arg) {
+      const names = [].concat(options.immFunc).filter(Boolean);
+      const name = declaredFunction(cleanCode, match.index);
+      const parsed = name ? parseCName(name) : null;
+      isImmDecl = names.includes(name) || Boolean(parsed && names.includes(parsed.func));
+    }
 
     if (isImmDecl) {
       // the parameter is a variable or an immediate, the template argument always an immediate
