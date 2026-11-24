@@ -31,5 +31,19 @@ if(MIPP_PRECOMPILED_HEADERS AND CMAKE_VERSION VERSION_GREATER_EQUAL 3.16)
     )
 endif()
 
+# GCC 15 + SVE: miscompilation of the 'immediates' test (wrong results of 'slidedown_b128' on LMUL = 2 types, in C++20
+# at -O2/-O3), worked around by disabling the scalar replacement of aggregates for this file only (disabling it for
+# all the tests makes the static binary too big for the AArch64 branches); GCC 16 is not affected (but it ICEs on other
+# SVE tests)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 15
+   AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16)
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles("#ifndef __ARM_FEATURE_SVE\n#error\n#endif\nint main() { return 0; }" MIPP_TESTS_SVE)
+    if(MIPP_TESTS_SVE)
+        set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/src/manual/immediates.cpp" PROPERTIES
+            COMPILE_OPTIONS "-fno-tree-sra" SKIP_PRECOMPILE_HEADERS ON)
+    endif()
+endif()
+
 enable_testing()
 add_test(NAME mipp::test COMMAND tests_exe)
