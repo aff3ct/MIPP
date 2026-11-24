@@ -113,7 +113,7 @@
     },
     "cmp_float_z_cmpneq": {
         "format": "short",
-        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_NEQ_OQ);"
+        "code": "{{ isa.prefix }}_mask_cmp_{{ isa_dt_par.data_ext }}_mask(vm0.vm, vd0.vd, vd1.vd, _CMP_NEQ_UQ);"
     },
     "cmp_int": {
         "format": "short",
@@ -158,7 +158,7 @@
     "cmpneq_float": {
         "format": "short",
         "code": [
-            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_NEQ_OQ);"
+            "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}_mask(vd0.vd, vd1.vd, _CMP_NEQ_UQ);"
         ]
     },
     "cvt": {

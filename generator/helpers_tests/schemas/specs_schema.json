@@ -569,16 +569,28 @@
                     ]
                 },
                 "special_values": {
-                    "description": "Values mixed into the random inputs: every other iteration, each lane takes one of these values (cycling, at a position that changes with the iteration). Used to test the cases that random values never hit (the halves of `round`, `-0.0`, the limits of the conversions).",
+                    "description": "Values mixed into the random inputs: every other iteration, each lane takes one of these values (cycling, at a position that changes with the iteration). Used to test the cases that random values never hit (the halves of `round`, `-0.0`, the limits of the conversions, the NaN of the comparisons). The second and the third inputs of a function take the next values of the list.",
                     "type": "object",
                     "properties": {
                         "by_datatype": {
-                            "description": "Values per datatype of the inputs (`float32`, `float64`, ...).",
+                            "description": "Values per datatype of the inputs (`float32`, `float64`, ...): numbers, or `\"nan\"`, `\"inf\"` and `\"-inf\"` for the floating-point types.",
                             "type": "object",
                             "additionalProperties": {
                                 "type": "array",
                                 "items": {
-                                    "type": "number"
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "enum": [
+                                                "nan",
+                                                "inf",
+                                                "-inf"
+                                            ]
+                                        }
+                                    ]
                                 }
                             },
                             "propertyNames": {

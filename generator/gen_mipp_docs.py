@@ -1277,8 +1277,8 @@ class SpecFuncInfo:
             print("", file=file)
         if spec["special_values"]:
             print('??? note "Special values"\n', file=file)
-            print("    Every other iteration, the lanes of the inputs take these values (cycling), to cover the "
-                  "cases that random values never hit:\n", file=file)
+            print("    Every other iteration, the lanes of the inputs take these values (cycling, each further "
+                  "input one value later in the list), to cover the cases that random values never hit:\n", file=file)
             for dt, vals in spec["special_values"].items():
                 print(f"    - `{dt}`: " + ", ".join(f"`{v}`" for v in vals), file=file)
             print("", file=file)

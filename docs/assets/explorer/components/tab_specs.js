@@ -87,8 +87,8 @@ export function renderTabSpecs(entry) {
       ${specialDts.length
         ? `<details class="mipp-specs-special">
             <summary>Special values</summary>
-            <p>Every other iteration, the lanes of the inputs take these values (cycling), to cover the cases
-            that random values never hit:</p>
+            <p>Every other iteration, the lanes of the inputs take these values (cycling, each further input
+            one value later in the list), to cover the cases that random values never hit:</p>
             <ul>${specialDts.map((dt) => `<li><span class="mipp-dt-badge ${getDtBadgeClass(dt)}">${escapeHtml(dt)}</span>
               <code>${special[dt].map((v) => escapeHtml(String(v))).join(", ")}</code></li>`).join("")}</ul>
           </details>`

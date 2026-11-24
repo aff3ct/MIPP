@@ -631,6 +631,30 @@
             }
         },
         "cmpeq": {
+                "special_values": {
+                    "by_datatype": {
+                        "float32": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ],
+                        "float64": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ]
+                    }
+                },
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
@@ -639,6 +663,30 @@
             ]
         },
         "cmpge": {
+                "special_values": {
+                    "by_datatype": {
+                        "float32": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ],
+                        "float64": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ]
+                    }
+                },
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
@@ -647,6 +695,30 @@
             ]
         },
         "cmpgt": {
+                "special_values": {
+                    "by_datatype": {
+                        "float32": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ],
+                        "float64": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ]
+                    }
+                },
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
@@ -655,6 +727,30 @@
             ]
         },
         "cmple": {
+                "special_values": {
+                    "by_datatype": {
+                        "float32": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ],
+                        "float64": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ]
+                    }
+                },
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
@@ -663,6 +759,30 @@
             ]
         },
         "cmplt": {
+                "special_values": {
+                    "by_datatype": {
+                        "float32": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ],
+                        "float64": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ]
+                    }
+                },
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [
@@ -671,6 +791,30 @@
             ]
         },
         "cmpneq": {
+                "special_values": {
+                    "by_datatype": {
+                        "float32": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ],
+                        "float64": [
+                            "nan",
+                            "nan",
+                            0.0,
+                            -0.0,
+                            1.0,
+                            1.0,
+                            "inf",
+                            "-inf"
+                        ]
+                    }
+                },
             "comparison": "logical",
             "support_obj": true,
             "extra_includes": [

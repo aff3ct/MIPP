@@ -73,7 +73,7 @@
         "format": "long",
         "code": [
             "%vm<tr>% res;",
-            "res.vm = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd, _CMP_NEQ_OQ);",
+            "res.vm = {{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd, _CMP_NEQ_UQ);",
             "return res;"
         ]
     },

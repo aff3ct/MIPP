@@ -183,15 +183,24 @@ class DomainResolver:
 
     def _render_special_values(self, func_spec: dict, var_name: str, dialect: str, dt_cstd: str) -> List[str]:
         """`special_values` (by_datatype): values mixed into the random inputs (every other iteration,
-        at a position that changes with the iteration), e.g. the halves for round."""
+        at a position that changes with the iteration), e.g. the halves for round. The second and the third
+        inputs take the next values of the list, so that a function of two registers is given pairs of
+        different values. "nan", "inf" and "-inf" are the macros of <cmath>."""
         sv = func_spec.get("special_values")
         if not isinstance(sv, dict) or var_name not in ("inputs1", "inputs2", "inputs3"):
             return []
         by_dt = sv.get("by_datatype", {})
+        named = {"nan": "NAN", "inf": "INFINITY", "-inf": "-INFINITY"}
+        shift = ("inputs1", "inputs2", "inputs3").index(var_name)
+        pos = "i + n / 2" + (f" + {shift}" if shift else "")
+        def _lit(dt, v):
+            if isinstance(v, str):
+                return f"({dt}_t){named[v]}"
+            return repr(float(v)) if isinstance(v, float) or dt.startswith("float") else str(v)
         def _arr(dt, vals):
-            lits = ", ".join(repr(float(v)) if isinstance(v, float) or dt.startswith("float") else str(v) for v in vals)
+            lits = ", ".join(_lit(dt, v) for v in vals)
             return (f"{{ static const {dt}_t sv_[] = {{{lits}}}; "
-                    f"if (n % 2 == 0) {var_name}[i] = sv_[(i + n / 2) % (sizeof(sv_) / sizeof(sv_[0]))]; }}")
+                    f"if (n % 2 == 0) {var_name}[i] = sv_[({pos}) % (sizeof(sv_) / sizeof(sv_[0]))]; }}")
         if dialect not in ("cpp", "obj"):
             raw_dt = dt_cstd.replace("_t", "")
             return [f"\t\t\t{_arr(raw_dt, by_dt[raw_dt])}"] if raw_dt in by_dt else []

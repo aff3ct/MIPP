@@ -116,7 +116,7 @@
     "latex": "m_i = (vd0_i < vd1_i)"
   },
   "cmpneq": {
-    "description": "Compares two vector registers element-wise for inequality ($a \\ne b$).",
+    "description": "Compares two vector registers element-wise for inequality ($a \\ne b$). True when one of the two elements is NaN.",
     "latex": "m_i = (vd0_i \\neq vd1_i)"
   },
   "cmul": {
