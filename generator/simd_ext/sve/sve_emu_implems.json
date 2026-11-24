@@ -867,6 +867,17 @@
             "template": "form_n_x"
         }
     ],
+    "swap2": [
+        {
+            "instr_name": "trn",
+            "datatypes": [
+                "float64",
+                "int64",
+                "uint64"
+            ],
+            "template": "rea_swap2_trn"
+        }
+    ],
     "tovd": [
         {
             "instr_name": "dup",

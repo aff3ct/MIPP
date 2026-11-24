@@ -839,6 +839,33 @@
             "template": "std_2_reg_unpred"
         }
     ],
+    "swap2": [
+        {
+            "instr_name": "revw",
+            "datatypes": [
+                "float32",
+                "int32",
+                "uint32"
+            ],
+            "template": "rea_rev_pairs"
+        },
+        {
+            "instr_name": "revh",
+            "datatypes": [
+                "int16",
+                "uint16"
+            ],
+            "template": "rea_rev_pairs"
+        },
+        {
+            "instr_name": "revb",
+            "datatypes": [
+                "int8",
+                "uint8"
+            ],
+            "template": "rea_rev_pairs"
+        }
+    ],
     "testz": [
         {
             "instr_name": "ptest_any",

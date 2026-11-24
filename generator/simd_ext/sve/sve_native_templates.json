@@ -63,6 +63,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}dup_lane_{{ isa_dt_par.data_ext }}(vd0.vd, (uint{{ dt_par.n_bits }}_t)s0);"
     },
+    "rea_rev_pairs": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ 2 * dt_par.n_bits }}({{ isa.prefix }}{{ instr_name }}_u{{ 2 * dt_par.n_bits }}_x({{ isa.prefix }}ptrue_b{{ 2 * dt_par.n_bits }}(), {{ isa.prefix }}reinterpret_u{{ 2 * dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd)));"
+    },
     "rea_self2": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd);"

@@ -168,6 +168,15 @@
         "format": "short",
         "code": "{{ isa.prefix }}splice_{{ isa_dt_par.data_ext }}({{ isa.prefix }}not_b_z(svptrue_{{ isa_dt_par.data_ext_logi }}(), {{ isa.prefix }}whilelt_{{ isa_dt_par.data_ext_logi }}_s32(0, s0)), vd0.vd, vd1.vd);"
     },
+    "rea_swap2_trn": {
+        "format": "long",
+        "code": [
+            "// trn2(v, v) = (v1, v1, v3, v3, ...), then trn1(., v) = (v1, v0, v3, v2, ...)",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}trn1_{{ isa_dt_par.data_ext }}({{ isa.prefix }}trn2_{{ isa_dt_par.data_ext }}(vd0.vd, vd0.vd), vd0.vd);",
+            "return res;"
+        ]
+    },
     "rea_tbl2_sel": {
         "format": "long",
         "code": [
