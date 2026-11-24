@@ -6,7 +6,7 @@ This document tracks pending engineering tasks, missing functionality relative t
 
 ## 1. MIPPv1 Function Parity & Missing Interfaces
 
-MIPPv2 currently defines and generates **144 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, selection, rearrangements and complex numbers, plus their scalar forms (`sub_vs`, `fmadd_vsv`...). The MIPPv1 families below are migrated on the `feat/mippv1-parity` branch; what is left is postponed with the register tuples (`sincos`, transposes, `interleavex*`) or deliberately not reproduced (`cmask`).
+MIPPv2 currently defines and generates **144 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, selection, rearrangements and complex numbers, plus their scalar forms (`sub_vs`, `fmadd_vsv`...). The MIPPv1 families below are migrated on the `feat/mippv1-parity` branch; what is left is postponed with the register tuples (`sincos`, transposes, `interleavex*`), low priority (shift of the lanes of a mask, `MIPP_STATIC_LIB` tables of `compress`) or deliberately not reproduced (`cmask`).
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
 MIPPv1 provided complex-number vector arithmetic defined on register pairs (`regx2` representing interleaved or split real and imaginary components). MIPPv2 works on the interleaved layout, in ordinary `float32` / `float64` registers (category `complex`, see `docs/user/complex_numbers.md`); the split layout is written with the real functions:
@@ -42,7 +42,8 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 ### 1.4. Vector Rotations & Dynamic Shifts
 - [x] `lrot`, `rrot`: Rotation of the **lanes** of a register by one position (not a bitwise rotation of the elements): `rotate(v, n)` (`rotate(v, 1)`, `rotate(v, N - 1)`), and `rotate_b128`.
 - [x] `lshiftr`, `rshiftr`: Variable element-wise vector-by-vector left and right logical/arithmetic bit shifts (where shift counts vary per lane, e.g., `_mm256_sllv_epi32`): `lshift(a, n)` / `rshift(a, n)` with a register of counts; the same count for every lane is `lshift_vs` / `rshift_vs`.
-- [ ] Immediate arguments (`alignr`, `vext`, `svext`, shifts by a constant): dispatch of the constant counts to the immediate instructions (`template <int N>` in C++17, a `switch` in C).
+- [x] Immediate arguments (`alignr`, `vext`, `svext`, shifts by a constant): with a constant count, `slide`, `slideup`, `slidedown`, `rotate`, `bcast` (and their `_b128` variants) and the shifts select the immediate instructions at compile time (`__builtin_constant_p`), in C and C++; the C++ APIs also have `mipp::slide<S>(a, b)`, `mipp::lshift<3>(a)`... (see `docs/user/rearrangements.md`, Constant Counts).
+- [ ] `lshift<N>`, `rshift<N>` on `msk`, `Msk << n`: shift of the lanes of a mask. Low priority (rarely used): native only on AVX-512 (`kshift`) and RVV (`vslideup` / `vslidedown` of the mask register); elsewhere through `tovd`, `slideup` / `slidedown` and `tovm`.
 
 ### 1.5. Memory Management & Dynamic Buffers
 - [x] `isAligned`: `mipp_is_aligned(p)` / `mipp::is_aligned(p)` against `MIPP_REQUIRED_ALIGNMENT` (the register size).
@@ -116,7 +117,7 @@ The header and documentation generation pipeline requires developer tools to ana
 
 ## 5. Upcoming MIPPv2 Features (Improvements over MIPPv1)
 
-- [ ] **Mixed Vector-Scalar Function Variants (`_vf` / `_vs`)**:
+- [x] **Mixed Vector-Scalar Function Variants (`_vf` / `_vs`)**: done as the scalar forms (`add_vs`, `sub_sv`, `fmadd_vsv`..., C++ overloads of `mipp::add`..., see `docs/user/scalar_forms.md`), with native bodies on RVV (`.vx` / `.vf`, and `vrsub` / `vfrsub` / `vfrdiv` for the `sv` forms) and SVE (`_n` intrinsics), and the broadcast (`set1`) elsewhere.
   - Define function variants that accept a scalar value as the second operand directly (e.g., `mipp::add(va, scalar_b)`, `mipp::fmadd(va, vb, scalar_c)` / `mipp_add_vf_float32`).
   - Enables the code generator to emit native vector-scalar instructions without generating an explicit vector broadcast (`set1` / `_mm256_set1_ps` / `vdupq_n_f32`):
     - RISC-V Vector: Emits native `.vf` / `.vx` instructions (e.g., `vfmadd.vf`, `vadd.vx`, `vmul.vx`).
