@@ -167,6 +167,11 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "and",
+            "datatypes": "all_float",
+            "template": "float_bitwise"
         }
     ],
     "andb_k": [
@@ -983,6 +988,29 @@
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_int",
+            "template": "shv_s_mskz",
+            "variant": "z"
         }
     ],
     "lshift_vs": [
@@ -1008,6 +1036,29 @@
             "datatypes": "all_int_uint",
             "template": "shift_scalar_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_float",
+            "template": "shift_float"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_float",
+            "template": "shift_float_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_float",
+            "template": "shift_float_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "sll",
+            "datatypes": "all_float",
+            "template": "shift_float_msks",
+            "variant": "s"
         }
     ],
     "max": [
@@ -1372,6 +1423,29 @@
             "datatypes": "all_int_uint",
             "template": "scalar_notb_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "float_notb"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "float_notb_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "float_notb_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "float_notb_msks",
+            "variant": "s"
         }
     ],
     "notb_k": [
@@ -1404,6 +1478,11 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "or",
+            "datatypes": "all_float",
+            "template": "float_bitwise"
         }
     ],
     "orb_k": [
@@ -1482,6 +1561,29 @@
             "datatypes": "all_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "sra",
+            "datatypes": "all_int",
+            "template": "shv_s_mskz",
+            "variant": "z"
         }
     ],
     "rshift_vs": [
@@ -1530,6 +1632,148 @@
             "datatypes": "all_int",
             "template": "shift_scalar_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float_msks",
+            "variant": "s"
+        }
+    ],
+    "rshiftl": [
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "arith_2args_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shvl_s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shvl_s_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shvl_s_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shvl_s_mskz",
+            "variant": "z"
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_uint",
+            "template": "shift_scalar_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shift_float"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shift_float_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shift_float_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_int",
+            "template": "shift_float_msks",
+            "variant": "s"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float_msk",
+            "variant": "m"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float_mskz",
+            "variant": "z"
+        },
+        {
+            "instr_name": "srl",
+            "datatypes": "all_float",
+            "template": "shift_float_msks",
+            "variant": "s"
         }
     ],
     "rsqrt": [
@@ -1815,6 +2059,11 @@
             "datatypes": "all_int_uint",
             "template": "arith_2args_mskz",
             "variant": "z"
+        },
+        {
+            "instr_name": "xor",
+            "datatypes": "all_float",
+            "template": "float_bitwise"
         }
     ],
     "xorb_k": [

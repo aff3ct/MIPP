@@ -718,6 +718,39 @@
             "if": "!defined(__AVX2__)"
         }
     ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "rshiftl_vs",
+            "datatypes": [
+                "uint8",
+                "int8"
+            ],
+            "template": "rshift_u8",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "uint64",
+                "int64",
+                "uint32",
+                "int32",
+                "uint16",
+                "int16"
+            ],
+            "template": "split_shift",
+            "if": "!defined(__AVX2__)"
+        },
+        {
+            "instr_name": "rshiftl_vs",
+            "datatypes": [
+                "uint8",
+                "int8"
+            ],
+            "template": "split_rshift_u8",
+            "if": "!defined(__AVX2__)"
+        }
+    ],
     "slide_b128": [
         {
             "instr_name": "shuffle_epi8",

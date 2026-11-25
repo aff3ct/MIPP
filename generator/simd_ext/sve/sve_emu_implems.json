@@ -197,25 +197,6 @@
             "template": "load_s"
         }
     ],
-    "lshift": [
-        {
-            "instr_name": "lsl",
-            "datatypes": "all_int",
-            "template": "shv_x_s"
-        },
-        {
-            "instr_name": "lsl",
-            "datatypes": "all_int",
-            "variant": "m",
-            "template": "shv_m_s"
-        },
-        {
-            "instr_name": "lsl",
-            "datatypes": "all_int",
-            "variant": "z",
-            "template": "shv_z_s"
-        }
-    ],
     "lshift_vs": [
         {
             "instr_name": "lsl",
@@ -308,25 +289,6 @@
             "if": "!defined(__ARM_FEATURE_SVE2)"
         }
     ],
-    "rshift": [
-        {
-            "instr_name": "asr",
-            "datatypes": "all_int",
-            "template": "shv_x_s"
-        },
-        {
-            "instr_name": "asr",
-            "datatypes": "all_int",
-            "variant": "m",
-            "template": "shv_m_s"
-        },
-        {
-            "instr_name": "asr",
-            "datatypes": "all_int",
-            "variant": "z",
-            "template": "shv_z_s"
-        }
-    ],
     "rshift_vs": [
         {
             "instr_name": "asr",
@@ -339,6 +301,20 @@
             "datatypes": "all_uint",
             "variant": "s",
             "template": "shift_s"
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "s",
+            "template": "shift_s"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "variant": "s",
+            "template": "shiftl_s_s"
         }
     ],
     "scatter": [
@@ -446,13 +422,6 @@
             "instr_name": "dup",
             "datatypes": "all_datatypes",
             "template": "tovd_dup"
-        }
-    ],
-    "tovm": [
-        {
-            "instr_name": "cmpne",
-            "datatypes": "all_datatypes",
-            "template": "tovm_cmpne"
         }
     ],
     "xorb": [

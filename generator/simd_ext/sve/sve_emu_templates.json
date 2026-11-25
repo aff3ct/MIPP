@@ -251,17 +251,13 @@
             "return res;"
         ]
     },
-    "shv_m_s": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
-    },
-    "shv_x_s": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
-    },
-    "shv_z_s": {
-        "format": "short",
-        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
+    "shiftl_s_s": {
+        "format": "long",
+        "code": [
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}sel_{{ isa_dt_par.data_ext }}(vm0.vm, {{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_n_u{{ dt_par.n_bits }}_x(vm0.vm, {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), (uint{{ dt_par.n_bits }}_t)s0)), vdsrc.vd);",
+            "return res;"
+        ]
     },
     "store_z": {
         "format": "long",
@@ -282,14 +278,6 @@
         "code": [
             "%vd<tr>% res;",
             "res.vd = {% if dt_par.category == 'uint' %}svdup_n_u{{ dt_par.n_bits }}_z(vm0.vm, (uint{{ dt_par.n_bits }}_t)-1){% else %}svreinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}(svdup_n_u{{ dt_par.n_bits }}_z(vm0.vm, (uint{{ dt_par.n_bits }}_t)-1)){% endif %};",
-            "return res;"
-        ]
-    },
-    "tovm_cmpne": {
-        "format": "long",
-        "code": [
-            "%vm<tr>% res;",
-            "res.vm = svcmpne_n_u{{ dt_par.n_bits }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'uint' %}vd0.vd{% else %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd){% endif %}, 0);",
             "return res;"
         ]
     }

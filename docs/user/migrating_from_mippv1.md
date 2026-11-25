@@ -130,7 +130,7 @@ These functions exist in both versions and compile after the renaming of the typ
 | Function | MIPPv1 | MIPPv2 | To get the result of MIPPv1 |
 | :--- | :--- | :--- | :--- |
 | `add`, `sub`, `+`, `-`, `hadd`, `sum` on 8-bit and 16-bit integers | Saturate: `100 + 100` is `127` in `int8_t`. | Wrap: `100 + 100` is `-56`. | [`adds`](../funcs_support/arithmetic/adds.md), [`subs`](../funcs_support/arithmetic/subs.md), [`hadds`](../funcs_support/reduction/hadds.md) |
-| `rshift`, `>>` on signed integers | Logical: `-16 >> 2` is `0x3FFFFFFC` in `int32_t`. | Arithmetic: `-16 >> 2` is `-4`. | Shift the unsigned type (`cast`). |
+| `rshift`, `>>` on signed integers | Logical: `-16 >> 2` is `0x3FFFFFFC` in `int32_t`. | Arithmetic: `-16 >> 2` is `-4`. | [`rshiftl`](../funcs_support/logic/rshiftl.md) (no operator). |
 | `cvt` from a floating-point type to an integer | Rounds to the nearest integer: `2.7f` gives `3`. | Truncates, as a C cast: `2.7f` gives `2`. | `cvt` of `round(v)`, except for the ties (next row). |
 | `round`, for a tie | To the even integer: `2.5f` gives `2`. | Away from zero: `2.5f` gives `3`. | None. |
 | `div2`, `div4` on negative integers | Toward zero: `-7` gives `-3` and `-1`. | Arithmetic shift: `-7` gives `-4` and `-2`. | Add 1 (3 for `div4`) to the negative elements first. |
@@ -195,7 +195,7 @@ Most functions keep their name and their meaning: `mul`, `div`, `fmadd`, `fnmadd
 | `neg(a, b)`, `copysign(a, b)` | `xorsign(a, b)` | `copysign` exists, with another meaning ([§3](#3-same-name-other-result)). |
 | `sign(r)` | `signbit(v)` | |
 | `msb(a, b)` | `msb(a ^ b)` | |
-| `lshiftr(a, b)`, `rshiftr(a, b)`, `a << b`, `a >> b` (two registers) | `lshift(a, b)`, `rshift(a, b)` | No operator for a count per lane. |
+| `lshiftr(a, b)`, `rshiftr(a, b)`, `a << b`, `a >> b` (two registers) | `lshift(a, b)`, `rshift(a, b)`, `a << b`, `a >> b` | `rshift` is arithmetic on the signed types ([§3](#3-same-name-other-result)). |
 | `lshift(r, n)`, `rshift(r, n)`, `r << n`, `r >> n` | Same. | `rshift` is arithmetic on the signed types ([§3](#3-same-name-other-result)). |
 | `sum(r)`, `r.sum()` | `sum(v)`, `hadd(v)` | |
 | `testz(m)` | `none(m)` | With `any`, `all` and `count`. |

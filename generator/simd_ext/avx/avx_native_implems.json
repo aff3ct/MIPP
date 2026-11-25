@@ -832,6 +832,43 @@
             "if": "defined(__AVX2__)"
         }
     ],
+    "rshiftl": [
+        {
+            "instr_name": "srlv",
+            "datatypes": [
+                "uint64",
+                "int64",
+                "uint32",
+                "int32"
+            ],
+            "template": "shv_vv",
+            "if": "defined(__AVX2__)"
+        },
+        {
+            "instr_name": "srlv",
+            "datatypes": [
+                "uint16",
+                "int16"
+            ],
+            "template": "shv_vv",
+            "if": "defined(__AVX512BW__) && defined(__AVX512VL__)"
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "srli",
+            "datatypes": [
+                "uint64",
+                "int64",
+                "uint32",
+                "int32",
+                "uint16",
+                "int16"
+            ],
+            "template": "sxl_var",
+            "if": "defined(__AVX2__)"
+        }
+    ],
     "rsqrt": [
         {
             "instr_name": "rsqrt",

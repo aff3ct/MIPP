@@ -396,12 +396,20 @@
     "latex": "\\text{res}_i = \\operatorname{round}(vd0_i)"
   },
   "rshift": {
-    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(vd0, s0)` in C++).",
+    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(vd0, s0)` in C++), and the logical shift of the signed types is `rshiftl`.",
     "latex": "\\text{res}_i = vd0_i \\gg vd1_i"
   },
   "rshift_vs": {
-    "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshift`; `mipp::rshift(vd0, s0)` in C++): arithmetic shift for the signed types, logical shift for the unsigned ones. The bits of the floating-point elements are shifted as an unsigned integer of the same size.",
+    "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshift`; `mipp::rshift(vd0, s0)` in C++): arithmetic shift for the signed types, logical shift for the unsigned ones. The bits of the floating-point elements are shifted as an unsigned integer of the same size. The logical shift of the signed types is `rshiftl_vs`.",
     "latex": "\\text{res}_i = vd0_i \\gg s0"
+  },
+  "rshiftl": {
+    "description": "Shifts each element right by the number of bits of the same lane of the second register, with a logical shift (zeros enter on the left) for all the types: the signed elements are shifted as the unsigned integer of the same size, like `(int32_t)((uint32_t)a >> n)` in C. Same result as `rshift` on the unsigned types. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshiftl_vs` (`mipp::rshiftl(vd0, s0)` in C++).",
+    "latex": "\\text{res}_i = \\text{unsigned}(vd0_i) \\gg vd1_i"
+  },
+  "rshiftl_vs": {
+    "description": "Shifts every element right by the same number of bits `s0` (scalar form `vs` of `rshiftl`; `mipp::rshiftl(vd0, s0)` in C++), with a logical shift (zeros enter on the left) for all the types: the signed and floating-point elements are shifted as the unsigned integer of the same size. Same result as `rshift_vs` on the unsigned and floating-point types.",
+    "latex": "\\text{res}_i = \\text{unsigned}(vd0_i) \\gg s0"
   },
   "rsqrt": {
     "description": "Computes an estimate of the reciprocal square root of each floating-point element ($1 / \\sqrt{a}$). Its precision is the one of the instruction of the target: from two or three significant digits (the estimates of NEON and RVV) to the exact value. Divide by `sqrt` when the last digits matter.",

@@ -353,6 +353,17 @@
             "if": "defined(__SSE2__)"
         }
     ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "rshiftl_vs",
+            "datatypes": [
+                "uint8",
+                "int8"
+            ],
+            "template": "rshift_u8",
+            "if": "defined(__SSE2__)"
+        }
+    ],
     "select": [
         {
             "instr_name": "select",

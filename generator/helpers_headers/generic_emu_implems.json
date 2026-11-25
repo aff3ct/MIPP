@@ -1174,6 +1174,35 @@
             "template_ref": "tpl_generic_emu.shift_float"
         }
     ],
+    "rshiftl": [
+        {
+            "instr_name": "rshift",
+            "datatypes": "all_uint",
+            "template_ref": "tpl_generic_emu.rshiftl_uint"
+        },
+        {
+            "instr_name": "rshift",
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.rshiftl_int"
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "rshift_vs",
+            "datatypes": "all_uint",
+            "template_ref": "tpl_generic_emu.rshiftl_vs_uint"
+        },
+        {
+            "instr_name": "rshift_vs",
+            "datatypes": "all_int",
+            "template_ref": "tpl_generic_emu.shift_float"
+        },
+        {
+            "instr_name": "rshift_vs",
+            "datatypes": "all_float",
+            "template_ref": "tpl_generic_emu.shift_float"
+        }
+    ],
     "rsqrt": [
         {
             "datatypes": "all_float",

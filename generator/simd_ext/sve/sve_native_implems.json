@@ -833,6 +833,23 @@
             "instr_name": "lsl",
             "datatypes": "all_uint",
             "template": "shv_x_u"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int",
+            "template": "shv_x_s"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int",
+            "variant": "m",
+            "template": "shv_m_s"
+        },
+        {
+            "instr_name": "lsl",
+            "datatypes": "all_int",
+            "variant": "z",
+            "template": "shv_z_s"
         }
     ],
     "lshift_vs": [
@@ -1141,6 +1158,23 @@
             "instr_name": "lsr",
             "datatypes": "all_uint",
             "template": "shv_x_u"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "template": "shv_x_s"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "variant": "m",
+            "template": "shv_m_s"
+        },
+        {
+            "instr_name": "asr",
+            "datatypes": "all_int",
+            "variant": "z",
+            "template": "shv_z_s"
         }
     ],
     "rshift_vs": [
@@ -1177,6 +1211,78 @@
             "instr_name": "lsr",
             "datatypes": "all_uint",
             "template": "shift_n_z"
+        }
+    ],
+    "rshiftl": [
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "template": "shv_x_u"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "m",
+            "template": "shv_m_u"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "z",
+            "template": "shv_z_u"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "template": "shvl_x_s"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "variant": "m",
+            "template": "shvl_m_s"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "variant": "z",
+            "template": "shvl_z_s"
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "template": "shift_n_z"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "m",
+            "template": "shift_m"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_uint",
+            "variant": "z",
+            "template": "shift_z"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "template": "shiftl_x_s"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "variant": "m",
+            "template": "shiftl_m_s"
+        },
+        {
+            "instr_name": "lsr",
+            "datatypes": "all_int",
+            "variant": "z",
+            "template": "shiftl_z_s"
         }
     ],
     "scatter": [
@@ -1390,6 +1496,13 @@
             "instr_name": "ptest_any",
             "datatypes": "all_datatypes",
             "template": "testz_2args"
+        }
+    ],
+    "tovm": [
+        {
+            "instr_name": "cmpne",
+            "datatypes": "all_datatypes",
+            "template": "tovm_cmpne"
         }
     ],
     "trunc": [

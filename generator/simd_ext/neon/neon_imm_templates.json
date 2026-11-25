@@ -30,5 +30,13 @@
             "res.vd = {% if imm == 0 %}vd0.vd{% elif dt_par.category == 'float' %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}shrq_n_u{{ dt_par.n_bits }}({{ isa.prefix }}reinterpretq_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ imm }})){% else %}{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(vd0.vd, {{ imm }}){% endif %};",
             "return res;"
         ]
+    },
+    "rshiftl_n": {
+        "format": "long",
+        "code": [
+            "%vd<tp>% res;",
+            "res.vd = {% if imm == 0 %}vd0.vd{% elif dt_par.category == 'uint' %}{{ isa.prefix }}shrq_n_{{ isa_dt_par.data_ext }}(vd0.vd, {{ imm }}){% else %}{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}shrq_n_u{{ dt_par.n_bits }}({{ isa.prefix }}reinterpretq_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ imm }})){% endif %};",
+            "return res;"
+        ]
     }
 }

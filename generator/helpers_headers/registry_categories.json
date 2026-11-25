@@ -72,7 +72,9 @@
         "lshift",
         "lshift_vs",
         "rshift",
-        "rshift_vs"
+        "rshift_vs",
+        "rshiftl",
+        "rshiftl_vs"
     ],
     "math": [
         "abs",

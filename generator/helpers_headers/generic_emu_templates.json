@@ -2190,5 +2190,26 @@
             "%vd<tp>% s = %rshift_vs<tp>%(vd1, {{ dt_par.n_bits - 1 }});",
             "return %sub<tp>%(%xorb<tp>%(vd0, s), s);"
         ]
+    },
+    "rshiftl_uint": {
+        "format": "long",
+        "code": [
+            "// logical shift: the shift of the unsigned types",
+            "return %rshift<tp>%(vd0, vd1);"
+        ]
+    },
+    "rshiftl_int": {
+        "format": "long",
+        "code": [
+            "// logical shift: the shift of the unsigned type of the same size",
+            "return %cast<c:uint|b:tp,tp>%(%rshift<c:uint|b:tp>%(%cast<tp,c:uint|b:tp>%(vd0), %cast<tp,c:uint|b:tp>%(vd1)));"
+        ]
+    },
+    "rshiftl_vs_uint": {
+        "format": "long",
+        "code": [
+            "// logical shift: the shift of the unsigned types",
+            "return %rshift_vs<tp>%(vd0, s0);"
+        ]
     }
 }

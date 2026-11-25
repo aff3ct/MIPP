@@ -99,6 +99,7 @@ void check_value()
 	{
 		MIPP_CHECK_IMM(lshift, a);
 		MIPP_CHECK_IMM(rshift, a);
+		MIPP_CHECK_IMM(rshiftl, a);
 	}
 #undef MIPP_CHECK_IMM
 }

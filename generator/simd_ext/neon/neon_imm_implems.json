@@ -23,6 +23,14 @@
             "if": "defined(__aarch64__)"
         }
     ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "ushr",
+            "datatypes": "all_datatypes",
+            "template": "rshiftl_n",
+            "if": "defined(__aarch64__)"
+        }
+    ],
     "slide": [
         {
             "instr_name": "ext",

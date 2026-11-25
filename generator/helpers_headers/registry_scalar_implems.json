@@ -1707,6 +1707,40 @@
               ]
           }
       ],
+    "rshiftl": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "variants": [],
+            "implem": [
+                "// logical shift for all the types: the bits of the unsigned type of the same size",
+                "res.vd[i] = %!pred_cond!% (%s<tr>%)((%s<c:uint|b:tp>%)vd0.vd[i] >> (unsigned)vd1.vd[i]) %!pred_alt!%;"
+            ]
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "variants": [],
+            "implem": [
+                "res.vd[i] = %!pred_cond!% (%s<tr>%)((%s<c:uint|b:tp>%)vd0.vd[i] >> s0) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "all_float",
+            "variants": [],
+            "implem": [
+                "%s<c:uint|b:tp>% r0i;",
+                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "r0i >>= s0;",
+                "%s<tr>% resv;",
+                "BIT_CAST_1(&resv, &r0i);",
+                "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
+            ]
+        }
+    ],
       "rsqrt": [
           {
               "type": "element-wide",

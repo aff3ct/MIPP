@@ -97,7 +97,7 @@ Two registers interleaved, then separated again. The interleaving of two registe
 
 ### 3.1. Constant Counts
 
-The number of lanes of `slide`, `slideup`, `slidedown`, `rotate`, `bcast` (and their `_b128` variants), the lane of `get` and the count of `lshift` / `rshift` (`lshift_vs` / `rshift_vs` in C) are often constants. Many instructions only exist with a constant encoded in them, an **immediate**: `palignr`, `pshufd`, `pextrd` on x86, `ext`, `dup` (element), `umov`, `shl` / `sshr` on NEON. The same function serves both cases:
+The number of lanes of `slide`, `slideup`, `slidedown`, `rotate`, `bcast` (and their `_b128` variants), the lane of `get` and the count of `lshift` / `rshift` / `rshiftl` (`lshift_vs` / `rshift_vs` / `rshiftl_vs` in C) are often constants. Many instructions only exist with a constant encoded in them, an **immediate**: `palignr`, `pshufd`, `pextrd` on x86, `ext`, `dup` (element), `umov`, `shl` / `sshr` on NEON. The same function serves both cases:
 
 - with a **variable**, the function runs its dynamic body: `slide` through `permute2` and indices `i + n` (`pshufb`, `vpermps`, `vpermt2ps`, `tbl`), `svsplice` on SVE, `vslidedown` / `vslideup` on RVV;
 - with a **constant**, once the function is inlined (any optimization level but `-O0`), the immediate instruction: the function tests `__builtin_constant_p(n)` and selects it at compile time, at no run-time cost. `get` needs no such test: its dynamic body (store, then read of the lane) already becomes an extraction (`pextrd`, `vextracti128`, `umov`...) when the lane is a constant, with GCC as with Clang.

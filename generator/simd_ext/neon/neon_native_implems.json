@@ -60,6 +60,12 @@
             ],
             "template": "all_minv",
             "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "minv",
+            "datatypes": "all_64bit",
+            "template": "all_minv64",
+            "if": "defined(__aarch64__)"
         }
     ],
     "andb": [
@@ -113,6 +119,12 @@
                 "uint8"
             ],
             "template": "any_maxv",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "maxv",
+            "datatypes": "all_64bit",
+            "template": "any_maxv64",
             "if": "defined(__aarch64__)"
         }
     ],
@@ -627,6 +639,16 @@
                 "int8"
             ],
             "template": "shv_shl_s"
+        },
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "shv_shl_u"
         }
     ],
     "max": [
@@ -724,6 +746,12 @@
             ],
             "template": "none_maxv",
             "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "none",
+            "datatypes": "all_64bit",
+            "template": "none_maxv64",
+            "if": "defined(__aarch64__)"
         }
     ],
     "notb": [
@@ -766,6 +794,11 @@
                 "uint8"
             ],
             "template": "notb_k"
+        },
+        {
+            "instr_name": "notb_k",
+            "datatypes": "all_64bit",
+            "template": "notb_k_64"
         }
     ],
     "orb": [
@@ -785,6 +818,13 @@
             "instr_name": "orrq",
             "datatypes": "all_datatypes",
             "template": "logi_m_2args"
+        }
+    ],
+    "pow2": [
+        {
+            "instr_name": "pow2",
+            "datatypes": "all_uint",
+            "template": "pow2_shl"
         }
     ],
     "reverse": [

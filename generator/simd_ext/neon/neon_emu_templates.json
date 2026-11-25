@@ -1,16 +1,4 @@
 {
-    "all_minv64": {
-        "format": "long",
-        "code": [
-            "return vminvq_u32(vreinterpretq_u32_u64(vm0.vm)) != 0;"
-        ]
-    },
-    "any_maxv64": {
-        "format": "long",
-        "code": [
-            "return vmaxvq_u32(vreinterpretq_u32_u64(vm0.vm)) != 0;"
-        ]
-    },
     "arith_2args_recp": {
         "format": "long",
         "code": [
@@ -108,12 +96,6 @@
             "return res;"
         ]
     },
-    "none_maxv64": {
-        "format": "long",
-        "code": [
-            "return vmaxvq_u32(vreinterpretq_u32_u64(vm0.vm)) == 0;"
-        ]
-    },
     "none_pmax": {
         "format": "long",
         "code": [
@@ -121,22 +103,6 @@
             "uint32x2_t t = vorr_u32(vget_low_u32(x), vget_high_u32(x));",
             "t = vpmax_u32(t, t);",
             "return vget_lane_u32(t, 0) == 0;"
-        ]
-    },
-    "notb_k_64": {
-        "format": "long",
-        "code": [
-            "%vm<tr>% res;",
-            "res.vm = vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(vm0.vm)));",
-            "return res;"
-        ]
-    },
-    "pow2_shl": {
-        "format": "long",
-        "code": [
-            "%vd<tp>% res;",
-            "res.vd = vshlq_{{ isa_dt_par.data_ext }}(vdupq_n_{{ isa_dt_par.data_ext }}(1), vreinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd));",
-            "return res;"
         ]
     },
     "rea_b128_bcast": {
@@ -294,9 +260,9 @@
         "format": "short",
         "code": "{% if instr_name == 'shlq' -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(s0));{% else -%}{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}dupq_n_s{% if isa_dt_par.data_ext in ['s64','u64','f64'] %}64{% elif isa_dt_par.data_ext in ['s32','u32','f32'] %}32{% elif isa_dt_par.data_ext in ['s16','u16'] %}16{% else %}8{% endif %}(-s0));{% endif %}"
     },
-    "shv_shl_u": {
+    "shiftl_var_s": {
         "format": "short",
-        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
+        "code": "{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}shlq_u{{ dt_par.n_bits }}({{ isa.prefix }}reinterpretq_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(-s0)));"
     },
     "shv_shr_s": {
         "format": "short",
@@ -305,6 +271,10 @@
     "shv_shr_u": {
         "format": "short",
         "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}subq_s{{ dt_par.n_bits }}({{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(0), {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd)));"
+    },
+    "shvl_shr_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpretq_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}shlq_u{{ dt_par.n_bits }}({{ isa.prefix }}reinterpretq_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}subq_s{{ dt_par.n_bits }}({{ isa.prefix }}dupq_n_s{{ dt_par.n_bits }}(0), vd1.vd)));"
     },
     "sqrt_nr": {
         "format": "long",

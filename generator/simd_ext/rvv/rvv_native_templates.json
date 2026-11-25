@@ -197,10 +197,68 @@
             "{{ isa.prefix }}_{{ instr_name }}_v_{{ isa_dt_ret.data_ext }}(vd0.vd, %N<tp>%);"
         ]
     },
+    "float_bitwise": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp1, tmp2;",
+            "tmp1.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp2.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd1.vd);",
+            "tmp1.vd = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.uint_data_ext }}(tmp1.vd, tmp2.vd, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.vd);",
+            "return ret;"
+        ]
+    },
     "float_getfirst": {
         "format": "short",
         "code": [
             "{{isa_dt_par.to_ptr}} res = {{ isa.prefix }}_v{{ instr_name }}_f_s_{{isa_dt_par.data_ext}}_{{isa_dt_par.reg_dt_ext}}(vd0.vd);"
+        ]
+    },
+    "float_notb": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp;",
+            "tmp.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp.vd = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}(tmp.vd, -1, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.vd);",
+            "return ret;"
+        ]
+    },
+    "float_notb_msk": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp;",
+            "tmp.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp.vd = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}_mu(vm0.vm, tmp.vd, tmp.vd, -1, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.vd);",
+            "return ret;"
+        ]
+    },
+    "float_notb_msks": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp, tmp1;",
+            "tmp1.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vdsrc.vd);",
+            "tmp.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp.vd = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}_mu(vm0.vm, tmp1.vd, tmp.vd, -1, %N<tp>%);",
+            "%vd<tp>% ret; ",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.vd);",
+            "return ret;"
+        ]
+    },
+    "float_notb_mskz": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp, tmp1;",
+            "tmp1 = %set0<c:uint|b:tp>%();",
+            "tmp.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp.vd = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.uint_data_ext}}_mu(vm0.vm, tmp1.vd, tmp.vd, -1, %N<tp>%); ",
+            "%vd<tp>% ret; ",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp.vd);",
+            "return ret;"
         ]
     },
     "float_set0": {
@@ -453,6 +511,54 @@
             "{{ isa.prefix }}_vle{{ isa_dt_par.width }}_v_{{ isa_dt_par.data_ext }}(({{ isa_dt_par.to_ptr }}*) vals, %N<tp>%);"
         ]
     },
+    "shift_float": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp1;",
+            "tmp1.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp1.vd = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}(tmp1.vd, s0, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.vd);",
+            "return ret;"
+        ]
+    },
+    "shift_float_msk": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp1;",
+            "tmp1.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp1.vd = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}_mu(vm0.vm, tmp1.vd, tmp1.vd, s0, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.vd);",
+            "return ret;"
+        ]
+    },
+    "shift_float_msks": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp1;",
+            "%vd<c:uint|b:tp>% vdsrc_u;",
+            "vdsrc_u.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vdsrc.vd);",
+            "",
+            "tmp1.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp1.vd = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}_mu(vm0.vm, vdsrc_u.vd, tmp1.vd, s0, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.vd);",
+            "return ret;"
+        ]
+    },
+    "shift_float_mskz": {
+        "format": "long",
+        "code": [
+            "%vd<c:uint|b:tp>% tmp1;",
+            "%vd<c:uint|b:tp>% zeroes = %set0<c:uint|b:tp>%();",
+            "tmp1.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.data_ext}}_{{isa_dt_par.uint_data_ext}}(vd0.vd);",
+            "tmp1.vd = {{ isa.prefix }}_v{{ instr_name }}_vx_{{ isa_dt_par.uint_data_ext }}_mu(vm0.vm, zeroes.vd, tmp1.vd, s0, %N<tp>%);",
+            "%vd<tp>% ret;",
+            "ret.vd = {{ isa.prefix }}_vreinterpret_v_{{isa_dt_par.uint_data_ext}}_{{isa_dt_par.data_ext}}(tmp1.vd);",
+            "return ret;"
+        ]
+    },
     "shift_scalar": {
         "format": "short",
         "code": [
@@ -477,6 +583,54 @@
             "%vd<tp>% tmp;",
             "tmp = %set0<tp>%();",
             "tmp.vd = {{isa.prefix}}_v{{instr_name}}_vx_{{isa_dt_par.data_ext}}_mu(vm0.vm, tmp.vd, vd0.vd, s0, %N<tp>%);",
+            "return tmp;"
+        ]
+    },
+    "shv_s": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%);"
+        ]
+    },
+    "shv_s_msk": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(vm0.vm, vd0.vd, vd0.vd, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%);"
+        ]
+    },
+    "shv_s_msks": {
+        "format": "short",
+        "code": [
+            "{{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(vm0.vm, vdsrc.vd, vd0.vd, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%);"
+        ]
+    },
+    "shv_s_mskz": {
+        "format": "long",
+        "code": [
+            "%vd<tp>% zero = %set0<tp>%();",
+            "%vd<tp>% res;",
+            "res.vd = {{ isa.prefix }}_v{{ instr_name }}_vv_{{ isa_dt_par.data_ext }}_mu(vm0.vm, zero.vd, vd0.vd, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%);",
+            "return res;"
+        ]
+    },
+    "shvl_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.uint_data_ext }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_vsrl_vv_{{ isa_dt_par.uint_data_ext }}({{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd0.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%));"
+    },
+    "shvl_s_msk": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.uint_data_ext }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_vsrl_vv_{{ isa_dt_par.uint_data_ext }}_mu(vm0.vm, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd0.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd0.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%));"
+    },
+    "shvl_s_msks": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.uint_data_ext }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_vsrl_vv_{{ isa_dt_par.uint_data_ext }}_mu(vm0.vm, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vdsrc.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd0.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%));"
+    },
+    "shvl_s_mskz": {
+        "format": "long",
+        "code": [
+            "%vd<tp>% tmp;",
+            "tmp = %set0<tp>%();",
+            "tmp.vd = {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.uint_data_ext }}_{{ isa_dt_par.data_ext }}({{ isa.prefix }}_vsrl_vv_{{ isa_dt_par.uint_data_ext }}_mu(vm0.vm, {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(tmp.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd0.vd), {{ isa.prefix }}_vreinterpret_v_{{ isa_dt_par.data_ext }}_{{ isa_dt_par.uint_data_ext }}(vd1.vd), %N<tp>%));",
             "return tmp;"
         ]
     },

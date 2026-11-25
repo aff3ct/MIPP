@@ -55,8 +55,8 @@ forms.expand_docs(funcs_docs, _raw_interfaces, form_functions)
 def form_groups():
     """{function: [(letters, name), ...]}: the functions that have scalar forms (`add_vs`,
     `fmadd_vvs`...), with the function itself first, written with one `v` per operand (`vv`), then
-    its forms in the order of the registry. `lshift_vs` and `rshift_vs`, declared as functions of
-    their own, are the `vs` forms of `lshift` and `rshift`."""
+    its forms in the order of the registry. `lshift_vs`, `rshift_vs` and `rshiftl_vs`, declared as
+    functions of their own, are the `vs` forms of `lshift`, `rshift` and `rshiftl`."""
     letters_of = {}
     for name, base in form_functions.items():
         letters_of.setdefault(base, []).append(name[len(base) + 1:])
@@ -716,7 +716,7 @@ class SpecFuncInfo:
     def get_cpp_func_name(self):
         # name in the C++ APIs given by the registry: the scalar forms are overloads of their base (`sub_sv` is
         # `mipp::sub(s, r)`), `lshift_vs` is `mipp::lshift(r, n)`
-        if forms.FORM_OF_KEY in interfaces.get(self.func_name, {}) or self.func_name in ("lshift_vs", "rshift_vs"):
+        if forms.FORM_OF_KEY in interfaces.get(self.func_name, {}) or self.func_name in ("lshift_vs", "rshift_vs", "rshiftl_vs"):
             return interfaces[self.func_name].get("cpp_name", self.func_name)
         has_reg_or_msk_arg = any(arg["type"] in ("reg", "msk") for arg in self.args)
         if has_reg_or_msk_arg and self.func_name.endswith("_k"):

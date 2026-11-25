@@ -231,17 +231,53 @@
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_n_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, (uint{{ dt_par.n_bits }}_t)s0);"
     },
+    "shiftl_m_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_n_u{{ dt_par.n_bits }}_m(vm0.vm, {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), (uint{{ dt_par.n_bits }}_t)s0));"
+    },
+    "shiftl_x_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_n_u{{ dt_par.n_bits }}_x({{ isa.prefix }}ptrue_{{ isa_dt_par.data_ext_logi }}(), {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), (uint{{ dt_par.n_bits }}_t)s0));"
+    },
+    "shiftl_z_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_n_u{{ dt_par.n_bits }}_z(vm0.vm, {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), (uint{{ dt_par.n_bits }}_t)s0));"
+    },
+    "shv_m_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
+    },
     "shv_m_u": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_m(vm0.vm, vd0.vd, vd1.vd);"
+    },
+    "shv_x_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
     },
     "shv_x_u": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_x(svptrue_{{ isa_dt_par.data_ext_logi }}(), vd0.vd, vd1.vd);"
     },
+    "shv_z_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
+    },
     "shv_z_u": {
         "format": "short",
         "code": "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(vm0.vm, vd0.vd, vd1.vd);"
+    },
+    "shvl_m_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_u{{ dt_par.n_bits }}_m(vm0.vm, {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd)));"
+    },
+    "shvl_x_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_u{{ dt_par.n_bits }}_x({{ isa.prefix }}ptrue_{{ isa_dt_par.data_ext_logi }}(), {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd)));"
+    },
+    "shvl_z_s": {
+        "format": "short",
+        "code": "{{ isa.prefix }}reinterpret_{{ isa_dt_par.data_ext }}_u{{ dt_par.n_bits }}({{ isa.prefix }}lsr_u{{ dt_par.n_bits }}_z(vm0.vm, {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd), {{ isa.prefix }}reinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd)));"
     },
     "std_1_reg_z": {
         "format": "short",
@@ -297,6 +333,14 @@
         "format": "long",
         "code": [
             "\treturn !{{ isa.prefix }}{{ instr_name }}(vm0.vm, vm1.vm);"
+        ]
+    },
+    "tovm_cmpne": {
+        "format": "long",
+        "code": [
+            "%vm<tr>% res;",
+            "res.vm = svcmpne_n_u{{ dt_par.n_bits }}(svptrue_{{ isa_dt_par.data_ext_logi }}(), {% if dt_par.category == 'uint' %}vd0.vd{% else %}svreinterpret_u{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd){% endif %}, 0);",
+            "return res;"
         ]
     },
     "un_m": {

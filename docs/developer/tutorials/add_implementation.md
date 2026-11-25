@@ -10,7 +10,7 @@ An ISA that has no single instruction but can build the operation from a few of 
 
 | Level | Code made of | Templates | Entries |
 | :--- | :--- | :--- | :--- |
-| <span class="mipp-isa-badge lvl-0">L0</span> Native | one intrinsic (the constants it uses do not count: broadcast of a literal, all-true predicate) | `simd_ext/<isa>/<isa>_native_templates.json` | `simd_ext/<isa>/<isa>_native_implems.json` |
+| <span class="mipp-isa-badge lvl-0">L0</span> Native | one intrinsic (the constants and reinterpretations it uses do not count: broadcast of a literal, all-true predicate, `reinterpret`) | `simd_ext/<isa>/<isa>_native_templates.json` | `simd_ext/<isa>/<isa>_native_implems.json` |
 | <span class="mipp-isa-badge lvl-1">L1</span> Dedicated emulation | several intrinsics of the ISA, possibly MIPP calls | `simd_ext/<isa>/<isa>_emu_templates.json` | `simd_ext/<isa>/<isa>_emu_implems.json` |
 | <span class="mipp-isa-badge lvl-2">L2</span> Generic emulation | MIPP calls only, for all ISAs | `helpers_headers/generic_emu_templates*.json` | `helpers_headers/generic_emu_implems*.json` |
 
@@ -258,7 +258,7 @@ The entry in `neon_emu_implems.json` is restricted to 32-bit Arm, since AArch64 
 ]
 ```
 
-The `levels` audit checks that each entry is in the right file: a native entry must contain exactly one intrinsic and no MIPP call (the broadcasts of constants and the constant predicates do not count, see [Audits](../reference/audits.md#21-levels-implementation-level-placement)), a dedicated emulation several intrinsics or intrinsics and MIPP calls. Code without any intrinsic belongs to the generic files. When an exception is justified, set `"skip_audit_level": true` and explain it in `skip_audit_level_reason`.
+The `levels` audit checks that each entry is in the right file: a native entry must contain exactly one intrinsic and no MIPP call (the broadcasts of constants, the constant predicates and the reinterpretations do not count, see [Audits](../reference/audits.md#21-levels-implementation-level-placement)), a dedicated emulation several intrinsics or intrinsics and MIPP calls. Code without any intrinsic belongs to the generic files. When an exception is justified, set `"skip_audit_level": true` and explain it in `skip_audit_level_reason`.
 
 ---
 

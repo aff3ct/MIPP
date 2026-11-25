@@ -19,13 +19,6 @@
             "template": "all_cpop"
         }
     ],
-    "andb": [
-        {
-            "instr_name": "and",
-            "datatypes": "all_float",
-            "template": "float_bitwise"
-        }
-    ],
     "andnb": [
         {
             "instr_name": "",
@@ -622,56 +615,6 @@
             "template": "rea_loadu_expand"
         }
     ],
-    "lshift": [
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int",
-            "template": "shv_s"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int",
-            "template": "shv_s_msk",
-            "variant": "m"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int",
-            "template": "shv_s_msks",
-            "variant": "s"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_int",
-            "template": "shv_s_mskz",
-            "variant": "z"
-        }
-    ],
-    "lshift_vs": [
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float_msk",
-            "variant": "m"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float_mskz",
-            "variant": "z"
-        },
-        {
-            "instr_name": "sll",
-            "datatypes": "all_float",
-            "template": "shift_float_msks",
-            "variant": "s"
-        }
-    ],
     "msb": [
         {
             "instr_name": "and",
@@ -695,38 +638,6 @@
             "datatypes": "all_datatypes",
             "template": "msb_and_z",
             "variant": "z"
-        }
-    ],
-    "notb": [
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_notb"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_notb_msk",
-            "variant": "m"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_notb_mskz",
-            "variant": "z"
-        },
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_notb_msks",
-            "variant": "s"
-        }
-    ],
-    "orb": [
-        {
-            "instr_name": "or",
-            "datatypes": "all_float",
-            "template": "float_bitwise"
         }
     ],
     "permute2": [
@@ -809,56 +720,6 @@
             "instr_name": "round",
             "datatypes": "all_float",
             "template": "round_float_rmm"
-        }
-    ],
-    "rshift": [
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shv_s"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shv_s_msk",
-            "variant": "m"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shv_s_msks",
-            "variant": "s"
-        },
-        {
-            "instr_name": "sra",
-            "datatypes": "all_int",
-            "template": "shv_s_mskz",
-            "variant": "z"
-        }
-    ],
-    "rshift_vs": [
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float_msk",
-            "variant": "m"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float_mskz",
-            "variant": "z"
-        },
-        {
-            "instr_name": "srl",
-            "datatypes": "all_float",
-            "template": "shift_float_msks",
-            "variant": "s"
         }
     ],
     "scatter": [
@@ -1123,13 +984,6 @@
             "instr_name": "0",
             "datatypes": "all_datatypes",
             "template": "rea_unzip"
-        }
-    ],
-    "xorb": [
-        {
-            "instr_name": "xor",
-            "datatypes": "all_float",
-            "template": "float_bitwise"
         }
     ],
     "ziphi": [

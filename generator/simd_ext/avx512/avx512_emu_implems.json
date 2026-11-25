@@ -556,6 +556,17 @@
             "if": "defined(__AVX512BW__)"
         }
     ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "rshiftl_vs",
+            "datatypes": [
+                "uint8",
+                "int8"
+            ],
+            "template": "rshift_u8",
+            "if": "defined(__AVX512BW__)"
+        }
+    ],
     "scatter": [
         {
             "instr_name": "scatter",

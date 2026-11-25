@@ -5,10 +5,22 @@
             "return {{ isa.prefix }}minvq_{{ isa_dt_par.data_ext_msk }}(vm0.vm) != 0;"
         ]
     },
+    "all_minv64": {
+        "format": "long",
+        "code": [
+            "return vminvq_u32(vreinterpretq_u32_u64(vm0.vm)) != 0;"
+        ]
+    },
     "any_maxv": {
         "format": "long",
         "code": [
             "return {{ isa.prefix }}maxvq_{{ isa_dt_par.data_ext_msk }}(vm0.vm) != 0;"
+        ]
+    },
+    "any_maxv64": {
+        "format": "long",
+        "code": [
+            "return vmaxvq_u32(vreinterpretq_u32_u64(vm0.vm)) != 0;"
         ]
     },
     "arith_2args": {
@@ -97,6 +109,12 @@
             "return {{ isa.prefix }}maxvq_{{ isa_dt_par.data_ext_msk }}(vm0.vm) == 0;"
         ]
     },
+    "none_maxv64": {
+        "format": "long",
+        "code": [
+            "return vmaxvq_u32(vreinterpretq_u32_u64(vm0.vm)) == 0;"
+        ]
+    },
     "notb": {
         "format": "short",
         "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext }}(vd0.vd);"
@@ -113,6 +131,22 @@
     "notb_k": {
         "format": "short",
         "code": "{{ isa.prefix }}mvnq_{{ isa_dt_par.data_ext_msk }}(vm0.vm);"
+    },
+    "notb_k_64": {
+        "format": "long",
+        "code": [
+            "%vm<tr>% res;",
+            "res.vm = vreinterpretq_u64_u32(vmvnq_u32(vreinterpretq_u32_u64(vm0.vm)));",
+            "return res;"
+        ]
+    },
+    "pow2_shl": {
+        "format": "long",
+        "code": [
+            "%vd<tp>% res;",
+            "res.vd = vshlq_{{ isa_dt_par.data_ext }}(vdupq_n_{{ isa_dt_par.data_ext }}(1), vreinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd0.vd));",
+            "return res;"
+        ]
     },
     "rea_2": {
         "format": "short",
@@ -161,6 +195,10 @@
     "shv_shl_s": {
         "format": "short",
         "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, vd1.vd);"
+    },
+    "shv_shl_u": {
+        "format": "short",
+        "code": "{{ isa.prefix }}shlq_{{ isa_dt_par.data_ext }}(vd0.vd, {{ isa.prefix }}reinterpretq_s{{ dt_par.n_bits }}_{{ isa_dt_par.data_ext }}(vd1.vd));"
     },
     "sqrt": {
         "format": "short",

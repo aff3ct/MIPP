@@ -1,20 +1,4 @@
 {
-    "all": [
-        {
-            "instr_name": "minv",
-            "datatypes": "all_64bit",
-            "template": "all_minv64",
-            "if": "defined(__aarch64__)"
-        }
-    ],
-    "any": [
-        {
-            "instr_name": "maxv",
-            "datatypes": "all_64bit",
-            "template": "any_maxv64",
-            "if": "defined(__aarch64__)"
-        }
-    ],
     "bcast_b128": [
         {
             "instr_name": "bcast",
@@ -273,18 +257,6 @@
             "template": "hreduc_emu"
         }
     ],
-    "lshift": [
-        {
-            "instr_name": "shlq",
-            "datatypes": [
-                "uint64",
-                "uint32",
-                "uint16",
-                "uint8"
-            ],
-            "template": "shv_shl_u"
-        }
-    ],
     "lshift_vs": [
         {
             "instr_name": "shlq",
@@ -320,22 +292,9 @@
     "none": [
         {
             "instr_name": "none",
-            "datatypes": "all_64bit",
-            "template": "none_maxv64",
-            "if": "defined(__aarch64__)"
-        },
-        {
-            "instr_name": "none",
             "datatypes": "all_datatypes",
             "template": "none_pmax",
             "if": "!defined(__aarch64__)"
-        }
-    ],
-    "notb_k": [
-        {
-            "instr_name": "notb_k",
-            "datatypes": "all_64bit",
-            "template": "notb_k_64"
         }
     ],
     "permute": [
@@ -362,13 +321,6 @@
             "derived_form": "permute",
             "skip_audit_level": true,
             "skip_audit_level_reason": "the register is one block of 128 bits: call of the function on the whole register, at its level"
-        }
-    ],
-    "pow2": [
-        {
-            "instr_name": "pow2",
-            "datatypes": "all_uint",
-            "template": "pow2_shl"
         }
     ],
     "reverse": [
@@ -448,6 +400,50 @@
                 "uint8"
             ],
             "template": "shift_var"
+        }
+    ],
+    "rshiftl": [
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "shv_shr_u"
+        },
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "shvl_shr_s"
+        }
+    ],
+    "rshiftl_vs": [
+        {
+            "instr_name": "shrq",
+            "datatypes": [
+                "uint64",
+                "uint32",
+                "uint16",
+                "uint8"
+            ],
+            "template": "shift_var"
+        },
+        {
+            "instr_name": "shlq",
+            "datatypes": [
+                "int64",
+                "int32",
+                "int16",
+                "int8"
+            ],
+            "template": "shiftl_var_s"
         }
     ],
     "slide_b128": [

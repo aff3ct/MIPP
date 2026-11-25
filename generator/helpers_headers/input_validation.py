@@ -330,6 +330,8 @@ def make_level_detector(isa):
     The constants do not count (`strip_negligible_calls`): a broadcast of a constant (`%set1<tp>%(0.5)`,
     `%set0<tp>%()`, `_mm512_set1_epi32(INT32_MIN)`, `vdupq_n_f32(1.f)`, `__riscv_vmv_v_x_u32m1(1, vl)`) and a
     constant predicate (`svptrue_b32()`, `__riscv_vmset_m_b32(vl)`) are materialized once, out of the loops.
+    The casts and reinterpretations of a register (`_mm_castps_si128`, `svreinterpret_u32_s32`) do not count either:
+    they generate no instruction.
     """
     import re
     # Build dynamic hardware intrinsic matching set/regex from datatypes
@@ -467,7 +469,10 @@ def make_level_detector(isa):
         calls = re.findall(r"\b([a-zA-Z0-9_]+)\s*\(", clean_code)
         # "JINJA": a call whose name is one Jinja expression ({{ ci }}(x), {{ ro }}(x)): a cast chosen at generation time
         ignore = {"if", "for", "while", "switch", "return", "defined", "sizeof", "cast", "tovd", "tovm", "cast_k", "jinja"}
-        useful_calls = [c for c in calls if c.lower() not in ignore and "cast" not in c.lower()]
+        # the casts and reinterpretations of a register (`_mm_castps_si128`, `vreinterpretq_u32_s32`,
+        # `svreinterpret_u32_s32`, `__riscv_vreinterpret_v_i32m1_u32m1`) generate no instruction
+        useful_calls = [c for c in calls if c.lower() not in ignore and "cast" not in c.lower()
+                        and "reinterpret" not in c.lower()]
         return len(useful_calls)
 
     def detect(code):
