@@ -231,15 +231,15 @@ The C++ Object API provides operator overloads for data vectors (`Vd`) and mask 
 | **Arithmetic** | `+`, `-`, `*`, `/` | `Vd<T>` and `Vd<T>`, `Vd<T>` and `T`, `T` and `Vd<T>` | `Vd<T>` |
 | **Negation** | unary `-` | `Vd<T>` | `Vd<T>` |
 | **Bitwise** | `&`, `|`, `^`, `~` | same as arithmetic / `Vd<T>` | `Vd<T>` |
-| **Shifts** | `<<`, `>>` | `Vd<T>` and `int32_t` (same shift count for every lane) | `Vd<T>` |
+| **Shifts** | `<<`, `>>` | `Vd<T>` and `int32_t` (same shift count for every lane), `Vd<T>` and `Vd<T>` (one count per lane) | `Vd<T>` |
 | **Compound Assignment** | `+=`, `-=`, `*=`, `/=`, `&=`, `|=`, `^=` | `Vd<T>&` and `Vd<T>` or `T` | `Vd<T>&` |
-| **Compound Shift** | `<<=`, `>>=` | `Vd<T>&` and `int32_t` | `Vd<T>&` |
+| **Compound Shift** | `<<=`, `>>=` | `Vd<T>&` and `int32_t` or `Vd<T>` | `Vd<T>&` |
 | **Relational / Comparison** | `==`, `!=`, `<`, `<=`, `>`, `>=` | same as arithmetic | `Vm<T>` *(Mask)* |
 | **Mask Logic** | `&`, `|`, `^` | `Vm<T>` and `Vm<T>` or `bool` | `Vm<T>` |
 | **Mask Inversion** | `~`, `!` | `Vm<T>` | `Vm<T>` |
 | **Mask Compound Assignment** | `&=`, `|=`, `^=` | `Vm<T>&` and `Vm<T>` or `bool` | `Vm<T>&` |
 
-Bitwise operators and shifts are defined for every element type: on floating-point types they act on the bit pattern. There is no per-lane shift count (`a << b` with `b` an `Vd` does not compile).
+Bitwise operators and the shifts by an `int32_t` are defined for every element type: on floating-point types they act on the bit pattern. The shifts by a `Vd<T>` (`a << b`, one count per lane) exist for the integer types. `>>` is `rshift`: arithmetic on the signed types (copies of the sign bit), logical on the unsigned ones; the logical shift of the signed types is `mipp::rshiftl(a, n)`, which has no operator.
 
 ### 4.3. Free Functions in Namespace `mipp::`
 
