@@ -39,22 +39,6 @@
             "variant": "z"
         }
     ],
-    "hmax": [
-        {
-            "instr_name": "maxv",
-            "datatypes": "all_datatypes",
-            "template": "reduce_msk_z",
-            "variant": "z"
-        }
-    ],
-    "hmin": [
-        {
-            "instr_name": "minv",
-            "datatypes": "all_datatypes",
-            "template": "reduce_msk_z",
-            "variant": "z"
-        }
-    ],
     "load": [
         {
             "instr_name": "ld1",
@@ -112,22 +96,6 @@
             "instr_name": "dup",
             "datatypes": "all_int_uint",
             "template": "set1_k"
-        }
-    ],
-    "store": [
-        {
-            "instr_name": "st1",
-            "datatypes": "all_datatypes",
-            "template": "store_msk_z",
-            "variant": "z"
-        }
-    ],
-    "storeu": [
-        {
-            "instr_name": "st1",
-            "datatypes": "all_datatypes",
-            "template": "store_msk_z",
-            "variant": "z"
         }
     ],
     "sub": [

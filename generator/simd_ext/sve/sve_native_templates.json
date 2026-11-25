@@ -17,12 +17,6 @@
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0);"
         ]
     },
-    "reduce_msk_z": {
-        "format": "long",
-        "code": [
-            "return {{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, r0.r);"
-        ]
-    },
     "select": {
         "format": "short",
         "code": [
@@ -63,12 +57,6 @@
         "format": "short",
         "code": [
             "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}_z(m0.m, r2.r, r1.r, r0.r);"
-        ]
-    },
-    "store_msk_z": {
-        "format": "short",
-        "code": [
-            "{{ isa.prefix }}{{ instr_name }}_{{ isa_dt_par.data_ext }}(m0.m, ({{ isa_dt_par.to_ptr }}*) p0, r0.r);"
         ]
     },
     "testz_2args": {
