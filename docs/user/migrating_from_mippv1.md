@@ -207,7 +207,7 @@ Most functions keep their name and their meaning: `mul`, `div`, `fmadd`, `fnmadd
 | `mipp::maskz<T, mipp::op>(m, a, b)` | `mipp::op<mipp::Z>(m, a, b)` | |
 | `mipp::Reduction<T, mipp::op>::sapply(r)` | `mipp::reduce(v, mipp::op::add())` | `add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`, or a functor. |
 | `mipp::Reduction<T, mipp::op>::apply(p, n)` | `mipp::reduce(p, n, mipp::op::add())` | Any `n` above 0 (a multiple of N in MIPPv1). |
-| `sincos(r, s, c)`, `sincos(r)`, `cossin(r)` | `sin(v)` and `cos(v)` | Two calls. |
+| `sincos(r, s, c)`, `sincos(r)`, `cossin(r)` | `sin(v)` and `cos(v)` | Two calls, inlined: the compiler computes their common part once. |
 
 ```cpp
 --8<-- "examples/doc/migrating_from_mippv1/obj.cpp:masked"
@@ -293,7 +293,7 @@ A few parts of MIPPv1 have no counterpart in MIPPv2:
 - **Transpositions** (`transpose`, `transpose2`, `transpose8x8`, `transpose28x8`) and the functions `interleavex2`, `interleavex4` and `interleavex16`.
 - **Shifts of the lanes of a mask** (`m << n`, `mipp::lshift<N>(m, n)`).
 - **Interleaving by halves that are not blocks of 128 bits**: `interleavelo2` and `interleavehi2` on SSE and NEON (halves of 64 bits) and on AVX-512 (halves of 256 bits).
-- **`sincos` and `cossin`**: call `sin` and `cos`.
+- **`sincos` and `cossin`**: call `sin` and `cos`, whose common part the compiler computes once.
 - **`mipp::Lanes`**: the functions `_b128` replace the code that depended on it.
 - **Run-time errors for a missing implementation**, and `MIPP_ENABLE_BACKTRACE` with them: what MIPPv1 reported at run time compiles in MIPPv2, or is a compile error.
 - **Member functions** for the operations (`a.add(b)`, `r.sqrt()`, `a.blend(b, m)`).

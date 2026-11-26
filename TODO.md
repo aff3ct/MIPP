@@ -6,7 +6,7 @@ This document tracks pending engineering tasks, missing functionality relative t
 
 ## 1. MIPPv1 Function Parity & Missing Interfaces
 
-MIPPv2 currently defines and generates **144 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, selection, rearrangements and complex numbers, plus their scalar forms (`sub_vs`, `fmadd_vsv`...). The MIPPv1 families below are migrated on the `feat/mippv1-parity` branch; what is left is postponed with the register tuples (`sincos`, transposes, `interleavex*`), low priority (shift of the lanes of a mask, `MIPP_STATIC_LIB` tables of `compress`) or deliberately not reproduced (`cmask`).
+MIPPv2 currently defines and generates **144 core vector primitives** across arithmetic, logic, comparison, math, reduction, load/store, conversions, selection, rearrangements and complex numbers, plus their scalar forms (`sub_vs`, `fmadd_vsv`...). The MIPPv1 families below are migrated on the `feat/mippv1-parity` branch; what is left is postponed with the register tuples (transposes, `interleavex*`), not needed (`sincos`, `cossin`: the compiler merges `sin` and `cos`), low priority (shift of the lanes of a mask, `MIPP_STATIC_LIB` tables of `compress`) or deliberately not reproduced (`cmask`).
 
 ### 1.1. Complex Arithmetic (`regx2` / Coordinate Pairs)
 
@@ -18,7 +18,7 @@ MIPPv1 provided complex-number vector arithmetic defined on register pairs (`reg
 - [x] `cdiv`: Complex division ($\frac{a \cdot \bar{b}}{|b|^2}$), with the algorithm of Smith (no overflow of $|b|^2$).
 - [x] `conj`: Complex conjugation ($a_r - i a_i$).
 - [x] `norm`: Complex squared Euclidean norm ($a_r^2 + a_i^2$): `cnorm`, and `cabs` for the modulus.
-- [ ] `sincos`, `cossin`: Simultaneous evaluation of sine and cosine returning register pairs (`regx2` with sine/cosine or cosine/sine components). Postponed with the register tuples (`sin` and `cos` exist).
+- [x] `sincos`, `cossin`: Simultaneous evaluation of sine and cosine returning register pairs (`regx2` with sine/cosine or cosine/sine components). Not needed: `sin` and `cos` share their range reduction and their two polynomials, and once inlined the compiler computes them once (clang -O2, float32: 64 instructions for `sin`, 75 for `sin` and `cos` on NEON; 50 and 61 on AVX2). `cossin` gave $e^{ix}$ in the split layout of MIPPv1, which MIPPv2 does not use for complex numbers.
 
 ### 1.2. Vector Interleaving & Deinterleaving
 
