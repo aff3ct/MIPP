@@ -131,8 +131,8 @@ These functions exist in both versions and compile after the renaming of the typ
 | :--- | :--- | :--- | :--- |
 | `add`, `sub`, `+`, `-`, `hadd`, `sum` on 8-bit and 16-bit integers | Saturate: `100 + 100` is `127` in `int8_t`. | Wrap: `100 + 100` is `-56`. | [`adds`](../funcs_support/arithmetic/adds.md), [`subs`](../funcs_support/arithmetic/subs.md), [`hadds`](../funcs_support/reduction/hadds.md) |
 | `rshift`, `>>` on signed integers | Logical: `-16 >> 2` is `0x3FFFFFFC` in `int32_t`. | Arithmetic: `-16 >> 2` is `-4`. | [`rshiftl`](../funcs_support/logic/rshiftl.md) (no operator). |
-| `cvt` from a floating-point type to an integer | Rounds to the nearest integer: `2.7f` gives `3`. | Truncates, as a C cast: `2.7f` gives `2`. | `cvt` of `round(v)`, except for the ties (next row). |
-| `round`, for a tie | To the even integer: `2.5f` gives `2`. | Away from zero: `2.5f` gives `3`. | None. |
+| `cvt` from a floating-point type to an integer | Rounds to the nearest integer: `2.7f` gives `3`. | Truncates, as a C cast: `2.7f` gives `2`. | `cvt` of [`roundeven(v)`](../funcs_support/math/roundeven.md). |
+| `round`, for a tie | To the even integer: `2.5f` gives `2`. | Away from zero: `2.5f` gives `3`. | [`roundeven`](../funcs_support/math/roundeven.md) |
 | `div2`, `div4` on negative integers | Toward zero: `-7` gives `-3` and `-1`. | Arithmetic shift: `-7` gives `-4` and `-2`. | Add 1 (3 for `div4`) to the negative elements first. |
 | `load`, `store`, `r.load(p)`, `r.store(p)` | Unaligned, unless `MIPP_ALIGNED_LOADS` is defined. | Aligned: a pointer that is not aligned is undefined behavior (a fault on x86). | `loadu`, `storeu` ([Memory & Alignment](memory_and_alignment.md)). |
 | `copysign(a, b)` | Flips the sign of `a` where `b` is negative (an alias of `neg(a, b)`): `copysign(-3, -1)` is `3`. | Magnitude of `a`, sign of `b`, as `std::copysign`: `-3`. | [`xorsign(a, b)`](../funcs_support/math/xorsign.md) |

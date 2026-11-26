@@ -168,6 +168,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}rndaq_{{ isa_dt_par.data_ext }}(vd0.vd);"
     },
+    "round_even": {
+        "format": "short",
+        "code": "{{ isa.prefix }}rndnq_{{ isa_dt_par.data_ext }}(vd0.vd);"
+    },
     "rsqrt": {
         "format": "short",
         "code": "{{ isa.prefix }}rsqrteq_{{ isa_dt_par.data_ext }}(vd0.vd);"

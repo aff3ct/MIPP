@@ -1141,6 +1141,31 @@
             "template": "std_1_reg_z"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "rintn",
+            "datatypes": "all_float",
+            "variant": "m",
+            "template": "un_m"
+        },
+        {
+            "instr_name": "rintn",
+            "datatypes": "all_float",
+            "variant": "z",
+            "template": "un_z"
+        },
+        {
+            "instr_name": "rintn",
+            "datatypes": "all_float",
+            "variant": "s",
+            "template": "un_s"
+        },
+        {
+            "instr_name": "rintn",
+            "datatypes": "all_float",
+            "template": "std_1_reg_z"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "lsr",

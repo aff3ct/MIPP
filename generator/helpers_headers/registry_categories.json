@@ -95,6 +95,7 @@
         "pow",
         "pow2",
         "round",
+        "roundeven",
         "rsqrt",
         "sin",
         "sinh",

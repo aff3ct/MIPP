@@ -136,6 +136,6 @@ The markers of the [templating DSL](templating_dsl.md) use the same letters as t
 
 ## 6. What Keeps the Conventions of Other Projects
 
-- The **mathematical functions** keep the names of the C library: `sqrt`, `atan2`, `copysign`, `trunc`, `round`...; `signbit` is named after C99.
+- The **mathematical functions** keep the names of the C library: `sqrt`, `atan2`, `copysign`, `trunc`, `round`, `roundeven` (C23)...; `signbit` is named after C99.
 - The **macros** keep the `MIPP_` prefix and upper case: `MIPP_N_FLOAT32`, `MIPP_REQUIRED_ALIGNMENT`, `MIPP_RVV_LDIV_VL`.
 - The **datatypes** are the ones of `<stdint.h>`, plus `float32_t` / `float64_t`.

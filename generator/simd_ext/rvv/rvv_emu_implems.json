@@ -722,6 +722,13 @@
             "template": "round_float_rmm"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "roundeven",
+            "datatypes": "all_float",
+            "template": "round_float_rne"
+        }
+    ],
     "scatter": [
         {
             "instr_name": "suxei",

@@ -1538,6 +1538,14 @@
             "variant": "s"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "vfcvt",
+            "datatypes": "all_int_uint",
+            "template": "round_int_msks",
+            "variant": "s"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "srl",

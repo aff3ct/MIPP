@@ -914,6 +914,18 @@
             "return %select<tp>%(small, rf, vd0);"
         ]
     },
+    "round_float_rne": {
+        "format": "long",
+        "code": [
+            "%vd<c:int|b:tp>% tmp;",
+            "tmp.vd = {{ isa.prefix }}_vfcvt_x_f_v_{{ isa_dt_par.int_data_ext }}_rm(vd0.vd, __RISCV_FRM_RNE, %N<tp>%);",
+            "%vd<tp>% rf;",
+            "rf.vd = {{ isa.prefix }}_vfcvt_f_x_v_{{ isa_dt_par.data_ext }}(tmp.vd, %N<tp>%);",
+            "// |x| >= 2^p (and NaN, Inf) are already integers: kept, and the sign of -0.5 .. -0.0 is restored",
+            "%vm<tp>% small = %cmplt<tp>%(%abs<tp>%(vd0), %set1<tp>%({{ '4503599627370496.0' if dt_par.n_bits == 64 else '8388608.0f' }}));",
+            "return %select<tp>%(small, %copysign<tp>%(rf, vd0), vd0);"
+        ]
+    },
     "scalar_get": {
         "format": "long",
         "code": [

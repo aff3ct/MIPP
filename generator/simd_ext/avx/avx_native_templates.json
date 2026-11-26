@@ -263,6 +263,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_epi64(vd0.vd, vd0.vd);"
     },
+    "roundeven_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));"
+    },
     "select_float": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd1.vd, vd0.vd, vm0.vm);"

@@ -856,6 +856,24 @@
             "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float64"
+            ],
+            "template": "round_even",
+            "if": "defined(__aarch64__)"
+        },
+        {
+            "instr_name": "",
+            "datatypes": [
+                "float32"
+            ],
+            "template": "round_even",
+            "if": "defined(__aarch64__) || (defined(__ARM_ARCH) && __ARM_ARCH >= 8)"
+        }
+    ],
     "rsqrt": [
         {
             "instr_name": "",

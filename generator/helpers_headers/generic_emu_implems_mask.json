@@ -1455,6 +1455,26 @@
             "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "roundeven",
+            "datatypes": "all_datatypes",
+            "variant": "m",
+            "template_ref": "tpl_mask_generic_emu.unary_mask_all_datatypes"
+        },
+        {
+            "instr_name": "roundeven",
+            "datatypes": "all_datatypes",
+            "variant": "z",
+            "template_ref": "tpl_mask_generic_emu.unary_maskz_all_datatypes"
+        },
+        {
+            "instr_name": "roundeven",
+            "datatypes": "all_datatypes",
+            "variant": "s",
+            "template_ref": "tpl_mask_generic_emu.unary_masks_all_datatypes"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "rshift",

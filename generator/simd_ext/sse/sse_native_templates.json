@@ -111,6 +111,10 @@
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext if dt_par.category == 'float' else 'epi' ~ dt_par.n_bits }}(vd0.vd, vd0.vd);"
     },
+    "roundeven_float": {
+        "format": "short",
+        "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext }}(vd0.vd, (_MM_FROUND_TO_NEAREST_INT | _MM_FROUND_NO_EXC));"
+    },
     "select_blendv": {
         "format": "short",
         "code": "{{ isa.prefix }}_{{ instr_name }}_{{ isa_dt_par.data_ext_logi if isa_dt_par.data_ext_logi != 'si128' else 'epi8' }}(vd1.vd, vd0.vd, vm0.vm);"

@@ -392,8 +392,12 @@
     "latex": "\\text{res}_{b+l} = vd0_{b + (l + s0) \\bmod n_b}"
   },
   "round": {
-    "description": "Rounds each floating-point element to the nearest integer. A tie is rounded away from zero, as the C function `round`: `2.5` gives `3` and `-2.5` gives `-3`.",
+    "description": "Rounds each floating-point element to the nearest integer. A tie is rounded away from zero, as the C function `round`: `2.5` gives `3` and `-2.5` gives `-3`. The rounding of a tie to the even integer is `roundeven`.",
     "latex": "\\text{res}_i = \\operatorname{round}(vd0_i)"
+  },
+  "roundeven": {
+    "description": "Rounds each floating-point element to the nearest integer. A tie is rounded to the even integer, as the C23 function `roundeven` and the default rounding of IEEE 754: `2.5` gives `2`, `3.5` gives `4` and `-0.5` gives `-0.0`. Unlike `round`, it does not move the ties away from zero, so it does not bias a sum of rounded values. The integers are returned unchanged.",
+    "latex": "\\text{res}_i = \\operatorname{roundeven}(vd0_i)"
   },
   "rshift": {
     "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(vd0, s0)` in C++), and the logical shift of the signed types is `rshiftl`.",

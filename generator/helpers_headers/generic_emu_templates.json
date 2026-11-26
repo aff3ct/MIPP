@@ -1527,6 +1527,19 @@
         "format": "short",
         "code": "vd0.vd;"
     },
+    "roundeven_magic": {
+        "format": "long",
+        "code": [
+            "// |x| + 2^p - 2^p rounds |x| < 2^p to an integer with the default rounding (to nearest, ties to even)",
+            "%vd<tp>% sign = %andb<tp>%(vd0, %set1<tp>%(-0.0));",
+            "%vd<tp>% ax = %xorb<tp>%(vd0, sign);",
+            "%vd<tp>% magic = %set1<tp>%({{ '4503599627370496.0' if dt_par.n_bits == 64 else '8388608.0f' }});",
+            "%vd<tp>% r = %sub<tp>%(%add<tp>%(ax, magic), magic);",
+            "// |x| >= 2^p (and NaN, Inf) are already integers: kept",
+            "r = %select<tp>%(%cmplt<tp>%(ax, magic), r, ax);",
+            "return %orb<tp>%(r, sign);"
+        ]
+    },
     "rsqrt_div": {
         "format": "long",
         "code": [

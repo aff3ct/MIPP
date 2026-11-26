@@ -70,7 +70,7 @@ static void shift()
     // --8<-- [start:shift]
     mipp::Vd<int32_t> a(-16);
     mipp::Vd<int32_t> ar = a >> 2;                                             // -4: arithmetic shift
-    mipp::Vd<int32_t> lg = mipp::cast<int32_t>(mipp::cast<uint32_t>(a) >> 2); // 0x3FFFFFFC: logical, as MIPPv1
+    mipp::Vd<int32_t> lg = mipp::rshiftl(a, 2);                               // 0x3FFFFFFC: logical, as MIPPv1
     // --8<-- [end:shift]
     DOC_CHECK(ar[0] == -4 && lg[0] == 0x3FFFFFFC);
 }
@@ -78,13 +78,15 @@ static void shift()
 static void conversion()
 {
     // --8<-- [start:conversion]
-    mipp::Vd<float> f(2.7f);
-    mipp::Vd<int32_t> t = mipp::cvt<int32_t>(f);              // 2: truncates, as a C cast (MIPPv1: 3)
-    mipp::Vd<int32_t> r = mipp::cvt<int32_t>(mipp::round(f)); // 3: rounds first
+    mipp::Vd<float> f(2.7f), h(2.5f);
+    mipp::Vd<int32_t> t = mipp::cvt<int32_t>(f);                  // 2: truncates, as a C cast (MIPPv1: 3)
+    mipp::Vd<int32_t> r = mipp::cvt<int32_t>(mipp::roundeven(f)); // 3: rounds first, as MIPPv1
+    mipp::Vd<float>   a = mipp::round(h);                         // 3: a tie goes away from zero
+    mipp::Vd<float>   e = mipp::roundeven(h);                     // 2: a tie goes to the even integer, as MIPPv1
     // --8<-- [end:conversion]
-    DOC_CHECK(t[0] == 2 && r[0] == 3);
-    // ties: away from zero in MIPPv2 (to even in MIPPv1 on x86 and AArch64)
-    DOC_CHECK(mipp::round(mipp::Vd<float>(2.5f))[0] == 3.f && mipp::round(mipp::Vd<float>(-0.5f))[0] == -1.f);
+    DOC_CHECK(t[0] == 2 && r[0] == 3 && a[0] == 3.f && e[0] == 2.f);
+    DOC_CHECK(mipp::round(mipp::Vd<float>(-0.5f))[0] == -1.f && mipp::roundeven(mipp::Vd<float>(-0.5f))[0] == 0.f);
+    DOC_CHECK(mipp::cvt<int32_t>(mipp::roundeven(mipp::Vd<float>(3.5f)))[0] == 4);
 }
 
 static void signs()

@@ -3468,6 +3468,35 @@
             "variant": "s"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "roundeven",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "roundeven_mask",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)",
+            "variant": "m"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "roundeven_maskz",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)",
+            "variant": "z"
+        },
+        {
+            "instr_name": "roundscale",
+            "datatypes": "all_float",
+            "template": "roundeven_masks",
+            "if": "defined(__AVX512F__) && !defined(__MIC__) && !defined(__KNCNI__)",
+            "variant": "s"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "srlv",

@@ -768,6 +768,13 @@
             "if": "defined(__AVX2__)"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "roundeven_float"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "srlv",

@@ -1673,6 +1673,36 @@
             ]
         }
     ],
+    "roundeven": [
+        {
+            "type": "element-wide",
+            "datatypes": "all_int_uint",
+            "variants": [],
+            "implem": [
+                "res.vd[i] = %!pred_cond!% vd0.vd[i] %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float64",
+            "variants": [],
+            "implem": [
+                "// requires #include <math.h>; a tie k + 0.5 goes to 2 * round((k + 0.5) / 2), the even neighbor,",
+                "// whatever the rounding mode of the environment",
+                "res.vd[i] = %!pred_cond!% (fabs(vd0.vd[i] - trunc(vd0.vd[i])) == 0.5 ? 2.0 * round(0.5 * vd0.vd[i]) : round(vd0.vd[i])) %!pred_alt!%;"
+            ]
+        },
+        {
+            "type": "element-wide",
+            "datatypes": "float32",
+            "variants": [],
+            "implem": [
+                "// requires #include <math.h>; a tie k + 0.5 goes to 2 * round((k + 0.5) / 2), the even neighbor,",
+                "// whatever the rounding mode of the environment",
+                "res.vd[i] = %!pred_cond!% (fabsf(vd0.vd[i] - truncf(vd0.vd[i])) == 0.5f ? 2.0f * roundf(0.5f * vd0.vd[i]) : roundf(vd0.vd[i])) %!pred_alt!%;"
+            ]
+        }
+    ],
     "rshift": [
         {
             "type": "element-wide",

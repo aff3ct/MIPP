@@ -803,6 +803,14 @@
             "if": "defined(__SSE2__)"
         }
     ],
+    "roundeven": [
+        {
+            "instr_name": "round",
+            "datatypes": "all_float",
+            "template": "roundeven_float",
+            "if": "defined(__SSE4_1__)"
+        }
+    ],
     "rshift": [
         {
             "instr_name": "srlv",
