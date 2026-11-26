@@ -112,13 +112,35 @@ The other fields (hardware masks, scalable layouts, ...) are described in [ISA D
 
 The `mipp::ISA` enum lists every directory of `simd_ext/`, whatever the `--simd-ext` value.
 
-With empty implementation files, every function already exists on `myisa` and the generated headers compile: about three quarters of the functions are at <span class="mipp-isa-badge lvl-3">L3</span>, most of the others at <span class="mipp-isa-badge lvl-2">L2</span>. The summary table printed at the end shows the distribution of the levels for the new ISA.
+With empty implementation files, every function already exists on `myisa` and the generated headers compile. The summary table printed at the end shows the distribution of the levels for the new ISA: more than half of the functions are at <span class="mipp-isa-badge lvl-3">L3</span>, and most of the others at <span class="mipp-isa-badge lvl-2">L2</span> (mostly the versions of the other LMULs, built on the LMUL 1 ones). At LMUL 1 and without mask, almost every function is at <span class="mipp-isa-badge lvl-3">L3</span> ([Step 4](#which-functions-first)).
 
 ---
 
 ## Step 4: Implement the Functions
 
-Add the <span class="mipp-isa-badge lvl-0">L0</span> entries, then the <span class="mipp-isa-badge lvl-1">L1</span> ones where needed, as described in [Add an Implementation](add_implementation.md). Start with the functions the generic templates call most: loads and stores, `set1`, `set0`, arithmetic, comparisons, `select`, bitwise operations, `max` and `min`. Each one turns many <span class="mipp-isa-badge lvl-3">L3</span> functions into <span class="mipp-isa-badge lvl-2">L2</span> at once.
+Add the <span class="mipp-isa-badge lvl-0">L0</span> entries, then the <span class="mipp-isa-badge lvl-1">L1</span> ones where needed, as described in [Add an Implementation](add_implementation.md).
+
+### Which functions first
+
+A generic emulation (<span class="mipp-isa-badge lvl-2">L2</span>) is written with other MIPP functions, and it is at <span class="mipp-isa-badge lvl-3">L3</span> as long as one of them is ([Effective Level](../internals/code_generation.md#44-effective-level)). With empty files, the emulations have nothing to stand on: almost every function is at <span class="mipp-isa-badge lvl-3">L3</span>. A core of functions is the base of all the others: once it is written, every other function is at <span class="mipp-isa-badge lvl-2">L2</span> or better, and can then be improved one by one.
+
+The table below is computed by the generator. It simulates an ISA whose implementation files are empty with the candidate resolver, gives each function of the core a native implementation for all its datatypes, then counts, for each function of the core, what goes back to <span class="mipp-isa-badge lvl-3">L3</span> when it alone is missing:
+
+- **Functions**: the functions at <span class="mipp-isa-badge lvl-3">L3</span> without it (unmasked);
+- **Scalar forms**: the same for the [scalar forms](../../user/scalar_forms.md) (`add_vs`, ...);
+- **Masked variants**: the other functions whose masked variants go back to <span class="mipp-isa-badge lvl-3">L3</span>. This column depends on the masks of the ISA: the table uses the full-vector masks of NEON, and with the masks of AVX-512 and RVV, `cast` and `andb` hold back far fewer masked variants.
+
+--8<-- "docs/includes/generated/isa_bootstrap.md"
+
+In practice:
+
+- Write the first rows first: `set1`, `cast` (a reinterpretation, usually without instruction), `select`, the arithmetic, the bitwise operations, the comparisons, `loadu` and `storeu`. They bring most of the library to <span class="mipp-isa-badge lvl-2">L2</span>.
+- `mul` and `div` have no generic emulation, and many emulations call them (math and complex functions): until they are written, these functions stay at <span class="mipp-isa-badge lvl-3">L3</span>, whatever else is written.
+- The functions that no other function needs (the reductions, the aligned `load` and `store`, `scatter`, several rearrangements) can wait: each one only improves itself.
+
+The counts assume an implementation for every datatype. A function written for some datatypes only (no 64-bit multiplication, for instance) holds back its dependents for the other datatypes.
+
+### Audits
 
 Watch the audits at each generation: they report entries placed at the wrong level, dead entries and overlapping conditions ([Audits & Validation](../reference/audits.md)).
 

@@ -152,6 +152,7 @@ Some tables of the hand-written pages restate the registries or the ISA descript
 | `datatypes.md` | `all_datatypes` (`datatypes.py`), `registry_scalar_isa.json` | [Vector Types & LMUL](../../user/vector_types_and_lmul.md#1-supported-datatypes-matrix) |
 | `categories.md` | `registry_categories.json` | [Add a Function](../tutorials/add_function.md#step-2-assign-a-category) |
 | `variants.md` | `registry_interfaces.json` | [Add a Function](../tutorials/add_function.md#step-1-declare-the-interface) |
+| `isa_bootstrap.md` | the candidate resolver, run on an ISA with empty implementation files (`helpers_docs/isa_bootstrap.py`, with the descriptor of NEON): the core of functions to write first, and what each one unlocks | [Add an ISA](../tutorials/add_isa.md#which-functions-first) |
 
 `docs/includes/` is excluded from the site (`exclude_docs` in `mkdocs.yml`): its files are fragments, not pages. A fragment is included in pages at different depths, so it contains no relative link. To add one, write a `render_*()` function and add its output to `write_includes()`.
 

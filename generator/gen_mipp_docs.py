@@ -1447,7 +1447,8 @@ def build_arg_parser():
             "- 'dev_reference': command-line and registry reference of the Developer Guide "
             "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/');\n"
             "- 'includes': tables included in the hand-written pages ('docs/includes/generated/'): LMUL and "
-            "half-vector availability per target, datatypes, categories, 'variants' lists.\n\n"
+            "half-vector availability per target, datatypes, categories, 'variants' lists, the functions to write "
+            "first for a new ISA (about 30 s: the candidate resolver is run a few hundred times).\n\n"
             "All these outputs are ignored by Git."
         ),
     )
@@ -1461,7 +1462,7 @@ def build_arg_parser():
     )
     set_examples(parser, [
         ("./gen_mipp_docs.py", "every part, as in the CI"),
-        ("./gen_mipp_docs.py --only dev_reference includes", "parts needed by the hand-written pages only (fast)"),
+        ("./gen_mipp_docs.py --only dev_reference includes", "parts needed by the hand-written pages only"),
     ])
     return parser
 

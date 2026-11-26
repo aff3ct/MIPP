@@ -175,6 +175,45 @@ def render_forms():
     return _header("registry_interfaces.json (forms)") + "\n".join(lines) + "\n"
 
 
+def render_isa_bootstrap(generator_dir):
+    """The functions to write first for a new ISA, measured with the candidate resolver (isa_bootstrap.py)."""
+    from helpers_docs.isa_bootstrap import compute
+    res = compute(generator_dir)
+
+    def code(names, last=", "):
+        names = [f"`{n}`" for n in names]
+        return ", ".join(names[:-1]) + last + names[-1] if len(names) > 1 else "".join(names)
+
+    def count(n):
+        return str(n) if n else "–"
+
+    empty, core = res["empty"], res["core"]
+    holders = [r for r in core if r["functions"] or r["forms"] or r["masked"]]
+    leaves = [r["function"] for r in core if r not in holders]
+    lines = [
+        f"With empty implementation files, {empty['l3']} of the {res['n_functions']} functions are at L3 for all "
+        f"their datatypes" + (f", and {empty['mixed']} for some of them" if empty["mixed"] else "")
+        + f" (unmasked, LMUL 1). Once the {len(core)} functions below are written, "
+        + (f"{code(res['left_at_l3'], ' and ')} are still at L3." if res["left_at_l3"] else "no other function is at L3."),
+        "",
+        "| Function | Functions | Scalar forms | Masked variants | For example |",
+        "| :--- | ---: | ---: | ---: | :--- |",
+    ]
+    for r in holders:
+        listed = r["examples"] or r["forms"]  # the scalar forms when no function needs it
+        examples = listed[:5]
+        more = len(listed) - len(examples)
+        lines.append(f"| `{r['function']}` | {count(len(r['functions']))} | {count(len(r['forms']))} | "
+                     f"{count(len(r['masked']))} | {code(examples)}{f', +{more}' if more > 0 else ''} |")
+    lines += ["", f"No other function needs them, but they have no emulation: at L3 until written: {code(leaves, ' and ')}."]
+    if res["masked_left_at_l3"]:
+        lines += ["", f"The masked variants of {code(res['masked_left_at_l3'], ' and ')} stay at L3 even then: they need "
+                      "masked implementations of their own."]
+    source = (f"the candidate resolver, with the descriptor of {TARGET_NAMES.get(res['sim_isa'], res['sim_isa'])} "
+              "and empty implementation files (helpers_docs/isa_bootstrap.py)")
+    return _header(source) + "\n".join(lines) + "\n"
+
+
 def write_includes(generator_dir, out_dir):
     """Writes the fragments into out_dir (deleted and rewritten)."""
     os.makedirs(out_dir, exist_ok=True)
@@ -187,6 +226,7 @@ def write_includes(generator_dir, out_dir):
         "categories.md": render_categories(),
         "variants.md": render_variants(),
         "forms.md": render_forms(),
+        "isa_bootstrap.md": render_isa_bootstrap(generator_dir),
     }
     for name, text in fragments.items():
         with open(os.path.join(out_dir, name), "w", encoding="utf-8") as f:
