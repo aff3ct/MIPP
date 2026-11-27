@@ -821,19 +821,6 @@ def audit_generic_templates_dead_code(flat_implems, data_templates):
                 for name in dead:
                     print(Fore.YELLOW + f"  - Template '{name}' in generic templates is never referenced.", file=sys.stderr)
 
-def audit_scalar_implems_dead_code(scalar_implems, interfaces):
-    if "dead-code" not in ACTIVE_AUDITS:
-        return
-    dead = []
-    for func in scalar_implems:
-        if func not in interfaces:
-            dead.append(func)
-    if dead:
-        dead.sort()
-        print(Fore.YELLOW + "Warning: Found dead (unreferenced) function implementations in 'registry_scalar_implems.json':", file=sys.stderr)
-        for func in dead:
-            print(Fore.YELLOW + f"  - Function '{func}' is implemented but does not exist in registry_interfaces.json.", file=sys.stderr)
-
 
 def audit_json_files_structure(gen_dir):
     if "json-structure" not in ACTIVE_AUDITS:

@@ -487,7 +487,7 @@ def build_arg_parser():
         help=(
             "Audits to run. They print warnings and never stop the generation (the validation checks "
             "always run and do). 'levels': an implementation is in the file of the wrong level. "
-            "'dead-code': templates, implementations or functions that are never used. 'duplicates': "
+            "'dead-code': templates and implementations that are never used. 'duplicates': "
             "overlapping implementations of the same function and datatype. 'json-structure': unsorted "
             "keys and empty lists in the JSON files."
         ),
@@ -534,11 +534,6 @@ def main(argv=None):
             registry.generic_flat_implems, registry.generic_data_templates
         )
     
-    if registry.scalar_implems is not None and registry.interfaces is not None:
-        input_validation.audit_scalar_implems_dead_code(
-            registry.scalar_implems, registry.interfaces
-        )
-
     if registry.categories is not None and registry.interfaces is not None:
         input_validation.validate_categories_logical_integrity(
             registry.categories, registry.interfaces
