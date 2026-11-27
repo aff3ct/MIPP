@@ -20,9 +20,10 @@ import { filterEntries } from "./filters.js";
 import { renderSidebar, updateSidebarUI, bindSidebarEvents } from "./components/sidebar.js";
 import { renderSearchBar, updateSearchBarUI, bindSearchBarEvents, scrollToSearchResults } from "./components/search_bar.js";
 import { renderCard, switchCardTab, renderCardExpandedDetails } from "./components/card.js";
-import { renderAlgoModal, algoModalIsa, algoCompareIsas } from "./components/modal_algo.js";
+import { renderAlgoModal, algoModalIsa, algoCompareIsas, updateAlgoProgress } from "./components/modal_algo.js";
+import { initCallGraphs } from "./components/call_graph.js";
 import { bindBoxLayout } from "./components/box_layout.js";
-import { getLoadedSources, loadAlgoSources } from "./algo_source.js";
+import { getLoadedSources, loadAlgoSources, onAlgoProgress } from "./algo_source.js";
 import { renderCompareModal } from "./components/modal_compare.js";
 import { showMacroTooltip, hideTooltip, toggleTooltip, typesetMath, followTooltipAnchors } from "./syntax.js";
 import { showIntrinsicTooltip, setIntrinsicNavigate } from "./components/intrinsic_tooltip.js";
@@ -652,6 +653,21 @@ function onBackdropClick(backdropEl, close) {
 // Box of the Compare ISAs view moved with the keyboard: its handle keeps the focus in the next render
 let movedCompareBox = null;
 
+// Progress bars of the Algorithm modal: updated in place (one update per frame), not re-rendered
+let algoProgressHooked = false;
+let algoProgressFrame = 0;
+function hookAlgoProgress(modalsContainerEl) {
+  if (algoProgressHooked) return;
+  algoProgressHooked = true;
+  onAlgoProgress(() => {
+    if (algoProgressFrame) return;
+    algoProgressFrame = requestAnimationFrame(() => {
+      algoProgressFrame = 0;
+      updateAlgoProgress(modalsContainerEl);
+    });
+  });
+}
+
 function updateModals(modalsContainerEl) {
   if (!modalsContainerEl) return;
 
@@ -661,6 +677,7 @@ function updateModals(modalsContainerEl) {
   `;
 
   applyModalSizes(modalsContainerEl);
+  initCallGraphs(modalsContainerEl);
   followTooltipAnchors(); // the tooltip of an element that this render replaced is closed
 
   // The URL always encodes the current view (shareable link): every render of
@@ -669,6 +686,7 @@ function updateModals(modalsContainerEl) {
 
   // The code of the Algorithm modal comes from the header tables of the ISAs, loaded on demand
   if (state.algoModalOpen && state.algoModalData) {
+    hookAlgoProgress(modalsContainerEl);
     const md = state.algoModalData;
     const wanted = [algoModalIsa(md)];
     if (md.view === "compare") {
@@ -726,6 +744,37 @@ function updateModals(modalsContainerEl) {
           mask: btn.getAttribute("data-algo-nav-mask"),
           lmul: btn.getAttribute("data-algo-nav-lmul"),
         });
+      });
+    });
+
+    // Dependencies: DAG, tree or text view (kept when another function is opened)
+    modalsContainerEl.querySelectorAll("[data-deps-view]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const md = state.algoModalData;
+        if (!md) return;
+        md.depsView = btn.getAttribute("data-deps-view");
+        // the render replaces the modal: it keeps its scroll position (the box stays in place)
+        const scroller = modalsContainerEl.querySelector(".mipp-algo-modal-content");
+        const top = scroller ? scroller.scrollTop : 0;
+        updateModals(modalsContainerEl);
+        const again = modalsContainerEl.querySelector(".mipp-algo-modal-content");
+        if (again) again.scrollTop = top;
+        const focus = modalsContainerEl.querySelector(`[data-deps-view="${md.depsView}"]`);
+        if (focus) focus.focus({ preventScroll: true });
+      });
+    });
+
+    // Breadcrumb: back to any function of the path (the ones after it are dropped)
+    modalsContainerEl.querySelectorAll("[data-algo-crumb]").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const md = state.algoModalData;
+        const i = Number(btn.getAttribute("data-algo-crumb"));
+        if (!md || !md.history || !(i >= 0 && i < md.history.length)) return;
+        state.algoModalData = { ...md.history[i], history: md.history.slice(0, i) };
+        updateModals(modalsContainerEl);
+        syncUrlHash(true);
       });
     });
 

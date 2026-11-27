@@ -3914,3 +3914,350 @@ html:has(.mipp-modal-backdrop.active) {
   color: var(--mipp-text-muted, #64748b);
   font-style: italic;
 }
+
+/* Algorithm modal: loading of the MIPP source code (progress bar updated in place) */
+.mipp-algo-loading-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+/* as wide as the modal (the note fills the body) */
+.mipp-algo-loading .mipp-loading-bar-wrapper {
+  max-width: none;
+  height: 6px;
+  margin: 0;
+}
+
+.mipp-algo-loading-text {
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-variant-numeric: tabular-nums;
+  color: var(--md-default-fg-color--light, #475569);
+}
+
+.mipp-code-box > .mipp-algo-loading {
+  margin: 0.6rem;
+}
+
+/* Algorithm modal: title with the path of the functions opened from one another */
+.mipp-algo-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.35rem;
+}
+
+.mipp-algo-title .mipp-algo-crumb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.1rem 0.35rem;
+  border: none;
+  border-radius: var(--mipp-border-radius-sm, 4px);
+  background: none;
+  font-family: var(--md-code-font, monospace);
+  font-size: var(--mipp-fs-base, 0.72rem);
+  font-weight: 500;
+  color: var(--md-typeset-a-color, #0284c7);
+  cursor: pointer;
+}
+
+.mipp-algo-title .mipp-algo-crumb:hover,
+.mipp-algo-title .mipp-algo-crumb:focus-visible {
+  background: rgba(14, 165, 233, 0.1);
+  text-decoration: underline;
+}
+
+.mipp-algo-crumb-current {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.mipp-algo-crumb-sep,
+.mipp-algo-crumb-more {
+  font-weight: 400;
+  color: var(--md-default-fg-color--lighter, #94a3b8);
+}
+
+.mipp-algo-crumb-more {
+  cursor: help;
+}
+
+.mipp-algo-title .mipp-algo-crumb-tags {
+  font-family: var(--md-text-font, sans-serif);
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-weight: 400;
+  color: var(--md-default-fg-color--light, #64748b);
+}
+
+/* Algorithm modal: Dependencies DAG (call graph in SVG, components/call_graph.js) */
+.mipp-dag-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.4rem 1rem;
+}
+
+.mipp-dag-head .mipp-algo-tree-title {
+  flex: 1 1 22rem;
+}
+
+.mipp-dag-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.mipp-dag-legend {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin-right: 0.4rem;
+}
+
+.mipp-dag-tools .mipp-icon-btn {
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.35rem;
+  border: 1px solid var(--mipp-card-border, #cbd5e1);
+  border-radius: var(--mipp-border-radius-sm, 4px);
+  font-size: var(--mipp-fs-md, 0.8rem);
+  line-height: 1;
+}
+
+.mipp-dag-tools .mipp-dag-fit {
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-weight: 600;
+}
+
+.mipp-dag-viewport {
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  border: 1px solid var(--mipp-card-border, #e2e8f0);
+  border-radius: var(--mipp-border-radius-sm, 4px);
+  background-color: var(--md-code-bg-color, #f8fafc);
+  background-image: radial-gradient(rgba(148, 163, 184, 0.35) 1px, transparent 1px);
+  background-size: 16px 16px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.mipp-dag-viewport--dragging {
+  cursor: grabbing;
+}
+
+/* the svg rules of the theme (height: auto) would bring it back to 150px */
+.mipp-dag-viewport > svg.mipp-dag-svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  font-family: var(--md-code-font, monospace);
+}
+
+.mipp-dag-edge {
+  fill: none;
+  stroke: var(--md-default-fg-color--lighter, #94a3b8);
+  stroke-width: 1.2;
+  transition: opacity 0.12s ease, stroke 0.12s ease;
+}
+
+.mipp-dag-arrow {
+  fill: var(--md-default-fg-color--lighter, #94a3b8);
+}
+
+.mipp-dag-node rect {
+  stroke-width: 1.2;
+  fill: var(--mipp-lvl-na-bg);
+  stroke: var(--mipp-lvl-na-border);
+}
+
+/* opaque under the translucent colors of the levels: the edges do not show through */
+.mipp-dag .mipp-dag-node rect.mipp-dag-node-bg {
+  fill: var(--md-default-bg-color, #fff);
+  stroke: none;
+}
+
+.mipp-dag-node text {
+  fill: var(--mipp-lvl-na);
+  pointer-events: none;
+}
+
+.mipp-dag-node.lvl-0 rect { fill: var(--mipp-lvl-0-bg); stroke: var(--mipp-lvl-0-border); }
+.mipp-dag-node.lvl-0 text { fill: var(--mipp-lvl-0); }
+.mipp-dag-node.lvl-1 rect { fill: var(--mipp-lvl-1-bg); stroke: var(--mipp-lvl-1-border); }
+.mipp-dag-node.lvl-1 text { fill: var(--mipp-lvl-1); }
+.mipp-dag-node.lvl-2 rect { fill: var(--mipp-lvl-2-bg); stroke: var(--mipp-lvl-2-border); }
+.mipp-dag-node.lvl-2 text { fill: var(--mipp-lvl-2); }
+.mipp-dag-node.lvl-3 rect { fill: var(--mipp-lvl-3-bg); stroke: var(--mipp-lvl-3-border); }
+.mipp-dag-node.lvl-3 text { fill: var(--mipp-lvl-3); }
+
+.mipp-dag-label {
+  font-weight: 600;
+}
+
+.mipp-dag-level {
+  font-size: 0.9em;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+.mipp-dag-node--root rect {
+  stroke-width: 2.4;
+}
+
+.mipp-dag-node--link {
+  cursor: pointer;
+}
+
+.mipp-dag-node--link:hover rect,
+.mipp-dag-node--link:focus-visible rect {
+  stroke-width: 2.4;
+}
+
+.mipp-dag-node:focus {
+  outline: none;
+}
+
+.mipp-dag-node {
+  transition: opacity 0.12s ease;
+}
+
+.mipp-dag--focus .mipp-dag-node:not(.is-on),
+.mipp-dag--focus .mipp-dag-edge:not(.is-on) {
+  opacity: 0.18;
+}
+
+/* Tree view: the other calls of the hovered function */
+.mipp-dag--focus .mipp-dag-node.is-twin {
+  opacity: 1;
+}
+
+.mipp-dag--focus .mipp-dag-node.is-twin rect:not(.mipp-dag-node-bg) {
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}
+
+.mipp-dag-views .mipp-segment-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mipp-dag--focus .mipp-dag-edge.is-on {
+  stroke: var(--mipp-accent, #0ea5e9);
+  stroke-width: 1.8;
+}
+
+.mipp-dag-tip {
+  position: absolute;
+  z-index: 2;
+  max-width: 340px;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--mipp-card-border, #cbd5e1);
+  border-radius: var(--mipp-border-radius-sm, 4px);
+  background: var(--md-default-bg-color, #fff);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.14);
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  line-height: 1.45;
+  color: var(--md-default-fg-color--light, #475569);
+  pointer-events: none;
+}
+
+.mipp-dag-tip code {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-weight: 600;
+  color: var(--md-default-fg-color, #0f172a);
+  word-break: break-all;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mipp-dag-edge,
+  .mipp-dag-node {
+    transition: none;
+  }
+}
+
+/* Dependencies DAG: choice of the view (graph or tree "How it is built") */
+/* one row whatever the width (the segmented groups of the modal wrap on phones) */
+.mipp-dag-tools .mipp-segmented-group.mipp-dag-views {
+  display: inline-flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  width: auto;
+  margin-right: 0.4rem;
+}
+
+.mipp-dag-tools .mipp-dag-views .mipp-segment-btn {
+  flex: 0 0 auto;
+  padding: 0.15rem 0.55rem;
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  white-space: nowrap;
+}
+
+.mipp-dag-tools {
+  flex-wrap: wrap;
+  row-gap: 0.35rem;
+}
+
+.mipp-dag > ul {
+  margin-top: 0.5rem;
+}
+
+/* A function called several times by the same function: "×2" (DAG edge, Text view) */
+.mipp-dag-times {
+  font-size: 0.9em;
+  font-weight: 700;
+  fill: var(--md-default-fg-color--light, #475569);
+  transition: opacity 0.12s ease;
+}
+
+.mipp-dag--focus .mipp-dag-times {
+  opacity: 0.18;
+}
+
+.mipp-dag--focus .mipp-dag-times.is-on {
+  opacity: 1;
+  fill: var(--mipp-accent, #0ea5e9);
+}
+
+.mipp-algo-tree-times {
+  font-family: var(--md-code-font, monospace);
+  font-size: var(--mipp-fs-sm, 0.66rem);
+  font-weight: 700;
+  color: var(--md-default-fg-color--light, #475569);
+}
+
+/* Dependencies, Text view: about 1rem per level (the list rules of the theme added a margin to
+   each list and each item, about 3rem per level) */
+#mipp-explorer-app .mipp-algo-tree ul {
+  margin: 0;
+  padding-left: 0.85rem;
+  list-style: none;
+}
+
+#mipp-explorer-app .mipp-algo-tree > ul {
+  padding-left: 0;
+}
+
+#mipp-explorer-app .mipp-algo-tree ul ul {
+  margin-left: 0.3rem;
+}
+
+#mipp-explorer-app .mipp-algo-tree li {
+  margin: 0.2rem 0;
+}
+
+#mipp-explorer-app .mipp-algo-tree ul ul li::before {
+  left: -0.85rem;
+  width: 0.6rem;
+}

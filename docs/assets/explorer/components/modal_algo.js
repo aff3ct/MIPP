@@ -11,7 +11,8 @@ import { state } from "../state.js";
 import { renderFormSelector } from "./card.js";
 import { boxSizeStyle, boxResizeHandles } from "./box_layout.js";
 import { getCompilerConfigForFlat, buildGodboltUrlForFlat } from "../codegen.js";
-import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName, immChoices } from "../algo_source.js";
+import { renderCallGraph } from "./call_graph.js";
+import { getLoadedSources, buildAbstractCode, buildFlatCode, parseCName, immChoices, algoLoadProgress } from "../algo_source.js";
 
 export function getAllModalIsas() {
   return Object.keys(apiMetadata.isas || {});
@@ -89,28 +90,157 @@ function treeLabel(cName) {
   return `${escapeHtml(p.func)}${v}&lt;${escapeHtml(p.dt.replace(",", ", "))}&gt;${lm}`;
 }
 
+// ---------------------------------------------------------------------------------------------
+// Loading of the MIPP source code (the header tables of an ISA, 14 to 28 MB each)
+// ---------------------------------------------------------------------------------------------
+const MB = (n) => (n / (1024 * 1024)).toFixed(1);
+
+function progressState(isa) {
+  const p = algoLoadProgress(isa);
+  if (!p || !p.total) return { pct: null, text: "" };
+  const pct = Math.min(100, Math.floor((100 * p.loaded) / p.total));
+  return { pct, text: `${pct}% (${MB(p.loaded)} MB / ${MB(p.total)} MB)` };
+}
+
+/** Loading note with a progress bar, updated in place by updateAlgoProgress. */
+function loadingNote(isa, compact = false) {
+  const names = { ...SIMD_EXT_DISPLAY_NAMES, scalar: "Scalar" };
+  const label = (i) => (names[i] || i.toUpperCase()).replace("ARM ", "");
+  const p = algoLoadProgress(isa);
+  const others = p ? p.tables.filter((t) => t !== isa && t !== "interface").map(label) : [];
+  const what = compact ? "Loading…" : `Loading the MIPP source code of ${label(isa)}${others.length ? ` (with the code of ${others.length > 1 ? `${others.slice(0, -1).join(", ")} and ${others[others.length - 1]}` : others[0]} that it includes)` : ""}…`;
+  const { pct, text } = progressState(isa);
+  return `<div class="mipp-algo-note mipp-algo-loading" data-algo-progress="${escapeHtml(isa)}">
+      <span class="mipp-algo-note-icon">${ICON_CLOCK}</span>
+      <div class="mipp-algo-loading-body">
+        <span>${escapeHtml(what)}</span>
+        <div class="mipp-loading-bar-wrapper" role="progressbar" aria-valuemin="0" aria-valuemax="100"${pct === null ? "" : ` aria-valuenow="${pct}"`}>
+          <div class="mipp-loading-bar-fill${pct === null ? " mipp-loading-bar-fill--indeterminate" : ""}" data-algo-progress-fill${pct === null ? "" : ` style="width: ${pct}%"`}></div>
+        </div>
+        <span class="mipp-algo-loading-text" data-algo-progress-text>${escapeHtml(text)}</span>
+      </div>
+    </div>`;
+}
+
+/** Updates the progress bars of the modal (called when bytes of a table arrive). */
+export function updateAlgoProgress(root) {
+  if (!root) return;
+  root.querySelectorAll("[data-algo-progress]").forEach((el) => {
+    const { pct, text } = progressState(el.getAttribute("data-algo-progress"));
+    const fill = el.querySelector("[data-algo-progress-fill]");
+    const bar = el.querySelector('[role="progressbar"]');
+    const label = el.querySelector("[data-algo-progress-text]");
+    if (pct === null) return;
+    if (fill) {
+      fill.classList.remove("mipp-loading-bar-fill--indeterminate");
+      fill.style.width = `${pct}%`;
+    }
+    if (bar) bar.setAttribute("aria-valuenow", String(pct));
+    if (label) label.textContent = text;
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
+// Path of the functions opened from one another (history), as a breadcrumb
+// ---------------------------------------------------------------------------------------------
+const MASK_WORDS = { unmasked: "unmasked", mask: "merge-masked", maskz: "zero-masked", masks: "source-masked" };
+const lmulWord = (l) => (String(l) === "-2" ? "1/2" : String(l));
+
+/**
+ * Title of the modal: the path of the functions opened from one another, the current one last
+ * (`mipp::name`), each step with the settings that differ from the step before (ISA, datatype,
+ * mask variant, LMUL), all of them in its title. A long path keeps the first step and the last
+ * three. Without history: the name of the function only.
+ */
+function renderTitlePath(modalData) {
+  const history = modalData.history || [];
+  const current = `<code>mipp::${escapeHtml(modalData.entry.form_of || modalData.entry.name)}</code>`;
+  if (!history.length) return current;
+  const names = { ...SIMD_EXT_DISPLAY_NAMES, scalar: "Scalar" };
+  const isaWord = (i) => (names[i] || String(i).toUpperCase()).replace("ARM ", "");
+  const steps = [...history, modalData];
+  let prev = null;
+  const items = steps.map((md, i) => {
+    const r = md.resolved || { isa: md.isa || md.simdExt, dt: md.dt, mask: md.mask || "unmasked", lmul: md.lmul || "1" };
+    const name = md.entry.form_of || md.entry.name;
+    const changed = [];
+    if (prev) {
+      if (r.isa !== prev.isa) changed.push(isaWord(r.isa));
+      if (r.dt !== prev.dt) changed.push(String(r.dt).replace(",", " → "));
+      if (r.mask !== prev.mask) changed.push(MASK_WORDS[r.mask] || r.mask);
+      if (String(r.lmul) !== String(prev.lmul)) changed.push(`LMUL ${lmulWord(r.lmul)}`);
+    }
+    prev = r;
+    const title = `mipp::${name}<${r.dt}> · ${isaWord(r.isa)} · ${MASK_WORDS[r.mask] || r.mask} · LMUL ${lmulWord(r.lmul)}`;
+    const tags = changed.length ? `<span class="mipp-algo-crumb-tags">${escapeHtml(changed.join(" · "))}</span>` : "";
+    if (i === steps.length - 1) {
+      return { name, html: `<span class="mipp-algo-crumb-current" title="${escapeHtml(title)}">${current}${tags}</span>` };
+    }
+    return { name, html: `<button type="button" class="mipp-algo-crumb" data-algo-crumb="${i}" title="Back to ${escapeHtml(title)}">${escapeHtml(name)}${tags}</button>` };
+  });
+  const shown = items.length > 5
+    ? [items[0], { html: `<span class="mipp-algo-crumb-more" title="${escapeHtml(items.slice(1, -3).map((it) => it.name).join(" › "))}">…</span>` }, ...items.slice(-3)]
+    : items;
+  return shown.map((it) => it.html).join('<span class="mipp-algo-crumb-sep" aria-hidden="true">›</span>');
+}
+
+// What the body of a function of the call tree / graph is: [label, explanation]
+const KINDS = {
+  native: ["native", "Instructions of the ISA"],
+  dedicated: ["dedicated emulation", "A sequence of instructions written for this ISA"],
+  composition: ["composition", "Calls other MIPP functions"],
+  fallback: ["scalar fallback", "Copies the registers to arrays and calls the scalar reference"],
+  immediate: ["immediate", "Instructions with an immediate, selected because the argument is a constant"],
+  lanewise: ["from LMUL 1", "Generated from the LMUL 1 function on the same register"],
+  wrapper: ["LMUL wrapper", "One call per register of the LMUL below"],
+  scalar: ["scalar code", "Plain C loop of the MIPP scalar target"],
+};
+
+/** A node of the call graph for the Dependencies box (call_graph.js). */
+function describeGraphNode(graph, currentIsa) {
+  const callers = new Map();
+  const callees = new Map();
+  for (const [a, b] of graph.edges) {
+    callees.set(a, (callees.get(a) || 0) + 1);
+    callers.set(b, (callers.get(b) || 0) + 1);
+  }
+  return (node) => {
+    const p = parseCName(node.cName);
+    const nav = navTarget(node.cName);
+    const k = KINDS[node.kind] || [node.kind, ""];
+    const isa = node.table !== currentIsa ? (ISA_LABEL()[node.table] || node.table) : "";
+    const lmul = p ? (p.lmul === "1" ? "" : (p.lmul === "-2" ? " · d2" : ` · m${p.lmul}`)) : "";
+    const text = p ? `${p.func}${p.mask === "unmasked" ? "" : `_${p.mask}`}<${p.dt.replace(",", ", ")}>${lmul}` : node.cName;
+    const lv = node.effective === null || node.effective === undefined ? null : node.effective;
+    const nIn = callers.get(node.cName) || 0;
+    const nOut = callees.get(node.cName) || 0;
+    const tip = [
+      node.cName,
+      `${k[0]}: ${k[1]}`,
+      lv === null ? "Effective level: none (code of the scalar target)" : `Effective level: L${lv} (${LEVEL_DESCRIPTIONS[lv] || ""})`,
+      isa ? `From the headers of ${isa}` : "",
+      `Uses ${nOut} function${nOut === 1 ? "" : "s"}, used by ${nIn}`,
+    ].filter(Boolean);
+    return {
+      text, isa, tip,
+      nav: nav ? { func: nav.func, isa: nav.isa, dt: nav.dt, mask: nav.mask, lmul: nav.lmul } : null,
+    };
+  };
+}
+
 /** Call tree: each function with its own level and its effective level, clickable. */
 function renderTree(node, currentIsa, depth = 0) {
   if (!node) return "";
   const nav = navTarget(node.cName);
   const isaTag = node.table !== currentIsa ? `<span class="mipp-algo-tree-isa">${escapeHtml(ISA_LABEL()[node.table] || node.table)}</span>` : "";
-  const KINDS = {
-    native: ["native", "Instructions of the ISA"],
-    dedicated: ["dedicated emulation", "A sequence of instructions written for this ISA"],
-    composition: ["composition", "Calls other MIPP functions"],
-    fallback: ["scalar fallback", "Copies the registers to arrays and calls the scalar reference"],
-    immediate: ["immediate", "Instructions with an immediate, selected because the argument is a constant"],
-    lanewise: ["from LMUL 1", "Generated from the LMUL 1 function on the same register"],
-    wrapper: ["LMUL wrapper", "One call per register of the LMUL below"],
-    scalar: ["scalar code", "Plain C loop of the MIPP scalar target"],
-  };
   const k = KINDS[node.kind] || [node.kind, ""];
   const own = `<span class="mipp-algo-tree-own" title="${escapeHtml(k[1])}">${escapeHtml(k[0])}</span>`;
   const label = nav && depth > 0
     ? `<button type="button" class="mipp-algo-tree-link" data-algo-nav-func="${escapeHtml(nav.func)}" data-algo-nav-isa="${escapeHtml(nav.isa)}" data-algo-nav-dt="${escapeHtml(nav.dt)}" data-algo-nav-mask="${escapeHtml(nav.mask)}" data-algo-nav-lmul="${escapeHtml(nav.lmul)}" title="Open ${escapeHtml(node.cName)}">${treeLabel(node.cName)}</button>`
     : `<span class="mipp-algo-tree-name" title="${escapeHtml(node.cName)}">${treeLabel(node.cName)}</span>`;
   const kids = node.repeated ? "" : node.children.map((c) => renderTree(c, currentIsa, depth + 1)).join("");
-  return `<li>${label}${isaTag} ${levelBadge(node.effective, "Effective level: the highest level of everything this function uses")} ${own}${node.repeated ? ' <span class="mipp-algo-tree-own">(see above)</span>' : ""}${kids ? `<ul>${kids}</ul>` : ""}</li>`;
+  const times = node.calls > 1 ? ` <span class="mipp-algo-tree-times" title="Called ${node.calls} times">×${node.calls}</span>` : "";
+  return `<li>${label}${times}${isaTag} ${levelBadge(node.effective, "Effective level: the highest level of everything this function uses")} ${own}${node.repeated ? ' <span class="mipp-algo-tree-own">(see above)</span>' : ""}${kids ? `<ul>${kids}</ul>` : ""}</li>`;
 }
 
 export function renderAlgoModal(modalData) {
@@ -138,6 +268,8 @@ export function renderAlgoModal(modalData) {
   const currentMask = (modalData.mask && allVariants.includes(modalData.mask)) ? modalData.mask : defaultMask;
 
   const effectiveLmul = (modalData.lmul !== undefined && modalData.lmul !== null) ? String(modalData.lmul) : (state.lmul || "1");
+  // the settings shown, kept with the step when another function is opened (breadcrumb)
+  modalData.resolved = { isa: currentIsa, dt: currentDt, mask: currentMask, lmul: effectiveLmul };
   // functions that change the LMUL (lo, hi, combine, wcvt, ncvt) are not defined for every LMUL
   const lmulUndefined = isLmulUndefined(entry, effectiveLmul);
 
@@ -233,15 +365,17 @@ export function renderAlgoModal(modalData) {
   let godboltRunUrl = "";
   let abstractCalls = [];
   let callTreeRoot = null;
+  let callGraph = null;
   let loadingHtml = "";
   if (modalData.loadError) {
     loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">${ICON_WARNING}</span><span>Unable to load the MIPP source code: ${escapeHtml(modalData.loadError)}</span></div>`;
   } else if (!sources) {
-    loadingHtml = `<div class="mipp-algo-note"><span class="mipp-algo-note-icon">${ICON_CLOCK}</span><span>Loading the MIPP source code of ${escapeHtml(isaLabel)}…</span></div>`;
+    loadingHtml = loadingNote(currentIsa);
   } else if (!lmulUndefined) {
     const abs = buildAbstractCode(entry, sources, algoCfg);
     abstractCalls = abs.calls || [];
     callTreeRoot = abs.tree || null;
+    callGraph = abs.graph || null;
     if (abs.rootFound) {
       currentImplLvl = abs.effectiveLevel;
     } else {
@@ -280,7 +414,7 @@ export function renderAlgoModal(modalData) {
       // a box that can be moved (its header, or the arrow keys on its grip) and resized (its gutters)
       const cell = (box) => `<div class="mipp-box-cell" data-box-key="${isa}" style="${boxSizeStyle(state.compareBoxSizes[isa])}">${box}${boxResizeHandles(label)}</div>`;
       const grip = `<span class="mipp-box-grip" data-box-grip role="button" tabindex="0" aria-label="Move or resize the ${escapeHtml(label)} box: arrow keys to move, Shift and arrow keys to resize, Delete for the automatic size" title="Drag the header to move this box. Keyboard: arrow keys to move, Shift + arrow keys to resize.">${ICON_GRIP}</span>`;
-      if (!src) return cell(`<div class="mipp-code-box"><div class="mipp-code-box-header" data-box-handle draggable="true"><div class="mipp-code-box-header-left">${grip}<span class="mipp-code-lang">${escapeHtml(label)}</span></div></div><pre><code>Loading…</code></pre></div>`);
+      if (!src) return cell(`<div class="mipp-code-box"><div class="mipp-code-box-header" data-box-handle draggable="true"><div class="mipp-code-box-header-left">${grip}<span class="mipp-code-lang">${escapeHtml(label)}</span></div></div>${loadingNote(isa, true)}</div>`);
       const isaDefines = definesOf(isa);
       const cc = getCompilerConfigForFlat(isa, isaDefines, currentScalarSize);
       const r = buildAbstractCode(entry, src, { ...algoCfg, isa, options: cc.options, compilerLabel: cc.compilerLabel, overrides: isaDefines });
@@ -311,11 +445,12 @@ export function renderAlgoModal(modalData) {
   const maskBySelect = treeHas(callTreeRoot, (n) => { const p = parseCName(n.cName); return Boolean(p) && p.func === "select"; });
   const notes = contextNotes(currentIsa, effectiveLmul, currentMask, maskBySelect);
   const notesHtml = notes.length ? `<div class="mipp-algo-note mipp-algo-context"><span class="mipp-algo-note-icon">${ICON_CONTEXT}</span><span>${notes.join("<br>")}</span></div>` : "";
-  const treeHtml = callTreeRoot ? `
-    <div class="mipp-algo-tree">
-      <div class="mipp-algo-tree-title">How it is built <span class="mipp-algo-tree-own">— each function with what its body is and its level: the highest level of everything it uses (<a href="${DOCS}implementation_levels/" target="_blank">implementation levels</a>)</span></div>
-      <ul>${renderTree(callTreeRoot, currentIsa)}</ul>
-    </div>` : "";
+  // Dependencies: DAG, tree or text; by default the DAG, the text on phones (a graph is hard to
+  // move around on a small touch screen)
+  const narrow = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(max-width: 768px)").matches;
+  const dagHtml = callGraph ? renderCallGraph(callGraph, describeGraphNode(callGraph, currentIsa), DOCS, {
+    view: modalData.depsView || (narrow ? "text" : "dag"), treeList: callTreeRoot ? renderTree(callTreeRoot, currentIsa) : "",
+  }) : "";
   const lvlDescFinal = LEVEL_DESCRIPTIONS[currentImplLvl] || (currentImplLvl === "na" ? "Not Supported" : `Level ${currentImplLvl}`);
 
   const VARIANT_LETTERS = { unmasked: "U", mask: "M", maskz: "Z", masks: "S" };
@@ -419,7 +554,7 @@ export function renderAlgoModal(modalData) {
         <!-- Header -->
         <div class="mipp-modal-header">
           <div style="display: flex; gap: 0.65rem; align-items: center; flex-wrap: wrap;">
-            <h3 class="mipp-modal-title" style="margin: 0;">Algorithm: <code>mipp::${escapeHtml(entry.form_of || entry.name)}</code></h3>
+            <h3 class="mipp-modal-title mipp-algo-title" style="margin: 0;">Algorithm: ${renderTitlePath(modalData)}</h3>
           </div>
           <div style="display: flex; gap: 0.45rem; align-items: center;">
             ${(modalData.history && modalData.history.length) ? `<button class="mipp-modal-share-btn" id="mipp-algo-modal-back" title="Back to ${escapeHtml(modalData.history[modalData.history.length - 1].entry.name)}" aria-label="Back">←</button>` : ""}
@@ -519,7 +654,7 @@ export function renderAlgoModal(modalData) {
               </div>
               <pre><code>${highlightCpp(fullCode, {}, { isa: currentIsa, imm: immAvailable ? entry.imm : null, immFunc: [entry.name, entry.form_of] })}</code></pre>
             </div>
-            ${treeHtml}
+            ${dagHtml}
           ` : `
             <div class="mipp-algo-note">
               <span class="mipp-algo-note-icon">${ICON_INFO}</span>

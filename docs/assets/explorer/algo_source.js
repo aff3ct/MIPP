@@ -19,25 +19,94 @@ const DATA_DIR = typeof URL !== "undefined" ? new URL("../data/algo/", import.me
 // ---------------------------------------------------------------------------------------------
 // Data loading
 // ---------------------------------------------------------------------------------------------
-let loader = async (file) => {
+// `onProgress(bytes)`: the decoded bytes received so far. The sizes of index.json are the decoded
+// sizes, so the progress is exact even when the server compresses the files.
+let loader = async (file, onProgress) => {
   const resp = await fetch(DATA_DIR + file, { cache: "no-cache" });
   if (!resp.ok) throw new Error(`Unable to load ${DATA_DIR + file}: HTTP ${resp.status}`);
-  return resp.json();
+  if (!onProgress || !resp.body || typeof resp.body.getReader !== "function") return resp.json();
+  const reader = resp.body.getReader();
+  const chunks = [];
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    onProgress(received);
+  }
+  const bytes = new Uint8Array(received);
+  let at = 0;
+  for (const c of chunks) { bytes.set(c, at); at += c.length; }
+  return JSON.parse(new TextDecoder().decode(bytes));
 };
-/** Replaces the loader (tests outside the browser). */
+/** Replaces the loader (tests outside the browser): fn(file, onProgress), onProgress is optional. */
 export function setAlgoLoader(fn) { loader = fn; }
 
 const tables = new Map(); // isa -> table (or Promise)
+const received = new Map(); // isa -> bytes received while its table loads
+const progressListeners = new Set();
 let indexData = null;
 
+/** Calls `fn()` whenever bytes of a table arrive. Returns the function that unsubscribes. */
+export function onAlgoProgress(fn) {
+  progressListeners.add(fn);
+  return () => progressListeners.delete(fn);
+}
+
 async function loadTable(isa) {
-  if (!tables.has(isa)) tables.set(isa, loader(`${isa}.json`).then((t) => { tables.set(isa, t); return t; }));
+  if (!tables.has(isa)) {
+    const onProgress = (n) => { received.set(isa, n); progressListeners.forEach((fn) => fn()); };
+    tables.set(isa, loader(`${isa}.json`, onProgress).then(
+      (t) => { tables.set(isa, t); return t; },
+      (err) => { tables.delete(isa); received.delete(isa); throw err; }, // tried again next time
+    ));
+  }
   return tables.get(isa);
+}
+
+/** The tables an ISA needs (itself and the ISAs it imports, transitively), from index.json. */
+function neededTables(isa) {
+  const out = [];
+  const visit = (name) => {
+    if (out.includes(name)) return;
+    out.push(name);
+    const meta = indexData && indexData.isas ? indexData.isas[name] : null;
+    for (const imp of (meta && meta.imports) || []) visit(imp);
+  };
+  visit(isa);
+  return out;
+}
+
+function tableBytes(name) {
+  if (!indexData) return 0;
+  const meta = name === "interface" ? indexData.interface : (indexData.isas || {})[name];
+  return (meta && meta.bytes) || 0;
+}
+
+/**
+ * Progress of the loading of the tables of an ISA: { tables, loaded, total } (decoded bytes), or
+ * null before index.json (the sizes are not known yet).
+ */
+export function algoLoadProgress(isa) {
+  if (!indexData) return null;
+  const names = neededTables(isa);
+  let loaded = 0;
+  let total = 0;
+  for (const name of names) {
+    const size = tableBytes(name);
+    const t = tables.get(name);
+    total += size;
+    loaded += t && !(t instanceof Promise) ? size : Math.min(size, received.get(name) || 0);
+  }
+  return { tables: names, loaded, total };
 }
 
 /** Loads the table of an ISA and of the ISAs it imports. Resolves to the ordered list of tables. */
 export async function loadAlgoSources(isa) {
   if (!indexData) indexData = await loader("index.json");
+  // all the tables at once (the order of the list is set below); a failure is reported by `visit`
+  for (const name of neededTables(isa)) loadTable(name).catch(() => {});
   const order = [];
   const visit = async (name) => {
     if (order.some((t) => t.isa === name)) return;
@@ -1070,7 +1139,7 @@ export function buildAbstractCode(entry, sources, cfg) {
   }
   return {
     code, calls, rootFound: true, level: levelOf(root.code), effectiveLevel: effectiveLevel(rootName, sources, macros), rootName,
-    tree: callTree(rootName, sources, macros), source: sourceOf(cleanCode(root, macros), root.table, mask),
+    tree: callTree(rootName, sources, macros), graph: callGraph(rootName, sources, macros), source: sourceOf(cleanCode(root, macros), root.table, mask),
   };
 }
 
@@ -1091,11 +1160,13 @@ export function parseCName(name) {
 
 /**
  * Functions called by a function, recursively: { cName, table, own, ownLabel, effective, children,
- * repeated }. `own` is the level of the function itself (its `// Level N` comment, null for the
- * software LMUL wrappers), `effective` the highest level of everything it uses.
+ * repeated, calls }. `own` is the level of the function itself (its `// Level N` comment, null for
+ * the software LMUL wrappers), `effective` the highest level of everything it uses, `calls` the
+ * number of times the parent calls it.
  */
 export function callTree(rootName, sources, macros, maxDepth = 6) {
   const seen = new Set();
+  const memo = new Map(); // effective levels, shared by the nodes
   const node = (name, depth) => {
     const sym = resolve(name, sources, macros);
     if (!sym || sym.kind !== "func") return null;
@@ -1106,22 +1177,53 @@ export function callTree(rootName, sources, macros, maxDepth = 6) {
     const n = {
       cName: name, table: sym.table, own: own ? own.level : null, ownLabel: own ? own.label : null,
       kind: sourceOf(code, sym.table, p ? p.mask : "unmasked").kind,
-      effective: isScalarRef ? null : effectiveLevel(name, sources, macros), children: [], repeated: seen.has(name),
+      effective: isScalarRef ? null : effectiveLevel(name, sources, macros, memo), children: [], repeated: seen.has(name),
     };
     if (n.repeated || depth >= maxDepth) return n;
     seen.add(name);
     const body = code.replace(/\/\/[^\n]*/g, "");
+    // each function called once, in the order of the code; `calls`: how many times (an LMUL
+    // wrapper calls the function of the LMUL below twice, on the low and the high halves)
     const calls = (sym.deps || [])
-      .map((d) => ({ d, at: body.search(new RegExp(`\\b${d}\\s*\\(`)) }))
+      .map((d) => {
+        const re = new RegExp(`\\b${d}\\s*\\(`, "g");
+        return { d, at: body.search(re), count: (body.match(re) || []).length };
+      })
       .filter((x) => x.at >= 0)
       .sort((a, b) => a.at - b.at);
-    for (const { d } of calls) {
+    for (const { d, count } of calls) {
       const c = node(d, depth + 1);
-      if (c) n.children.push(c);
+      if (c) {
+        c.calls = count;
+        n.children.push(c);
+      }
     }
     return n;
   };
   return node(rootName, 0);
+}
+
+/**
+ * The call graph of a function: every function it uses, once each (no depth limit).
+ * { nodes: [{ cName, table, own, ownLabel, kind, effective }] (the root first), edges: [[caller, callee,
+ * number of calls]] }
+ */
+export function callGraph(rootName, sources, macros) {
+  const root = callTree(rootName, sources, macros, Infinity);
+  const nodes = new Map();
+  const edges = new Map();
+  const walk = (n) => {
+    if (!nodes.has(n.cName)) {
+      const { cName, table, own, ownLabel, kind, effective } = n;
+      nodes.set(n.cName, { cName, table, own, ownLabel, kind, effective });
+    }
+    for (const c of n.children) {
+      edges.set(`${n.cName} ${c.cName}`, [n.cName, c.cName, c.calls || 1]);
+      walk(c);
+    }
+  };
+  if (root) walk(root);
+  return { nodes: [...nodes.values()], edges: [...edges.values()] };
 }
 
 /** The call tree of the function of a configuration (same cfg as buildFlatCode). */

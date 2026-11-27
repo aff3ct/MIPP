@@ -150,6 +150,8 @@ export function syncUrlHash(replace = false) {
       if (mData.imm !== undefined && mData.imm !== null && mData.imm !== "var") params.set("algo_imm", String(mData.imm));
       if (mData.compareIsas && mData.compareIsas.length) params.set("algo_cmp", mData.compareIsas.join(","));
       if (mData.scalarSize && mData.scalarSize !== 256) params.set("algo_scalarsize", String(mData.scalarSize));
+      // view of the Dependencies box, when chosen (the default depends on the width of the screen)
+      if (["dag", "tree", "text"].includes(mData.depsView)) params.set("algo_deps", mData.depsView);
       if (mData.features) {
         const currentIsa = mData.simdExt || mData.isa || "avx";
         const isaMeta = apiMetadata && apiMetadata.isas ? apiMetadata.isas[currentIsa] : null;
@@ -329,6 +331,9 @@ export function readUrlHash(allSimdExts, allCategories, allDatatypes, allMaskMod
       };
       if (params.has("algo_cmp")) {
         state.algoModalData.compareIsas = params.get("algo_cmp").split(",").filter(Boolean);
+      }
+      if (["dag", "tree", "text"].includes(params.get("algo_deps"))) {
+        state.algoModalData.depsView = params.get("algo_deps");
       }
     }
   } catch (err) {
