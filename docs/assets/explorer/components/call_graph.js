@@ -21,6 +21,13 @@ const COL_GAP = 64;
 const MARGIN = 16;
 const MIN_SCALE = 0.05;      // "Fit" shows the whole tree of an LMUL 8 wrapper
 const MAX_SCALE = 2.5;
+const MIN_VIEW_H = 120;      // height of the viewport, in pixels
+const AUTO_VIEW_H = 520;     // at most, before the user resizes it
+const MAX_VIEW_H = 4000;
+
+// Heights chosen with the grip, per view ("dag", "tree"): kept for the visit, whatever function
+// or settings the modal shows
+const userHeights = {};
 
 // ---------------------------------------------------------------------------------------------
 // Layout: layers (longest path), order (barycenters), coordinates
@@ -320,10 +327,11 @@ export function renderCallGraph(graph, describe, docsUrl, opts = {}) {
       ? layoutTree(tree, (f) => labels[f].w)
       : layoutCallGraph(graph, (v) => labels[graph.nodes.indexOf(v)]);
     const n = isTree ? tree.nodes.length : graph.nodes.length;
+    const autoH = Math.min(AUTO_VIEW_H, Math.max(MIN_VIEW_H, Math.ceil(lay.height)));
     const scene = drawScene(lay, n, isTree ? (i) => tree.nodes[i].fn : (i) => i, graph, info, labels);
     const what = isTree ? `Call tree: ${n} calls of ${graph.nodes.length} functions` : `Call graph: ${graph.nodes.length} functions, ${graph.edges.length} calls`;
     body = `
-      <div class="mipp-dag-viewport" data-dag-viewport data-width="${lay.width.toFixed(0)}" data-height="${lay.height.toFixed(0)}" data-root-y="${(lay.nodes[0].y + NODE_H / 2).toFixed(0)}" style="height: ${Math.min(520, Math.max(120, Math.ceil(lay.height)))}px">
+      <div class="mipp-dag-viewport" data-dag-viewport data-view="${view}" data-width="${lay.width.toFixed(0)}" data-height="${lay.height.toFixed(0)}" data-root-y="${(lay.nodes[0].y + NODE_H / 2).toFixed(0)}" data-auto-h="${autoH}" style="height: ${userHeights[view] || autoH}px">
         <svg class="mipp-dag-svg" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="${what}" style="font-size: ${FONT_PX}px">
           <defs>
             <marker id="mipp-dag-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -333,6 +341,7 @@ export function renderCallGraph(graph, describe, docsUrl, opts = {}) {
           <g data-dag-scene>${scene}</g>
         </svg>
         <div class="mipp-dag-tip" data-dag-tip hidden></div>
+        <div class="mipp-dag-grip" data-dag-grip role="separator" aria-orientation="horizontal" aria-label="Height of the graph" tabindex="0" title="Drag to change the height (double-click: automatic height)"><span aria-hidden="true"></span></div>
       </div>`;
   }
 
@@ -381,6 +390,41 @@ function initOne(box) {
   const tip = box.querySelector("[data-dag-tip]");
   if (!vp || !scene || vp.dataset.dagReady) return;
   vp.dataset.dagReady = "1";
+
+  // grip along the bottom edge: the height of the viewport (drag, double-click, arrow keys)
+  const grip = box.querySelector("[data-dag-grip]");
+  if (grip) {
+    const viewKey = vp.dataset.view;
+    const setH = (h) => {
+      const v = Math.round(Math.min(MAX_VIEW_H, Math.max(MIN_VIEW_H, h)));
+      vp.style.height = `${v}px`;
+      userHeights[viewKey] = v;
+    };
+    let drag = null;
+    grip.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      e.stopPropagation(); // not a move of the graph
+      e.preventDefault();
+      drag = { y: e.clientY, h: vp.getBoundingClientRect().height };
+      grip.setPointerCapture(e.pointerId);
+      vp.classList.add("mipp-dag-viewport--resizing");
+    });
+    grip.addEventListener("pointermove", (e) => { if (drag) setH(drag.h + e.clientY - drag.y); });
+    const end = () => { drag = null; vp.classList.remove("mipp-dag-viewport--resizing"); };
+    grip.addEventListener("pointerup", end);
+    grip.addEventListener("pointercancel", end);
+    grip.addEventListener("click", (e) => e.stopPropagation());
+    grip.addEventListener("dblclick", (e) => {
+      e.stopPropagation();
+      delete userHeights[viewKey];
+      vp.style.height = `${vp.dataset.autoH}px`;
+    });
+    grip.addEventListener("keydown", (e) => {
+      const step = e.shiftKey ? 100 : 20;
+      if (e.key === "ArrowDown") { e.preventDefault(); setH(vp.getBoundingClientRect().height + step); }
+      if (e.key === "ArrowUp") { e.preventDefault(); setH(vp.getBoundingClientRect().height - step); }
+    });
+  }
   const W = Number(vp.dataset.width);
   const H = Number(vp.dataset.height);
   const view = { x: 0, y: 0, k: 1 };

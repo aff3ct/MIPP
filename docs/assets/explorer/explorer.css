@@ -4261,3 +4261,43 @@ html:has(.mipp-modal-backdrop.active) {
   left: -0.85rem;
   width: 0.6rem;
 }
+
+/* Dependencies: grip along the bottom edge, the height of the graph */
+.mipp-dag-grip {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 12px;
+  cursor: ns-resize;
+  touch-action: none;
+}
+
+.mipp-dag-grip span {
+  width: 36px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--md-default-fg-color--lighter, #94a3b8);
+  opacity: 0.6;
+  transition: opacity 0.12s ease, background 0.12s ease, width 0.12s ease;
+}
+
+.mipp-dag-grip:hover span,
+.mipp-dag-grip:focus-visible span,
+.mipp-dag-viewport--resizing .mipp-dag-grip span {
+  width: 52px;
+  background: var(--mipp-accent, #0ea5e9);
+  opacity: 1;
+}
+
+.mipp-dag-grip:focus-visible {
+  outline: none;
+}
+
+.mipp-dag-viewport--resizing {
+  cursor: ns-resize;
+}
