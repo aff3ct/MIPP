@@ -864,7 +864,20 @@
             "sin_poly = %andb<tp>%(poly_mask, sin_poly);",
             "cos_poly = %andnb<tp>%(poly_mask, cos_poly);",
             "%vd<tp>% result = %add<tp>%(cos_poly, sin_poly);",
-            "return %xorb<tp>%(result, sign_bit);"
+            "%vd<tp>% trig_res = %xorb<tp>%(result, sign_bit);",
+            "",
+            "/* Huge, infinite and NaN inputs: the reduction above is accurate up to 2^13 only (without FMA), the libm for these lanes */",
+            "if (!%none<tp>%(%notb_k<tp>%(%cmple<tp>%(%abs<tp>%(vd0), %set1<tp>%(8192.0f))))) {",
+            "\t%s<tp>% x_buf[%N<tp>%];",
+            "\t%s<tp>% r_buf[%N<tp>%];",
+            "\t%storeu<tp>%(x_buf, vd0);",
+            "\t%storeu<tp>%(r_buf, trig_res);",
+            "\tfor (size_t i = 0; i < %N<tp>%; i++)",
+            "\t\tif (!(x_buf[i] <= 8192.0f && x_buf[i] >= -8192.0f))",
+            "\t\t\tr_buf[i] = cosf(x_buf[i]);",
+            "\ttrig_res = %loadu<tp>%(r_buf);",
+            "}",
+            "return trig_res;"
         ]
     },
     "cos_f64": {
@@ -923,7 +936,20 @@
             "%vd<tp>% poly_c1 = %fmadd<tp>%(x4, poly_b0, poly_b1);",
             "result = %fmadd<tp>%(x8, poly_c0, poly_c1);",
             "result = %fmadd<tp>%(result, x2, %set1<tp>%(-0.166666666666666657414808));",
-            "return %fmadd<tp>%(x2, %mul<tp>%(result, reduced_x), reduced_x);"
+            "%vd<tp>% trig_res = %fmadd<tp>%(x2, %mul<tp>%(result, reduced_x), reduced_x);",
+            "",
+            "/* Huge, infinite and NaN inputs: the reduction above is accurate up to 2^50 only, the libm for these lanes */",
+            "if (!%none<tp>%(%notb_k<tp>%(%cmple<tp>%(%abs<tp>%(vd0), %set1<tp>%(1125899906842624.0))))) {",
+            "\t%s<tp>% x_buf[%N<tp>%];",
+            "\t%s<tp>% r_buf[%N<tp>%];",
+            "\t%storeu<tp>%(x_buf, vd0);",
+            "\t%storeu<tp>%(r_buf, trig_res);",
+            "\tfor (size_t i = 0; i < %N<tp>%; i++)",
+            "\t\tif (!(x_buf[i] <= 1125899906842624.0 && x_buf[i] >= -1125899906842624.0))",
+            "\t\t\tr_buf[i] = cos(x_buf[i]);",
+            "\ttrig_res = %loadu<tp>%(r_buf);",
+            "}",
+            "return trig_res;"
         ]
     },
     "cosh_f32": {
@@ -1745,7 +1771,20 @@
             "sin_poly = %andb<tp>%(poly_mask, sin_poly);",
             "cos_poly = %andnb<tp>%(poly_mask, cos_poly);",
             "%vd<tp>% result = %add<tp>%(cos_poly, sin_poly);",
-            "return %xorb<tp>%(result, sign_bit);"
+            "%vd<tp>% trig_res = %xorb<tp>%(result, sign_bit);",
+            "",
+            "/* Huge, infinite and NaN inputs: the reduction above is accurate up to 2^13 only (without FMA), the libm for these lanes */",
+            "if (!%none<tp>%(%notb_k<tp>%(%cmple<tp>%(%abs<tp>%(vd0), %set1<tp>%(8192.0f))))) {",
+            "\t%s<tp>% x_buf[%N<tp>%];",
+            "\t%s<tp>% r_buf[%N<tp>%];",
+            "\t%storeu<tp>%(x_buf, vd0);",
+            "\t%storeu<tp>%(r_buf, trig_res);",
+            "\tfor (size_t i = 0; i < %N<tp>%; i++)",
+            "\t\tif (!(x_buf[i] <= 8192.0f && x_buf[i] >= -8192.0f))",
+            "\t\t\tr_buf[i] = sinf(x_buf[i]);",
+            "\ttrig_res = %loadu<tp>%(r_buf);",
+            "}",
+            "return trig_res;"
         ]
     },
     "sin_f64": {
@@ -1805,7 +1844,20 @@
             "",
             "/* 4. Negative Zero Preservation */",
             "%vm<tp>% is_neg_zero_mask = %cmpeq<tp>%(input_x, %set1<tp>%(-0.0));",
-            "return %select<tp>%(is_neg_zero_mask, input_x, result);"
+            "%vd<tp>% trig_res = %select<tp>%(is_neg_zero_mask, input_x, result);",
+            "",
+            "/* Huge, infinite and NaN inputs: the reduction above is accurate up to 2^50 only, the libm for these lanes */",
+            "if (!%none<tp>%(%notb_k<tp>%(%cmple<tp>%(%abs<tp>%(vd0), %set1<tp>%(1125899906842624.0))))) {",
+            "\t%s<tp>% x_buf[%N<tp>%];",
+            "\t%s<tp>% r_buf[%N<tp>%];",
+            "\t%storeu<tp>%(x_buf, vd0);",
+            "\t%storeu<tp>%(r_buf, trig_res);",
+            "\tfor (size_t i = 0; i < %N<tp>%; i++)",
+            "\t\tif (!(x_buf[i] <= 1125899906842624.0 && x_buf[i] >= -1125899906842624.0))",
+            "\t\t\tr_buf[i] = sin(x_buf[i]);",
+            "\ttrig_res = %loadu<tp>%(r_buf);",
+            "}",
+            "return trig_res;"
         ]
     },
     "sinh_f32": {
@@ -2030,7 +2082,20 @@
             "",
             "/* 4. Reciprocal Blend for Odd Quadrants */",
             "%vd<tp>% inv_poly_eval = %div<tp>%(%set1<tp>%(1.0f), poly_eval);",
-            "return %select<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask), inv_poly_eval, poly_eval);"
+            "%vd<tp>% trig_res = %select<tp>%(%cast_k<c:int|b:32,tp>%(quadrant_odd_mask), inv_poly_eval, poly_eval);",
+            "",
+            "/* Huge, infinite and NaN inputs: the reduction above is accurate up to 2^13 only (without FMA), the libm for these lanes */",
+            "if (!%none<tp>%(%notb_k<tp>%(%cmple<tp>%(%abs<tp>%(vd0), %set1<tp>%(8192.0f))))) {",
+            "\t%s<tp>% x_buf[%N<tp>%];",
+            "\t%s<tp>% r_buf[%N<tp>%];",
+            "\t%storeu<tp>%(x_buf, vd0);",
+            "\t%storeu<tp>%(r_buf, trig_res);",
+            "\tfor (size_t i = 0; i < %N<tp>%; i++)",
+            "\t\tif (!(x_buf[i] <= 8192.0f && x_buf[i] >= -8192.0f))",
+            "\t\t\tr_buf[i] = tanf(x_buf[i]);",
+            "\ttrig_res = %loadu<tp>%(r_buf);",
+            "}",
+            "return trig_res;"
         ]
     },
     "tan_f64": {
@@ -2092,7 +2157,20 @@
             "",
             "%vd<tp>% tan_num = %select<tp>%(quadrant_odd_m, %neg<tp>%(tan_y), tan_x);",
             "%vd<tp>% tan_den = %select<tp>%(quadrant_odd_m, tan_x, tan_y);",
-            "return %div<tp>%(tan_num, tan_den);"
+            "%vd<tp>% trig_res = %div<tp>%(tan_num, tan_den);",
+            "",
+            "/* Huge, infinite and NaN inputs: the reduction above is accurate up to 2^50 only, the libm for these lanes */",
+            "if (!%none<tp>%(%notb_k<tp>%(%cmple<tp>%(%abs<tp>%(vd0), %set1<tp>%(1125899906842624.0))))) {",
+            "\t%s<tp>% x_buf[%N<tp>%];",
+            "\t%s<tp>% r_buf[%N<tp>%];",
+            "\t%storeu<tp>%(x_buf, vd0);",
+            "\t%storeu<tp>%(r_buf, trig_res);",
+            "\tfor (size_t i = 0; i < %N<tp>%; i++)",
+            "\t\tif (!(x_buf[i] <= 1125899906842624.0 && x_buf[i] >= -1125899906842624.0))",
+            "\t\t\tr_buf[i] = tan(x_buf[i]);",
+            "\ttrig_res = %loadu<tp>%(r_buf);",
+            "}",
+            "return trig_res;"
         ]
     },
     "tanh_f32": {
