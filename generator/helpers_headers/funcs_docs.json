@@ -4,11 +4,11 @@
     "latex": "\\text{res}_i = |vd0_i|"
   },
   "acos": {
-    "description": "Computes the arc cosine of each floating-point element in radians.",
+    "description": "Computes the arc cosine of each floating-point element in radians. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 3e-7 in `float32` and 5e-16 in `float64`. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\arccos(vd0_i)"
   },
   "acosh": {
-    "description": "Computes the inverse hyperbolic cosine of each floating-point element.",
+    "description": "Computes the inverse hyperbolic cosine of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 2e-5 in `float32` (1e-4 near 1) and 5e-9 in `float64`. $+\\infty$ gives `88.7` in `float32` and `709.8` in `float64`, and a NaN gives a number. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\operatorname{arcosh}(vd0_i)"
   },
   "add": {
@@ -44,23 +44,23 @@
     "latex": "\\text{res} = \\begin{cases} 1 & \\text{if } \\exists i, \\, m_{0, i} \\neq 0 \\\\ 0 & \\text{otherwise} \\end{cases}"
   },
   "asin": {
-    "description": "Computes the arc sine of each floating-point element in radians.",
+    "description": "Computes the arc sine of each floating-point element in radians. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 3e-7 in `float32` and 5e-16 in `float64`. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\arcsin(vd0_i)"
   },
   "asinh": {
-    "description": "Computes the inverse hyperbolic sine of each floating-point element.",
+    "description": "Computes the inverse hyperbolic sine of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 1e-6 in `float32` for $|x| \\ge 0.1$, and 4e-9 in `float64`. Near 0, the error is absolute (a few 1e-8 in `float32`): below $|x| = 0.1$ the relative error grows (about 1e-4 at $|x| = 0.001$ in `float32`), and a tiny $x$ (`1e-30`) gives 0. $\\pm\\infty$ gives $\\pm 88.7$ in `float32` and $\\pm 709.8$ in `float64`, and a NaN gives a number. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\operatorname{arsinh}(vd0_i)"
   },
   "atan": {
-    "description": "Computes the arc tangent of each floating-point element in radians.",
+    "description": "Computes the arc tangent of each floating-point element in radians. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 3e-7 in `float32` and 5e-16 in `float64`. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\arctan(vd0_i)"
   },
   "atan2": {
-    "description": "Computes the four-quadrant arc tangent of y and x floating-point vector elements.",
+    "description": "Computes the four-quadrant arc tangent of y and x floating-point vector elements. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 3e-7 in `float32` and 4e-11 in `float64`, and `atan2(0, -0)` and `atan2(-0, -0)` give $\\pm 0$ instead of $\\pm\\pi$. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\operatorname{atan2}(vd0_i, vd1_i)"
   },
   "atanh": {
-    "description": "Computes the inverse hyperbolic tangent of each floating-point element.",
+    "description": "Computes the inverse hyperbolic tangent of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 1e-6 in `float32` for $|x| \\ge 0.1$, and 4e-9 in `float64`. Near 0, the error is absolute (a few 1e-8 in `float32`): below $|x| = 0.1$ the relative error grows (about 1e-4 at $|x| = 0.001$ in `float32`), and a tiny $x$ (`1e-30`) gives 0. $\\pm 1$ gives a finite value ($\\pm 44.4$ in `float32`, $\\pm 354.9$ in `float64`) instead of $\\pm\\infty$, and $\\pm\\infty$ and NaN give a number instead of NaN. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\operatorname{artanh}(vd0_i)"
   },
   "bcast": {
@@ -76,11 +76,11 @@
     "latex": "|a| = \\sqrt{a_r^2 + a_i^2}"
   },
   "cast": {
-    "description": "In-register bitcast/reinterpretation of a vector register to another datatype of identical bitwidth with zero runtime instructions.",
+    "description": "In-register bitcast/reinterpretation of a vector register to another datatype with zero runtime instructions: the register keeps its size and its bits, so the number of lanes changes with the element size.",
     "latex": "\\text{res} = \\operatorname{bit_cast}\\langle \\operatorname{vd}\\langle T_{\\text{dst}}\\rangle \\rangle(vd0)"
   },
   "cast_k": {
-    "description": "In-register bitcast/reinterpretation of a mask register to another datatype of identical bitwidth with zero runtime instructions.",
+    "description": "In-register bitcast/reinterpretation of a mask register to another datatype of the same element size with zero runtime instructions: the mask keeps its lanes.",
     "latex": "m_{\\text{dst}} = \\operatorname{bit_cast}\\langle \\operatorname{vm}\\langle T_{\\text{dst}}\\rangle \\rangle(vm0)"
   },
   "cdiv": {
@@ -157,14 +157,14 @@
   },
   "copysign": {
     "description": "Builds each element with the magnitude of the first register and the sign of the second one (IEEE copysign).",
-    "latex": "\\text{res}_i = \\text{sign}(vd1_i) \\cdot |vd0_i|"
+    "latex": "\\text{res}_i = \\begin{cases} -|vd0_i| & \\text{if } \\operatorname{signbit}(vd1_i) \\\\ |vd0_i| & \\text{otherwise} \\end{cases}"
   },
   "cos": {
-    "description": "Computes the trigonometric cosine of each floating-point element in radians.",
+    "description": "Computes the trigonometric cosine of each floating-point element in radians. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 2e-7 in `float32` and 5e-16 in `float64`, for any argument: the lanes with $|x| > 8192$ (`float32`) or $|x| > 2^{50}$ (`float64`), the infinities and NaN are computed by the C library. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\cos(vd0_i)"
   },
   "cosh": {
-    "description": "Computes the hyperbolic cosine of each floating-point element.",
+    "description": "Computes the hyperbolic cosine of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 4e-7 in `float32` and 4e-11 in `float64`. In `float64`, the result overflows to $\\pm\\infty$ from $|x| \\approx 709.8$, a little before the C library; a NaN gives $+\\infty$ on SSE and AVX. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\cosh(vd0_i)"
   },
   "count": {
@@ -180,7 +180,7 @@
     "latex": "\\text{res}_k = vd0_{2k},\\ \\text{res}_{N/2+k} = vd0_{2k+1}"
   },
   "div": {
-    "description": "Divides the first vector register by the second element-wise.",
+    "description": "Divides the first vector register by the second element-wise. On ARMv7 NEON (`float32`), the division is a reciprocal estimate refined by two Newton-Raphson steps, then a multiplication: the last bits can differ from an IEEE division.",
     "latex": "\\text{res}_i = \\frac{vd0_i}{vd1_i}"
   },
   "div2": {
@@ -200,7 +200,7 @@
     "latex": "\\text{res}_{2k} = \\text{res}_{2k+1} = vd0_{2k+1}"
   },
   "exp": {
-    "description": "Computes the base-e exponential of each floating-point element.",
+    "description": "Computes the base-e exponential of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 1e-7 in `float32` and 4e-11 in `float64`. In `float32`, the result saturates at about `2.4e38` above $x \\approx 88.38$ ($+\\infty$ included) instead of overflowing to $+\\infty$, and is 0 below $x \\approx -87.34$. Neither type gives a subnormal result, and a NaN does not give NaN on SSE and AVX. The scalar target calls the C library.",
     "latex": "\\text{res}_i = e^{vd0_i}"
   },
   "expand": {
@@ -212,44 +212,50 @@
     "latex": "\\text{res}_i = vm0_i\\ ?\\ p0_{\\#\\{j < i \\mid vm0_j\\}} : 0"
   },
   "fmadd": {
-    "description": "Computes the fused multiply-add of three vector registers ($a \\times b + c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
+    "description": "Computes the fused multiply-add of three vector registers ($a \\times b + c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, ARMv7 NEON without VFPv4 for `float32`, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = (vd0_i \\cdot vd1_i) + vd2_i"
   },
   "fmsub": {
-    "description": "Computes the fused multiply-subtract of three vector registers ($a \\times b - c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
+    "description": "Computes the fused multiply-subtract of three vector registers ($a \\times b - c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, ARMv7 NEON without VFPv4 for `float32`, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = (vd0_i \\cdot vd1_i) - vd2_i"
   },
   "fnmadd": {
-    "description": "Computes the fused negative multiply-add of three vector registers ($-(a \\times b) + c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
+    "description": "Computes the fused negative multiply-add of three vector registers ($-(a \\times b) + c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, ARMv7 NEON without VFPv4 for `float32`, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = -(vd0_i \\cdot vd1_i) + vd2_i"
   },
   "fnmsub": {
-    "description": "Computes the fused negative multiply-subtract of three vector registers ($-(a \\times b) - c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
+    "description": "Computes the fused negative multiply-subtract of three vector registers ($-(a \\times b) - c$). The operation is fused (a single rounding) on the targets that have the instruction. Without it (SSE and AVX without FMA, ARMv7 NEON without VFPv4 for `float32`, and the scalar target depending on the compiler) the product is rounded before the addition, and the last bits of the result can differ.",
     "latex": "\\text{res}_i = -(vd0_i \\cdot vd1_i) - vd2_i"
   },
   "gather": {
-    "description": "Loads elements from non-contiguous memory locations into a vector register using an index vector (unsigned indices counted in elements, of the width of the data or 32/64-bit: then at their own LMUL; 32-bit indices lower than $2^{31}$, and than $2^{30}$ on RVV for 32-bit data).",
+    "description": "Loads elements from non-contiguous memory locations into a vector register using an index vector (unsigned indices counted in elements, of the width of the data or 32/64-bit: then at their own LMUL; 32-bit indices lower than $2^{31}$, and than $2^{30}$ on RVV for 32-bit data). The masked variants read only the elements of the active lanes: the index of an inactive lane is not used.",
     "latex": "\\text{res}_i = \\text{p0}[vd0_i]"
   },
   "get": {
     "description": "Extracts a single scalar element at index `s0` from a vector register.",
-    "latex": "\\text{res} = vd0[\\text{idx}]"
+    "latex": "\\text{res} = vd0_{s0}"
   },
   "get_k": {
-    "description": "Extracts the boolean truthiness of a single mask element at index `s0`.",
-    "latex": "\\text{res} = vm0[\\text{idx}]"
+    "description": "Returns the lane `s0` of a mask register as a value of the element type: all bits set for an active lane (`-1` for the signed integers, the maximum for the unsigned ones, NaN for the floating-point types), 0 for an inactive lane, on every target. Test it with `!= 0`, and do not convert a floating-point result to an integer. In the C++ Object API, `mipp::get(vm, idx)` returns a `bool`.",
+    "latex": "\\text{res} = vm0_{s0}\\ ?\\ (\\sim 0) : 0"
   },
   "getfirst": {
     "description": "Extracts the first scalar element (element 0) from a vector register with minimal latency.",
     "latex": "\\text{res} = vd0[0]"
   },
   "hadd": {
-    "description": "Computes the horizontal addition (reduction sum) of all elements in a vector register. For the floating-point types, the order of the additions depends on the target: the last bits of the result can differ from one target to another, and from a sequential sum.",
-    "latex": "\\text{res} = \\sum_{i=0}^{N-1} vd0_i"
+    "description": "Computes the horizontal addition (reduction sum) of all elements in a vector register. The integer sum wraps around (modulo $2^n$), so its result depends on the number of lanes; `hadds` saturates instead. For the floating-point types, the order of the additions depends on the target: the last bits of the result can differ from one target to another, and from a sequential sum.",
+    "latex": "\\text{res} = \\sum_{i=0}^{N-1} vd0_i",
+    "variants": {
+      "maskz": "only the active lanes are added: the inactive lanes count as 0, which is also the result when no lane is active."
+    }
   },
   "hadds": {
-    "description": "Computes the horizontal addition with saturation of all elements in a vector register.",
-    "latex": "\\text{res} = \\operatorname{saturate}\\left(\\sum_{i=0}^{N-1} vd0_i\\right)"
+    "description": "Computes the horizontal addition with saturation of all elements in an integer vector register. For the 8-, 16- and 32-bit types, the sum is exact and saturated once at the end: `100 + 100 - 100 - 100` gives `0` in `int8`. For the 64-bit types, each addition saturates, in the order of the lanes: `MAX + 1 - 1` gives `MAX - 1`.",
+    "latex": "\\text{res} = \\operatorname{saturate}\\left(\\sum_{i=0}^{N-1} vd0_i\\right)",
+    "variants": {
+      "maskz": "only the active lanes are added: the inactive lanes count as 0, which is also the result when no lane is active."
+    }
   },
   "hi": {
     "description": "Returns the upper half of a vector register as a register of the LMUL below (`m2` to `m1`, `m1` to `d2`, ...).",
@@ -261,34 +267,43 @@
   },
   "hmax": {
     "description": "Computes the horizontal maximum (reduction maximum) of all elements in a vector register. With a NaN element, the result depends on the target.",
-    "latex": "\\text{res} = \\max_{i=0}^{N-1} vd0_i"
+    "latex": "\\text{res} = \\max_{i=0}^{N-1} vd0_i",
+    "variants": {
+      "maskz": "only the active lanes are compared: the inactive lanes are ignored. With no active lane, the result is the lowest value of the type: `-FLT_MAX`, `-DBL_MAX`, `INT8_MIN` to `INT64_MIN`, or 0 for the unsigned types."
+    }
   },
   "hmin": {
     "description": "Computes the horizontal minimum (reduction minimum) of all elements in a vector register. With a NaN element, the result depends on the target.",
-    "latex": "\\text{res} = \\min_{i=0}^{N-1} vd0_i"
+    "latex": "\\text{res} = \\min_{i=0}^{N-1} vd0_i",
+    "variants": {
+      "maskz": "only the active lanes are compared: the inactive lanes are ignored. With no active lane, the result is the highest value of the type: `FLT_MAX`, `DBL_MAX`, `INT8_MAX` to `INT64_MAX`, or `UINT8_MAX` to `UINT64_MAX`."
+    }
   },
   "hmul": {
-    "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register. For the floating-point types, the order of the multiplications depends on the target: the last bits of the result can differ from one target to another, and from a sequential product.",
-    "latex": "\\text{res} = \\prod_{i=0}^{N-1} vd0_i"
+    "description": "Computes the horizontal multiplication (reduction product) of all elements in a vector register. The integer product keeps the low bits (modulo $2^n$). For the floating-point types, the order of the multiplications depends on the target: the last bits of the result can differ from one target to another, and from a sequential product.",
+    "latex": "\\text{res} = \\prod_{i=0}^{N-1} vd0_i",
+    "variants": {
+      "maskz": "only the active lanes are multiplied: the inactive lanes count as 1, which is also the result when no lane is active."
+    }
   },
   "zip": {
     "description": "Interleaves the two halves of the register: the lane $2k$ receives the lane $k$, the lane $2k+1$ the lane $N/2 + k$ (planar to interleaved layout; the inverse of `unzip`).",
     "latex": "\\text{res}_{2k} = vd0_k,\\ \\text{res}_{2k+1} = vd0_{N/2+k}"
   },
   "load": {
-    "description": "Loads elements from an aligned memory address into a vector register.",
+    "description": "Loads elements from an aligned memory address into a vector register. The masked variants read only the memory of the active lanes: the memory of the inactive lanes can be out of bounds (the tail of an array).",
     "latex": "\\text{res}_i = \\text{p0}[i]"
   },
   "loadu_unzip": {
     "description": "Loads $N$ elements (no alignment required) and separates the even and the odd ones: the even elements in the lower half of the register, the odd ones in the upper half (`unzip(loadu(p0))`; with LMUL 2, the two LMUL 1 halves are the even and the odd elements of $2N$ elements, as ARM `vld2`).",
-    "latex": "\\text{res}_k = p_{2k},\\ \\text{res}_{N/2+k} = p_{2k+1}"
+    "latex": "\\text{res}_k = p0_{2k},\\ \\text{res}_{N/2+k} = p0_{2k+1}"
   },
   "loadu": {
-    "description": "Loads elements from an unaligned memory address into a vector register.",
+    "description": "Loads elements from an unaligned memory address into a vector register. The masked variants read only the memory of the active lanes: the memory of the inactive lanes can be out of bounds (the tail of an array).",
     "latex": "\\text{res}_i = \\text{p0}[i]"
   },
   "log": {
-    "description": "Computes the natural (base-e) logarithm of each floating-point element.",
+    "description": "Computes the natural (base-e) logarithm of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 1e-7 in `float32` and 4e-9 in `float64`. `log(0)` gives NaN instead of $-\\infty$, $+\\infty$ gives the logarithm of the largest finite value (`88.7` in `float32`, `709.8` in `float64`), a NaN gives a number, and the subnormals count as the smallest normal number. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\ln(vd0_i)"
   },
   "lo": {
@@ -300,7 +315,7 @@
     "latex": "m_{\\text{res}, i} = m_{0, i}, \\quad 0 \\le i < N / 2"
   },
   "lshift": {
-    "description": "Shifts each element left by the number of bits of the same lane of the second register (from 0 to the number of bits of the type minus 1; any other count is undefined behavior). The shift by the same count for every lane is `lshift_vs` (`mipp::lshift(vd0, s0)` in C++).",
+    "description": "Shifts each element left by the number of bits of the same lane of the second register (from 0 to the number of bits of the type minus 1; any other count is undefined behavior). The shift by the same count for every lane is `lshift_vs` (`mipp::lshift(vd0, s0)` in C++). `lshift_vs` also accepts the floating-point types: their bits are shifted as an integer of the same size.",
     "latex": "\\text{res}_i = vd0_i \\ll vd1_i"
   },
   "lshift_vs": {
@@ -324,7 +339,7 @@
     "latex": "\\text{res}_i = vd0_i \\cdot vd1_i"
   },
   "ncvt": {
-    "description": "Narrowing conversion: converts vector elements to a narrower datatype, keeping the lanes in a register one LMUL below. The value is truncated (modulo for integers), not saturated.",
+    "description": "Narrowing conversion: converts each element to the type twice as narrow, keeping the lanes in a register one LMUL below. The integers keep their low bits (modulo $2^n$: `70000` gives `4464` in `int16`), without saturation (`ncvts` saturates). A `float64` is rounded to the nearest `float32`, and a value out of its range gives $\\pm\\infty$.",
     "latex": "\\text{res}_i = (T_{\\text{narrow}}) vd0_i"
   },
   "ncvts": {
@@ -368,11 +383,11 @@
     "latex": "\\text{res}_{b+l} = vd0_{b + vd1_{b+l}}"
   },
   "pow": {
-    "description": "Computes the first vector register raised to the power of the second element-wise.",
+    "description": "Computes the first vector register raised to the power of the second element-wise. On the SIMD targets (measured on SSE, AVX and NEON), it is computed as $e^{y \\ln x}$ and is defined for $x > 0$ only: a zero or negative base gives a wrong result (NaN, or a huge value on SSE and AVX), even with an integer exponent (`pow(-2, 3)`, `pow(0, 0)`), and the infinities and NaN are not handled. The relative error is below 5e-6 in `float32` and 2e-8 in `float64`; in `float32`, an overflow gives about `2.4e38` instead of $+\\infty$. On the unsigned types, the integer power wraps around (modulo $2^n$) and `pow(0, 0)` is 1.",
     "latex": "\\text{res}_i = vd0_i^{vd1_i}"
   },
   "pow2": {
-    "description": "Computes 2 raised to the power of each vector element.",
+    "description": "Computes 2 raised to the power of each vector element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 5e-6 in `float32` and 3e-11 in `float64`; in `float32`, an overflow gives about `2.4e38` instead of $+\\infty$, and a NaN does not give NaN on SSE and AVX. On the unsigned types, the result is `1 << x`: 0 when $x$ is at least the number of bits of the type, undefined from $x = 64$.",
     "latex": "\\text{res}_i = 2^{vd0_i}"
   },
   "reverse": {
@@ -392,7 +407,7 @@
     "latex": "\\text{res}_{b+l} = vd0_{b + (l + s0) \\bmod n_b}"
   },
   "round": {
-    "description": "Rounds each floating-point element to the nearest integer. A tie is rounded away from zero, as the C function `round`: `2.5` gives `3` and `-2.5` gives `-3`. The rounding of a tie to the even integer is `roundeven`.",
+    "description": "Rounds each floating-point element to the nearest integer. A tie is rounded away from zero, as the C function `round`: `2.5` gives `3` and `-2.5` gives `-3`. The rounding of a tie to the even integer is `roundeven`. The sign of a zero result depends on the target: `-0.3` and `-0.0` give `-0.0` on NEON, SVE and the scalar target, and `+0.0` on SSE, AVX, AVX-512 and RVV. The integers are returned unchanged.",
     "latex": "\\text{res}_i = \\operatorname{round}(vd0_i)"
   },
   "roundeven": {
@@ -400,7 +415,7 @@
     "latex": "\\text{res}_i = \\operatorname{roundeven}(vd0_i)"
   },
   "rshift": {
-    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(vd0, s0)` in C++), and the logical shift of the signed types is `rshiftl`.",
+    "description": "Shifts each element right by the number of bits of the same lane of the second register: arithmetic shift (copies of the sign bit) for the signed types, logical shift (zeros) for the unsigned ones. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshift_vs` (`mipp::rshift(vd0, s0)` in C++), and the logical shift of the signed types is `rshiftl`. `rshift_vs` also accepts the floating-point types: their bits are shifted logically, as an unsigned integer of the same size (`-1.0f` shifted by 4 gives the bits `0x0bf80000`).",
     "latex": "\\text{res}_i = vd0_i \\gg vd1_i"
   },
   "rshift_vs": {
@@ -408,7 +423,7 @@
     "latex": "\\text{res}_i = vd0_i \\gg s0"
   },
   "rshiftl": {
-    "description": "Shifts each element right by the number of bits of the same lane of the second register, with a logical shift (zeros enter on the left) for all the types: the signed elements are shifted as the unsigned integer of the same size, like `(int32_t)((uint32_t)a >> n)` in C. Same result as `rshift` on the unsigned types. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshiftl_vs` (`mipp::rshiftl(vd0, s0)` in C++).",
+    "description": "Shifts each element right by the number of bits of the same lane of the second register, with a logical shift (zeros enter on the left) for all the types: the signed elements are shifted as the unsigned integer of the same size, like `(int32_t)((uint32_t)a >> n)` in C. Same result as `rshift` on the unsigned types. Counts from 0 to the number of bits of the type minus 1; any other count is undefined behavior. The shift by the same count for every lane is `rshiftl_vs` (`mipp::rshiftl(vd0, s0)` in C++). `rshiftl_vs` also accepts the floating-point types: their bits are shifted as an unsigned integer of the same size.",
     "latex": "\\text{res}_i = \\text{unsigned}(vd0_i) \\gg vd1_i"
   },
   "rshiftl_vs": {
@@ -421,7 +436,11 @@
   },
   "scatter": {
     "description": "Stores vector elements into non-contiguous memory locations using an index vector (unsigned indices counted in elements, of the width of the data or 32/64-bit: then at their own LMUL; 32-bit indices lower than $2^{31}$, and than $2^{30}$ on RVV for 32-bit data).",
-    "latex": "\\text{p0}[vd0_i] = vd1_i"
+    "latex": "\\text{p0}[vd0_i] = vd1_i",
+    "variants": {
+      "mask": "only the active lanes are written: the memory at the index of the inactive lanes is left untouched.",
+      "maskz": "every lane is written: 0 at the index of the inactive lanes, which must be valid."
+    }
   },
   "select": {
     "description": "Selects elements between two vector registers based on a mask (`vd0` in the active lanes of `vm0`, `vd1` in the others).",
@@ -429,7 +448,7 @@
   },
   "set": {
     "description": "Initializes a vector register from a scalar array.",
-    "latex": "\\text{res}_i = \\text{p0}[i]"
+    "latex": "\\text{res}_i = \\text{vals}[i]"
   },
   "set0": {
     "description": "Initializes a vector register with all zeros.",
@@ -441,26 +460,26 @@
   },
   "set1": {
     "description": "Broadcasts a single scalar value to all elements of a vector register.",
-    "latex": "\\text{res}_i = \\text{val}"
+    "latex": "\\text{res}_i = s0"
   },
   "set1_k": {
     "description": "Broadcasts boolean truthiness to all elements of a mask register.",
-    "latex": "m_i = (\\text{val} \\neq 0)"
+    "latex": "m_i = (s0 \\neq 0)"
   },
   "set_k": {
     "description": "Initializes a mask register from an array of `int32_t` evaluating boolean truthiness.",
-    "latex": "m_i = (\\text{p0}[i] \\neq 0)"
+    "latex": "m_i = (\\text{vals}[i] \\neq 0)"
   },
   "signbit": {
-    "description": "Returns the mask of the elements whose sign bit is set (negative values, including -0.0 for the floating-point types).",
-    "latex": "m_{\\text{res}, i} = (vd0_i < 0)"
+    "description": "Returns the mask of the elements whose sign bit is set: the negative values, and for the floating-point types also `-0.0` and the NaN with a negative sign.",
+    "latex": "m_{\\text{res}, i} = \\operatorname{signbit}(vd0_i)"
   },
   "sin": {
-    "description": "Computes the trigonometric sine of each floating-point element in radians.",
+    "description": "Computes the trigonometric sine of each floating-point element in radians. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 2e-7 in `float32` and 5e-16 in `float64`, for any argument: the lanes with $|x| > 8192$ (`float32`) or $|x| > 2^{50}$ (`float64`), the infinities and NaN are computed by the C library. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\sin(vd0_i)"
   },
   "sinh": {
-    "description": "Computes the hyperbolic sine of each floating-point element.",
+    "description": "Computes the hyperbolic sine of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 4e-7 in `float32` and 4e-11 in `float64`. In `float64`, the result overflows to $\\pm\\infty$ from $|x| \\approx 709.8$, a little before the C library; a NaN gives $+\\infty$ on SSE and AVX. In `float64`, the error is absolute near 0 (about 1e-16), and a tiny $x$ (`1e-30`) gives 0. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\sinh(vd0_i)"
   },
   "slide": {
@@ -488,7 +507,7 @@
     "latex": "\\text{res}_{b+l} = l \\ge s0\\ ?\\ vd0_{b+l-s0} : 0"
   },
   "sqrt": {
-    "description": "Computes the square root of each element in a vector register.",
+    "description": "Computes the square root of each element in a vector register, correctly rounded. On ARMv7 NEON before ARMv8 (`float32`), it is a reciprocal square root estimate refined by two Newton-Raphson steps: the last bits can differ.",
     "latex": "\\text{res}_i = \\sqrt{vd0_i}"
   },
   "store": {
@@ -497,7 +516,7 @@
   },
   "storeu_zip": {
     "description": "Interleaves the two halves of the register and stores the $N$ elements (no alignment required): `storeu(p0, zip(vd0))`, the inverse of `loadu_unzip` (ARM `vst2`).",
-    "latex": "p_{2k} = vd0_k,\\ p_{2k+1} = vd0_{N/2+k}"
+    "latex": "p0_{2k} = vd0_k,\\ p0_{2k+1} = vd0_{N/2+k}"
   },
   "storeu": {
     "description": "Stores vector elements into an unaligned memory address.",
@@ -516,11 +535,11 @@
     "latex": "\\text{res}_i = vd0_{i \\oplus 1}"
   },
   "tan": {
-    "description": "Computes the trigonometric tangent of each floating-point element in radians.",
+    "description": "Computes the trigonometric tangent of each floating-point element in radians. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 2e-7 in `float32` and 5e-16 in `float64`, for any argument: the lanes with $|x| > 8192$ (`float32`) or $|x| > 2^{50}$ (`float64`), the infinities and NaN are computed by the C library. In `float64` on NEON, `tan(-0.0)` gives `+0.0`. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\tan(vd0_i)"
   },
   "tanh": {
-    "description": "Computes the hyperbolic tangent of each floating-point element.",
+    "description": "Computes the hyperbolic tangent of each floating-point element. On the SIMD targets (measured on SSE, AVX and NEON), the relative error is below 1e-6 in `float32` for $|x| \\ge 0.1$, and 1e-12 in `float64`. Near 0, the error is absolute (a few 1e-8 in `float32`): below $|x| = 0.1$ the relative error grows (about 1e-4 at $|x| = 0.001$ in `float32`), and a tiny $x$ (`1e-30`) gives 0. In `float32`, a NaN gives 1 on SSE and AVX. The scalar target calls the C library.",
     "latex": "\\text{res}_i = \\tanh(vd0_i)"
   },
   "testz": {
@@ -536,7 +555,7 @@
     "latex": "m_i = (\\text{bits}(vd0_i) \\neq 0)"
   },
   "trunc": {
-    "description": "Truncates each floating-point element toward zero.",
+    "description": "Truncates each floating-point element toward zero: `-2.7` gives `-2`. The integers are returned unchanged.",
     "latex": "\\text{res}_i = \\operatorname{trunc}(vd0_i)"
   },
   "unziplo": {
@@ -568,8 +587,8 @@
     "latex": "m_{\\text{res}, i} = m_{0, i} \\oplus m_{1, i}"
   },
   "xorsign": {
-    "description": "Negates each element of the first register where the element of the second register is negative (sign bit set).",
-    "latex": "\\text{res}_i = \\begin{cases} -vd0_i & \\text{if } vd1_i < 0 \\\\ vd0_i & \\text{otherwise} \\end{cases}"
+    "description": "Negates each element of the first register where the sign bit of the element of the second register is set (negative values, and also `-0.0` and the negative NaN for the floating-point types).",
+    "latex": "\\text{res}_i = \\begin{cases} -vd0_i & \\text{if } \\operatorname{signbit}(vd1_i) \\\\ vd0_i & \\text{otherwise} \\end{cases}"
   },
   "ziphi": {
     "description": "Interleaves the lanes of the upper halves of the two registers: `vd0[N/2]`, `vd1[N/2]`, `vd0[N/2+1]`... (the second half of `zip`).",

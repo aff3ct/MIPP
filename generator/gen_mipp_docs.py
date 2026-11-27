@@ -36,7 +36,7 @@ from gen_mipp_headers import discover_and_sort_isas
 from c_generator import resolve_lmul_in_isa, register_all_candidates
 from codegen.candidate_resolver import resolve_candidates
 from scalar_gen import gen_c_functions_scalar_one
-from name_builder import is_defined_for_lmul, resolve_ret_lmul, changes_lmul
+from name_builder import is_defined_for_lmul, is_defined_for_dt_lmul, resolve_ret_lmul, changes_lmul
 from codegen.ldiv_mask import compute_changing_levels
 
 # Load Centralized Function Documentation Metadata
@@ -126,9 +126,11 @@ def merge_form_pages(base, members):
     out = list(pages[0][2])
     while out and not out[-1]:
         out.pop()
+    scalar = ("A scalar `int32_t` count takes the place of the vector of counts and is used for every lane"
+              if base in ("lshift", "rshift", "rshiftl") else
+              "A scalar of the element type takes the place of a vector and is used for every lane")
     out += ["", "## Scalar Forms", "",
-            "A scalar of the element type takes the place of a vector and is used for every lane "
-            "([Scalar Forms](../../user/scalar_forms.md)). The sections below have one tab per form.", "",
+            f"{scalar} ([Scalar Forms](../../user/scalar_forms.md)). The sections below have one tab per form.", "",
             "| Form | Operands | C function | Semantics |", "| :--- | :--- | :--- | :--- |"]
     for letters, name in [(l, n) for l, n, _, _ in pages]:
         operands = ", ".join("vector" if c == "v" else "scalar" for c in letters)
@@ -242,7 +244,7 @@ def imm_template_line(func_name, line):
     """Template version (`mipp::slide<S>(a, b)`) of the unmasked C++ prototype `line`: the integer argument
     becomes the template parameter S. None when the function has no immediate version."""
     imm = imm_info(func_name)
-    m = re.search(r", const u?int32_t s\d+\);$", line)
+    m = re.search(r", const (u?int32_t s\d+|size_t idx)\);$", line)
     if not imm or not m or "template <" not in line:
         return None
     return line[:m.start()].replace("template <", "template <int S, ", 1) + ");"
@@ -692,6 +694,44 @@ def match_args_type_c(arg_type, cast=False, ret=False, fixed_dtype=False):
     return "int32_t"
 
 
+def _static_inline(proto):
+    """C prototype as declared by the headers: `static inline`."""
+    return "static " + proto if proto.startswith("inline ") else proto
+
+
+def _nele_param(type_str, lmul_arg):
+    """Array parameter of set / set_k (`Nele`): `const T vals[N<T>()]`, as declared by the C++ headers."""
+    base = type_str.replace("[]", "").strip()
+    if not base.startswith("const "):
+        base = "const " + base
+    return f"{base} vals[N<T{lmul_arg}>()]"
+
+
+# Behaviour of the inactive lanes of each mask variant (bullet list of "Mask Execution Variants"). The default
+# depends on what the function returns; an entry "variants" of funcs_docs.json replaces it for one function.
+MASK_VARIANT_LABELS = (("mask", "Merge-Masked", "_mask", "mipp::M"), ("maskz", "Zero-Masked", "_maskz", "mipp::Z"),
+                       ("masks", "Source-Masked", "_masks", "mipp::S"))
+
+
+def default_mask_variant_texts(proto):
+    ret = proto["ret"]["type"]
+    reads_memory = any(a["type"] == "ptr" for a in proto["args"]) and ret == "reg"
+    if not ret:  # stores and scatter
+        return {"mask": "only the active lanes are written: the memory of the inactive lanes is left untouched.",
+                "maskz": "every lane is written, with 0 for the inactive lanes."}
+    if reads_memory:  # loads and gather
+        return {"maskz": "the active lanes are loaded; the inactive lanes are set to 0 and their memory is not read.",
+                "masks": "the active lanes are loaded; the inactive lanes take the value of `vdsrc` and their memory is not read."}
+    if ret == "msk":  # comparisons
+        return {"maskz": "the active lanes are computed; the inactive lanes are false in the resulting mask."}
+    if ret == "val":  # reductions
+        return {"maskz": "only the active lanes are reduced: the inactive ones count as the neutral element of the "
+                         "operation, which is also the result when no lane is active."}
+    return {"mask": "the active lanes are computed; the inactive lanes keep the value of `vd0`, the first vector operand.",
+            "maskz": "the active lanes are computed; the inactive lanes are set to 0.",
+            "masks": "the active lanes are computed; the inactive lanes take the value of `vdsrc`."}
+
+
 class SpecFuncInfo:
     def __init__(self):
         self.func_name = None
@@ -803,6 +843,9 @@ class SpecFuncInfo:
                 name = f"a{cnt_val}"
                 cnt_val += 1
 
+            if arg_type == "Nele":
+                args_parts.append(_nele_param(type_str, f", {lmul}" if lmul != 1 else ""))
+                continue
             args_parts.append(f"{const_prefix}{type_str} {name}".strip())
 
         args_str = ", ".join(args_parts)
@@ -902,6 +945,14 @@ class SpecFuncInfo:
                 name = f"a{cnt_val}"
                 cnt_val += 1
 
+            if arg_type == "Nele":
+                args_parts.append(_nele_param(type_str, lmul_arg))
+                continue
+            if is_indexed and arg_type == "reg" and fixed == "ret":
+                name = "vi"  # index register of gather / scatter in the Object API
+                cnt_reg -= 1
+            elif self.func_name in ("get", "get_k") and arg_type == "val":
+                type_str, name = "const size_t", "idx"
             args_parts.append(f"{type_str} {name}".strip())
 
         args_str = ", ".join(args_parts)
@@ -915,6 +966,8 @@ class SpecFuncInfo:
 
         lines = [f"{tmpl_header}{ret_str} {func_call_name}({args_str});"]
         imm_line = imm_template_line(self.func_name, lines[0]) if not mask_kind or mask_kind == "unmasked" else None
+        if self.func_name == "get_k":  # the lane of a Vm by a run-time index: its truth value
+            lines[0] = f"{tmpl_header}bool {func_call_name}({args_str});"
         if imm_line:
             lines.append(imm_line)
 
@@ -967,16 +1020,18 @@ class SpecFuncInfo:
         lines = []
         if is_pair_func:
             for dt in self.dttypes:
+                if not is_defined_for_dt_lmul(interfaces[self.func_name]["proto"], dt, lmul):
+                    continue  # gather / scatter: the index LMUL does not exist (m16, or d2 with mixed widths)
                 dt_par, dt_ret = dt.split(",")
                 full_func_name = build_func_name({}, dt_par, dt_ret, self.func_name, isa_name=False, lmul=lmul, masked_version=mask_kind)
                 proto = build_proto(interfaces[self.func_name]["proto"], dt_par, dt_ret, {}, full_func_name, lmul=lmul, isa_name=False, masked_version=mask_kind)
-                lines.append(proto + ";")
+                lines.append(_static_inline(proto) + ";")
         else:
             for dt in self.dttypes:
                 dt_single = dt.split(",")[0]
                 full_func_name = build_func_name_short({}, dt_single, self.func_name, isa_name=False, lmul=lmul, masked_version=mask_kind)
                 proto = build_proto(interfaces[self.func_name]["proto"], dt_single, dt_single, {}, full_func_name, lmul=lmul, isa_name=False, masked_version=mask_kind)
-                lines.append(proto + ";")
+                lines.append(_static_inline(proto) + ";")
         return "\n".join(lines)
 
     def write_func_algo(self, file):
@@ -991,10 +1046,11 @@ class SpecFuncInfo:
         f = self.func_name
         lmul = scalar_ref_lmul(f)
 
+        # entries of each datatype: one per set of variants for some functions (store: [u, z] and [m])
         entry_of = {}
         for ff in scalar_implems[f]:
             for dt in (ff["datatypes"] or funcs[f]["datatypes"]):
-                entry_of.setdefault(dt, ff)
+                entry_of.setdefault(dt, []).append(ff)
         dts = [dt for dt in funcs[f]["datatypes"] if dt in entry_of]
         dts += [dt for dt in entry_of if dt not in dts]
 
@@ -1010,16 +1066,19 @@ class SpecFuncInfo:
             return "\n".join(pad + l if l else l for l in lines) + "\n"
 
         def write_dt(dt, label, indent):
-            ff = entry_of[dt]
-            variants = scalar_mask_variants(f, ff)
+            entry_of_variant = {}
+            for ff in entry_of[dt]:
+                for variant in scalar_mask_variants(f, ff):
+                    entry_of_variant.setdefault(variant, ff)
+            variants = [v for v in SCALAR_VARIANT_TAB_TITLES if v in entry_of_variant]
             pad = " " * indent
             print(f'{pad}=== "{label}"\n', file=file)
             if len(variants) == 1:
-                print(code_block(scalar_code(ff, dt, variants[0]), indent + 4), file=file)
+                print(code_block(scalar_code(entry_of_variant[variants[0]], dt, variants[0]), indent + 4), file=file)
                 return
             for variant in variants:
                 print(f'{pad}    === "{SCALAR_VARIANT_TAB_TITLES[variant]}"\n', file=file)
-                print(code_block(scalar_code(ff, dt, variant), indent + 8), file=file)
+                print(code_block(scalar_code(entry_of_variant[variant], dt, variant), indent + 8), file=file)
 
         print('<div class="mipp-scalar-reference" markdown>\n', file=file)
         pairs = [dt.split(",") for dt in dts]
@@ -1065,6 +1124,8 @@ class SpecFuncInfo:
             print("    ```c", file=f)
             for lmul in lmuls_of(self.func_name):
                 lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
+                if lmul == 1:
+                    lmul_label += " (also without the _m1 suffix)"
                 print(f"    // {lmul_label}", file=f)
                 c_block = self.func_to_str_c(lmul)
                 for line in c_block.splitlines():
@@ -1135,8 +1196,10 @@ class SpecFuncInfo:
             _print_headers_block("obj", "hpp", "mipp_obj.hpp", "C++ Object API")
 
             print("## Supported Datatypes\n", file=f)
-            if self.func_name in ("cast", "cast_k"):
-                print("Supported between all pairwise datatype permutations of matching bitwidth.\n", file=f)
+            if self.func_name == "cast":
+                print("All the pairs of datatypes (100): the register keeps its size and its bits, the number of lanes changes.\n", file=f)
+            elif self.func_name == "cast_k":
+                print("All the pairs of datatypes of the same element size: the mask keeps its lanes.\n", file=f)
             elif is_pair_function(self.func_name):
                 for dt in self.dttypes:
                     src, dst = dt.split(",")
@@ -1149,15 +1212,7 @@ class SpecFuncInfo:
                 print("", file=f)
 
             if self.variant_set and self.variant_set.is_any_mask():
-                print("## Mask Execution Variants\n", file=f)
-                variants = ["- **Unmasked (no suffix / `<mipp::U>`)**: All elements evaluated, no mask argument."]
-                if self.variant_set.is_maskable():
-                    variants.append("- **Merge-Masked (`_mask` / `<mipp::M>`)**: Active elements evaluated; inactive elements keep the value of the first operand.")
-                if self.variant_set.is_maskzable():
-                    variants.append("- **Zero-Masked (`_maskz` / `<mipp::Z>`)**: Active elements evaluated; inactive elements zeroed.")
-                if self.variant_set.is_masksable():
-                    variants.append("- **Source-Masked (`_masks` / `<mipp::S>`)**: Active elements evaluated; inactive elements take values from source operand `src`.")
-                print("\n".join(variants) + "\n", file=f)
+                self.write_mask_variants(f, doc_entry)
 
             if mipp_infos is not None:
                 self.write_isa_matrix(f, mipp_infos)
@@ -1172,9 +1227,55 @@ class SpecFuncInfo:
             self.write_test_specs(f)
             return f.getvalue()
 
+    def write_mask_variants(self, file, doc_entry):
+        """Section "Mask Execution Variants": the behaviour of the inactive lanes, then the masked prototypes (one
+        LMUL: the others follow the same suffixes as the unmasked prototypes)."""
+        texts = dict(default_mask_variant_texts(interfaces[self.func_name]["proto"]), **doc_entry.get("variants", {}))
+        kinds = [k for k, *_ in MASK_VARIANT_LABELS if self.variant_set.is_supported(k)]
+        print("## Mask Execution Variants\n", file=file)
+        lines = ["- **Unmasked (no suffix / `<mipp::U>`)**: every lane is computed, no mask argument."]
+        for kind, title, suffix, enum in MASK_VARIANT_LABELS:
+            if kind in kinds:
+                lines.append(f"- **{title} (`{suffix}` / `<{enum}>`)**: {texts[kind]}")
+        print("\n".join(lines) + "\n", file=file)
+
+        lmul = lmuls_of(self.func_name)[0]
+        lmul_label = f"LMUL = {lmul}" if lmul > 0 else "d2 (half-vector)"
+        order = "The mask comes first, " + ("then `vdsrc` for Source-Masked, " if "masks" in kinds else "")
+        print(order + "then the arguments of the unmasked function:\n", file=file)
+        print('=== "C API"', file=file)
+        print("    ```c", file=file)
+        for kind in kinds:
+            title = next(t for k, t, *_ in MASK_VARIANT_LABELS if k == kind)
+            print(f"    // {title}, {lmul_label}", file=file)
+            for line in self.func_to_str_c(lmul, kind).splitlines():
+                print(f"    {line}", file=file)
+        print("    ```\n", file=file)
+        # C++: one overload for the variants without vdsrc (the default is M, else Z: `f<Z>(...)` for the other
+        # one) and one for Source-Masked
+        three = [k for k in ("mask", "maskz") if k in kinds]
+        for api, render in (("C++ Functional API", self.func_to_str_cpp), ("C++ Object API", self.func_to_str_obj)):
+            print(f'=== "{api}"', file=file)
+            print("    ```cpp", file=file)
+            groups = ([(three[0], f"Merge-Masked, and Zero-Masked with {self.get_cpp_func_name()}<Z>(...)" if len(three) == 2
+                        else next(t for k, t, *_ in MASK_VARIANT_LABELS if k == three[0]))] if three else [])
+            groups += [("masks", "Source-Masked")] if "masks" in kinds else []
+            for kind, comment in groups:
+                body = render(lmul, kind)
+                if not body:
+                    continue
+                print(f"    // {comment}, {lmul_label}", file=file)
+                for line in body.splitlines():
+                    print(f"    {line}", file=file)
+            print("    ```\n", file=file)
+
     def write_isa_matrix(self, file, mipp_infos):
         print(f"## Architecture & Implementation Matrix{NO_SEARCH}\n", file=file)
-        print(f'<small>**Legend:** {badge_l0} Native Hardware &bull; {badge_l1} Dedicated Emulation &bull; {badge_l2} Generic Emulation &bull; {badge_l3} Scalar Fallback &bull; {badge_na} N/A &nbsp;—&nbsp; *[Full details & latency](../index.md#implementation-levels)*</small>\n', file=file)
+        print(f'<small>**Legend:** {badge_l0} Native Hardware &bull; {badge_l1} Dedicated Emulation &bull; {badge_l2} Generic Emulation &bull; {badge_l3} Scalar Fallback &bull; {badge_na} N/A &nbsp;—&nbsp; *[Full details](../../user/implementation_levels.md)*. When the level depends on a compiler flag, the best level is shown.</small>\n', file=file)
+        mode = interfaces[self.func_name]["proto"]["ret"].get("lmul", "same")
+        if mode in ("up", "down"):
+            side = "of the result (the arguments are half-vectors)" if mode == "up" else "of the argument"
+            print(f"<small>The levels are the ones at LMUL = 1 {side}.</small>\n", file=file)
         
         if self.func_name in ("cast", "cast_k"):
             dts = all_datatypes_cart_prod
@@ -1322,21 +1423,21 @@ MIPP provides high-performance SIMD/vector abstractions across a broad spectrum 
 <a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend
 
-Every MIPP function is resolved against a deterministic 4-level hierarchy:
+Every MIPP function is resolved against a 4-level hierarchy (details and examples in [Implementation Levels](../user/implementation_levels.md)):
 
-| Badge | Implementation Level | Performance & Latency |
+| Badge | Implementation Level | Meaning |
 | :---: | :--- | :--- |
-| <span class="mipp-badge lvl-0">L0</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
-| <span class="mipp-badge lvl-1">L1</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
-| <span class="mipp-badge lvl-2">L2</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
-| <span class="mipp-badge lvl-3">L3</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
+| <span class="mipp-badge lvl-0">L0</span> | **Level 0 (Native Hardware)** | A single hardware instruction (vendor intrinsic) for this datatype and variant; the constants it uses do not count. |
+| <span class="mipp-badge lvl-1">L1</span> | **Level 1 (Dedicated Emulation)** | A sequence of intrinsics written for this ISA, where no single instruction does the job. |
+| <span class="mipp-badge lvl-2">L2</span> | **Level 2 (Generic Emulation)** | Generic code shared by the ISAs, built on other MIPP functions (in a few cases a loop over the lanes, or the identity). |
+| <span class="mipp-badge lvl-3">L3</span> | **Level 3 (Scalar Fallback)** | The registers are copied to the scalar target, which computes the elements one by one. |
 | <span class="mipp-badge lvl-na">&minus;</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
 
 ---
 
 ## Universal Portability & Guaranteed Vectorization
 
-- [**All Targets (Intersection Matrix)**](intersection.md): For each function and datatype, the worst level among **all** the supported target ISAs. A primitive shown at <span class="mipp-badge lvl-0">L0</span>, <span class="mipp-badge lvl-1">L1</span> or <span class="mipp-badge lvl-2">L2</span> there executes as SIMD instructions on x86, ARM and RISC-V alike; one at <span class="mipp-badge lvl-3">L3</span> falls back to scalar code on at least one target.
+- [**All Targets (Intersection Matrix)**](intersection.md): For each function and datatype, the worst level among **all** the supported target ISAs. A primitive shown at <span class="mipp-badge lvl-0">L0</span>, <span class="mipp-badge lvl-1">L1</span> or <span class="mipp-badge lvl-2">L2</span> there has an implementation without the scalar fallback on x86, ARM and RISC-V alike, provided that the best compiler flags of each ISA are enabled (the tables show the best level when it depends on a flag, such as SSE4.1, AVX2 or AArch64); one at <span class="mipp-badge lvl-3">L3</span> falls back to scalar code on at least one target.
 
 ---
 
@@ -1377,14 +1478,14 @@ This section contains complete API reference documentation, mathematical semanti
 <a id="implementation-levels"></a>
 ## Implementation Levels & Acceleration Legend
 
-Every MIPP function is resolved against a deterministic 4-level hierarchy:
+Every MIPP function is resolved against a 4-level hierarchy (details and examples in [Implementation Levels](../user/implementation_levels.md)):
 
-| Badge | Implementation Level | Performance & Latency |
+| Badge | Implementation Level | Meaning |
 | :---: | :--- | :--- |
-| <span class="mipp-badge lvl-0">L0</span> | **Level 0 (Native Hardware)** | Optimal 1:1 hardware intrinsic mapping with minimum latency. |
-| <span class="mipp-badge lvl-1">L1</span> | **Level 1 (Dedicated Emulation)** | Target-specific multi-instruction sequence emulating missing hardware operations. |
-| <span class="mipp-badge lvl-2">L2</span> | **Level 2 (Generic Emulation)** | Portable vector AST algorithm built from other MIPP operations. |
-| <span class="mipp-badge lvl-3">L3</span> | **Level 3 (Scalar Fallback)** | Element-by-element sequential loop fallback ensuring 100% functional completeness. |
+| <span class="mipp-badge lvl-0">L0</span> | **Level 0 (Native Hardware)** | A single hardware instruction (vendor intrinsic) for this datatype and variant; the constants it uses do not count. |
+| <span class="mipp-badge lvl-1">L1</span> | **Level 1 (Dedicated Emulation)** | A sequence of intrinsics written for this ISA, where no single instruction does the job. |
+| <span class="mipp-badge lvl-2">L2</span> | **Level 2 (Generic Emulation)** | Generic code shared by the ISAs, built on other MIPP functions (in a few cases a loop over the lanes, or the identity). |
+| <span class="mipp-badge lvl-3">L3</span> | **Level 3 (Scalar Fallback)** | The registers are copied to the scalar target, which computes the elements one by one. |
 | <span class="mipp-badge lvl-na">&minus;</span> | **N/A (Not Applicable)** | Operation is not defined for this element datatype or masking variant. |
 
 ---
@@ -1443,11 +1544,13 @@ def build_arg_parser():
             "- 'funcs_support': Function Support pages ('docs/funcs_support/'), one page per function with its "
             "prototypes and support tables;\n"
             "- 'explorer': data files of the API Explorer ('docs/assets/data/mipp_api_index.json' and "
-            "'mipp_api_details.json');\n"
+            "'mipp_api_details.json') and the symbol tables of its Algorithm modal ('docs/assets/data/algo/'), "
+            "read from the generated headers: run gen_mipp_headers.py first, otherwise the tables are skipped. "
+            "It also validates the '<isa>_explorer.json' files;\n"
             "- 'dev_reference': command-line and registry reference of the Developer Guide "
             "('docs/developer/reference/cli.md' and 'docs/developer/reference/registries/');\n"
             "- 'includes': tables included in the hand-written pages ('docs/includes/generated/'): LMUL and "
-            "half-vector availability per target, datatypes, categories, 'variants' lists, the functions to write "
+            "half-vector availability per target, datatypes, categories, 'variants' lists, scalar forms, the functions to write "
             "first for a new ISA (about 30 s: the candidate resolver is run a few hundred times).\n\n"
             "All these outputs are ignored by Git."
         ),
