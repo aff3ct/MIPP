@@ -45,7 +45,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ACOSF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% acosf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -53,7 +53,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ACOSD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% acos(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -63,7 +63,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ACOSHF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% acoshf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -71,7 +71,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ACOSHD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% acosh(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -146,11 +146,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
-                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i & r1i;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -180,11 +180,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
-                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = (~r0i) & r1i;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -218,7 +218,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ASINF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% asinf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -226,7 +226,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ASIND(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% asin(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -236,7 +236,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ASINHF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% asinhf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -244,7 +244,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ASINHD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% asinh(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -254,7 +254,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ATANF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% atanf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -262,7 +262,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ATAND(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% atan(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -272,7 +272,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ATAN2F(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% atan2f(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -280,7 +280,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ATAN2D(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% atan2(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -290,7 +290,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ATANHF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% atanhf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -298,7 +298,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% ATANHD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% atanh(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -349,7 +349,7 @@
             "variants": [],
             "implem": [
                 "%vd<tr>% res;",
-                "BIT_CAST_N(res.vd, vd0.vd, %N<tr>%);",
+                "MIPP_BIT_CAST_N(res.vd, vd0.vd, %N<tr>%);",
                 "return res;"
             ]
         }
@@ -361,7 +361,7 @@
             "variants": [],
             "implem": [
                 "%vm<tr>% res;",
-                "BIT_CAST_N(res.vm, vm0.vm, %N<tr>%);",
+                "MIPP_BIT_CAST_N(res.vm, vm0.vm, %N<tr>%);",
                 "return res;"
             ]
         }
@@ -605,7 +605,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% COSF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% cosf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -613,7 +613,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% COSD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% cos(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -623,7 +623,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% COSHF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% coshf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -631,7 +631,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% COSHD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% cosh(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -746,7 +746,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% EXPF(vd0.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% expf(vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -754,7 +754,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% EXPD(vd0.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% exp(vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -1150,7 +1150,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% LOGF(vd0.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% logf(vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1158,7 +1158,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% LOGD(vd0.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% log(vd0.vd[i]) %!pred_alt!%;"
             ]
         }
     ],
@@ -1190,10 +1190,10 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
                 "r0i <<= s0;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &r0i);",
+                "MIPP_BIT_CAST_1(&resv, &r0i);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -1226,10 +1226,10 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x8000000000000000ULL;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
@@ -1240,10 +1240,10 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x80000000;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
@@ -1254,10 +1254,10 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x8000;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },
@@ -1268,10 +1268,10 @@
             "implem": [
                 "%s<c:uint|b:tp>% msk = 0x80;",
                 "%s<c:uint|b:tp>% ri;",
-                "BIT_CAST_1(&ri, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&ri, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ri & msk;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -1441,10 +1441,10 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
                 "%s<c:uint|b:tp>% resi = ~r0i;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -1474,11 +1474,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
-                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i | r1i;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -1541,7 +1541,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% POWF(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% powf(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1549,7 +1549,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% POWD(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% pow(vd0.vd[i], vd1.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1576,7 +1576,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% POWF(2.f, vd0.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% powf(2.f, vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1584,7 +1584,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-                "res.vd[i] = %!pred_cond!% POWD(2., vd0.vd[i]) %!pred_alt!%;"
+                "res.vd[i] = %!pred_cond!% pow(2., vd0.vd[i]) %!pred_alt!%;"
             ]
         },
         {
@@ -1729,10 +1729,10 @@
               "variants": [],
               "implem": [
                   "%s<c:uint|b:tp>% r0i;",
-                  "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                  "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
                   "r0i >>= s0;",
                   "%s<tr>% resv;",
-                  "BIT_CAST_1(&resv, &r0i);",
+                  "MIPP_BIT_CAST_1(&resv, &r0i);",
                   "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
               ]
           }
@@ -1763,10 +1763,10 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
                 "r0i >>= s0;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &r0i);",
+                "MIPP_BIT_CAST_1(&resv, &r0i);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -1873,7 +1873,7 @@
                   "%vm<tr>% res;",
                   "%s<c:int|b:tr>% m_tmp = s0 ? -1 : 0;",
                   "for (size_t i = 0; i < %N<tr>%; i++)",
-                  "\tBIT_CAST_1(&res.vm[i], &m_tmp);",
+                  "\tMIPP_BIT_CAST_1(&res.vm[i], &m_tmp);",
                   "return res;"
               ]
           }
@@ -1885,7 +1885,7 @@
               "variants": [],
               "implem": [
                   "%s<c:int|b:tr>% m_tmp = vals[i] ? -1 : 0;",
-                  "BIT_CAST_1(&res.vm[i], &m_tmp);"
+                  "MIPP_BIT_CAST_1(&res.vm[i], &m_tmp);"
               ]
           }
       ],
@@ -1896,7 +1896,7 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
                 "res.vm[i] = (r0i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1))) ? (%s<c:uint|b:tr>%)-1 : 0;"
             ]
         },
@@ -1915,7 +1915,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-              "res.vd[i] = %!pred_cond!% SINF(vd0.vd[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% sinf(vd0.vd[i]) %!pred_alt!%;"
             ]
           },
           {
@@ -1923,7 +1923,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-              "res.vd[i] = %!pred_cond!% SIND(vd0.vd[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% sin(vd0.vd[i]) %!pred_alt!%;"
             ]
           }
       ],
@@ -1933,7 +1933,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-              "res.vd[i] = %!pred_cond!% SINHF(vd0.vd[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% sinhf(vd0.vd[i]) %!pred_alt!%;"
             ]
           },
           {
@@ -1941,7 +1941,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-              "res.vd[i] = %!pred_cond!% SINHD(vd0.vd[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% sinh(vd0.vd[i]) %!pred_alt!%;"
             ]
           }
       ],
@@ -2188,7 +2188,7 @@
             "datatypes": "float32",
             "variants": [],
             "implem": [
-              "res.vd[i] = %!pred_cond!% TANF(vd0.vd[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% tanf(vd0.vd[i]) %!pred_alt!%;"
             ]
           },
           {
@@ -2196,7 +2196,7 @@
             "datatypes": "float64",
             "variants": [],
             "implem": [
-              "res.vd[i] = %!pred_cond!% TAND(vd0.vd[i]) %!pred_alt!%;"
+              "res.vd[i] = %!pred_cond!% tan(vd0.vd[i]) %!pred_alt!%;"
             ]
           }
       ],
@@ -2234,7 +2234,7 @@
           "datatypes": "float32",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% TANHF(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% tanhf(vd0.vd[i]) %!pred_alt!%;"
           ]
         },
         {
@@ -2242,7 +2242,7 @@
           "datatypes": "float64",
           "variants": [],
           "implem": [
-            "res.vd[i] = %!pred_cond!% TANHD(vd0.vd[i]) %!pred_alt!%;"
+            "res.vd[i] = %!pred_cond!% tanh(vd0.vd[i]) %!pred_alt!%;"
           ]
         }
     ],
@@ -2266,7 +2266,7 @@
             "variants": [],
             "implem": [
                 "%vd<tr>% res;",
-                "BIT_CAST_N(res.vd, vm0.vm, %N<tr>%);",
+                "MIPP_BIT_CAST_N(res.vd, vm0.vm, %N<tr>%);",
                 "return res;"
             ]
         }
@@ -2278,7 +2278,7 @@
             "variants": [],
             "implem": [
                 "%vm<tr>% res;",
-                "BIT_CAST_N(res.vm, vd0.vd, %N<tr>%);",
+                "MIPP_BIT_CAST_N(res.vm, vd0.vd, %N<tr>%);",
                 "for (size_t i = 0; i < %N<tr>%; i++)",
                 "\tres.vm[i] = res.vm[i] ? (%s<c:uint|b:tr>%)-1 : 0;",
                 "return res;"
@@ -2454,11 +2454,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
-                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i ^ r1i;",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         }
@@ -2480,11 +2480,11 @@
             "variants": [],
             "implem": [
                 "%s<c:uint|b:tp>% r0i, r1i;",
-                "BIT_CAST_1(&r0i, &vd0.vd[i]);",
-                "BIT_CAST_1(&r1i, &vd1.vd[i]);",
+                "MIPP_BIT_CAST_1(&r0i, &vd0.vd[i]);",
+                "MIPP_BIT_CAST_1(&r1i, &vd1.vd[i]);",
                 "%s<c:uint|b:tp>% resi = r0i ^ (r1i & ((%s<c:uint|b:tp>%)1 << (8 * sizeof(%s<c:uint|b:tp>%) - 1)));",
                 "%s<tr>% resv;",
-                "BIT_CAST_1(&resv, &resi);",
+                "MIPP_BIT_CAST_1(&resv, &resi);",
                 "res.vd[i] = %!pred_cond!% resv %!pred_alt!%;"
             ]
         },

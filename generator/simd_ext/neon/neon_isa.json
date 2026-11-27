@@ -84,8 +84,8 @@
     },
     "define": "defined(__ARM_NEON__) || defined(__ARM_NEON)",
     "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_NEON_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_NEON_H_",
+        "#ifndef MIPP_INTERNAL_NEON_COMMON_H_",
+        "#define MIPP_INTERNAL_NEON_COMMON_H_",
         "#include <arm_neon.h>"
     ],
     "hw_lmul": [],

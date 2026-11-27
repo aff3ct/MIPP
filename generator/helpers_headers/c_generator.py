@@ -594,7 +594,7 @@ def generate_c_layer(isa, include_manager, native_implems, emu_implems):
         gen_c_structures(isa, file_common, is_scalar=isa.get("is_scalar", False))
     print("", file=file_common)
 
-    print(f"#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_{isa['name'].upper()}_H_ */", file=file_common)
+    print(f"#endif /* MIPP_INTERNAL_{isa['name'].upper()}_COMMON_H_ */", file=file_common)
 
     # 3. Register and resolve hardware candidates (HW LMUL)
     copy_interfaces = copy.deepcopy(interfaces)

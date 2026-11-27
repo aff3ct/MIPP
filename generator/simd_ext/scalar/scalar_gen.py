@@ -478,8 +478,8 @@ def scalar_gen(include_manager):
     file_common = include_manager.get_fd(scalar_isa["name"], "common")
     # file = open("../include/scalar/mipp_impl_scalar_gen.h", "w")
 
-    tpl_header_scalar = """#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
-#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_
+    tpl_header_scalar = """#ifndef MIPP_INTERNAL_SCALAR_COMMON_H_
+#define MIPP_INTERNAL_SCALAR_COMMON_H_
 #include <math.h> // sqrt, sqrtf, round, roundf
 #include <string.h> // memcpy
 #include <stdint.h>
@@ -512,61 +512,11 @@ def scalar_gen(include_manager):
 	#error "MIPP_SCALAR_SIZE must be a power of two greater than or equal to 128 (bits)"
 #endif
 
-#define BIT_CAST_N(dst_ptr, src_ptr, n) \\
+#define MIPP_BIT_CAST_N(dst_ptr, src_ptr, n) \\
 	memcpy((dst_ptr), (src_ptr), (n) * sizeof(*(dst_ptr)))
 
-#define BIT_CAST_1(dst_ptr, src_ptr) \\
+#define MIPP_BIT_CAST_1(dst_ptr, src_ptr) \\
 	memcpy((dst_ptr), (src_ptr), sizeof(*(dst_ptr)))
-
-// log, exp, pow
-#include <math.h>
-
-#define EXPF(x) (expf(x))
-#define EXPD(x) (exp(x))
-#define LOGF(x) (logf(x))
-#define LOGD(x) (log(x))
-
-#define POWF(x, y) (powf(x, y))
-#define POWD(x, y) (pow(x, y))
-
-#define COSF(x) (cosf(x))
-#define COSD(x) (cos(x))
-
-#define SINF(x) (sinf(x))
-#define SIND(x) (sin(x))
-
-#define TANF(x) (tanf(x))
-#define TAND(x) (tan(x))
-
-#define ACOSF(x) (acosf(x))
-#define ACOSD(x) (acos(x))
-
-#define ASINF(x) (asinf(x))
-#define ASIND(x) (asin(x))
-
-#define ATANF(x) (atanf(x))
-#define ATAND(x) (atan(x))
-
-#define ATAN2F(x, y) (atan2f(x, y))
-#define ATAN2D(x, y) (atan2(x, y))
-
-#define COSHF(x) (coshf(x))
-#define COSHD(x) (cosh(x))
-
-#define SINHF(x) (sinhf(x))
-#define SINHD(x) (sinh(x))
-
-#define TANHF(x) (tanhf(x))
-#define TANHD(x) (tanh(x))
-
-#define ACOSHF(x) (acoshf(x))
-#define ACOSHD(x) (acosh(x))
-
-#define ASINHF(x) (asinhf(x))
-#define ASINHD(x) (asinh(x))
-
-#define ATANHF(x) (atanhf(x))
-#define ATANHD(x) (atanh(x))
 
 #ifndef MIPP_FLOAT_TYPEDEFS_
 #define MIPP_FLOAT_TYPEDEFS_
@@ -590,7 +540,7 @@ typedef double float64_t;
     ldiv = -2
     gen_c_functions_scalar(scalar_isa, include_manager, copy_interfaces, scalar_implems, lmul=ldiv)
 
-    tpl_footer_scalar = """#endif /* MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SCALAR_H_ */"""
+    tpl_footer_scalar = """#endif /* MIPP_INTERNAL_SCALAR_COMMON_H_ */"""
     j2_template = Template(tpl_footer_scalar, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     

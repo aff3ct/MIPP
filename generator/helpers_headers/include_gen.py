@@ -1217,8 +1217,8 @@ def generate_mipp_h(include_manager=None):
 
     file = open("../include/mipp.h", "w")
 
-    template_file = """#ifndef MY_INTRINSICS_PLUS_PLUS_H_
-#define MY_INTRINSICS_PLUS_PLUS_H_
+    template_file = """#ifndef MIPP_H_
+#define MIPP_H_
 #include "mipp/internal/simd_ext/scalar/c/common.h"
 #include "mipp/internal/interfaces/c/common.h"
 """
@@ -1231,7 +1231,7 @@ def generate_mipp_h(include_manager=None):
     include_list += '#include "mipp/c/utils.h"\n'
     # transpositions of an array of registers (ziplo/ziphi steps): utils_generator.py
     include_list += '#include "mipp/c/transpose.h"\n'
-    postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
+    postfix = """#endif /* MIPP_H_ */"""
 
     template_file += include_list + "\n" + postfix
 

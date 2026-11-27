@@ -52,8 +52,8 @@ The fastest start is to copy the directory of the closest ISA, rename the files 
     },
     "define": "defined(__MY_ISA__)",
     "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_MYISA_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_MYISA_H_",
+        "#ifndef MIPP_INTERNAL_MYISA_COMMON_H_",
+        "#define MIPP_INTERNAL_MYISA_COMMON_H_",
         "#include <my_isa_intrinsics.h>"
     ],
     "hw_lmul": [],

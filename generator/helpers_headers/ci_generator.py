@@ -175,8 +175,8 @@ def generate_c_interface(isa_list, include_manager=None):
     custom_prefix = _custom_prefix_generator("common", isa_list, is_common=True)
     print(custom_prefix, file=file_common)
     
-    tpl_header_interface = """#ifndef MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_
-#define MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_"""
+    tpl_header_interface = """#ifndef MIPP_INTERNAL_INTERFACE_COMMON_H_
+#define MIPP_INTERNAL_INTERFACE_COMMON_H_"""
     j2_template = Template(tpl_header_interface, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
     # use try ldiv sve
@@ -186,7 +186,7 @@ def generate_c_interface(isa_list, include_manager=None):
 
     _gen_ci_vv_aliases(file_common)
 
-    tpl_footer_interface = """#endif /* MY_INTRINSICS_PLUS_PLUS_INTERFACE_H_ */"""
+    tpl_footer_interface = """#endif /* MIPP_INTERNAL_INTERFACE_COMMON_H_ */"""
     j2_template = Template(tpl_footer_interface, undefined=StrictUndefined)
     print(j2_template.render(), file=file_common)
 

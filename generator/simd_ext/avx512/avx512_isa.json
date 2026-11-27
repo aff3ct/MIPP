@@ -123,8 +123,8 @@
     },
     "define": "defined(__MIC__) || defined(__KNCNI__) || defined(__AVX512__) || defined(__AVX512F__)",
     "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_AVX512_H_",
+        "#ifndef MIPP_INTERNAL_AVX512_COMMON_H_",
+        "#define MIPP_INTERNAL_AVX512_COMMON_H_",
         "#include <immintrin.h>",
         "#include <mipp/internal/simd_ext/avx/c/common.h> // ldiv2 support"
     ],

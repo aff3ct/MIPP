@@ -315,8 +315,8 @@
     },
     "define": "defined(__riscv_v_intrinsic)",
     "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_RVV_H_",
+        "#ifndef MIPP_INTERNAL_RVV_COMMON_H_",
+        "#define MIPP_INTERNAL_RVV_COMMON_H_",
         "#include <riscv_vector.h>",
         "#include <string.h>",
         "#include <float.h>",

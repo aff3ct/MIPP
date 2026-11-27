@@ -83,8 +83,8 @@
     },
     "define": "defined(__ARM_FEATURE_SVE)",
     "header_template": [
-        "#ifndef MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE_H_",
-        "#define MY_INTRINSICS_PLUS_PLUS_IMPL_GEN_SVE_H_",
+        "#ifndef MIPP_INTERNAL_SVE_COMMON_H_",
+        "#define MIPP_INTERNAL_SVE_COMMON_H_",
         "#ifndef __ARM_FEATURE_SVE_BITS",
         "\t#error Only -msve-vector-bits = 128-256-512-1024-2048 is supported",
         "#endif",
