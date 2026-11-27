@@ -17,7 +17,7 @@ Every push runs the whole pipeline.
 | | `generation-docs` | `./gen_mipp_headers.py --granularity fine`, then `./gen_mipp_docs.py` (the headers are read by the Algorithm modal of the API Explorer). |
 | `analysis` | `analysis-cppcheck` | `ci/analysis-cppcheck.sh` on the generated headers. |
 | `build` | `build-test-examples` | Compiles the programs of `examples/` with `-Werror`, for each target of the matrix. In fine granularity, also checks that `mipp_fine_grained.cpp` includes atomic headers only. Then compiles the code examples of the documentation (`scripts/check_doc_snippets.sh --build-only`, see [Code Examples of the User Guide](../setup.md#61-code-examples-of-the-user-guide)). |
-| | `build-test-unit` | Configures and builds the unit tests (`tests/`) for each target of the matrix. |
+| | `build-test-unit` | Configures and builds the unit tests (`tests/`) for each target of the matrix, with `-Wall -Wno-unused-function -Werror -funroll-loops -finline-functions` and the flags of the target, linked with `-static -static-libgcc -static-libstdc++`. |
 | `test` | `test-unit` | Runs `run-tests` on each target. |
 | | `test-examples` | Runs the examples and the code examples of the documentation (`--run-only`) on each target. |
 | `deploy` | `deploy-docs-html` | `mkdocs build` (without `--strict`); the site is kept as an artifact. |
@@ -40,7 +40,7 @@ The matrix is the `ARCH` list of `.matrix-linux-common`; the flags of each targe
 
 **RVV.** The C examples (and the C code examples of the documentation) are skipped on `riscv64-rvv1.0`, and the unit tests are built without unity build and precompiled headers (`-DCMAKE_UNITY_BUILD=OFF -DMIPP_PRECOMPILED_HEADERS=OFF`).
 
-**SVE.** On `armv9-sve` and `armv9-sve2`, the unit tests are also built without unity build and precompiled headers. GCC 14 stops with an internal compiler error on the SVE code, so the `gcc-14` jobs of these two targets install GCC 15 from the Ubuntu toolchain PPA and build with it (the job names keep `gcc-14`; the Docker image is unchanged). The examples are then linked with `-static-libstdc++ -static-libgcc`, because they run in another job, with the older `libstdc++` of the image.
+**SVE.** On `armv9-sve` and `armv9-sve2`, the unit tests are also built without unity build and precompiled headers. GCC 14 stops with an internal compiler error on the SVE code, so the `gcc-14` jobs of these two targets install GCC 15 from the Ubuntu toolchain PPA and build with it (the job names keep `gcc-14`; the Docker image is unchanged). The C++ programs of `examples/` are then linked with `-static-libstdc++ -static-libgcc`, because they run in another job, with the older `libstdc++` of the image. The code examples of the documentation are linked dynamically (`check_doc_snippets.sh` takes no linker flags).
 
 ---
 

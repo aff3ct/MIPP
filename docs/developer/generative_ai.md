@@ -30,7 +30,7 @@ The architecture of MIPPv2 separates what is generated from what is decided, and
 
 Each function has a scalar reference: a plain C loop that defines the expected result for every datatype and mask variant. The [test generator](internals/test_generator.md) writes, for every function, a test that runs the implementation under test and the reference on the same random inputs and compares the results lane by lane, exactly or within a documented tolerance.
 
-The same tests run for the three APIs, with two compilers and 16 targets in the [continuous integration](process/ci.md), from SSE to AVX-512, NEON, SVE and RVV.
+The tests are generated for the three APIs. The [continuous integration](process/ci.md) runs the tests of the C++ Object API (LMUL 1, LMUL 8 and the half-vectors, every mask variant) with two compilers on 16 targets, from SSE to AVX-512, NEON, SVE and RVV.
 
 This is what makes a new SIMD extension safe to add: its implementations are accepted when they agree with the reference, whoever, or whatever, wrote them. It is a test and not a proof. It covers the inputs that are drawn, in the domains the specifications give, and its strength is that of the reference itself, which is short, sequential, and reviewed by hand.
 
@@ -38,7 +38,7 @@ This is what makes a new SIMD extension safe to add: its implementations are acc
 
 ## 4. Seeing What Was Generated
 
-The [API Explorer](../explorer/index.md) is built from the generated headers themselves, not from a separate description. For a function, a datatype, a mask variant and a target, it shows:
+The [API Explorer](../explorer/index.md) does not rely on a separate description. Its levels come from the candidate resolver that writes the headers, and its Algorithm modal reads the generated headers themselves. For a function, a datatype, a mask variant and a target, it shows:
 
 - the code that is really compiled for the selected compiler flags, and its level;
 - what this code is built from: the tree of the MIPP functions it calls, down to the intrinsics;

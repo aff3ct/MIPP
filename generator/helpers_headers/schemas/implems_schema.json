@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Implementations",
-    "description": "Implementation entries of the levels 0 to 2: `simd_ext/<isa>/<isa>_native_implems.json` (Level 0), `simd_ext/<isa>/<isa>_emu_implems.json` (Level 1) and, for every ISA, `helpers_headers/generic_emu_implems.json`, `generic_emu_implems_mask.json` (masked variants) and `generic_emu_implems_lmulh.json` (horizontal functions with LMUL > 1) (Level 2). Each function maps to a list of candidate entries. For each datatype, mask variant and preprocessor condition, the [candidate resolver](../../internals/code_generation.md) keeps the lowest level whose dependencies are available.\n\nChecked when the file is loaded: the functions and the datatypes exist in the interfaces and in the ISA descriptor, and every `template` / `template_ref` resolves. The `levels`, `dead-code` and `duplicates` audits check the placement and the overlaps of the entries.",
+    "description": "Implementation entries of the levels 0 to 2: `simd_ext/<isa>/<isa>_native_implems.json` (Level 0), `simd_ext/<isa>/<isa>_emu_implems.json` (Level 1) and, for every ISA, `helpers_headers/generic_emu_implems.json`, `generic_emu_implems_mask.json` (masked variants) and `generic_emu_implems_lmulh.json` (horizontal functions with LMUL > 1) (Level 2). Each function maps to a list of candidate entries. For each datatype, mask variant and preprocessor condition, the [candidate resolver](../../internals/code_generation.md) keeps the lowest level whose dependencies are available. The bodies of the [immediate versions](../../internals/code_generation.md#53-immediate-versions) of an ISA, `simd_ext/<isa>/<isa>_imm_implems.json` (optional), use the same format.\n\nChecked when the file is loaded: the functions and the datatypes exist in the interfaces and in the ISA descriptor, and every `template` / `template_ref` resolves. The `levels`, `dead-code` and `duplicates` audits check the placement and the overlaps of the entries.",
     "examples": [
         {
             "div": [
@@ -105,7 +105,7 @@
                     "type": "string"
                 },
                 "variant": {
-                    "description": "`m`, `z` or `s`: the entry implements this mask variant (merge, zero, scalar-merge). Without it, the entry implements the unmasked variant `u`.",
+                    "description": "`m`, `z` or `s`: the entry implements this mask variant (Merge-Masked, Zero-Masked, Source-Masked). Without it, the entry implements the unmasked variant `u`.",
                     "type": "string",
                     "enum": [
                         "m",

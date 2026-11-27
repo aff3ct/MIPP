@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Scalar Implementations",
-    "description": "Reference implementations of the functions. They define what each function computes: they are the code of the scalar ISA, the Level 3 fallback of the other ISAs, and the reference of the generated tests. A function can have several entries that split its datatypes or its mask variants.\n\nChecked when the file is loaded: every datatype and mask variant of a declared function is covered by an entry. The entries of an undeclared function get a `dead-code` warning.",
+    "description": "Reference implementations of the functions. They define what each function computes: they are the code of the scalar ISA, the Level 3 fallback of the other ISAs, and the reference of the generated tests. A function can have several entries that split its datatypes or its mask variants.\n\nChecked when the file is loaded: every declared function has entries, every datatype of a function is covered by an entry, and a function that is not declared in `registry_interfaces.json` is a blocking error. Before the code generation, `gen_mipp_headers.py` also checks that every mask variant of a function is covered by an entry.",
     "examples": [
         {
             "absdiff": [
@@ -49,7 +49,7 @@
                     }
                 },
                 "implem": {
-                    "description": "Code, as a string or a list of lines, in the [templating DSL](../templating_dsl.md). `%!pred_cond!%` and `%!pred_alt!%` implement the mask variants.",
+                    "description": "Code, as a string or a list of lines, in the [templating DSL](../templating_dsl.md). `%!pred_cond!%` and `%!pred_alt!%` implement the mask variants ([Predication of the Scalar Implementations](../templating_dsl.md#61-predication-of-the-scalar-implementations)).",
                     "anyOf": [
                         {
                             "type": "string"

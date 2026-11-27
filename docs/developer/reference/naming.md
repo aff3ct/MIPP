@@ -71,7 +71,7 @@ This is the style of the intrinsics (`unpacklo`, `vslideup`) and of MIPPv1 (`int
 | Modifier | Meaning | Examples |
 | :--- | :--- | :--- |
 | `_k` | the function on masks | `andb_k`, `set1_k`, `lo_k`, `combine_k`, `cast_k` |
-| `_vs`, `_sv`, `_vsv`, `_vvs` | [scalar forms](../../user/scalar_forms.md): one letter per operand, `v` (register) or `s` (scalar) | `sub_vs`, `sub_sv`, `fmadd_vsv` |
+| `_vs`, `_sv`, `_vsv`, `_vvs`, `_vss` | [scalar forms](../../user/scalar_forms.md): one letter per operand, `v` (register) or `s` (scalar) | `sub_vs`, `sub_sv`, `fmadd_vsv`, `clamp_vss` |
 | `_b128` | the operation in each block of 128 bits | `ziplo_b128`, `slide_b128`, `bcast_b128` |
 | `_mask`, `_maskz`, `_masks` (C) | the [mask variants](../../user/masking_semantics.md) (`mipp::M`, `Z`, `S` in C++) | `mipp_add_float32_maskz` |
 | `_m2`, `_m4`, `_m8`, `_d2` (C) | the LMUL of the arguments (none for LMUL 1) | `mipp_add_float32_m2` |
@@ -123,6 +123,7 @@ The parameters are named by kind, each kind with its own counter:
 | scalar | `s0`, `s1`... | `rshift_vs(vd0, s0)` |
 | pointer | `p0`, `p1`... | `storeu(p0, vd0)` |
 | source register of the `masks` variant | `vdsrc` | `sub<S>(vm0, vdsrc, vd0, vd1)` |
+| values of `set` (one per lane) | `vals` | `set(vals)` |
 
 These names appear in the prototypes of the three APIs, in the reference pages and in the templates. In the generated code, the copies of a parameter take a prefix: `s_vd0` (to the scalar ISA, in the scalar fallback), `w_vd0` (to the LMUL 1 register, in the half-vectors by mask).
 

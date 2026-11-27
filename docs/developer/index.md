@@ -2,7 +2,7 @@
 
 This guide is for contributors who add functions, implementations or targets to MIPP, or who work on the generators themselves. To use MIPP in an application, read the [User Guide](../user/getting_started.md) instead.
 
-MIPP has no hand-written vector code. The headers in `include/`, the unit tests in `tests/src/` and the reference pages of this site are **generated** from a database of JSON files in `generator/`. Contributing to MIPP means editing that database, then regenerating.
+MIPP has no hand-written vector code. The headers in `include/`, the unit tests in `tests/src/{c,cpp,obj}/` and the reference pages of this site are **generated** from a database of JSON files in `generator/`. Contributing to MIPP means editing that database, then regenerating. The only hand-written tests are in `tests/src/manual/`, with the helpers of `tests/src/utils/` and `tests/src/main.cpp` (see [Unit Tests](setup.md#32-unit-tests)).
 
 | I want to... | Read |
 | :--- | :--- |
@@ -33,7 +33,7 @@ MIPP has no hand-written vector code. The headers in `include/`, the unit tests 
 
 These rules hold for the whole code base. The tutorials rely on them.
 
-- **Generated files are never edited.** `include/`, `tests/src/{c,cpp,obj}/`, `docs/funcs_support/`, `docs/isas_support/`, `docs/assets/data/`, `docs/developer/reference/cli.md` and `docs/developer/reference/registries/` are ignored by Git and overwritten at each generation. Fix the JSON input or the generator instead.
+- **Generated files are never edited.** `include/`, `tests/src/{c,cpp,obj}/`, `docs/funcs_support/`, `docs/isas_support/`, `docs/assets/data/`, `docs/includes/generated/`, `docs/developer/reference/cli.md` and `docs/developer/reference/registries/` are ignored by Git and overwritten at each generation. Fix the JSON input or the generator instead.
 - **The scalar reference is the specification.** Every declared function has a scalar implementation for exactly its declared datatypes, otherwise the generator stops. This implementation is both the <span class="mipp-isa-badge lvl-3">L3</span> fallback and the reference of every generated test.
 - **Every combination exists on every generated ISA.** If no <span class="mipp-isa-badge lvl-0">L0</span>, <span class="mipp-isa-badge lvl-1">L1</span> or <span class="mipp-isa-badge lvl-2">L2</span> candidate applies, the resolver emits the <span class="mipp-isa-badge lvl-3">L3</span> fallback, which converts the registers to scalar arrays and calls the scalar reference. The exceptions are a few functions on 64-bit elements in some configurations (`float64` on ARMv7 NEON, 64-bit elements on RVV with `ELEN` < 64): they compile, but stop at run time when called, with a `MIPP_PANIC_STUB` message. [Known Limitations](../user/implementation_levels.md#5-known-limitations) lists them.
 - **Conditions split, they do not replace.** An entry with an `if` condition is emitted under `#if <condition>`. For the rest of the condition space, the resolver keeps looking for another candidate. For instance, an AArch64-only native entry gives <span class="mipp-isa-badge lvl-0">L0</span> under `#if defined(__aarch64__)` and the <span class="mipp-isa-badge lvl-3">L3</span> fallback under `#if !defined(__aarch64__)`.
@@ -69,13 +69,14 @@ All the generators are run from this directory (see [Setup](setup.md)).
 
 ```text
 generator/
-├── gen_mipp_headers.py              # Header generator (C, C++ Functional, C++ Object)
+├── gen_mipp_headers.py              # Header generator (C, C++ Functional, C++ Object), public per-function headers
 ├── gen_mipp_tests.py                # Test generator (Catch2 sources in tests/src/)
 ├── gen_mipp_docs.py                 # Generated pages of the documentation
 ├── gen_mipp_api_data.py             # API Explorer data (called by gen_mipp_docs.py)
 ├── requirements.txt                 # Python dependencies (Jinja2, jsonschema, colorama)
 │
-├── helpers_docs/                    # Developer Guide reference: CLI (argparse) and Registries (schemas)
+├── helpers_docs/                    # Helpers of gen_mipp_docs.py: CLI and Registries reference, Algorithm modal data,
+│                                    # tables of the hand-written pages, test properties of the Function Support pages
 │
 ├── helpers_headers/                 # Header generation engine and core registries
 │   ├── registry_interfaces.json     # Declaration of every function
@@ -85,7 +86,8 @@ generator/
 │   ├── registry_scalar_isa.json     # Descriptor of the scalar target
 │   ├── generic_emu_templates*.json  # Generic emulation templates (Level 2)
 │   ├── generic_emu_implems*.json    # Generic emulation entries (Level 2)
-│   ├── generic_ldiv_mask.json       # Generic half-vector and LMUL-changing templates (lo, hi, combine, wcvt, ncvt)
+│   ├── generic_ldiv_mask.json       # Generic half-vector templates: LMUL-changing functions (lo, hi, combine, wcvt,
+│   │                                # ncvt, ncvts, the _k versions), d2 loads, stores, gather, scatter, reductions, tests
 │   ├── funcs_docs.json              # Function descriptions and formulas
 │   ├── jinja_keywords.json          # Jinja2 keywords (not parsed as DSL placeholders)
 │   ├── schemas/                     # JSON Schemas of all the registries and ISA files
@@ -95,19 +97,23 @@ generator/
 │   ├── input_validation.py          # Validation checks and header audits
 │   ├── tools.py                     # DSL parsing, datatype aliases, ISA loading
 │   ├── datatypes.py                 # Datatypes, categories and datatype pairs
+│   ├── forms.py                     # Scalar forms (add_vs, ...), derived when the registry is loaded
+│   ├── luts.py                      # Constant tables computed for the templates (compress_lut)
 │   ├── name_builder.py              # Function names, prototypes and call arguments
 │   ├── cond_utils.py                # Preprocessor condition parsing and simplification
 │   ├── include_gen.py               # IncludeManager: header layout and dependencies
 │   ├── c_generator.py               # Per-ISA C implementation headers
 │   ├── ci_generator.py              # C API dispatch headers
 │   ├── cpp_generator.py             # C++ Functional API (namespace mipp)
-│   └── obj_generator.py             # C++ Object API (Vd, Vm) and public per-function headers
+│   └── obj_generator.py             # C++ Object API (Vd, Vm) and its internal per-function headers
 │
 ├── helpers_tests/                   # Test generation engine
 │   ├── tests_builder.py             # Test engine and test audits
 │   ├── dialect_adapters.py          # C, C++ Functional and C++ Object syntax adapters
 │   ├── domain_resolver.py           # Input domains and mask patterns
 │   ├── indexed_tests.py             # Tests of the indexed accesses (gather, scatter)
+│   ├── perm_tests.py                # Tests of permute, permute2, permute_b128, compress, expand, storeu_compress,
+│   │                                # storeuf_compress and loadu_expand
 │   ├── tests_specs.json             # Per-function test properties
 │   ├── tests_templates.json         # Test code templates
 │   └── schemas/                     # JSON Schemas of the two files above
@@ -122,4 +128,4 @@ generator/
     └── rvv/                         # RISC-V Vector 1.0
 ```
 
-Each ISA directory holds `<isa>_isa.json`, `<isa>_native_templates.json` and `<isa>_native_implems.json`, plus the optional `<isa>_emu_*.json` (<span class="mipp-isa-badge lvl-1">L1</span>), `<isa>_ldiv_mask.json` (half-vectors and functions that change the LMUL), `<isa>_sw_lmul.json` (`wcvt` / `ncvt` of the software LMUL written by the ISA) and `<isa>_explorer.json` (API Explorer metadata). See [Add an ISA](tutorials/add_isa.md).
+Each ISA directory holds `<isa>_isa.json`, `<isa>_native_templates.json` and `<isa>_native_implems.json`, plus the optional `<isa>_emu_*.json` (<span class="mipp-isa-badge lvl-1">L1</span>), `<isa>_imm_templates.json` and `<isa>_imm_implems.json` (bodies for a constant integer argument), `<isa>_ldiv_mask.json` (half-vectors and functions that change the LMUL), `<isa>_sw_lmul.json` (`wcvt` / `ncvt` of the software LMUL written by the ISA) and `<isa>_explorer.json` (API Explorer metadata). See [Add an ISA](tutorials/add_isa.md).

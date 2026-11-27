@@ -29,11 +29,11 @@ PAGES = [
      ["simd_ext/<isa>/<isa>_isa.json", "helpers_headers/registry_scalar_isa.json"], "json"),
     ("implems", "helpers_headers/schemas/implems_schema.json",
      ["simd_ext/<isa>/<isa>_native_implems.json", "simd_ext/<isa>/<isa>_emu_implems.json",
-      "helpers_headers/generic_emu_implems.json", "helpers_headers/generic_emu_implems_mask.json",
+      "simd_ext/<isa>/<isa>_imm_implems.json", "helpers_headers/generic_emu_implems.json", "helpers_headers/generic_emu_implems_mask.json",
       "helpers_headers/generic_emu_implems_lmulh.json"], "json"),
     ("templates", "helpers_headers/schemas/templates_schema.json",
      ["simd_ext/<isa>/<isa>_native_templates.json", "simd_ext/<isa>/<isa>_emu_templates.json",
-      "helpers_headers/generic_emu_templates.json", "helpers_headers/generic_emu_templates_mask.json",
+      "simd_ext/<isa>/<isa>_imm_templates.json", "helpers_headers/generic_emu_templates.json", "helpers_headers/generic_emu_templates_mask.json",
       "helpers_headers/generic_emu_templates_lmulh.json"], "mipp-json"),
     ("ldiv_mask", "helpers_headers/schemas/ldiv_mask_schema.json",
      ["simd_ext/<isa>/<isa>_ldiv_mask.json", "helpers_headers/generic_ldiv_mask.json"], "mipp-json"),
@@ -50,7 +50,12 @@ PAGES = [
 # JSON files of generator/ without a schema
 UNVALIDATED = [
     ("helpers_headers/funcs_docs.json",
-     "Description and LaTeX formula of each function, for the Function Support pages and the API Explorer."),
+     "Description and LaTeX formula of each function, for the Function Support pages and the API Explorer, and "
+     "optionally (`variants`) the behaviour of the inactive lanes of each mask variant, when the default text of "
+     "the Function Support pages does not fit the function."),
+    ("helpers_headers/registry_utilities.json",
+     "Utilities of the API Explorer (category `utilities`): the functions written by hand in "
+     "`helpers_headers/templates/` (`utils_generator.py`), outside the registry. Read by `gen_mipp_api_data.py`."),
     ("helpers_headers/jinja_keywords.json",
      "Jinja2 keywords ignored when the dependencies of a template are extracted from its `%...%` markers."),
 ]

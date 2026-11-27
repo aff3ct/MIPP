@@ -80,7 +80,7 @@ The code is rendered by Jinja2 with these variables:
 | `instr_name` | The `instr_name` of the entry. |
 | `isa_dt_par`, `isa_dt_ret` | The datatype entry of the ISA descriptor, for the parameter and the return types: `data_ext` (`f32`, `s32`, `ps`, `epi32`, ...), `reg`, `msk`, ... |
 | `dt_par`, `dt_ret` | The generic description of the datatypes, from `datatypes` in `tools.py`: `name`, `n_bits`, `category`, `cstd`, `log2_n_bytes` (log2 of the size in bytes: a shift instead of a multiplication by `sizeof`), ... |
-| `cstdint_ret` | The C type of the return datatype (`int32_t`, `float`, ...). |
+| `cstdint_ret` | The C type of the return datatype, the `cstd` of `dt_ret` (`int32_t`, `float32_t`, ...). |
 | `func_name` | The MIPP function name (`absdiff`), useful in templates shared by several functions. |
 | `lmul`, `mask_kind` | The LMUL and the mask variant being generated. |
 | `compress_lut(lanes, units, fill)` | A function (`helpers_headers/luts.py`) that computes the constant table of a `compress` by permutation and returns its C initializer: `static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=128) }};` (SSSE3 `pshufb`, 32-bit lanes). The tables of the templates are computed there at generation time, not written in the JSON files. |
@@ -136,7 +136,7 @@ static inline vd_avx_float32_m1_t mipp_avx_absdiff_float32_m1(const vd_avx_float
 }
 ```
 
-The <span class="mipp-isa-badge lvl-0">L0</span> entries of step 1 have priority on NEON: the generic template only fills the gaps (`int64` and `uint64`).
+On NEON, the <span class="mipp-isa-badge lvl-0">L0</span> entries of step 1 have priority over the generic template: it only fills the gaps (`int64` and `uint64`).
 
 `template_ref` names a template of another file, with a prefix:
 
@@ -146,7 +146,7 @@ The <span class="mipp-isa-badge lvl-0">L0</span> entries of step 1 have priority
 | `tpl_mask_generic_emu.` | `generic_emu_templates_mask.json` | `generic_emu_implems_mask.json` |
 | `tpl_horiz_lmul_generic_emu.` | `generic_emu_templates_lmulh.json` | `generic_emu_implems_lmulh.json` |
 
-The `lmulh` files combine the registers of an LMUL > 1 group for horizontal functions (reductions).
+The `lmulh` files combine the registers of an LMUL > 1 group for the horizontal functions (reductions) and the lane-crossing functions (`reverse`, `slide`, `ziplo`...), whose result cannot be computed on each register of the group alone.
 
 !!! note "A generic template is only as fast as its dependencies"
     The resolver uses an <span class="mipp-isa-badge lvl-2">L2</span> template only where the functions it calls exist. When one of them is itself an <span class="mipp-isa-badge lvl-3">L3</span> fallback, the scalar fallback of `absdiff` is used instead, or the generic code is reported as <span class="mipp-isa-badge lvl-3">L3</span> (see [Invariants](../index.md#2-invariants)). Check the result with the methods of [step 4](#step-4-check-the-levels).
@@ -217,9 +217,9 @@ The `absdiff` of this tutorial (LMUL 1, unmasked) gives:
 | :--- | :--- | :--- | :--- |
 | NEON | `float32`, 8/16/32-bit integers; `float64` on AArch64 | `int64`, `uint64` | `float64` on ARMv7 |
 | AVX | | all the datatypes | |
-| SSE | | all the datatypes | |
+| SSE | | all the datatypes (from SSE2 on) | every datatype but `float32` without SSE2 |
 
-The masked variants are <span class="mipp-isa-badge lvl-2">L2</span> wherever the unmasked function is <span class="mipp-isa-badge lvl-0">L0</span> or <span class="mipp-isa-badge lvl-2">L2</span>, and <span class="mipp-isa-badge lvl-3">L3</span> elsewhere. On x86, `absdiff` is <span class="mipp-isa-badge lvl-2">L2</span> for every datatype: where the ISA has no `max` / `min` instruction (64-bit integers before AVX-512, some 8/16/32-bit integers before SSE4.1), `max` and `min` are themselves dedicated or generic emulations (compare and `select`), not scalar fallbacks.
+The masked variants are <span class="mipp-isa-badge lvl-2">L2</span> wherever the unmasked function is <span class="mipp-isa-badge lvl-0">L0</span> or <span class="mipp-isa-badge lvl-2">L2</span>, and <span class="mipp-isa-badge lvl-3">L3</span> elsewhere. On x86 from SSE2 on, `absdiff` is <span class="mipp-isa-badge lvl-2">L2</span> for every datatype: where the ISA has no `max` / `min` instruction (64-bit integers before AVX-512, some 8/16/32-bit integers before SSE4.1), `max` and `min` are themselves dedicated or generic emulations (compare and `select`), not scalar fallbacks.
 
 Then run the tests on each target you changed (see [Setup](../setup.md#4-build-and-run-the-unit-tests)). On NEON the first run fails for `int32` and `int64`: the [test properties](add_function.md#step-6-set-the-test-properties) of `absdiff` must keep the signed differences in range.
 
@@ -273,7 +273,7 @@ The fields are the same in all the `*_implems.json` files. The complete referenc
 | `instr_name` | String passed to the template as `instr_name`. |
 | `if` | Preprocessor condition. The entry is emitted under `#if <condition>`; the rest of the condition space goes to the next candidate. |
 | `variant` | `m`, `z` or `s`: the entry implements this mask variant (without it, the unmasked variant `u`). |
-| `mode` | `horiz_lmul`: the entry implements an LMUL > 1 horizontal function. It is not a mask variant. |
+| `mode` | `horiz_lmul`: the entry implements an LMUL > 1 horizontal or lane-crossing function (`generic_emu_implems_lmulh.json`). It is not a mask variant. |
 | `preferred_simd_ext` | ISA or list of ISAs. Among the candidates of the same level, the entry is tried first on these ISAs and last on the others. Used to choose between several generic entries. |
 | `simd_size` | Register size or list of sizes (in bits, after LMUL) for which the entry applies, e.g. `128`. |
 | `skip_audit_level`, `skip_audit_level_reason` | Disable the `levels` audit for this entry, with a reason. |

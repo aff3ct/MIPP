@@ -23,6 +23,7 @@ Create `simd_ext/myisa/`. The directory name is the ISA name. It holds:
 | `myisa_native_templates.json` | Yes | <span class="mipp-isa-badge lvl-0">L0</span> templates (may be `{}` at first). |
 | `myisa_native_implems.json` | Yes | <span class="mipp-isa-badge lvl-0">L0</span> entries (may be `{}` at first). |
 | `myisa_emu_templates.json`, `myisa_emu_implems.json` | No | <span class="mipp-isa-badge lvl-1">L1</span> templates and entries. |
+| `myisa_imm_templates.json`, `myisa_imm_implems.json` | No | Bodies used when an integer argument is a constant (immediate instructions), loaded only if both files exist ([Immediate Versions](../internals/code_generation.md#53-immediate-versions)). |
 | `myisa_ldiv_mask.json` | No | Half-vector (`d2`) specializations and the functions that change the LMUL ([step 4](#half-vectors-and-functions-that-change-the-lmul)). |
 | `myisa_sw_lmul.json` | No | `wcvt` (`m1` → `m2`) and `ncvt` (`m2` → `m1`) written by the ISA for its software LMUL registers ([step 4](#half-vectors-and-functions-that-change-the-lmul)). |
 | `myisa_explorer.json` | No | Metadata for the API Explorer ([step 5](#step-5-describe-the-isa-for-the-api-explorer)). |
@@ -85,10 +86,10 @@ The `...` stands for the nine other datatypes: the descriptor must have an entry
 | `header_template` | First lines of the generated ISA header: include guard and intrinsics header. |
 | `mipp_definitions` | Macros defined for the users when the ISA is selected (`MIPP_64BIT`, `MIPP_BW`, ...). |
 | `info_names` | Optional. Name printed by `mipp_info()`: the first entry whose `if` condition holds; the entry without `if` is the default and must be last. Without this field, the upper-case `name` is printed. |
-| `sw_ldiv_type` | How the half-vectors of `sw_lmul` are built: `"mask"` (the LMUL = 1 register, upper lanes ignored: SSE, NEON, SVE) or `"sub_isa"` (a register of the parent ISA: AVX, AVX-512). |
-| `sub_isa` | Optional. Parent ISA: the derived ISA is tested before its parent, and `--simd-ext` pulls in the parent. With `"sw_ldiv_type": "sub_isa"`, the half-vectors use the parent's registers (AVX `d2` uses SSE registers). With `"sw_ldiv_type": "mask"` and `-2` in `sw_lmul`, no parent is needed: the half-vectors reuse the LMUL = 1 register and ignore the upper lanes (optional per-ISA optimizations in `<isa>_ldiv_mask.json`). |
+| `sw_ldiv_type` | How the half-vectors of `sw_lmul` are built: `"mask"` (the LMUL = 1 register, upper lanes ignored: SSE, NEON, SVE) or `"sub_isa"` (a register of the parent ISA: AVX, AVX-512). The default, `"native"`, builds no half-vector in software: `-2` is then only allowed in `hw_lmul` (RVV). |
+| `sub_isa` | Optional. Parent ISA: the derived ISA is tested before its parent, and `--simd-ext` pulls in the parent. With `"sw_ldiv_type": "sub_isa"`, the half-vectors use the parent's registers (AVX `d2` uses SSE registers), and `size` must be twice the `size` of the parent. With `"sw_ldiv_type": "mask"` and `-2` in `sw_lmul`, no parent is needed: the half-vectors reuse the LMUL = 1 register and ignore the upper lanes (optional per-ISA optimizations in `<isa>_ldiv_mask.json`). |
 
-The other fields (hardware masks, scalable layouts, ...) are described in [ISA Descriptor](../reference/registries/isa.md). The descriptor is validated against `helpers_headers/schemas/isa_schema.json`; the cross-field rules (existing `sub_isa`, `-2` and `sw_ldiv_type`, default `info_names` entry) stop the generator on the first violation.
+The other fields (hardware masks, scalable layouts, ...) are described in [ISA Descriptor](../reference/registries/isa.md). The descriptor is validated against `helpers_headers/schemas/isa_schema.json`; the cross-field rules (existing `sub_isa`, `-2` and `sw_ldiv_type`, `size` twice the size of the `sub_isa`, default `info_names` entry) stop the generator on the first violation.
 
 ---
 
@@ -146,11 +147,11 @@ Watch the audits at each generation: they report entries placed at the wrong lev
 
 ### Half-vectors and functions that change the LMUL
 
-`lo`, `hi`, `combine`, `wcvt` and `ncvt` return a register of another LMUL than their arguments (`ret.lmul` in `registry_protos.json`). Their templates, and the half-vector specializations, go to `<isa>_ldiv_mask.json` ([Half-Vector Templates](../reference/registries/ldiv_mask.md)). What an ISA must provide depends on its descriptor:
+`lo`, `hi`, `combine`, `wcvt`, `ncvt` and `ncvts` return a register of another LMUL than their arguments (`ret.lmul` in `registry_protos.json`). Their templates, and the half-vector specializations, go to `<isa>_ldiv_mask.json` ([Half-Vector Templates](../reference/registries/ldiv_mask.md)). What an ISA must provide depends on its descriptor:
 
 - **LMUL ≥ 2** (`sw_lmul` without a hardware group): nothing to write. `lo` and `hi` return one half of the register group, `combine` joins two registers, and `wcvt` / `ncvt` apply the conversion to each half. When the ISA converts a whole register into two (or two into one) better than through `lo` / `hi` and `combine`, write `wcvt` (`m1` → `m2`, the result has the registers `res.lo` and `res.hi`) and `ncvt` (`m2` → `m1`, the argument has `vd0.lo` and `vd0.hi`) in `<isa>_sw_lmul.json` ([Software LMUL Templates](../reference/registries/sw_lmul.md)); see `simd_ext/sve/sve_sw_lmul.json`.
-- **Between `m1` and `d2`** with `"sw_ldiv_type": "mask"`: add `lo` and `hi` (`m1` to `d2`) and `combine` (`d2` to `m1`) to `<isa>_ldiv_mask.json`, with the intrinsics of the ISA and, if needed, an `if` condition (`defined(__SSE4_1__)`). Without an entry, or when the condition does not hold, the generic version of `generic_ldiv_mask.json` is used (level L3, through a buffer). `wcvt` (`d2` to `m1`) and `ncvt` (`m1` to `d2`) are templates of the generic file that an ISA can override the same way.
-- **Between `m1` and `d2`** with `"sw_ldiv_type": "sub_isa"` (the `d2` is a register of the parent ISA, e.g. an SSE register for AVX): the generic file does not apply, since the two registers have different types. Write all of `lo`, `hi`, `combine`, `lo_k`, `hi_k`, `combine_k`, `wcvt` and `ncvt` in `<isa>_ldiv_mask.json` (see `simd_ext/avx/avx_ldiv_mask.json`); the generator reports an error if a template is missing. The fallbacks of `wcvt` / `ncvt` go through a buffer (level L3). Without a `<isa>_ldiv_mask.json`, nothing is provided between `m1` and `d2`.
+- **Between `m1` and `d2`** with `"sw_ldiv_type": "mask"`: add `lo` and `hi` (`m1` to `d2`) and `combine` (`d2` to `m1`) to `<isa>_ldiv_mask.json`, with the intrinsics of the ISA and, if needed, an `if` condition (`defined(__SSE4_1__)`). Without an entry, or when the condition does not hold, the generic version of `generic_ldiv_mask.json` is used: a register copy for `lo` and `lo_k` (level L0), a copy through a buffer for `hi`, `combine`, `hi_k` and `combine_k` (level L3). `wcvt` (`d2` to `m1`), `ncvt` and `ncvts` (`m1` to `d2`) are templates of the generic file (level L3) that an ISA can override the same way.
+- **Between `m1` and `d2`** with `"sw_ldiv_type": "sub_isa"` (the `d2` is a register of the parent ISA, e.g. an SSE register for AVX): the generic file does not apply, since the two registers have different types. Write all of `lo`, `hi`, `combine`, `lo_k`, `hi_k`, `combine_k`, `wcvt`, `ncvt` and `ncvts` in `<isa>_ldiv_mask.json` (see `simd_ext/avx/avx_ldiv_mask.json`); the generator reports an error if a template is missing. The fallbacks of `wcvt`, `ncvt` and `ncvts` go through a buffer (level L3). Without a `<isa>_ldiv_mask.json`, nothing is provided between `m1` and `d2`.
 - **Hardware groups** (RVV: `-2` and several LMULs in `hw_lmul`): one template per function in `<isa>_ldiv_mask.json` (see `simd_ext/rvv/rvv_ldiv_mask.json`) is rendered for every pair of consecutive hardware LMULs (`d2` to `m1`, `m1` to `m2`, ...). The template reads `ctx.lmul_in`, `ctx.lmul_out` and `ctx.ext(dt, lmul)` (the `data_ext` of the datatype at that LMUL, such as `i32mf2`) and branches on them. The masks (`lo_k`, `hi_k`, `combine_k`) go through a vector: the mask is turned into a vector of `-1` / `0` (`vmerge`), the data operation is applied, and the result is turned back into a mask (`vmsne`); the 64-bit `d2` masks, which are C arrays, are filled or read with `vse64` / `vle64`. The tests are not generated for the functions that are not provided (see [Test Generator](../internals/test_generator.md)).
 
 The generated test of each function is protected by `#if defined(MIPP_<ISA>)` for the ISAs that provide it, so that adding an entry to `<isa>_ldiv_mask.json` is enough to have it tested.
@@ -164,23 +165,24 @@ The generated test of each function is protected by `#if defined(MIPP_<ISA>)` fo
 ```json
 {
     "$schema": "../../helpers_headers/schemas/explorer_isa_schema.json",
-    "name": "sse",
-    "display_name": "SSE",
-    "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
-    "order": 10,
-    "headers": ["<immintrin.h>"],
     "compiler": { "id": "cg142", "arch": "x86", "label": "x86-64 GCC", "base_flags": "-O3" },
+    "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
+    "display_name": "SSE",
     "features": {
-        "mode": "hierarchy",
+        "mode": "mixed",
         "default": "SSE4.2",
         "items": [
-            { "id": "SSE2", "label": "SSE2", "define": "__SSE2__", "flag": "-msse2", "default": true, "locked": false, "description": "Streaming SIMD Extensions 2" }
+            { "id": "SSE2", "label": "SSE2", "define": "__SSE2__", "flag": "-msse2", "type": "tier", "default": true, "locked": false, "description": "Streaming SIMD Extensions 2" },
+            { "id": "FMA", "label": "FMA", "define": "__FMA__", "flag": "-mfma", "type": "flag", "default": false, "locked": false, "description": "Fused Multiply-Add (FMA3) on 128-bit registers: a CPU that also has AVX" }
         ]
-    }
+    },
+    "headers": ["<immintrin.h>"],
+    "name": "sse",
+    "order": 10
 }
 ```
 
-`compiler.id` is a Compiler Explorer compiler identifier; `features` lists the extensions the user can toggle, with their macro and compiler flag. All the fields are described in [Explorer Metadata](../reference/registries/explorer_isa.md).
+The real file lists more items. `compiler.id` is a Compiler Explorer compiler identifier; `features` lists the extensions the user can toggle, with their macro and compiler flag. In `"mixed"` mode, the `"tier"` items are ordered levels (selecting one enables the ones before it) and the `"flag"` items are independent toggles. All the fields are described in [Explorer Metadata](../reference/registries/explorer_isa.md).
 
 ---
 
@@ -193,7 +195,7 @@ Then add the target to the CI:
 - `.gitlab-ci.yml`:
     - add `myisa` to the `--simd-ext` list of the `generation-headers` job;
     - add an architecture name (e.g. `myisa-v1`) to the `ARCH` list of `.matrix-linux-common`, and a rule in `.build-common` that maps it to the compiler flags (`SIMD_EXT: "-mmyisa"`);
-    - the build jobs run in the image `registry.gitlab.com/aff3ct/aff3ct/mipp_linux:<compiler>_<arch>` on a runner tagged with the architecture name: both must exist;
+    - the build jobs run in the image `registry.gitlab.com/aff3ct/aff3ct/mipp_linux:<compiler>_<arch>` on a runner tagged with the architecture name: both must exist. Create the image tags of the new architecture (`gcc-14_myisa-v1` and `clang-20_myisa-v1`) from the image of its host architecture with `docker tag`, and push them with `docker push`, as described in `ci/docker/README.md`;
 - `.github/workflows/ci.yml`: add `myisa` to the `--simd-ext` list of the generation step, so that the released headers include the new target.
 
 The existing targets and their flags are listed in [Targets and Flags](../process/ci.md#11-targets-and-flags); the jobs are described in [Continuous Integration](../process/ci.md).

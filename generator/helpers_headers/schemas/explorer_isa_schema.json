@@ -2,6 +2,59 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "title": "Explorer Metadata",
     "description": "Presentation of an ISA in the [API Explorer](../../../explorer/index.md), in `simd_ext/<isa>/<isa>_explorer.json`: display name and order, Compiler Explorer (Godbolt) settings, and the feature tiers or flags that the user can toggle. Read by `gen_mipp_api_data.py`, which validates it and copies it into `docs/assets/data/mipp_api_index.json`.",
+    "examples": [
+        {
+            "compiler": {
+                "id": "cg142",
+                "arch": "x86",
+                "label": "x86-64 GCC",
+                "base_flags": "-O3"
+            },
+            "description": "Streaming SIMD Extensions (x86 / x86-64 128-bit vector extensions)",
+            "display_name": "SSE",
+            "features": {
+                "mode": "mixed",
+                "default": "SSE4.2",
+                "items": [
+                    {
+                        "id": "SSE",
+                        "label": "SSE",
+                        "define": "__SSE__",
+                        "flag": "-msse",
+                        "type": "tier",
+                        "default": true,
+                        "locked": true,
+                        "description": "Streaming SIMD Extensions (Base)"
+                    },
+                    {
+                        "id": "SSE4.2",
+                        "label": "SSE4.2",
+                        "define": "__SSE4_2__",
+                        "flag": "-msse4.2",
+                        "type": "tier",
+                        "default": true,
+                        "locked": false,
+                        "description": "Streaming SIMD Extensions 4.2"
+                    },
+                    {
+                        "id": "FMA",
+                        "label": "FMA",
+                        "define": "__FMA__",
+                        "flag": "-mfma",
+                        "type": "flag",
+                        "default": false,
+                        "locked": false,
+                        "description": "Fused Multiply-Add (FMA3) on 128-bit registers: a CPU that also has AVX"
+                    }
+                ]
+            },
+            "headers": [
+                "<immintrin.h>"
+            ],
+            "name": "sse",
+            "order": 10
+        }
+    ],
     "type": "object",
     "additionalProperties": false,
     "required": [
@@ -17,14 +70,14 @@
         },
         "description": {
             "type": "string",
-            "description": "Optional short description or architectural notes"
+            "description": "Optional short description or architectural notes."
         },
         "name": {
-            "description": "Identifier of the ISA matching the directory name",
+            "description": "Identifier of the ISA matching the directory name.",
             "type": "string"
         },
         "display_name": {
-            "description": "Human-friendly display name of the ISA",
+            "description": "Human-friendly display name of the ISA.",
             "type": "string"
         },
         "order": {
@@ -32,14 +85,14 @@
             "type": "integer"
         },
         "headers": {
-            "description": "Explicit C/C++ header inclusions override (e.g. for scalar)",
+            "description": "Explicit C/C++ header inclusions override (e.g. for scalar).",
             "type": "array",
             "items": {
                 "type": "string"
             }
         },
         "ignored_intrinsics": {
-            "description": "List of vendor intrinsic function names to ignore from matching",
+            "description": "List of vendor intrinsic function names to ignore from matching.",
             "type": "array",
             "items": {
                 "type": "string"
@@ -57,19 +110,19 @@
             "additionalProperties": false,
             "properties": {
                 "id": {
-                    "description": "Godbolt identifier of a C compiler (e.g. cg142, carm64g1420, rv64-cclang): the Flat C code is compiled as C",
+                    "description": "Godbolt identifier of a C compiler (e.g. cg142, carm64g1420, rv64-cclang): the Flat C code is compiled as C.",
                     "type": "string"
                 },
                 "arch": {
-                    "description": "Architecture family (x86, arm, riscv)",
+                    "description": "Architecture family (x86, arm, riscv).",
                     "type": "string"
                 },
                 "label": {
-                    "description": "Human-readable label for the default compiler",
+                    "description": "Human-readable label for the default compiler.",
                     "type": "string"
                 },
                 "base_flags": {
-                    "description": "Base compilation flags (can contain {simd_width} template)",
+                    "description": "Base compilation flags (can contain {simd_width} template).",
                     "type": "string"
                 },
                 "execute": {
@@ -110,7 +163,7 @@
                     }
                 },
                 "flags_by_size": {
-                    "description": "Optional map of vector/buffer size in bits to arch-specific flags",
+                    "description": "Optional map of vector/buffer size in bits to arch-specific flags.",
                     "type": "object",
                     "additionalProperties": {
                         "type": "string"
@@ -131,7 +184,7 @@
             "additionalProperties": false,
             "properties": {
                 "mode": {
-                    "description": "How features are organized: 'hierarchy' (ordered tiers like SSE), 'flags' (orthogonal toggles), 'mixed' (tiers + flags), or 'none'",
+                    "description": "How features are organized: 'hierarchy' (ordered tiers like SSE), 'flags' (orthogonal toggles), 'mixed' (tiers + flags), or 'none'.",
                     "type": "string",
                     "enum": [
                         "hierarchy",
@@ -142,10 +195,10 @@
                 },
                 "default": {
                     "type": "string",
-                    "description": "Default selected tier ID if mode is 'hierarchy' or 'mixed'"
+                    "description": "Default selected tier ID if mode is 'hierarchy' or 'mixed'."
                 },
                 "items": {
-                    "description": "List of feature flags or hierarchical tiers",
+                    "description": "List of feature flags or hierarchical tiers.",
                     "type": "array",
                     "items": {
                         "type": "object",
@@ -158,22 +211,22 @@
                         "properties": {
                             "description": {
                                 "type": "string",
-                                "description": "Tooltip or documentation string"
+                                "description": "Tooltip or documentation string."
                             },
                             "id": {
-                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2). Two ISAs can use the same identifier: the Explorer keeps the state of a flag per ISA",
+                                "description": "Unique feature identifier within this ISA (e.g. BW, FMA, SSE4.2). Two ISAs can use the same identifier: the Explorer keeps the state of a flag per ISA.",
                                 "type": "string"
                             },
                             "label": {
-                                "description": "Short label for UI buttons",
+                                "description": "Short label for UI buttons.",
                                 "type": "string"
                             },
                             "define": {
-                                "description": "C preprocessor symbol (e.g. __AVX512BW__, __ARM_FEATURE_FMA)",
+                                "description": "C preprocessor symbol (e.g. __AVX512BW__, __ARM_FEATURE_FMA).",
                                 "type": "string"
                             },
                             "type": {
-                                "description": "Type of item: 'tier' for hierarchical levels or 'flag' for orthogonal toggles (used in 'mixed' mode)",
+                                "description": "Type of item: 'tier' for hierarchical levels or 'flag' for orthogonal toggles (used in 'mixed' mode).",
                                 "type": "string",
                                 "enum": [
                                     "tier",
@@ -181,15 +234,15 @@
                                 ]
                             },
                             "flag": {
-                                "description": "Compiler flag to enable this feature",
+                                "description": "Compiler flag to enable this feature.",
                                 "type": "string"
                             },
                             "default": {
                                 "type": "boolean",
-                                "description": "Whether this feature is active by default"
+                                "description": "Whether this feature is active by default."
                             },
                             "locked": {
-                                "description": "Whether this feature is locked/read-only in the UI",
+                                "description": "Whether this feature is locked/read-only in the UI.",
                                 "type": "boolean"
                             }
                         }

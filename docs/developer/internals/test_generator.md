@@ -17,7 +17,7 @@ The scalar target is generated from `registry_scalar_implems.json`, like the <sp
 
 A function that reaches a stub on the ISA under test throws `mipp::stub_exception`: the test catches it and reports a Catch2 warning instead of a failure.
 
-The input and output arrays are aligned on 64 bytes, which suits `load` and `store` on every ISA. For `loadu` and `storeu` (`_UNALIGNED_PTR_FUNCS` in `tests_builder.py`), the call under test gets a pointer one element past an aligned buffer, never aligned on the register size; the scalar reference keeps the aligned arrays.
+The input and output arrays are aligned on 64 bytes, which suits `load` and `store` on every ISA. For `loadu`, `storeu`, `loadu_unzip` and `storeu_zip` (`_UNALIGNED_PTR_FUNCS` in `tests_builder.py`), the call under test gets a pointer one element past an aligned buffer, never aligned on the register size; the scalar reference keeps the aligned arrays.
 
 ---
 
@@ -25,11 +25,22 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 
 | API | Files (in `tests/src/`) | Content |
 | :--- | :--- | :--- |
-| C | `c/<category>/<m1\|m2\|m4\|m8\|d2>/<unmasked\|mask\|maskz\|masks>/<function>.cpp` | One file per function, LMUL and mask variant; one test function per datatype. |
+| C | `c/<category>/<m0\|m1\|m2\|m4\|m8\|d2>/<unmasked\|mask\|maskz\|masks>/<function>.cpp` | One file per function, LMUL and mask variant; one test function per datatype. `m0` is LMUL 0, which calls the names without suffix (`mipp_add_float32`), and `m1` calls the `_m1` names. |
 | C++ Functional | `cpp/<category>/<function>.cpp` | One file per function: one template test (`<VARIANT, T, LMUL>`), instantiated in nested `SECTION`s for each mask variant, datatype and LMUL. |
 | C++ Object | `obj/<category>/<function>.cpp` | Same structure, with `mipp::Vd` and `mipp::Vm`. |
 
 `--lmul`, `--ldiv` and `--mask-kind` restrict the generated combinations; a function is only tested for the mask variants of its `variants`. `tests/CMakeLists.txt` compiles every `.cpp` found under `tests/src/`, with the helpers of `tests/src/utils/` (random generators, overflow checks, `abs_diff`).
+
+**Hand-written tests.** `tests/src/manual/` holds the tests that the generator cannot write. The clean step of `gen_mipp_tests.py` only removes `tests/src/{c,cpp,obj}/`, so these files are kept, and the GLOB of `tests/CMakeLists.txt` compiles them with the others:
+
+| File | Tests |
+| :--- | :--- |
+| `complex.cpp` | Special values of the complex functions (a zero or an infinite part), that the random inputs do not draw. |
+| `forms.cpp` | The [scalar forms](../../user/scalar_forms.md) not covered by the generated tests: the C aliases of the base form `vv`, and the C++ overloads of the base function. |
+| `immediates.cpp` | The immediate versions (`codegen/imm.py`): for every value of the integer argument, the call with a constant, the C++ templates `f<S>(...)` and the call with a variable give the same lanes. |
+| `patterns.cpp` | The compile-time permutations `permute<P>` and `permute2<P>` (C++17, `mipp/cpp/patterns.hpp`). |
+| `transpose.cpp` | `transpose` and `transpose_b128`, in the three APIs. |
+| `utils.cpp` | The hand-written utilities (`utils_generator.py`): aligned allocation, printing, `reduce`, the initializer lists of the Object API. |
 
 ---
 
@@ -65,6 +76,8 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 
 **Indexed functions.** `gather` and `scatter` take a pointer and a register of unsigned indices, which the generic builder cannot generate. They are generated for pairs `"data,index"`, the index having its own LMUL when its width differs from the one of the data (`mipp::details::idx_lmul<T, IDX>(LMUL)` in C++); a pair is only tested for the LMULs where this LMUL exists, and the mask has the type of the data. `helpers_tests/indexed_tests.py` writes their tests, with the same principle as the others: the result of the ISA under test is compared with the scalar reference (`gather`: the stored register; `scatter`: the memory written by both targets), for every datatype, LMUL, `d2` and mask variant, in the three APIs. The indices address a table larger than a register: $2^8$ elements for 8-bit indices, $2^{16}$ for 16-bit indices and $2^{17}$ for wider ones (and at least N), so that the whole range of the 8 and 16-bit indices is covered, including the byte offsets that overflow the index width. The indices of a `gather` are random values of the table; the ones of a `scatter` are N distinct positions of the table, so that the result does not depend on the order of the writes, and the whole table is compared. They have no entry in `tests_specs.json`.
 
+**Permutations, compress and expand.** `permute`, `permute2`, `permute_b128`, `compress`, `expand`, `storeu_compress`, `storeuf_compress` and `loadu_expand` take a register of indices or a mask that moves the lanes, which the generic builder cannot generate either. `helpers_tests/perm_tests.py` writes their tests, with the same principle: the result is compared with the scalar reference, for every datatype, LMUL, `d2` (when the function has one) and mask variant, in the three APIs. The indices are drawn in `[0, N)` for `permute`, in the lanes of a block of 128 bits for `permute_b128`, and in `[0, 2N)` for `permute2` (bounded by the largest index of the type). `storeu_compress` compares the returned count and the whole output buffer; `storeuf_compress` compares the count and the first `count` elements, since the next ones are unspecified.
+
 !!! warning "Known gaps"
     - `overflow_check` with `add`, `sub` or `mul` is only applied in the C tests; the C++ tests only handle the `accumulate_*` values (reductions).
     - The `define` field of a domain rule is accepted by the schema but ignored.
@@ -73,7 +86,7 @@ The input and output arrays are aligned on 64 bytes, which suits `load` and `sto
 
 ## 4. Code Templates
 
-The C++ code of the tests is not written in Python: it comes from `helpers_tests/tests_templates.json` ([Test Templates](../reference/registries/tests_templates.md)), which holds the file headers, the bodies of the test functions, the `TEST_CASE` and `SECTION` skeletons and the assertions. The templates contain `{{placeholder}}` variables filled by `tests_builder.py`, and `%token<datatype,lmul>(argument)%` markers that depend on the API (`%load<...>(p)%`, `%reg_type<...>%`, `%set_k<...>(p)%`, `%N<...>%`, ...).
+The skeletons of the C++ code of the tests come from `helpers_tests/tests_templates.json` ([Test Templates](../reference/registries/tests_templates.md)): the file headers, the bodies of the test functions, the `TEST_CASE` and `SECTION` skeletons and the assertions. The rest is written in Python: part of the declarations (buffers, ...) by `tests_builder.py`, and the whole tests of `indexed_tests.py` and `perm_tests.py`. The templates contain `{{placeholder}}` variables filled by `tests_builder.py`, and `%token<datatype,lmul>(argument)%` markers that depend on the API (`%load<...>(p)%`, `%reg_type<...>%`, `%set_k<...>(p)%`, `%N<...>%`, ...).
 
 These markers are resolved by the **dialect adapters** (`dialect_adapters.py`): for a load with LMUL 2, `CDialectAdapter` writes `mipp_load_float32_m2(p)`, `CppDialectAdapter` writes `mipp::load<T, 2>(p)`, `CppObjDialectAdapter` writes `mipp::Vd<T, 2>(p)`. The adapters only format expressions; the structure of the test is the same for the three APIs.
 
@@ -87,5 +100,7 @@ These markers are resolved by the **dialect adapters** (`dialect_adapters.py`): 
 | `helpers_tests/tests_builder.py` | `TestsBuilderEngine`: loads and validates the JSON files, renders the tests (`TestsBuilderEngineC`, `TestsBuilderEngineCpp`, `TestsBuilderEngineObj`), tolerances and assertions, test audits. |
 | `helpers_tests/domain_resolver.py` | `DomainResolver`: input domains and mask patterns per datatype, LMUL, mask variant and ISA. |
 | `helpers_tests/dialect_adapters.py` | Expression syntax of the C, C++ Functional and C++ Object APIs. |
+| `helpers_tests/indexed_tests.py` | Tests of `gather` and `scatter`, written in Python. |
+| `helpers_tests/perm_tests.py` | Tests of `permute`, `permute2`, `permute_b128`, `compress`, `expand`, `storeu_compress`, `storeuf_compress` and `loadu_expand`, written in Python. |
 | `helpers_tests/tests_specs.json`, `tests_templates.json` | Test properties and code templates. |
 | `helpers_tests/schemas/` | JSON Schemas of the two files above. |

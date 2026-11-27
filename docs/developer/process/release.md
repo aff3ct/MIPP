@@ -22,9 +22,10 @@ On GitLab, the tag runs the usual pipeline.
 1. **The GitLab pipeline is green** on the commit to release: GitHub does not build or test anything.
 2. **The documentation builds in strict mode.** The site is only deployed if `mkdocs build --strict` succeeds on GitHub. Check it locally first:
     ```bash
-    (cd generator && ./gen_mipp_docs.py)
+    (cd generator && ./gen_mipp_headers.py --granularity fine && ./gen_mipp_docs.py)
     mkdocs build --strict
     ```
+    The environment needs `docs/requirements.txt`, which also installs the generator dependencies ([Build the Documentation](../setup.md#6-build-the-documentation)).
 3. **Tag and push.** Create an annotated tag (signed with `-s` if you sign your commits) and push it to both repositories, `develop` first:
     ```bash
     git tag -a vX.Y.Z -m "MIPP vX.Y.Z"

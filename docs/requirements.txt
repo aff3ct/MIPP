@@ -1,6 +1,10 @@
 mkdocs>=1.5,<2  # MkDocs 2.0 breaks the plugin API used by Material and the plugins below
 mkdocs-material>=9.5
 
+# Generator dependencies (jsonschema, Jinja2, colorama): gen_mipp_docs.py writes the generated pages.
+# The path of a nested -r is relative to this file.
+-r ../generator/requirements.txt
+
 # Plugins
 mkdocs-awesome-pages-plugin>=2.9
 mkdocs-charts-plugin==0.0.10

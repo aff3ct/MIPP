@@ -2,7 +2,7 @@
 
 MIPPv2 validates its declarative JSON database before emitting any code. Two kinds of checks coexist:
 
-- **Validation checks** are always active. They stop the generator with an error (exit code 1).
+- **Validation checks** are always active. They stop the generator with an error (non-zero exit code).
 - **Audits** are selected with `--audit`. They report warnings and never stop generation.
 
 The header-generator checks live in `generator/helpers_headers/input_validation.py`; the test-generator checks live in `generator/helpers_tests/tests_builder.py`.
@@ -13,10 +13,11 @@ The header-generator checks live in `generator/helpers_headers/input_validation.
 
 | File | Checks |
 | :--- | :--- |
-| All inputs | Valid against its JSON Schema (`generator/helpers_headers/schemas/`, `generator/helpers_tests/schemas/`, documented in [Registries](registries/index.md)): registries, ISA descriptors, templates and implementation files, `tests_specs.json`, `tests_templates.json`. |
+| All inputs | Valid against its JSON Schema (`generator/helpers_headers/schemas/`, `generator/helpers_tests/schemas/`, documented in [Registries](registries/index.md)): registries, ISA descriptors, templates and implementation files, `tests_specs.json`, `tests_templates.json`. The `<isa>_explorer.json` files are only validated by `gen_mipp_docs.py`. |
+| `registry_protos.json` | An argument may only have `"lmul": "ratio"` (the other `lmul` values are for `ret`). |
 | `registry_interfaces.json` | Every `proto_ref` exists in `registry_protos.json`. |
 | `registry_categories.json` | A function belongs to at most one category.<br>Every categorized function is declared. |
-| `registry_scalar_implems.json` | Every declared function has a scalar implementation, for exactly its declared datatypes. |
+| `registry_scalar_implems.json` | Every declared function has a scalar implementation, for exactly its declared datatypes.<br>Every function of the file is declared.<br>Every mask variant of a function is covered by an entry (`check_mipp_funcs_scalar_implems` in `gen_mipp_headers.py`). |
 | `<isa>_native_implems.json`<br>`<isa>_emu_implems.json` | Every implemented function and emulation dependency is declared.<br>The implemented datatypes are supported by the interface and by the ISA descriptor. |
 | `*_implems.json` | Every `template` / `template_ref` resolves to an existing template. |
 | `<isa>_emu_implems.json` | No dependency cycle between emulated functions. |
@@ -38,7 +39,7 @@ The header-generator checks live in `generator/helpers_headers/input_validation.
 For each ISA, the code of every template is inspected heuristically to infer its level:
 
 - a single intrinsic call and no call to other MIPP functions: <span class="mipp-isa-badge lvl-0">L0</span>;
-- the calls that materialize a constant do not count (`strip_negligible_calls` in `helpers_headers/input_validation.py`): a broadcast whose arguments are literals, macros or generation-time values (`%set1<tp>%(0.5)`, `%set0<tp>%()`, `_mm512_set1_epi32(INT32_MIN)`, `vdupq_n_*`, `svdup_n_*`, `__riscv_vmv_v_x_*`), and a constant predicate (`svptrue_*`, `svpfalse_*`, `__riscv_vmset_m_*`, `__riscv_vmclr_m_*`). A broadcast of an argument of the function (`%set1<tp>%(s0)`) still counts. The casts and reinterpretations of a register do not count either, since they generate no instruction (`_mm_castps_si128`, `vreinterpretq_*`, `svreinterpret_*`, `__riscv_vreinterpret_*`, the `cast` calls); a call whose name is one Jinja expression (`{{ ci }}(x)`) is a cast;
+- the calls that materialize a constant do not count (`strip_negligible_calls` in `helpers_headers/input_validation.py`): a broadcast whose arguments are literals, macros or generation-time values (`%set1<tp>%(0.5)`, `%set0<tp>%()`, `_mm512_set1_epi32(INT32_MIN)`, `vdupq_n_*`, `svdup_n_*`, `__riscv_vmv_v_x_*`), and a constant predicate (`svptrue_*`, `svpfalse_*`, `__riscv_vmset_m_*`, `__riscv_vmclr_m_*`). A broadcast of an argument of the function (`%set1<tp>%(s0)`) still counts. The casts and reinterpretations of a register do not count either, since they generate no instruction (`_mm_castps_si128`, `vreinterpretq_*`, `svreinterpret_*`, `__riscv_vreinterpret_*`, the `cast` calls). The calls to `cast`, `cast_k`, `tovd` and `tovm` are not counted as MIPP functions; a call whose name is one Jinja expression (`{{ ci }}(x)`) is a cast;
 - intrinsics combined with other intrinsics or MIPP functions: <span class="mipp-isa-badge lvl-1">L1</span>;
 - MIPP functions only: <span class="mipp-isa-badge lvl-2">L2</span>.
 
@@ -49,7 +50,6 @@ A warning is emitted when the inferred level does not match the file the entry l
 - Native and ISA-specific emulation templates that no implementation entry references.
 - Generic templates (`tpl_generic_emu`, `tpl_mask_generic_emu`, `tpl_horiz_lmul_generic_emu`) that no generic implementation entry references.
 - Generic emulation entries that can never be selected because every targeted datatype is already implemented natively on every candidate ISA.
-- Scalar implementations of functions that are not declared in `registry_interfaces.json`.
 - Functions declared in `registry_interfaces.json` but not assigned to any category.
 
 ### 2.3. `duplicates`: Overlapping Implementations

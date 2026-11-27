@@ -32,10 +32,10 @@ In `helpers_headers/registry_interfaces.json`:
 | :--- | :--- |
 | `proto_ref` | A prototype of `registry_protos.json`. `ret_reg_2args_reg` takes two registers and returns one. See [Choosing a Prototype](#choosing-a-prototype). |
 | `datatypes` | An alias of `DATATYPES_MAP` (`generator/helpers_headers/tools.py`): `all_datatypes`, `all_float`, `all_int` (signed), `all_uint`, `all_int_uint`, `all_64bit`, `all_32bit`, `all_16bit`, `all_8bit`, or pair aliases for conversions (`all_datatypes_cart_prod`, `all_datatypes_same_size`, `all_datatypes_widenning`, `all_datatypes_narrowing`, `all_int_uint_narrowing` for the integers only, ...). An explicit list such as `["float32", "float64"]` is also accepted. |
-| `horizontal` | `true` for reductions across the lanes of a register (`hadd`, `hmax`), `false` otherwise. |
+| `horizontal` | `true` for reductions across the lanes of a register (`hadd`, `hmax`), `false` otherwise. A horizontal function needs a template in `generic_emu_templates_lmulh.json` and an entry with `"mode": "horiz_lmul"` in `generic_emu_implems_lmulh.json` (see `hadd`): without them, its LMUL > 1 versions (software LMUL) are panic stubs. |
 | `variants` | Variants generated for the function, as a list of `u` (unmasked, always present), `m` (Merge-Masked), `z` (Zero-Masked) and `s` (Source-Masked): `["u"]` for no mask variant, `["u", "m", "z", "s"]` for all of them. The lists used are in the table below ([Masking Semantics](../../user/masking_semantics.md)). |
 | `cpp_name` | Optional. Name of the C++ function when it differs from the C name: `get_k` is exposed as `mipp::get`. |
-| `lane_crossing` | Optional, `false` by default. `true` for a function whose lanes of the result come from other lanes (`reverse`, `slide`, `ziplo`...): its LMUL > 1 versions (software LMUL) need a template in `generic_emu_templates_lmulh.json` (the generation fails without it), since the function on each half of the group would be wrong, and its half-vectors by mask go through the scalar `d2` function. See [Code Generation](../internals/code_generation.md), step 6. |
+| `lane_crossing` | Optional, `false` by default. `true` for a function whose lanes of the result come from other lanes (`reverse`, `slide`, `ziplo`...): its LMUL > 1 versions (software LMUL) need a template in `generic_emu_templates_lmulh.json` and an entry with `"mode": "horiz_lmul"` in `generic_emu_implems_lmulh.json` (see `reverse`; the generation fails without them), since the function on each half of the group would be wrong, and its half-vectors by mask go through the scalar `d2` function. See [Code Generation](../internals/code_generation.md#2-one-isa-layer), step 6. |
 | `forms` | Optional. [Scalar forms](../../user/scalar_forms.md) of the function: one string per form, one letter per data register of the prototype, `v` (register) or `s` (scalar). `"forms": ["vs", "sv"]` adds `absdiff_vs(r, s)` and `absdiff_sv(s, r)`: functions of their own, derived when the registry is loaded (`helpers_headers/forms.py`), with the category, the variants and a scalar reference derived from the ones of `absdiff`, a generic body (`absdiff(vd0, set1(s0))`, at the level of `absdiff`) and C++ overloads of `mipp::absdiff`. A native body is written in an ISA file under the name of the form (`"absdiff_vs": [...]`, with `s0` for the scalar). The scalar reference of the base must read the registers lane by lane (`vd1.vd[i]`). |
 
 Lists used for `variants`, with the number of functions that use each one:
@@ -46,7 +46,7 @@ The names of the generated functions are derived from this entry: `mipp_absdiff_
 
 ### Choosing a Prototype
 
-`registry_protos.json` holds 36 prototypes. Each one describes the return value and the arguments:
+Each prototype of `registry_protos.json` describes the return value and the arguments:
 
 ```json
 "ret_reg_2args_reg": {
@@ -64,9 +64,10 @@ The names of the generated functions are derived from this entry: `mipp_absdiff_
 | `fixeddatatype` | `false` when the parameter follows the datatype of the function (the first type of a pair for the arguments, the second one for the return value), or a fixed type: a datatype (`int32` for a shift count, `uint32`, ...), a category (`uint`: the unsigned type of the same width), `par` / `ret` (the first / second type of the pair: gather and scatter are generated for pairs `"data,index"`, their result has the type of the data and their index the type of the index). |
 | `lmul` (argument) | `ratio`: the argument has one lane per lane of the function, so its LMUL is the LMUL of the function times size(second type) / size(first type) (the index of gather and scatter). The function is not generated for the LMULs where this LMUL does not exist. |
 | `charac` | `RO` (read) or `WO` (written). |
-| `lmul` | Return value only, optional. LMUL of the returned register relative to the one of the arguments: `same` (default), `down` (one step below, `m1` → `d2`), `up` (one step above, `d2` → `m1`) or a fixed LMUL (`d2`, `m1`, ... `m8`). Used by `lo` and `hi` (`down`), `combine` (`up`), `wcvt` (`up`) and `ncvt` (`down`). The function is only generated for the LMULs where the returned LMUL exists. |
-| `changes_type` | Return value only, optional. `true` when the datatype of the result differs from the one of the argument (`wcvt`, `ncvt`): the LMUL change then keeps the number of lanes with wider or narrower elements. Without it, `down` and `up` split or join the registers. |
+| `lmul` | Return value only, optional. LMUL of the returned register relative to the one of the arguments: `same` (default), `down` (one step below, `m1` → `d2`), `up` (one step above, `d2` → `m1`) or a fixed LMUL (`d2`, `m1`, ... `m8`). Used by `lo` and `hi` (`down`), `combine` (`up`), `wcvt` (`up`), `ncvt` and `ncvts` (`down`). The function is only generated for the LMULs where the returned LMUL exists. |
+| `changes_type` | Return value only, optional. `true` when the datatype of the result differs from the one of the argument (`wcvt`, `ncvt`, `ncvts`): the LMUL change then keeps the number of lanes with wider or narrower elements. Without it, `down` and `up` split or join the registers. |
 | `offset_lmul` | Pointers only, optional. `false` passes the same pointer to the two halves of an LMUL > 1 function (gather and scatter). |
+| `ldiv` | Prototype level (next to `ret` and `args`), optional. `false`: the functions of this prototype have no half-vector (`d2`) version (the `_noldiv` prototypes of `compress`, `expand`...). Default `true`. |
 
 Add a prototype only if none fits. The names follow the pattern `ret_<return>_<n>args_<arguments>`.
 
@@ -133,7 +134,7 @@ In `helpers_headers/funcs_docs.json`, a short description and an optional LaTeX 
 ```json
 "absdiff": {
     "description": "Computes the absolute difference of two vector registers element-wise.",
-    "latex": "\\text{res}_i = |r0_i - r1_i|"
+    "latex": "\\text{res}_i = |vd0_i - vd1_i|"
 }
 ```
 
@@ -151,7 +152,7 @@ From `generator/` (see [Setup](../setup.md)):
 The generator writes, among others:
 
 - the public headers `<mipp/c/fun/absdiff.h>`, `<mipp/cpp/fun/absdiff.hpp>` and `<mipp/obj/fun/absdiff.hpp>`;
-- implementation headers per ISA, mask variant and LMUL, for instance `mipp/internal/simd_ext/neon/c/functions/arithmetic/u/m1/absdiff.h` in fine granularity ([Header Layout](../internals/header_layout.md)), where every resolved function carries a comment with its level:
+- implementation headers per ISA, for instance `mipp/internal/simd_ext/neon/c/functions/arithmetic/absdiff.h` (in fine granularity, one per mask variant and LMUL: `.../arithmetic/u/m1/absdiff.h`, see [Header Layout](../internals/header_layout.md)), where every resolved function carries a comment with its level:
 
 ```c
 static inline vd_neon_float32_m1_t mipp_neon_absdiff_float32_m1(const vd_neon_float32_m1_t vd0, const vd_neon_float32_m1_t vd1) {
@@ -178,7 +179,7 @@ Finally, regenerate the documentation pages with `./gen_mipp_docs.py`: `absdiff`
 
 ## Step 6: Set the Test Properties
 
-Without an entry in `helpers_tests/tests_specs.json`, the `default` properties apply: uniform random inputs over the whole range of each datatype, and an exact comparison with the scalar reference. For `absdiff`, this default is wrong for the signed integers, and the tests show it as soon as a SIMD implementation exists. With the NEON implementation of the [next tutorial](add_implementation.md):
+Without an entry in `helpers_tests/tests_specs.json`, the `default` properties apply: uniform random inputs, over the whole range of the integer datatypes and in [-1, 1] for the floating-point ones, and an exact comparison with the scalar reference. For `absdiff`, this default is wrong for the signed integers, and the tests show it as soon as a SIMD implementation exists. With the NEON implementation of the [next tutorial](add_implementation.md):
 
 ```text
 REQUIRE( mipp_get_int32_m1(rres, i) == mipp_scalar_get_int32_m1(sres, i) )
@@ -213,7 +214,7 @@ Other common properties:
 | `disabled` and `disabled_reason` | Comment out the generated test (the reason is printed in the file). |
 | `support_obj` | `false` if the function has no C++ Object API overload. |
 
-The domain can also depend on the ISA (`by_define`, e.g. `MIPP_AVX2`) and on the mask variant (`unmasked`, `mask`, `maskz`, `masks` keys). All the properties are described in [Test Specifications](../reference/registries/tests_specs.md), and `tests_specs.json` contains an example of each of them.
+The domain can also depend on the ISA (`by_define`, e.g. `MIPP_AVX2`) and on the mask variant (`unmasked`, `mask`, `maskz`, `masks` keys). All the properties are described in [Test Specifications](../reference/registries/tests_specs.md), and the `default` entry of `tests_specs.json` gives the default value of the main ones.
 
 ---
 

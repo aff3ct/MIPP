@@ -33,7 +33,7 @@ The public headers contain nothing but `#include` lines to `mipp/internal/`: `mi
 
 ## 2. Layers
 
-The `IncludeManager` handles one **layer** per output directory. A function is written once per layer:
+The `IncludeManager` handles one **layer** per output directory of the C and C++ Functional code. A function is written once per layer:
 
 | Layer | Directory (in `include/mipp/internal/`) | Written by |
 | :--- | :--- | :--- |
@@ -42,9 +42,13 @@ The `IncludeManager` handles one **layer** per output directory. A function is w
 | `c` | `interfaces/c/` | `ci_generator.py` |
 | `cpp` | `interfaces/cpp/` | `cpp_generator.py` |
 | `templates` | `templates/cpp/` | `cpp_generator.py` |
-| `obj` | `interfaces/obj/` | `obj_generator.py` |
 
-The generators never open files themselves: they ask the manager for a file object with `get_fd(layer, function, variant, lmul)`, and the manager chooses the path according to the granularity.
+For these layers, the generators do not open the function headers themselves: they ask the manager for a file object with `get_fd(layer, function, variant, lmul)`, and the manager chooses the path according to the granularity. The other files are written directly, outside the `IncludeManager`:
+
+- the C++ Object API, `interfaces/obj/` (`obj_generator.py`), with its own atoms and umbrellas in fine granularity;
+- the global headers `mipp.h` and `mipp.hpp` (`generate_mipp_h()` in `include_gen.py`, `cpp_generator.py`), `mipp_obj.hpp` (`obj_generator.py`) and `templates/cpp/common.hpp` (`cpp_generator.py`);
+- the public headers of `mipp/{c,cpp,obj}/` (`generate_public_headers()` in `gen_mipp_headers.py`);
+- the utilities, patterns and transpositions (`utils_generator.py`).
 
 ---
 
@@ -59,7 +63,7 @@ With `--granularity coarse` (default), each layer has one header per function, `
 
 ## 4. Fine Granularity
 
-With `--granularity fine`, the functions are split into **atoms**, one per function, mask variant and LMUL:
+With `--granularity fine`, the functions are split into **atoms**, one per function, mask variant and LMUL (the `templates` layer stays coarse):
 
 ```text
 functions/<category>/<v>/<l>/<function>.h

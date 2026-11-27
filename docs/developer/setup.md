@@ -64,6 +64,8 @@ The script deletes and rewrites `../include/`. It prints the validation results,
 
 The sources are written to `../tests/src/{c,cpp,obj}/`, one file per function (and per LMUL and mask variant for the C API). The options are described in the [Command-Line Reference](reference/cli.md#gen_mipp_tests).
 
+The other files of `tests/src/` are written by hand, and `gen_mipp_tests.py` keeps them: `main.cpp`, the helpers of `utils/` (random inputs, number of iterations, overflow checks) and the tests of `manual/`. A manual test covers what a generated test cannot compare with the scalar reference: special values that random inputs do not draw, the C++ templates and overloads (scalar forms, immediate versions, `permute<P>`), the transpositions and the utilities. The comment at the top of each file says what it covers. Add a file there, or a test case to an existing file, when a new feature is not a function of the registry.
+
 !!! warning "Generating one API leaves the others in place"
     `./gen_mipp_tests.py obj` only cleans and rewrites `tests/src/obj/`. The `c/` and `cpp/` directories of a previous run stay, and CMake compiles every file under `tests/src/`. Delete them if you only want the Object tests: `rm -rf ../tests/src/c ../tests/src/cpp`.
 
@@ -71,7 +73,7 @@ The sources are written to `../tests/src/{c,cpp,obj}/`, one file per function (a
 
 ```bash
 ./gen_mipp_docs.py                                    # every generated page
-./gen_mipp_docs.py --only dev_reference includes      # only what the hand-written pages need (fast)
+./gen_mipp_docs.py --only dev_reference includes      # only what the hand-written pages need (about 30 s)
 ```
 
 This writes the Function Support pages (`docs/funcs_support/`), the Hardware Support pages (`docs/isas_support/`), the API Explorer data (`docs/assets/data/`), the [Command-Line](reference/cli.md) and [Registries](reference/registries/index.md) reference of this guide, and the tables included in the hand-written pages (`docs/includes/generated/`). These files are ignored by Git. See [Build the Documentation](#6-build-the-documentation) and [Docs & API Explorer](internals/docs_and_explorer.md).
@@ -123,7 +125,7 @@ gcc -std=c11   -O3 -march=native -DMIPP_PRINT_INFO -I../include -o mipp_c   mipp
 
 ### 5.1. CI Targets and Flags
 
-The GitLab CI builds and runs the tests with GCC 14 and Clang 20 on 16 targets (SSE, AVX, AVX-512, NEON, SVE, SVE2, RVV and scalar). The compiler flags of each target, and the build options specific to RVV and SVE, are listed in [Continuous Integration](process/ci.md#11-targets-and-flags): use the same flags in `CMAKE_CXX_FLAGS` to reproduce a job.
+The GitLab CI builds and runs the tests with GCC 14 and Clang 20 on 16 targets (SSE, AVX, AVX-512, NEON, SVE, SVE2, RVV and scalar). The compiler flags of each target, and the build options specific to RVV and SVE, are listed in [Continuous Integration](process/ci.md#11-targets-and-flags). To reproduce a job, put the flags of the target in `CMAKE_CXX_FLAGS`, with the warning flags of the CI: `-Wall -Wno-unused-function -Werror -funroll-loops -finline-functions`. Without `-Werror`, a warning that fails the CI goes unnoticed. The CI also links the tests statically (`-DCMAKE_EXE_LINKER_FLAGS="-static -static-libgcc -static-libstdc++"`), which is only needed to run them in another container.
 
 ### 5.2. CI Docker Images
 
@@ -157,13 +159,13 @@ Libraries such as Catch2 must then be available for x86-64 too: a Homebrew insta
 The site uses MkDocs with the Material theme. From the repository root, in a virtual environment:
 
 ```bash
-pip install -r docs/requirements.txt
-(cd generator && ./gen_mipp_docs.py)      # generated pages, needed by the site
+pip install -r docs/requirements.txt      # also installs generator/requirements.txt
+(cd generator && ./gen_mipp_headers.py --granularity fine && ./gen_mipp_docs.py)   # generated pages, needed by the site
 mkdocs serve                              # live preview on http://127.0.0.1:8000
 mkdocs build --strict                     # what the CI runs: warnings are errors
 ```
 
-`--strict` turns broken links and missing pages into errors. Run it before submitting a change to the documentation.
+`gen_mipp_docs.py` reads the generated headers for the Algorithm modal of the API Explorer: without `include/`, it skips that part and prints a message. `--strict` turns broken links and missing pages into errors. Run it before submitting a change to the documentation.
 
 ### 6.1. Code Examples of the User Guide
 

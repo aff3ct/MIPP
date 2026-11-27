@@ -387,12 +387,17 @@
                                     }
                                 },
                                 "by_lmul": {
+                                    "description": "`max_abs_diff` value per LMUL (numeric keys: `\"2\"`, `\"4\"`), as in a [`tolerance_spec`](#def-tolerance_spec); 0.001 for the other LMULs.",
                                     "type": "object",
                                     "additionalProperties": {
-                                        "$ref": "#/definitions/tolerance_spec"
+                                        "type": "number"
+                                    },
+                                    "propertyNames": {
+                                        "title": "lmul"
                                     }
                                 },
                                 "rules": {
+                                    "description": "Accepted, but not read by the test generator.",
                                     "type": "array",
                                     "items": {
                                         "type": "object"

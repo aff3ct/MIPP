@@ -55,7 +55,7 @@ Inside a template body, the parameters of the function being generated are not n
 
 For example, in `%vd<tp>% res = %add<tp>%(vd0, vd1);`, `vd0` and `vd1` are the first and second register arguments. A function taking a mask, a register and a scalar (e.g. a masked shift) names them `vm0`, `vd0` and `s0`.
 
-A few arguments have a fixed, special name instead: `vdsrc` (the source register of the Source-Masked `masks` variants, e.g. `%sub<tp|v:S>%(vm0, vdsrc, vd0, vd1)`), `vals` (the values of `set`) and `vi` (the index vector of `gather`/`scatter`).
+A few arguments have a fixed, special name instead: `vdsrc` (the source register of the Source-Masked `masks` variants, e.g. `%sub<tp|v:S>%(vm0, vdsrc, vd0, vd1)`) and `vals` (the values of `set`). The index register of `gather` / `scatter` is an ordinary register argument: `vd0`.
 
 ---
 
@@ -89,7 +89,7 @@ You can construct new datatypes by altering the **category** (`c:`) or the **bit
     - `b:64`, `b:32`, `b:16`, `b:8` : Fixed bitwidth
     - `b:tp` or `b:tr` : Copy bitwidth from parameter / return type
 
-A missing attribute is taken from `tp`. The accepted parts are `tp`, `tr`, `c:`, `b:`, and the modifiers `m:` and `v:` of [§4](#4-modifiers-lmul-and-masking); any other part stops the generation with a "Panic" message.
+A missing attribute is taken from `tp`. In an expression of several parts, a bare `tp` or `tr` part is ignored: `%vd<tr|m:tr*2>%` has the category and the width of `tp`, unless `c:tr` / `b:tr` are given. The accepted parts are `tp`, `tr`, `c:`, `b:`, and the modifiers `m:` and `v:` of [§4](#4-modifiers-lmul-and-masking); any other part stops the generation with a "Panic" message.
 
 #### Examples
 
@@ -128,7 +128,7 @@ You can adjust the register multiplier of a type or of a function call:
 ```
 
 !!! warning "Only in templates rendered for an LMUL"
-    `m:` has an effect only when the template is rendered for a specific LMUL: the horizontal templates of `generic_emu_templates_lmulh.json` (`mode: horiz_lmul`), and the half-vector templates of `generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`, rendered for `d2` (or `m1` for `lo` and `hi`), where `%N<tp|m:tp*2>%` is the number of elements of the full register. The other templates are rendered once, for the base register: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32_m1`.
+    `m:` has an effect only when the template is rendered for a specific LMUL: the horizontal templates of `generic_emu_templates_lmulh.json` (`mode: horiz_lmul`), the half-vector templates of `generic_ldiv_mask.json` and `<isa>_ldiv_mask.json`, rendered for `d2` (or `m1` for `lo` and `hi`), where `%N<tp|m:tp*2>%` is the number of elements of the full register, and all the templates of the ISAs with `hw_lmul` (RVV, SVE, scalar), rendered for each of their hardware LMULs. On the ISAs without `hw_lmul` (SSE, AVX, AVX-512, NEON), the other templates are rendered once, at LMUL 0: there, `m:` is silently ignored and `%add<tp|m:2>%` produces `mipp_avx_add_float32_m1`.
 
 ### 4.2. Variant Modifiers (`v:`)
 
@@ -219,3 +219,41 @@ vd_avx_int32_m1_t r1_s = mipp_avx_cast_uint32_int32_m1(vd1);
 vd_avx_int32_m1_t res_s = mipp_avx_add_int32_m1(r0_s, r1_s);
 return mipp_avx_cast_int32_uint32_m1(res_s);
 ```
+
+---
+
+## 6. Generation-Time Helpers
+
+### 6.1. Predication of the Scalar Implementations
+
+These two markers are only valid in `registry_scalar_implems.json`. They write the mask variants of a scalar implementation from one line of code (`simd_ext/scalar/scalar_gen.py`):
+
+```mipp-dsl
+res.vd[i] = %!pred_cond!% vd0.vd[i] + vd1.vd[i] %!pred_alt!%;
+```
+
+| Variant | `%!pred_cond!%` | `%!pred_alt!%` |
+| :--- | :--- | :--- |
+| unmasked | nothing | nothing |
+| Merge-Masked (`_mask`) | `vm0.vm[i] ? (` | `) : vd0.vd[i]` |
+| Zero-Masked (`_maskz`) | `vm0.vm[i] ? (` | `) : 0` |
+| Source-Masked (`_masks`) | `vm0.vm[i] ? (` | `) : vdsrc.vd[i]` |
+
+In the Zero-Masked reductions, an inactive lane must not change the result: `%!pred_alt!%` gives `) : resv` (the accumulator) for `hmax` and `hmin`, and `) : 1` for `hmul`.
+
+### 6.2. Constant Tables
+
+The implementation templates (native, emulated, generic and immediate templates) can call these Jinja2 functions (`helpers_headers/luts.py`). Each one returns a C initializer, computed at generation time:
+
+| Function | Result |
+| :--- | :--- |
+| `compress_lut(lanes, units, fill=None)` | Table of `compress` by permutation: one row per value of the mask, giving the source of each unit (byte or lane) of the result; the units after the count are `fill`, or the units of the lane 0. |
+| `iota(n, start=0)` | `{start, start + 1, ..., start + n - 1}`. |
+| `iota_mod(n, m)` | `{0, 1, ..., m - 1, 0, 1, ...}`, `n` elements. |
+| `iota_block(n, m)` | `{0, ..., 0, m, ..., m, 2m, ...}`, `n` elements. |
+
+```mipp-dsl
+static const uint8_t lut[16][16] = {{ compress_lut(lanes=4, units=4, fill=128) }};
+```
+
+The half-vector templates (`generic_ldiv_mask.json`, `<isa>_ldiv_mask.json`) do not get these functions. They have their own helpers (`call1`, `wrap`, `ret_d2`, `lanemask`, `neutral`, `ctx`...), listed in the `code` field of [Half-Vector Templates](registries/ldiv_mask.md).
