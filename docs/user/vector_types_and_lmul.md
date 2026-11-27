@@ -111,7 +111,7 @@ static inline vd_avx_float32_m2_t mipp_avx_add_float32_m2(
 }
 ```
 
-The compiler places `vd1` and `vd2` into separate CPU vector registers (e.g., `%ymm0` and `%ymm1`), inlining the calls into dual-issue instructions without memory round-trips.
+The compiler places the `.lo` and `.hi` halves into separate CPU vector registers (e.g., `%ymm0` and `%ymm1`), inlining the calls into dual-issue instructions without memory round-trips.
 
 ### 3.3. Flattened Array Representation (Scalar Target)
 In the scalar fallback backend, multi-register vectors are represented as flat arrays sized by the total capacity:
@@ -197,9 +197,9 @@ The `d2` and `MIPP_LDIV_2` columns of the [table of §3.4](#34-representation-pe
 - **AVX / AVX2, AVX-512**: a native register of the narrower ISA: 128-bit SSE registers (`__m128`, `__m128d`, `__m128i`) on AVX, 256-bit AVX registers on AVX-512.
 - **RISC-V Vector (RVV)**: native fractional register types (`vfloat32mf2_t`, ...) for 8 to 32-bit elements. For 64-bit elements, where the RVV constraint $\text{SEW} / \text{LMUL} \le \text{ELEN}$ forbids fractional types, MIPP stores the half-vector in a plain array, and most operations on it use the scalar fallback. They are implemented with the standard `V` extension; on cores without 64-bit elements or with VLEN < 128, some of them are not (see [Implementation Levels](implementation_levels.md#known-limitations)). The representation of the RVV half-vectors can be changed at compile time (see [§4.3](#43-rvv-half-vectors-hardware-or-by-vl)).
 - **SSE / NEON / ARM SVE**: there is no narrower register (on ARMv7, part of the `float64` half-vector operations are not implemented, see [Implementation Levels](implementation_levels.md#known-limitations)), so a `d2` value is stored in a full LMUL = 1 register (same member as the `m1` type, but a distinct type). Only the lower $N/2$ lanes are meaningful; the upper lanes are unspecified and ignored (they may hold garbage). Consequences:
-    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions, `testz`, `none`, `any` and `all` ignore the upper lanes;
+    - lane-wise operations are the `m1` operations; loads and stores only access $N/2$ elements; reductions, `testz`, `none`, `any`, `all` and `count` ignore the upper lanes;
     - `get(r, lane)` with `lane` outside $[0, N/2)$ is undefined behavior;
-    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, `none`, `any`, `all`, masked loads/stores/gathers/scatters, masked reductions, `combine` on masks).
+    - the upper lanes of a `d2` mask are not kept at zero: they are neutralized only where observable (`testz`, `none`, `any`, `all`, `count`, masked loads/stores/gathers/scatters, masked reductions, `combine` on masks).
 - **Scalar**: plain array of half the elements.
 
 ### 4.2. Scope and Constraints of Deeper Fractional Division
@@ -223,7 +223,7 @@ On RVV, a half-vector can be represented in two ways, chosen by defining **one**
 
 With a vector length of $N/2$, the RVV instructions only process the lower $N/2$ lanes: the lane-wise operations, the loads, the stores and the reductions of a half-vector are single instructions, with no mask and no access beyond the $N/2$ elements. This is the only native representation of the 64-bit half-vectors, for which RVV has no fractional register type. `lo` is then free and `hi` / `combine` are a slide of the register.
 
-In the default mode, the Level 3 functions of the 64-bit half-vectors compiled by GCC are neither inlined nor vectorized: GCC 14 miscompiles them in some inlining contexts ([details](../developer/internals/code_generation.md#54-gcc-bugs-in-the-scalar-fallback)). The modes `MIPP_RVV_LDIV_VL` and `MIPP_RVV_LDIV_HYBRID` have native 64-bit half-vectors.
+With GCC, the Level 3 functions of RVV (scalar fallbacks) are neither inlined nor vectorized: GCC 14 miscompiles them in some inlining contexts ([details](../developer/internals/code_generation.md#54-gcc-bugs-in-the-scalar-fallback)). In the default mode, most functions on the 64-bit half-vectors are such fallbacks. The modes `MIPP_RVV_LDIV_VL` and `MIPP_RVV_LDIV_HYBRID` have native 64-bit half-vectors.
 
 The API is the same in the three modes (same type names, same functions, same results): only the content of the `d2` types and the implementation change. Since the types change, **all the files of a program must be compiled with the same mode**; passing a `d2` register between files compiled with different modes is not supported. Defining several of these macros is a compilation error. The implementation levels given by the documentation and the API Explorer are the ones of the default mode.
 

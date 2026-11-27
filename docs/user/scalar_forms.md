@@ -6,7 +6,7 @@ Many functions take several data vectors: `sub(a, b)`, `fmadd(a, b, c)`, `cmplt(
 
 ## 1. Names
 
-A form is written with one letter per data vector of the function, in order: `v` for a vector, `s` for a scalar of the element type. The function itself is the form with only `v` letters.
+A form is written with one letter per data vector of the function, in order: `v` for a vector, `s` for a scalar of the element type. The function itself is the form with only `v` letters. In C, its alias is always named `_vv`, whatever the number of vectors (`mipp_fmadd_vv_float32`, not `_vvv`).
 
 | Form | Meaning | C | C++ |
 | :--- | :--- | :--- | :--- |
@@ -18,6 +18,7 @@ A form is written with one letter per data vector of the function, in order: `v`
 - **C API.** The form comes right after the name of the function, before the type, the mask variant and the LMUL: `mipp_sub_sv_float32_maskz_m2`. Every function with scalar forms also has `_vv` aliases of its base names (`mipp_sub_vv_float32_maskz_m2` is `mipp_sub_float32_maskz_m2`), for code that spells all the forms.
 - **C++ APIs.** The forms are overloads of the function: `mipp::sub(a, s)` and `mipp::sub(s, b)`. The scalar must have the element type exactly in the masked calls and in the Object API (`T` is deduced from it): `mipp::sub<mipp::M>(m, 10.f, va)` with a `float` register, not `10`.
 - **Object API operators.** `va - 1.f`, `10.f - va` and `va < 0.f` already broadcast the scalar: they compute the same thing as the forms.
+- **Headers.** Each form has its own header, named after it: `fun/add_vs.h` in C, `fun/add_vs.hpp` in the C++ APIs, and `sub_sv`, `fmadd_vsv`... The header of the function (`fun/add.hpp`) does not provide its forms. The category headers (`cat/arithmetic.hpp`) and the umbrella headers (`mipp.h`, `mipp.hpp`, `mipp_obj.hpp`) include them (see [Headers](headers_and_compile_time.md)).
 
 The forms exist for every datatype, mask variant and LMUL of their function. [§6](#6-functions-with-scalar-forms) lists them: the commutative functions have no `sv` form (`add(s, b)` is `add(b, s)`), and the functions whose scalar operand only gives a sign have the `vs` form only (`copysign`, `xorsign`).
 

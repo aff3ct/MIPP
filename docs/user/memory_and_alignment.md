@@ -72,7 +72,7 @@ For a multi-register vector (`LMUL > 1`), the alignment required is still the si
 
 ### 2.2. Masked Loads & Stores
 
-A masked access reads or writes the active lanes only: inactive lanes are never accessed, so a mask can guard the end of an array (see the [masked remainder example](programming_model.md#5-example-remainder-handled-with-masked-memory-accesses)). Loads exist in the Zero-Masked (`Z`, inactive lanes set to 0) and Source-Masked (`S`, inactive lanes taken from `src`) variants, stores in the Merge-Masked variant (`M`, memory of inactive lanes left unchanged). The alignment contract of [§2.1](#21-aligned-vs-unaligned-access) is unchanged: masked `load` / `store` require an aligned pointer, masked `loadu` / `storeu` accept any address.
+Loads exist in the Zero-Masked (`Z`, inactive lanes set to 0) and Source-Masked (`S`, inactive lanes taken from `src`) variants, stores in the Merge-Masked (`M`, memory of inactive lanes left unchanged) and Zero-Masked (`Z`, `0` written in the memory of inactive lanes) variants. The masked loads and the Merge-Masked stores read or write the active lanes only: inactive lanes are never accessed, so a mask can guard the end of an array (see the [masked remainder example](programming_model.md#5-example-remainder-handled-with-masked-memory-accesses)). The Zero-Masked store is a full store: it writes every lane, so it cannot guard the end of an array. The alignment contract of [§2.1](#21-aligned-vs-unaligned-access) is unchanged: masked `load` / `store` require an aligned pointer, masked `loadu` / `storeu` accept any address.
 
 === "C API"
 
@@ -92,7 +92,7 @@ A masked access reads or writes the active lanes only: inactive lanes are never 
     --8<-- "examples/doc/memory_and_alignment/obj.cpp:masked"
     ```
 
-In the Object API, loads are named `load_obj` / `loadu_obj` (masked or not) so that they return an `Vd`; stores keep the names `store` / `storeu`.
+In the Object API, loads are named `load_obj` / `loadu_obj` (masked or not) so that they return a `Vd`; stores keep the names `store` / `storeu`.
 
 In the C++ Functional API, a masked access deduces `T` from the pointer and assumes `LMUL = 1`: the mask type does not allow the deduction of `LMUL`, so give `T` and `LMUL` for a multi-register vector (`mipp::loadu<mipp::Z, float, 2>`). In the C++ Object API, `T` and `LMUL` are deduced from the `Vm` mask.
 
@@ -112,7 +112,7 @@ The indices can also be `uint32_t` or `uint64_t` whatever the width of the data:
 | 32, 16 or 8-bit types | `uint64` | `m2`, `m4` or `m8` | RVV |
 | 16 or 8-bit types | `uint32` | `m2` or `m4` | RVV |
 
-Elsewhere the scalar fallback applies, as for the gathers of 8 and 16-bit elements on x86. With the C++ Object API, the LMUL of the result is deduced from the index (`mipp::gather(table, idx)` with an `Vd<uint32_t, -2>` gives an `Vd<double, 1>`); with the C++ Functional API, it is the LMUL of the data (`mipp::gather<mipp::Z, double, uint32_t, 1>`).
+Elsewhere the scalar fallback applies, as for the gathers of 8 and 16-bit elements on x86. With the C++ Object API, the LMUL of the result is deduced from the index (`mipp::gather(table, idx)` with a `Vd<uint32_t, -2>` gives a `Vd<double, 1>`); with the C++ Functional API, it is the LMUL of the data (`mipp::gather<mipp::Z, double, uint32_t, 1>`).
 
 !!! warning "Range of the indices"
     Every index must address an element of the array. The 8-bit and 16-bit indices can take any value of their type. The 32-bit indices must be lower than $2^{31}$: the x86 gather and scatter instructions read them as signed integers. On RVV, the byte offset of a 32-bit element, $\text{index} \times 4$, is computed on 32 bits: the indices must be lower than $2^{30}$ (arrays of at most 4 GiB).
@@ -182,7 +182,7 @@ MIPP provides primitives to extract individual scalar values from vector and mas
 In C++, the mask-lane extraction has no `_k` suffix: it is the `get` overload taking a mask.
 
 !!! warning "Mask-lane extraction in the C and C++ Functional APIs"
-    `mipp_get_k_*` and `mipp::get(vm, idx)` currently return the raw lane with the element type `T`: zero for an inactive lane, all bits set for an active one, which is **NaN** for `float` / `double`, `-1` for signed and the maximum value for unsigned types. Do not convert this value to an integer (converting a NaN is undefined behavior). Until these functions return a `0` / `1` value, read mask lanes with the Object API (`m[idx]` returns a `bool`).
+    `mipp_get_k_*` and `mipp::get(vm, idx)` currently return the raw lane with the element type `T`: zero for an inactive lane, all bits set for an active one (on every target, the scalar one included), which is **NaN** for `float` / `double`, `-1` for signed and the maximum value for unsigned types. Do not convert this value to an integer (converting a NaN is undefined behavior). Until these functions return a `0` / `1` value, read mask lanes with the Object API (`m[idx]` returns a `bool`).
 
 === "C API"
 

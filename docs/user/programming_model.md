@@ -27,7 +27,7 @@ Each API has an umbrella header (`<mipp.h>`, `<mipp.hpp>`, `<mipp_obj.hpp>`) and
 
 ## 2. C API (`<mipp.h>`)
 
-The C API provides explicit, type-safe C11 function identifiers and vector types for every `(operation, datatype, lmul, mask_variant)` combination.
+The C API provides explicit, type-safe C11 function identifiers and vector types for every supported `(operation, datatype, lmul, mask_variant)` combination (each operation lists its datatypes and masking variants in [Specifications](../funcs_support/index.md)).
 
 ### 2.1. Naming Convention
 ```text
@@ -86,7 +86,7 @@ The C++ Functional API parameterizes operations over the element type `T`, an op
 
 | Parameter | Domain / Supported Values | Description & Constraints |
 | :--- | :--- | :--- |
-| `typename T` | `float`, `double`, `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t` | 10 standard numeric datatypes supported across all operations. |
+| `typename T` | `float`, `double`, `int8_t`, `int16_t`, `int32_t`, `int64_t`, `uint8_t`, `uint16_t`, `uint32_t`, `uint64_t` | 10 standard numeric datatypes. Most operations support all of them; some only a subset (e.g. `sqrt` only the floating-point types, `neg` no unsigned type). |
 | `int LMUL` | `1, 2, 4, 8` (integer multipliers) and `-2` for [half-vectors](vector_types_and_lmul.md#half-vectors) (`d2`, provided by every target today, see [§3.4](vector_types_and_lmul.md#34-representation-per-target)) | Vector length multiplier (register grouping, or half-vector). Defaults to `1`. See [Vector Types & LMUL](vector_types_and_lmul.md). |
 | `mipp::ISA ISA_TYPE` | `mipp::ISA::SCALAR`, `mipp::ISA::SSE`, `mipp::ISA::AVX`, `mipp::ISA::AVX512`, `mipp::ISA::NEON`, `mipp::ISA::SVE`, `mipp::ISA::RVV` | Target instruction set architecture. Defaults to `mipp::DEFAULT_ISA`. |
 
@@ -220,7 +220,7 @@ struct Vm {
 !!! warning "Per-lane initialization takes `int32_t`, not `bool`"
     Like `set_k` in every API, the per-lane constructor takes an `int32_t` array, whatever `T`. A `bool` array is rejected at compile time: `Vm<float> m(bool_array)` would otherwise decay to a pointer, convert to `bool` and activate **all** lanes through `Vm(const bool)`, so the `const bool*` constructor and assignment are deleted. Use an `int32_t` array.
 
-Element access: `v[i]` and the free function `mipp::get(v, i)` return the element as `T`. On a mask, `m[i]` and `mipp::get(m, i)` return a `bool`: `get` taking an `Vm` is the C++ name of the C function `get_k` (see [Memory & Alignment](memory_and_alignment.md#4-scalar-element-extraction)).
+Element access: `v[i]` and the free function `mipp::get(v, i)` return the element as `T`. On a mask, `m[i]` and `mipp::get(m, i)` return a `bool`: `get` taking a `Vm` is the C++ name of the C function `get_k` (see [Memory & Alignment](memory_and_alignment.md#4-scalar-element-extraction)).
 
 ### 4.2. Overloaded Operators Reference
 
@@ -251,8 +251,10 @@ Every MIPP SIMD operation is exposed as a free function under `namespace mipp::`
     --8<-- "examples/doc/programming_model/obj.cpp:free_functions"
     ```
 
+The contiguous loads and the `set` functions build a register from memory or from scalars: without a `Vd` or `Vm` argument, they would have the same parameters as their C++ Functional API counterparts. In the Object API they have the `_obj` suffix (masked or not) and return a `Vd` or a `Vm`: `load_obj`, `loadu_obj`, `loadu_unzip_obj`, `set_obj`, `set0_obj`, `set1_obj`, `set_k_obj`, `set0_k_obj` and `set1_k_obj` (e.g. `mipp::loadu_obj<float>(ptr)`). The stores keep their names (`mipp::storeu(ptr, v)`).
+
 ### 4.4. Masked Operations
-With `Vm` and `Vd` objects, the compiler deduces `T` and `LMUL`: only the variant is needed.
+With `Vm` and `Vd` objects, the compiler deduces `T` and `LMUL`: only the variant is needed. The variant also has a default: `mipp::M` for a call with the mask alone (`mipp::Z` for the functions without `M`, such as the loads, the comparisons and the reductions), and `mipp::S` for a call with a source register `vdsrc`. `mipp::add(m, a, b)` is then a merge-masked add. Writing the variant keeps the intent visible.
 
 === "C++ Object API"
 
@@ -264,7 +266,7 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
 
 ### 4.5. Printing and Generic Reductions
 
-- `std::cout << v` prints the lanes of an `Vd` or of an `Vm` (`1` for an active lane): `[0, 1, 2, 3 | 4, 5, 6, 7]`, with a `|` between the 128-bit blocks. The C API has `mipp_dump_[type]_[lmul](v)` and `mipp_fdump_[type]_[lmul](FILE*, v)` (`_k` for the masks), the C++ Functional API `mipp::dump<T, LMUL>(v)` and `mipp::dump_k<T, LMUL>(m)`.
+- `std::cout << v` prints the lanes of a `Vd` or of a `Vm` (`1` for an active lane): `[0, 1, 2, 3 | 4, 5, 6, 7]`, with a `|` between the 128-bit blocks. The C API has `mipp_dump[_k]_[type][_lmul](v)` and `mipp_fdump[_k]_[type][_lmul](FILE*, v)`, with `_k` for the masks and no LMUL suffix for LMUL = 1 (`mipp_dump_float32`, `mipp_dump_k_float32_m2`), the C++ Functional API `mipp::dump<T, LMUL>(v)` and `mipp::dump_k<T, LMUL>(m)`.
 - `mipp::reduce(v, op)` reduces the lanes of a register, and `mipp::reduce<T, LMUL>(ptr, n, op)` the `n` elements of an array (`n` $\geq 1$), with an associative and commutative operation `op(Vd, Vd) -> Vd` that accepts every `LMUL`: one of `mipp::op::add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`, or a functor with a template `operator()`.
 
 === "C++ Object API"
@@ -311,4 +313,4 @@ See [Masking Semantics](masking_semantics.md) for the four variants.
     ```
 
 !!! note "Performance"
-    The masked `loadu` / `storeu` of this example map to native instructions on RVV (masked `vle` / `vse`, every type) and on AVX-512 for the 10 datatypes (8-bit and 16-bit types require AVX-512BW). Everywhere else (SSE, AVX, NEON, SVE) they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).
+    The masked `loadu` / `storeu` of this example map to native instructions on RVV (masked `vle` / `vse`) and SVE (predicated `ld1` / `st1`) for every type, on AVX-512 for the 10 datatypes (8-bit and 16-bit types require AVX-512BW), and on AVX for the 32-bit and 64-bit types (`vmaskmov`, and `vpmaskmov` for the integer types, which require AVX2). On SSE and NEON, and on AVX for the 8-bit and 16-bit types, they are currently emulated element by element, so the masked remainder is not faster than a scalar loop: its benefit is a single code path, with no scalar copy of the loop body. The implementation level of each target and variant is given in [`loadu`](../funcs_support/load/loadu.md) and [`storeu`](../funcs_support/store/storeu.md).

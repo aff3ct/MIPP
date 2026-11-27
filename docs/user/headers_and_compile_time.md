@@ -14,13 +14,21 @@ include/
 └── mipp/
     ├── c/                         # C API
     │   ├── cat/<category>.h       #   one category (e.g. arithmetic.h)
-    │   └── fun/<function>.h       #   one function (e.g. add.h)
-    ├── cpp/                       # C++ Functional API (same layout, .hpp)
-    ├── obj/                       # C++ Object API (same layout, .hpp)
+    │   ├── fun/<function>.h       #   one function (e.g. add.h)
+    │   ├── utils.h                #   allocation, alignment, dump
+    │   └── transpose.h            #   transpositions
+    ├── cpp/                       # C++ Functional API (same layout, .hpp, plus patterns.hpp)
+    ├── obj/                       # C++ Object API (same layout, .hpp, plus patterns.hpp)
     └── internal/                  # implementation details: never include directly
 ```
 
 The `cat/` and `fun/` directories exist for the three APIs. Categories are the ones listed in [Function Support](../funcs_support/index.md) (`arithmetic`, `comparison`, `load`, `store`, `math`, ...).
+
+The umbrella headers also include `utils`, `transpose` and `patterns`, which the `cat/` and `fun/` headers do not include. With these headers, include them yourself when you use what they define:
+
+- `utils.h` / `utils.hpp`: `mipp_malloc`, `mipp_free`, `MIPP_REQUIRED_ALIGNMENT`, `mipp::malloc`, `mipp::vector`, the dump functions (`mipp_dump_*`, `mipp::dump`) and, in the Object API, `operator<<` and `mipp::reduce`;
+- `transpose.h` / `transpose.hpp`: the transpositions (see [Rearrangements](rearrangements.md#7-transpositions));
+- `patterns.hpp` (C++17): `mipp::permute<P>` and `mipp::permute2<P>` with a compile-time pattern (see [Rearrangements](rearrangements.md#8-patterns-known-at-compile-time-c17)).
 
 ---
 
@@ -49,6 +57,8 @@ The same layout exists for categories (`cat/m/m2/arithmetic.hpp`) and for the th
 !!! warning "Include what you call"
     With fine-grained headers, a call only compiles if the matching granule is included. For example, `mipp::add<mipp::Z>(m, a, b)` requires the `z` granule (`z/add.hpp`, `z/m1/add.hpp`, or a coarser header). Several granules of the same function can be included in the same translation unit.
 
+    The [scalar forms](scalar_forms.md) have their own headers, at every granularity: `mipp::add(a, 2.f)` needs `fun/add_vs.hpp`, `mipp::sub(2.f, a)` needs `fun/sub_sv.hpp`, `mipp::fmadd(a, 2.f, c)` needs `fun/fmadd_vsv.hpp`. `fun/add.hpp` does not provide them; the category headers (`cat/arithmetic.hpp`) and the umbrella headers do.
+
 ---
 
 ## 3. Measured Impact
@@ -71,7 +81,7 @@ Compile time (wall clock, median of 2 runs) and compiler peak memory (RSS) for a
 Going from monolithic to fine-grained headers makes compilation **2× to 4× faster** and divides peak memory by **2 to 3**.
 
 !!! note "Measurement setup"
-    Apple M1 Pro (ARM NEON, LMUL = 1), AppleClang 21 and GCC 16, `-O3`, `-std=c99` for the C API and `-std=c++20` for the C++ APIs, October 2026. Kernels cycle over `float`, `double`, `int32_t` and `int64_t`, half of them using masked operations.
+    Apple M1 Pro (ARM NEON, LMUL = 1), AppleClang 21 and GCC 16, `-O3`, `-std=c99` for the C API (the C API targets C11 for `mipp_malloc`, which calls `aligned_alloc`: the libc of macOS also declares it in C99) and `-std=c++20` for the C++ APIs, October 2026. Kernels cycle over `float`, `double`, `int32_t` and `int64_t`, half of them using masked operations.
 
 ---
 

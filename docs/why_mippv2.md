@@ -30,7 +30,7 @@ MIPPv2 was written with the help of generative AI, in a way its design keeps und
 ### 2.1. Three APIs
 Three complementary interfaces mapping to the same inlined instructions:
 
-- **C API (`<mipp.h>`, C11)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases, embedded targets, and Linux kernel modules.
+- **C API (`<mipp.h>`, C11)**: Explicit type-suffixed functions (`mipp_add_float32`) for pure C codebases and embedded targets.
 - **C++ Functional API (`<mipp.hpp>`, C++11)**: Overloaded functions under namespace `mipp::` (`mipp::add(a, b)`), with datatype and LMUL deduced from the register types.
 - **C++ Object API (`<mipp_obj.hpp>`, C++11)**: Register classes (`mipp::Vd`, `mipp::Vm`) with complete operator overloading.
 
@@ -110,8 +110,8 @@ Choosing the right SIMD library depends on language requirements, compilation co
 
 1. **Dual-Ecosystem (C & Modern C++)**: Most modern wrappers require C++17/C++20, while nSIMD relies on heavy macro preprocessing. MIPPv2 has a C11 API next to its two C++11 APIs ([§2.1](#21-three-apis)).
 2. **Expressive Syntax without Portability Sacrifices**: While Google Highway restricts operator overloading to fixed-width targets to accommodate sizeless SVE / RVV vectors, MIPPv2 retains natural operator expressions (`va + vb`) across all fixed-width targets.
-3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures: every function compiles on every target, for its 10 datatypes ([§2.2](#22-deterministic-4-level-fallback-hierarchy)).
-4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N`) and straightforward struct layouts. The price is one binary per vector width ([below](#when-highway-is-a-better-fit)).
+3. **Deterministic 4-Level Fallback Guarantee**: Missing CPU instructions never cause compilation failures: every function compiles on every target, for every datatype it supports ([§2.2](#22-deterministic-4-level-fallback-hierarchy)).
+4. **Pragmatic Fixed-Width Design (RVV & SVE)**: Targeting compile-time vector widths (`-mrvv-vector-bits` / `-msve-vector-bits`) preserves compile-time constants (`MIPP_N_FLOAT32`, ...) and straightforward struct layouts. The price is one binary per vector width ([below](#when-highway-is-a-better-fit)).
 5. **Predictable Assembly vs. Auto-Vectorization**: Compiler auto-vectorization (`-O3`) is fragile and can silently de-vectorize loops upon subtle code changes. MIPP guarantees explicit, deterministic SIMD instructions.
 6. **Automated Offline Code Generation**: Shifting metaprogramming offline into a Python engine (`generator/`) yields three major engineering benefits:
     - **Fine-Grained Modular Headers**: Programmatic synthesis enables headers restricted to one function, one masking variant and one LMUL (e.g. `<mipp/obj/fun/m/m2/add.hpp>`). Including only what is needed makes compilation 2× to 4× faster than with the umbrella header (see [Headers & Compile Time](user/headers_and_compile_time.md)).
@@ -125,6 +125,6 @@ MIPPv2 is not the best choice for every project. [Google Highway](https://github
 1. **Dynamic Dispatch**: Highway compiles a function for several targets and picks the best one at run time (`HWY_DYNAMIC_DISPATCH`): a single binary runs AVX-512 code where the CPU has it and SSE code elsewhere. MIPPv2 targets one ISA per compilation: a program distributed as a binary has to be built once per target and choose the right build itself.
 2. **Scalable Vectors**: On SVE and RVV, Highway also supports sizeless vectors: the same binary uses the full vector length of any hardware. A MIPPv2 binary is tied to the width chosen at compile time.
 3. **More Architectures**: Highway also covers PowerPC (VSX), IBM Z, WebAssembly and LoongArch.
-4. **Maturity**: Highway is used in production by large projects (JPEG XL, Chromium, the sort of NumPy), has a stable API, many contributors, and ready-made algorithms (sorting, dot products, matrix-vector products). MIPPv2 is younger: its API can still change between versions.
+4. **Maturity**: Highway is used in production by large projects (JPEG XL, Chromium, NumPy's sort), has a stable API, many contributors, and ready-made algorithms (sorting, dot products, matrix-vector products). MIPPv2 is younger: its API can still change between versions.
 
 Highway is the better fit for binaries shipped to unknown machines, for a single binary that uses the full width of SVE or RVV hardware, and for the architectures above. MIPPv2 fits code compiled for known machines (HPC, research), C code bases, and projects that value readable SIMD code, explicit [implementation levels](user/implementation_levels.md) and register groups on every ISA.

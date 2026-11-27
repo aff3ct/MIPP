@@ -245,6 +245,7 @@ MIPPv2 names the rearrangements after what happens to the lanes, and each one wo
 | `interleave(a, b)` | `combine(ziplo(a, b), ziphi(a, b))` | A group of LMUL 2. |
 | `deinterleave(a, b)` | `unziplo(a, b)`, `unziphi(a, b)` | |
 | `interleavelo2`, `interleavehi2` on AVX, `interleavelo4`, `interleavehi4` on AVX-512 | `ziplo_b128(a, b)`, `ziphi_b128(a, b)` | |
+| `interleave2(a, b)` on AVX, `interleave4(a, b)` on AVX-512 | `combine(ziplo_b128(a, b), ziphi_b128(a, b))` | A group of LMUL 2. |
 | `interleave(r)` (one register) | `zip(v)` | The inverse is `unzip(v)`. |
 | `interleavex2(a, b)` | `combine(lo(a), lo(b))`, `combine(hi(a), hi(b))` | The halves of the two registers exchanged. |
 | `interleavex16(r)` | `zip` of the register cast to `int16_t` | |
@@ -284,7 +285,7 @@ A program that keeps the real and imaginary parts in two arrays does not need th
 | `MIPP_NO_INTRINSICS` | `MIPP_SCALAR` | The registers keep their size: N is not 1. |
 | `MIPP_ALIGNED_LOADS` | None. | The alignment is in the name of the function (`load`, `loadu`). |
 | `MIPP_STATIC_LIB` | None. | Nothing to link. |
-| `MIPP_ENABLE_BACKTRACE` | None. | No function throws for a missing implementation. |
+| `MIPP_ENABLE_BACKTRACE` | None. | Only the few stubs of the [known limitations](implementation_levels.md#known-limitations) stop at run time (`mipp::stub_exception` in C++). |
 | `mipp::nElReg<T>()`, `mipp::nElmtsPerRegister<T>()` | `mipp::N<T>()` | |
 | `mipp::InstructionType`, `mipp::InstructionFullType`, `mipp::InstructionVersion`, `mipp::InstructionExtensions()` | `mipp_info()` | It prints the target. The macros `MIPP_SSE`, `MIPP_AVX`, `MIPP_AVX512`, `MIPP_NEON`, `MIPP_SVE`, `MIPP_RVV` and `MIPP_SCALAR` select code at compile time. |
 | `mipp::RegisterSizeBit`, `MIPP_REGISTER_SIZE` | `MIPP_RVD_SIZE_BYTE` | In bytes. |
@@ -298,8 +299,8 @@ A few parts of MIPPv1 have no counterpart in MIPPv2:
 
 - **`transpose2` of `int8_t` on SSE**: two 8 × 8 matrices in the halves of 64 bits of 8 registers.
 - **Shifts of the lanes of a mask** (`m << n`, `mipp::lshift<N>(m, n)`).
-- **Interleaving by halves that are not blocks of 128 bits**: `interleavelo2` and `interleavehi2` on SSE and NEON (halves of 64 bits) and on AVX-512 (halves of 256 bits).
+- **Interleaving by halves that are not blocks of 128 bits**: `interleavelo2`, `interleavehi2` and `interleave2` on SSE and NEON (halves of 64 bits) and on AVX-512 (halves of 256 bits).
 - **`sincos` and `cossin`**: call `sin` and `cos`, whose common part the compiler computes once.
 - **`mipp::Lanes`**: the functions `_b128` replace the code that depended on it.
-- **Run-time errors for a missing implementation**, and `MIPP_ENABLE_BACKTRACE` with them: what MIPPv1 reported at run time compiles in MIPPv2, or is a compile error.
+- **Run-time errors for a missing implementation**, and `MIPP_ENABLE_BACKTRACE` with them: what MIPPv1 reported at run time compiles in MIPPv2, or is a compile error. The exceptions are the few stubs of the [known limitations](implementation_levels.md#known-limitations) (`float64` half-vectors on ARMv7, RVV without 64-bit elements or with VLEN < 128): they compile, then stop the program (`exit(-1)` in C, `mipp::stub_exception` in C++).
 - **Member functions** for the operations (`a.add(b)`, `r.sqrt()`, `a.blend(b, m)`).

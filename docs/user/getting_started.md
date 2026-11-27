@@ -20,7 +20,7 @@ g++ -std=c++11 -O3 -mavx2 -mfma -I/path/to/include main.cpp -o app
 Generating the headers requires Python 3 and the packages listed in `generator/requirements.txt`:
 
 ```bash
-git clone https://github.com/aff3ct/MIPP.git
+git clone -b develop https://github.com/aff3ct/MIPP.git   # MIPPv2 is on develop (master is MIPPv1)
 cd MIPP/generator
 python3 -m venv .venv
 source .venv/bin/activate
@@ -43,7 +43,7 @@ Each API has a single umbrella header that brings every MIPP function into scope
 
 This is the simplest way to start. For larger projects, you can include only the functions you use (`<mipp/obj/fun/add.hpp>`), or even a single masking variant and LMUL (`<mipp/obj/fun/m/m2/add.hpp>`), which makes compilation 2× to 4× faster: see [Headers & Compile Time](headers_and_compile_time.md).
 
-Every public name starts with `mipp` (`mipp_add_float32`, `mipp::add`, `MIPP_N_FLOAT32`). In C++, a shorter prefix is a namespace alias in your own code: with `namespace mi = mipp;`, write `mi::add(a, b)` or `mi::Vd<float>`. MIPP does not shorten its prefix itself, since a two-letter prefix would collide with other libraries in C (`mi_` is the one of mimalloc): see [Naming Conventions](../developer/reference/naming.md).
+Every public name starts with `mipp` (`mipp_add_float32`, `mipp::add`, `MIPP_N_FLOAT32`), except the C register types (`vd_float32_t`, `vm_float32_t`) and the C typedefs `float32_t` and `float64_t`. In C++, a shorter prefix is a namespace alias in your own code: with `namespace mi = mipp;`, write `mi::add(a, b)` or `mi::Vd<float>`. MIPP does not shorten its prefix itself, since a two-letter prefix would collide with other libraries in C (`mi_` is the one of mimalloc): see [Naming Conventions](../developer/reference/naming.md).
 
 ---
 
@@ -55,9 +55,9 @@ MIPP automatically detects the target instruction set architecture (ISA) at comp
 
 | Target Architecture | Compiler Flags (GCC / Clang / ICX) | Detected MIPP Macro | Vector Bitwidth |
 | :--- | :--- | :--- | :--- |
-| **x86 SSE4.2** | `-msse4.2` | `MIPP_SSE` | 128 bits |
+| **x86 SSE** | `-msse4.2` (SSE2, the x86-64 default, is enough) | `MIPP_SSE` | 128 bits |
 | **x86 AVX** | `-mavx` | `MIPP_AVX` | 256 bits |
-| **x86 AVX2 + FMA** | `-mavx2 -mfma` | `MIPP_AVX` (with `MIPP_BW`, `MIPP_FMA`) | 256 bits |
+| **x86 AVX2 + FMA** | `-mavx2 -mfma` | `MIPP_AVX` (with `MIPP_AVX2`, `MIPP_BW`, `MIPP_FMA`) | 256 bits |
 | **x86 AVX-512** | `-mavx512f -mavx512bw -mavx512dq` | `MIPP_AVX512` | 512 bits |
 | **ARM NEON (v8-A)** | `-march=armv8-a+simd` | `MIPP_NEON` | 128 bits |
 | **ARM SVE** | `-march=armv8-a+sve -msve-vector-bits=256` | `MIPP_SVE` | Fixed at compile time (256 bits in the given compiler flags) |

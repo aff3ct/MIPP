@@ -54,7 +54,7 @@ hide:
       <h3 class="mipp-home-card-title">Three APIs, One Engine</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Choose your paradigm: the <b>C API</b> (<code>mipp_add_float32</code>, C11) for <b>OS kernels and embedded targets</b>; the generic <b>C++ Functional API</b> (<code>mipp::add(va, vb)</code>) for <b>HPC algorithms</b>; or the expressive <b>C++ Object API</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
+      Choose your paradigm: the <b>C API</b> (<code>mipp_add_float32</code>, C11) for <b>C codebases and embedded targets</b>; the generic <b>C++ Functional API</b> (<code>mipp::add(va, vb)</code>) for <b>HPC algorithms</b>; or the expressive <b>C++ Object API</b> (<code>va + vb</code>) with full <b>operator overloading</b>.
     </p>
   </div>
   <div class="mipp-home-card">
@@ -63,7 +63,7 @@ hide:
       <h3 class="mipp-home-card-title">Fallback Guarantee</h3>
     </div>
     <p class="mipp-home-card-desc">
-      Every function compiles on every target for all <b>10 datatypes</b>, through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Hardware) &rarr; <b>L1</b> (Dedicated Emulation) &rarr; <b>L2</b> (Generic Emulation) &rarr; <b>L3</b> (Scalar Fallback). <b>No missing-instruction compilation errors</b> (see the <a href="user/implementation_levels/#known-limitations">known limitations</a>).
+      Every function compiles on every target for <b>every datatype it supports</b>, through a deterministic <b>4-level fallback engine</b>: <b>L0</b> (Native Hardware) &rarr; <b>L1</b> (Dedicated Emulation) &rarr; <b>L2</b> (Generic Emulation) &rarr; <b>L3</b> (Scalar Fallback). <b>No missing-instruction compilation errors</b> (see the <a href="user/implementation_levels/#known-limitations">known limitations</a>).
     </p>
   </div>
   <div class="mipp-home-card">
@@ -72,7 +72,7 @@ hide:
       <h3 class="mipp-home-card-title">Zero-Overhead & Header-Only</h3>
     </div>
     <p class="mipp-home-card-desc">
-      <b>No compilation</b>, <b>no external dependencies</b>, and <b>no linking</b> required. Simply include <code>&lt;mipp.h&gt;</code>, <code>&lt;mipp.hpp&gt;</code>, or <code>&lt;mipp_obj.hpp&gt;</code> into your include path: code inlines directly into bare-metal assembly with <b>zero runtime penalty</b>.
+      <b>No compilation</b>, <b>no external dependencies</b>, and <b>no linking</b> required. Simply add <code>include/</code> to your include path and include <code>&lt;mipp.h&gt;</code>, <code>&lt;mipp.hpp&gt;</code>, or <code>&lt;mipp_obj.hpp&gt;</code>: code inlines directly into bare-metal assembly with <b>zero runtime penalty</b>.
     </p>
   </div>
 </div>
@@ -115,6 +115,9 @@ MIPP supports 10 fundamental numeric data types across all vector abstractions:
 - **[Vector Types & LMUL](user/vector_types_and_lmul.md)**: Vector representations, element counts (`mipp::N<T, LMUL>()`), register multipliers, half-vectors and type conversions.
 - **[Memory & Alignment](user/memory_and_alignment.md)**: Alignment constraints, load/store primitives, and gather/scatter memory access.
 - **[Masking Semantics](user/masking_semantics.md)**: Mask generation, mask conversion, and execution variants (`unmasked`, `mask`, `maskz`, `masks`).
+- **[Scalar Forms](user/scalar_forms.md)**: Functions that take a scalar instead of a vector operand (`mipp::sub(a, s)`, `mipp::fmadd(a, s, c)`).
+- **[Rearrangements](user/rearrangements.md)**: Moving lanes inside a register or between two registers: reverse, interleave, slide, permute, transpose.
+- **[Complex Numbers](user/complex_numbers.md)**: Complex arithmetic on `float32` / `float64` registers, in the interleaved or the split layout.
 - **[Headers & Compile Time](user/headers_and_compile_time.md)**: Header tree, monolithic / per-function / fine-grained inclusion, and measured compile times.
 - **[Implementation Levels](user/implementation_levels.md)**: The 4-level fallback engine explained from an application performance standpoint.
 - **[Migrating from MIPPv1](user/migrating_from_mippv1.md)**: What changes in depth, the functions that keep their name and change their result, and the correspondence tables.
