@@ -79,7 +79,7 @@ The code is rendered by Jinja2 with these variables:
 | `isa` | The ISA descriptor (`<isa>_isa.json`): `isa.prefix` (`v` on NEON, `_mm` on SSE, `_mm256` on AVX), `isa.name`, `isa.size`, ... |
 | `instr_name` | The `instr_name` of the entry. |
 | `isa_dt_par`, `isa_dt_ret` | The datatype entry of the ISA descriptor, for the parameter and the return types: `data_ext` (`f32`, `s32`, `ps`, `epi32`, ...), `reg`, `msk`, ... |
-| `dt_par`, `dt_ret` | The generic description of the datatypes (`name`, `n_bits`, `category`, ...). |
+| `dt_par`, `dt_ret` | The generic description of the datatypes, from `datatypes` in `tools.py`: `name`, `n_bits`, `category`, `cstd`, `log2_n_bytes` (log2 of the size in bytes: a shift instead of a multiplication by `sizeof`), ... |
 | `cstdint_ret` | The C type of the return datatype (`int32_t`, `float`, ...). |
 | `func_name` | The MIPP function name (`absdiff`), useful in templates shared by several functions. |
 | `lmul`, `mask_kind` | The LMUL and the mask variant being generated. |
