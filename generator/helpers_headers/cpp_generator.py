@@ -25,7 +25,7 @@ def _generate_mipp_hpp(include_manager=None):
     for func in interfaces:
         category = _match_category(func)
         content += f'#include "mipp/internal/interfaces/cpp/functions/{category}/{func}.hpp"\n'
-    # hand-written utilities (allocator, printing, sum): utils_generator.py
+    # hand-written utilities (allocator, printing): utils_generator.py
     content += '#include "mipp/cpp/utils.hpp"\n'
     # compile-time permutations (C++17), not included by utils.hpp: they pull 20 rearrangement functions
     content += '#include "mipp/cpp/patterns.hpp"\n'

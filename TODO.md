@@ -60,7 +60,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 ### 1.6. Reductions, Aliases & Diagnostics
 
 - [x] `reduction<T, OP>`: `mipp::reduce(v, op)` and `mipp::reduce<T, LMUL>(ptr, n, op)` in the Object API, with the operations of `mipp::op` (`add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`) or any functor.
-- [x] `sum`: Reduction alias for horizontal addition (`hadd`), C++ APIs.
+- [x] `sum`: not needed: `hadd(v)` (wraps) or `hadds(v)` (saturates, as the MIPPv1 `sum` on the 8-bit and 16-bit integers). An alias of `hadd` would silently wrap where MIPPv1 saturated.
 - [x] `sat`: Dynamic clamping of vector elements between runtime bounds $[min, max]$, distinct from the MIPPv2 `adds`/`subs` type-boundary saturation: `clamp(v, lo, hi)`, with its scalar forms (`clamp(v, 0.f, 1.f)`).
 - [x] `dump`: `mipp_dump_<type>[_<lmul>]` / `mipp_fdump_...` (C, `_k` for the masks), `mipp::dump<T, LMUL>` / `mipp::dump_k` (C++ Functional), `operator<<` on `Vd` and `Vm` (C++ Object).
 - [x] `neg(r, s)`, `copysign(r, s)`, `sign(r)`: `xorsign(a, b)` (negates `a` where `b` is negative: the MIPPv1 `neg` / `copysign`), `copysign(a, b)` (IEEE: magnitude of `a`, sign of `b`) and `signbit(v)` (mask of the negative lanes, including -0.0).

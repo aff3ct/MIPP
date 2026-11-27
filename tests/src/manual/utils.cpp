@@ -1,5 +1,5 @@
 // Tests of the hand-written utilities (generator/helpers_headers/utils_generator.py): aligned allocation,
-// printing of the registers, sum, reduce and the initializer lists of the Object API.
+// printing of the registers, reduce and the initializer lists of the Object API.
 // Not generated: tests/src/manual/ is kept by gen_mipp_tests.py.
 #include <cstdio>
 #include <cstdint>
@@ -97,16 +97,6 @@ TEST_CASE("utils - dump", "[utils]")
 	std::ostringstream o8;
 	o8 << mipp::Vd<int8_t>(in8);
 	REQUIRE(o8.str() == expected_lanes(MIPP_N_INT8, 16));
-}
-
-TEST_CASE("utils - sum", "[utils]")
-{
-	float in[MIPP_N_FLOAT32];
-	for (int i = 0; i < MIPP_N_FLOAT32; i++)
-		in[i] = static_cast<float>(i) * 0.5f;
-	const mipp::Vd<float> rf(in);
-	REQUIRE(mipp::sum(rf.vd) == mipp::hadd(rf.vd));
-	REQUIRE(mipp::sum(rf) == mipp::hadd(rf));
 }
 
 TEST_CASE("utils - reduce", "[utils]")

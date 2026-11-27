@@ -5,7 +5,7 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
   `mipp_is_aligned`, `MIPP_REQUIRED_ALIGNMENT`) and the printing of the registers and masks
   (`mipp_dump_<type>[_<lmul>]`, `mipp_fdump_...`, `_k` for the masks), one function per datatype and LMUL;
 - `include/mipp/cpp/utils.hpp` (C++ Functional API, `mipp_utils.tpl.hpp`): `mipp::malloc`, `mipp::free`,
-  `mipp::allocator`, `mipp::vector`, `mipp::dump`, `mipp::sum`;
+  `mipp::allocator`, `mipp::vector`, `mipp::dump`;
 - `include/mipp/obj/utils.hpp` (C++ Object API, `mipp_obj_utils.tpl.hpp`): `operator<<`, `reduce` and the
   operations of `mipp::op`;
 - `include/mipp/cpp/patterns.hpp` and `include/mipp/obj/patterns.hpp` (C++17, `mipp_patterns.tpl.hpp`,
@@ -17,7 +17,7 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
   headers include them.
 
 These functions are not in the registry: they are not implemented per ISA, they are written once on top of the
-generated functions (storeu, tovd, hadd, combine, ncvts, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
+generated functions (storeu, tovd, combine, ziplo, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
 The API Explorer lists them in the category `utilities` from `registry_utilities.json`: a new utility gets an
 entry there (signatures in the three APIs, header, section of the user documentation).
 """

@@ -1,6 +1,6 @@
 #pragma once
-// MIPP utilities of the C++ Functional API: aligned memory (malloc, allocator, vector), printing of the
-// registers and `sum`.
+// MIPP utilities of the C++ Functional API: aligned memory (malloc, allocator, vector) and printing of the
+// registers.
 // Generated from generator/helpers_headers/templates/mipp_utils.tpl.hpp (utils_generator.py).
 
 #include <cstddef>
@@ -15,7 +15,6 @@
 #include "mipp/internal/interfaces/cpp/common.hpp"
 #include "mipp/cpp/fun/storeu.hpp"
 #include "mipp/cpp/fun/tovd.hpp"
-#include "mipp/cpp/fun/hadd.hpp"
 
 namespace mipp
 {
@@ -109,13 +108,6 @@ inline std::ostream& dump_k(const vm<T, LMUL>& m, std::ostream& os = std::cout)
 	details::print_lanes(os, buf, N<T, LMUL>(), true);
 	return os << '\n';
 }
-
-// ---------------------------------------------------------------------------------------------------------
-// sum: alias of hadd (MIPPv1)
-// ---------------------------------------------------------------------------------------------------------
-
-template <typename R>
-inline auto sum(const R& r) -> decltype(hadd(r)) { return hadd(r); }
 
 } // namespace mipp
 
