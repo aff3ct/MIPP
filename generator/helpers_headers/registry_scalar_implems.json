@@ -838,7 +838,9 @@
             "datatypes": "all_defs",
             "variants": [],
             "implem": [
-                "return vm0.vm[s0];"
+                "%s<tr>% res;",
+                "MIPP_BIT_CAST_1(&res, &vm0.vm[s0]);",
+                "return res;"
             ]
         }
     ],
