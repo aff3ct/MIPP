@@ -402,8 +402,8 @@ def _parse_lmul_expression(expr, dt_par, dt_ret, isa, base_lmul):
         return base_lmul
     elif expr in ["1", "2", "4", "8"]:
         return int(expr)
-    elif expr in ["-2", "-4", "-8"]: # convert to number
-        return str(-int(expr)) # we return the string of the positive number, as we want to have ldiv in the function name if it's a division by a power of 2
+    elif expr in ["-2", "-4", "-8"]: # a division of m1 (-2 is 'd2'), as the result of `tp/2` at LMUL 1
+        return int(expr)
     else:
         #print("else case for lmul expression: " + expr)
         match = _RE_LMUL_EXPR.match(expr)
