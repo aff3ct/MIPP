@@ -1,5 +1,5 @@
 #pragma once
-// MIPP utilities of the C++ Object API: printing (operator<<), saturating `pack`, and generic reductions of
+// MIPP utilities of the C++ Object API: printing (operator<<) and generic reductions of
 // a register or of an array with any associative operation (MIPPv1 `Reduction<T, OP>`).
 // Generated from generator/helpers_headers/templates/mipp_obj_utils.tpl.hpp (utils_generator.py).
 
@@ -36,13 +36,6 @@ inline std::ostream& operator<<(std::ostream& os, const Vm<T, LMUL>& m)
 	mipp::storeu(buf, mipp::tovd(m.vm));
 	details::print_lanes(os, buf, Vd<T, LMUL>::N(), true);
 	return os;
-}
-
-// Saturating narrowing of two registers into one (the lanes of `a`, then the lanes of `b`).
-template <typename T_DST, typename T, int LMUL>
-inline Vd<T_DST, LMUL> pack(const Vd<T, LMUL>& a, const Vd<T, LMUL>& b)
-{
-	return Vd<T_DST, LMUL>(mipp::pack<T_DST>(a.vd, b.vd));
 }
 
 // ---------------------------------------------------------------------------------------------------------

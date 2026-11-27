@@ -1,5 +1,5 @@
 // Tests of the hand-written utilities (generator/helpers_headers/utils_generator.py): aligned allocation,
-// printing of the registers, sum, pack, reduce and the initializer lists of the Object API.
+// printing of the registers, sum, reduce and the initializer lists of the Object API.
 // Not generated: tests/src/manual/ is kept by gen_mipp_tests.py.
 #include <cstdio>
 #include <cstdint>
@@ -99,7 +99,7 @@ TEST_CASE("utils - dump", "[utils]")
 	REQUIRE(o8.str() == expected_lanes(MIPP_N_INT8, 16));
 }
 
-TEST_CASE("utils - sum and pack", "[utils]")
+TEST_CASE("utils - sum", "[utils]")
 {
 	float in[MIPP_N_FLOAT32];
 	for (int i = 0; i < MIPP_N_FLOAT32; i++)
@@ -107,22 +107,6 @@ TEST_CASE("utils - sum and pack", "[utils]")
 	const mipp::Vd<float> rf(in);
 	REQUIRE(mipp::sum(rf.vd) == mipp::hadd(rf.vd));
 	REQUIRE(mipp::sum(rf) == mipp::hadd(rf));
-
-	// pack<int8_t>: the lanes of a, then the lanes of b, saturated to [-128, 127]
-	constexpr int n16 = MIPP_N_INT16;
-	int16_t a[n16], b[n16];
-	for (int i = 0; i < n16; i++)
-	{
-		a[i] = static_cast<int16_t>(i * 37 - 300);
-		b[i] = static_cast<int16_t>(300 - i * 41);
-	}
-	const mipp::Vd<int8_t> p = mipp::pack<int8_t>(mipp::Vd<int16_t>(a), mipp::Vd<int16_t>(b));
-	auto sat = [](int v) { return static_cast<int8_t>(std::min(127, std::max(-128, v))); };
-	for (int i = 0; i < n16; i++)
-	{
-		REQUIRE(p[i] == sat(a[i]));
-		REQUIRE(p[n16 + i] == sat(b[i]));
-	}
 }
 
 TEST_CASE("utils - reduce", "[utils]")

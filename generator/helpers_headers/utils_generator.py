@@ -5,8 +5,8 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
   `mipp_is_aligned`, `MIPP_REQUIRED_ALIGNMENT`) and the printing of the registers and masks
   (`mipp_dump_<type>[_<lmul>]`, `mipp_fdump_...`, `_k` for the masks), one function per datatype and LMUL;
 - `include/mipp/cpp/utils.hpp` (C++ Functional API, `mipp_utils.tpl.hpp`): `mipp::malloc`, `mipp::free`,
-  `mipp::allocator`, `mipp::vector`, `mipp::dump`, `mipp::sum`, `mipp::pack`;
-- `include/mipp/obj/utils.hpp` (C++ Object API, `mipp_obj_utils.tpl.hpp`): `operator<<`, `pack`, `reduce` and the
+  `mipp::allocator`, `mipp::vector`, `mipp::dump`, `mipp::sum`;
+- `include/mipp/obj/utils.hpp` (C++ Object API, `mipp_obj_utils.tpl.hpp`): `operator<<`, `reduce` and the
   operations of `mipp::op`;
 - `include/mipp/cpp/patterns.hpp` and `include/mipp/obj/patterns.hpp` (C++17, `mipp_patterns.tpl.hpp`,
   `mipp_obj_patterns.tpl.hpp`): `permute<P>` and `permute2<P>`, permutations whose pattern is known at compile time.

@@ -262,10 +262,9 @@ With `Vm` and `Vd` objects, the compiler deduces `T` and `LMUL`: only the varian
 
 See [Masking Semantics](masking_semantics.md) for the four variants.
 
-### 4.5. Printing, Packing and Generic Reductions
+### 4.5. Printing and Generic Reductions
 
 - `std::cout << v` prints the lanes of an `Vd` or of an `Vm` (`1` for an active lane): `[0, 1, 2, 3 | 4, 5, 6, 7]`, with a `|` between the 128-bit blocks. The C API has `mipp_dump_[type]_[lmul](v)` and `mipp_fdump_[type]_[lmul](FILE*, v)` (`_k` for the masks), the C++ Functional API `mipp::dump<T, LMUL>(v)` and `mipp::dump_k<T, LMUL>(m)`.
-- `mipp::pack<T_DST>(a, b)` narrows the lanes of `a`, then the lanes of `b`, into one register of the type twice as narrow, with saturation (see [Vector Types & LMUL §5.4](vector_types_and_lmul.md#54-ncvt-narrowing-value-conversion)).
 - `mipp::reduce(v, op)` reduces the lanes of a register, and `mipp::reduce<T, LMUL>(ptr, n, op)` the `n` elements of an array (`n` $\geq 1$), with an associative and commutative operation `op(Vd, Vd) -> Vd` that accepts every `LMUL`: one of `mipp::op::add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`, or a functor with a template `operator()`. `mipp::sum(v)` is `mipp::hadd(v)`.
 
 === "C++ Object API"

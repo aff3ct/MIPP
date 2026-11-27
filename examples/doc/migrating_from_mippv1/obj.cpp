@@ -123,10 +123,10 @@ static void halves()
     mipp::Vd<int8_t> v8(I8);
     mipp::Vd<int32_t> a32(I32), b32(I32);
     // --8<-- [start:halves]
-    mipp::Vd<int8_t, -2> lo = v8.lo();                        // half register (mipp::Reg_2<int8_t>)
-    mipp::Vd<int16_t> w = mipp::wcvt<int16_t>(lo);            // widening (cvt of a Reg_2)
-    mipp::Vd<int16_t> p = mipp::pack<int16_t>(a32, b32);      // narrowing with saturation (pack)
-    mipp::Vd<int8_t> back = mipp::combine(v8.lo(), v8.hi()); // two halves in a register
+    mipp::Vd<int8_t, -2> lo = v8.lo();                                   // half register (mipp::Reg_2<int8_t>)
+    mipp::Vd<int16_t> w = mipp::wcvt<int16_t>(lo);                       // widening (cvt of a Reg_2)
+    mipp::Vd<int16_t> p = mipp::ncvts<int16_t>(mipp::combine(a32, b32)); // narrowing with saturation (pack)
+    mipp::Vd<int8_t> back = mipp::combine(v8.lo(), v8.hi());             // two halves in a register
     // --8<-- [end:halves]
     const int n16 = (int)mipp::N<int16_t>();
     for (int i = 0; i < n16; i++) DOC_CHECK(w[i] == I8[i]);

@@ -28,7 +28,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [x] `interleavelo4`, `interleavehi4`: 4-element granular low/high interleaving: same `_b128` variants.
 - [x] `interleave`, `deinterleave`: Full two-register zip and unzip operations returning `regx2`: the result is a register of LMUL 2 (`combine(ziplo(a, b), ziphi(a, b))`); `zip(a)` / `unzip(a)` in one register, and `loadu_unzip` / `storeu_zip`.
 - [x] `interleave2`, `interleave4`: Multi-stride 2-way and 4-way register interleaving returning `regx2`. In MIPPv1 the block is relative to the register (a half or a quarter, i.e. 256 bits on AVX-512): MIPPv2 uses fixed 128-bit blocks instead (`_b128` variants).
-- [x] `interleavex2`, `interleavex4`, `interleavex16`: Cross-lane intra-register interleaving permutations. Not needed: `interleavex2(a, b)` is `combine(lo(a), lo(b))` and `combine(hi(a), hi(b))`, `interleavex16` the `zip` of a register cast to `int16`, and `interleavex4` put back the order of the quarters after a `pack` of AVX2 (MIPPv2 `pack`, `ncvts` and `zip` work on the whole register).
+- [x] `interleavex2`, `interleavex4`, `interleavex16`: Cross-lane intra-register interleaving permutations. Not needed: `interleavex2(a, b)` is `combine(lo(a), lo(b))` and `combine(hi(a), hi(b))`, `interleavex16` the `zip` of a register cast to `int16`, and `interleavex4` put back the order of the quarters after a `pack` of AVX2 (MIPPv2 `ncvts` and `zip` work on the whole register).
 
 ### 1.3. Permutation, Shuffling & Packing
 
@@ -39,7 +39,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 - [x] `compress`: Contiguous stream compaction (compressing active elements governed by a boolean mask into contiguous vector lanes, e.g., `_mm256_maskz_compress_epi32` / `vcompress`), with `expand`, `count`, `storeu_compress` (exact), `storeuf_compress` (a whole register written) and `loadu_expand`.
 - [ ] `MIPP_STATIC_LIB`: compiled shuffle tables of `compress` for the 8 and 16-bit elements on SSSE3, AVX2 and NEON (Level 3 today), and the large tables out of the headers.
 - [x] `low`, `high`, `combine` (and `_k` mask versions): Half-register extraction and slice concatenation (`lo`, `hi`, `combine`), done on every ISA (`d2` ↔ `m1` ↔ `m2` ↔ ...). Native mask versions on RVV.
-- [x] `pack`: Saturating register narrowing from two inputs: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs, and `mipp::pack<T_DST>(a, b)` = `ncvts(combine(a, b))` in the C++ APIs.
+- [x] `pack`: Saturating register narrowing from two inputs: `ncvts` (saturating `ncvt`, integers of the same signedness, one input at the LMUL above) in the three APIs; the `pack` of two registers is `ncvts(combine(a, b))`.
   > **Note:** `wcvt` (widening, input at a lower LMUL: `d2` → `m1` → `m2`) and `ncvt` (narrowing by truncation, the inverse) are implemented with the LMUL-changing infrastructure (`ret.lmul` in the registry). Half-register slicing (`lo`/`hi`) and element conversions are now separate primitives.
 
 ### 1.4. Vector Rotations & Dynamic Shifts
@@ -73,7 +73,7 @@ MIPPv1 provided a set of multi-stride interleaving and deinterleaving primitives
 | `mipp::load_2<T>`, `mipp::loadu_2<T>` | `mipp::load<T, -2>` / `mipp_load_*_d2` | Handled natively via MIPPv2 Length Division ($\text{LDIV} / LMUL=-2$). |
 | `mipp::mask<T, fn>`, `mipp::maskz<T, fn>` | `_mask`, `_maskz`, `_masks` variants on all functions | Masking promoted to a first-class execution mode across all 4 variants rather than higher-order function pointer wrappers. |
 | `mipp::cvt<T1, T2>` (all conversions) | `cvt` (same-size), `wcvt` (widening), `ncvt` (narrowing, truncating), `cast` (reinterpreting) | Disambiguates arithmetic casting, widening/narrowing conversions, and zero-cost bit reinterpretation into dedicated primitives. |
-| `mipp::pack<T1, T2>`, `low`, `high` | `ncvts` (saturating), `ncvt` (truncating), `mipp::pack<T_DST>(a, b)`, `lo` / `hi` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives. |
+| `mipp::pack<T1, T2>`, `low`, `high` | `ncvts` (saturating), `ncvt` (truncating), `ncvts(combine(a, b))`, `lo` / `hi` / `combine` & $\text{LDIV}$ | Narrowing and half-register slicing are separate primitives. |
 | `mipp::sat(r, min, max)` | `clamp` | Clamping between runtime bounds. Not to be confused with `adds`/`subs`, the saturated arithmetic at the type boundaries (`vsadd.vv`, `vqadd`, `_mm_adds_epi16`). |
 | Mask arrays `bool[N]` | Strongly typed `vm<T>` / `vm_*_t` | Eliminates raw boolean unpacking overhead; masks match hardware opmask or full-vector representations. |
 | `mipp::toreg<N>(m)` | `tovd(m)` / `tovm(r)` | Dedicated bidirectional conversion primitives with exact truthiness and bit-expansion semantics. |
@@ -151,7 +151,7 @@ The header and documentation generation pipeline requires developer tools to ana
     - **ARM Performance Libraries (ARMPL)** / `libamath` (AArch64 math routines).
     - **AMD AOCL-LibM** (AMD Zen-optimized vectorized transcendental routines).
 - [x] **Harmonized Widening/Narrowing & Register Slicing Specification (`wcvt`, `ncvt`, `lo`/`hi`)**: resolved. `wcvt` takes a register at the LMUL below and returns the LMUL above; `ncvt` is its truncating inverse; `lo`/`hi`/`combine` slice and join registers. All are available on every ISA (compile-checked only on SVE/AVX-512/RVV).
-  - Remaining open point: a saturating `pack`, and the register-tuple alternative below.
+  - Remaining open point: the register-tuple alternative below.
   - (Original question) Finalize API contracts to determine whether conversions operate on half-width register inputs (`LMUL=-2`) to produce full registers (`LMUL=1`), or consume full registers to produce register tuples (`Tuple<T, 2>` / `regx2`), ensuring uniform behavior across fixed-length (SSE, AVX) and scalable (SVE, RVV) architectures.
 
 ---

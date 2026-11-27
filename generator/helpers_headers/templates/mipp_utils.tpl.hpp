@@ -1,6 +1,6 @@
 #pragma once
 // MIPP utilities of the C++ Functional API: aligned memory (malloc, allocator, vector), printing of the
-// registers, `sum` and the saturating `pack` of two registers.
+// registers and `sum`.
 // Generated from generator/helpers_headers/templates/mipp_utils.tpl.hpp (utils_generator.py).
 
 #include <cstddef>
@@ -16,8 +16,6 @@
 #include "mipp/cpp/fun/storeu.hpp"
 #include "mipp/cpp/fun/tovd.hpp"
 #include "mipp/cpp/fun/hadd.hpp"
-#include "mipp/cpp/fun/combine.hpp"
-#include "mipp/cpp/fun/ncvts.hpp"
 
 namespace mipp
 {
@@ -118,28 +116,6 @@ inline std::ostream& dump_k(const vm<T, LMUL>& m, std::ostream& os = std::cout)
 
 template <typename R>
 inline auto sum(const R& r) -> decltype(hadd(r)) { return hadd(r); }
-
-// ---------------------------------------------------------------------------------------------------------
-// pack: saturating narrowing of two registers into one register of the narrower type (MIPPv1 `pack`):
-// the lanes of `a`, then the lanes of `b`. pack<int8_t>(a, b) = ncvts_int8(combine(a, b)).
-// ---------------------------------------------------------------------------------------------------------
-
-namespace details
-{
-template <typename T_DST> struct ncvts_to;
-template <> struct ncvts_to<int32_t>  { template <typename R> static auto apply(const R& r) -> decltype(ncvts_int32(r))  { return ncvts_int32(r); } };
-template <> struct ncvts_to<uint32_t> { template <typename R> static auto apply(const R& r) -> decltype(ncvts_uint32(r)) { return ncvts_uint32(r); } };
-template <> struct ncvts_to<int16_t>  { template <typename R> static auto apply(const R& r) -> decltype(ncvts_int16(r))  { return ncvts_int16(r); } };
-template <> struct ncvts_to<uint16_t> { template <typename R> static auto apply(const R& r) -> decltype(ncvts_uint16(r)) { return ncvts_uint16(r); } };
-template <> struct ncvts_to<int8_t>   { template <typename R> static auto apply(const R& r) -> decltype(ncvts_int8(r))   { return ncvts_int8(r); } };
-template <> struct ncvts_to<uint8_t>  { template <typename R> static auto apply(const R& r) -> decltype(ncvts_uint8(r))  { return ncvts_uint8(r); } };
-} // namespace details
-
-template <typename T_DST, typename R>
-inline auto pack(const R& a, const R& b) -> decltype(details::ncvts_to<T_DST>::apply(combine(a, b)))
-{
-	return details::ncvts_to<T_DST>::apply(combine(a, b));
-}
 
 } // namespace mipp
 

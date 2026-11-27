@@ -77,9 +77,6 @@ static void utilities()
 
     float vmax = mipp::reduce(v, mipp::op::max());        // largest lane of v
     float total = mipp::reduce(B, 100, mipp::op::add());  // sum of the 100 elements of B
-
-    const mipp::Vd<int16_t> a(int16_t(300)), b(int16_t(-5));
-    mipp::Vd<int8_t> p = mipp::pack<int8_t>(a, b);        // [127, 127, ... (lanes of a), -5, -5, ... (lanes of b)]
     // --8<-- [end:utilities]
     float ref_max = A[0], ref_total = 0.f;
     for (int i = 1; i < mipp::Vd<float>::N(); i++)
@@ -88,7 +85,6 @@ static void utilities()
         ref_total += B[i];
     DOC_CHECK(vmax == ref_max);
     DOC_CHECK(total == ref_total);
-    DOC_CHECK(p[0] == 127 && p[mipp::Vd<int16_t>::N()] == -5);
     DOC_CHECK(out.str().compare(0, 4, "[-3,") == 0);
 }
 

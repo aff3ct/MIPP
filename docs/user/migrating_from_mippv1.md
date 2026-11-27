@@ -226,7 +226,7 @@ Most functions keep their name and their meaning: `mul`, `div`, `fmadd`, `fnmadd
 | `mipp::low(r)`, `mipp::high(r)` | `v.lo()`, `v.hi()`, `mipp::lo(v)`, `mipp::hi(v)` | A `Vd<T, -2>`, for every type. |
 | `mipp::combine(lo, hi)` | `mipp::combine(lo, hi)`, `lo.combine(hi)` | |
 | `mipp::cvt<T1, T2>(Reg_2<T1>)` (widening) | `mipp::wcvt<T2>(v.lo())` | `wcvt` of a whole register gives a group of LMUL 2. |
-| `mipp::pack<T1, T2>(a, b)` | `mipp::pack<T2>(a, b)` | Saturates to the range of `T2`, unsigned types included. |
+| `mipp::pack<T1, T2>(a, b)` | `mipp::ncvts<T2>(mipp::combine(a, b))` | `combine` joins `a` and `b` in a group of LMUL 2, narrowed into one register with saturation to the range of `T2`, unsigned types included. |
 
 ```cpp
 --8<-- "examples/doc/migrating_from_mippv1/obj.cpp:halves"
@@ -248,7 +248,7 @@ MIPPv2 names the rearrangements after what happens to the lanes, and each one wo
 | `interleave(r)` (one register) | `zip(v)` | The inverse is `unzip(v)`. |
 | `interleavex2(a, b)` | `combine(lo(a), lo(b))`, `combine(hi(a), hi(b))` | The halves of the two registers exchanged. |
 | `interleavex16(r)` | `zip` of the register cast to `int16_t` | |
-| `interleavex4(r)` | None needed. | It put back the order of the quarters after a `pack` of AVX2, done in each block of 128 bits: `pack`, `ncvts` and `zip` work on the whole register. |
+| `interleavex4(r)` | None needed. | It put back the order of the quarters after a `pack` of AVX2, done in each block of 128 bits: `ncvts` and `zip` work on the whole register. |
 | `transpose(tab)` | `transpose(t)` | `t` is an array of `N<T>()` registers, transposed in place, for every type and target ([Rearrangements §7](rearrangements.md#7-transpositions)). |
 | `transpose2(tab)` on AVX | `transpose_b128(t)` | A matrix in each block of 128 bits. |
 | `transpose8x8(tab)`, `transpose28x8(tab)` (`int8_t`) | `transpose_b128` of the registers cast to `int16_t` | As MIPPv1, which transposes pairs of bytes. |
