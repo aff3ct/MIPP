@@ -117,6 +117,39 @@ static void filter(void)
     DOC_CHECK(out == OUT + k);
 }
 
+/* §7: transpositions */
+static float M[MIPP_N_FLOAT32 * MIPP_N_FLOAT32], MT[MIPP_N_FLOAT32 * MIPP_N_FLOAT32];
+static float PTS[4 * MIPP_N_FLOAT32], REF[4 * MIPP_N_FLOAT32];
+
+static void transpositions(void)
+{
+    const size_t n = MIPP_N_FLOAT32;
+    for (size_t i = 0; i < n * n; i++) M[i] = (float)i;
+    // --8<-- [start:transpose]
+    // M: a matrix of n x n floats (n = MIPP_N_FLOAT32), row-major; MT: its transpose
+    vd_float32_t rows[MIPP_N_FLOAT32];
+    for (size_t i = 0; i < n; i++) rows[i] = mipp_loadu_float32(&M[i * n]);
+    mipp_transpose_float32(rows); // rows[i]: the column i of M
+    for (size_t i = 0; i < n; i++) mipp_storeu_float32(&MT[i * n], rows[i]);
+    // --8<-- [end:transpose]
+    for (size_t i = 0; i < n; i++)
+        for (size_t j = 0; j < n; j++) DOC_CHECK(MT[i * n + j] == M[j * n + i]);
+
+    for (size_t i = 0; i < 4 * n; i++) PTS[i] = REF[i] = (float)(i % 5) + 1.f;
+    // --8<-- [start:transpose_b128]
+    // n points (x, y, z, w), one after the other in memory: x, y and z divided by w
+    vd_float32_t v[4];
+    for (size_t i = 0; i < 4; i++) v[i] = mipp_loadu_float32(&PTS[i * n]);
+    mipp_transpose_b128_float32(v); // v[0]: x of n points, v[1]: y, v[2]: z, v[3]: w
+    for (size_t c = 0; c < 3; c++) v[c] = mipp_div_float32(v[c], v[3]);
+    mipp_transpose_b128_float32(v); // back to (x, y, z, w)
+    for (size_t i = 0; i < 4; i++) mipp_storeu_float32(&PTS[i * n], v[i]);
+    // --8<-- [end:transpose_b128]
+    for (size_t p = 0; p < n; p++)
+        for (size_t c = 0; c < 4; c++)
+            DOC_CHECK(PTS[4 * p + c] == (c < 3 ? REF[4 * p + c] / REF[4 * p + 3] : REF[4 * p + 3]));
+}
+
 int main(void)
 {
     fill();
@@ -125,5 +158,6 @@ int main(void)
     interleaved();
     permutations();
     filter();
+    transpositions();
     return doc_status();
 }

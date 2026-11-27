@@ -1229,6 +1229,8 @@ def generate_mipp_h(include_manager=None):
         include_list += f'#include "mipp/internal/interfaces/c/functions/{category}/{func}.h"\n'
     # hand-written utilities (aligned allocation, printing): utils_generator.py
     include_list += '#include "mipp/c/utils.h"\n'
+    # transpositions of an array of registers (ziplo/ziphi steps): utils_generator.py
+    include_list += '#include "mipp/c/transpose.h"\n'
     postfix = """#endif /* MY_INTRINSICS_PLUS_PLUS_H_ */"""
 
     template_file += include_list + "\n" + postfix

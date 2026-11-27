@@ -1,4 +1,6 @@
+#include <cstddef>
 #include <cstdint>
+#include <vector>
 #include <mipp_obj.hpp>
 
 #include "doc_check.h"
@@ -104,6 +106,38 @@ static void filter()
     DOC_CHECK(out == OUT + k);
 }
 
+// §7: transpositions
+static void transpositions()
+{
+    const size_t n = mipp::N<float>();
+    std::vector<float> m(n * n), mt(n * n);
+    for (size_t i = 0; i < n * n; i++) m[i] = (float)i;
+    // --8<-- [start:transpose]
+    // m: a matrix of n x n floats (n = N<float>()), row-major; mt: its transpose
+    mipp::Vd<float> rows[mipp::N<float>()];
+    for (size_t i = 0; i < n; i++) rows[i] = mipp::Vd<float>(&m[i * n]);
+    mipp::transpose(rows); // rows[i]: the column i of m
+    for (size_t i = 0; i < n; i++) mipp::storeu(&mt[i * n], rows[i]);
+    // --8<-- [end:transpose]
+    for (size_t i = 0; i < n; i++)
+        for (size_t j = 0; j < n; j++) DOC_CHECK(mt[i * n + j] == m[j * n + i]);
+
+    std::vector<float> pts(4 * n), ref(4 * n);
+    for (size_t i = 0; i < 4 * n; i++) pts[i] = ref[i] = (float)(i % 5) + 1.f;
+    // --8<-- [start:transpose_b128]
+    // n points (x, y, z, w), one after the other in memory: x, y and z divided by w
+    mipp::Vd<float> v[4];
+    for (size_t i = 0; i < 4; i++) v[i] = mipp::Vd<float>(&pts[i * n]);
+    mipp::transpose_b128(v); // v[0]: x of n points, v[1]: y, v[2]: z, v[3]: w
+    for (size_t c = 0; c < 3; c++) v[c] = v[c] / v[3];
+    mipp::transpose_b128(v); // back to (x, y, z, w)
+    for (size_t i = 0; i < 4; i++) mipp::storeu(&pts[i * n], v[i]);
+    // --8<-- [end:transpose_b128]
+    for (size_t p = 0; p < n; p++)
+        for (size_t c = 0; c < 4; c++)
+            DOC_CHECK(pts[4 * p + c] == (c < 3 ? ref[4 * p + c] / ref[4 * p + 3] : ref[4 * p + 3]));
+}
+
 int main()
 {
     fill();
@@ -112,5 +146,6 @@ int main()
     interleaved();
     permutations();
     filter();
+    transpositions();
     return doc_status();
 }

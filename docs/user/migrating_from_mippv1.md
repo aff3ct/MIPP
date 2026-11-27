@@ -246,6 +246,12 @@ MIPPv2 names the rearrangements after what happens to the lanes, and each one wo
 | `deinterleave(a, b)` | `unziplo(a, b)`, `unziphi(a, b)` | |
 | `interleavelo2`, `interleavehi2` on AVX, `interleavelo4`, `interleavehi4` on AVX-512 | `ziplo_b128(a, b)`, `ziphi_b128(a, b)` | |
 | `interleave(r)` (one register) | `zip(v)` | The inverse is `unzip(v)`. |
+| `interleavex2(a, b)` | `combine(lo(a), lo(b))`, `combine(hi(a), hi(b))` | The halves of the two registers exchanged. |
+| `interleavex16(r)` | `zip` of the register cast to `int16_t` | |
+| `interleavex4(r)` | None needed. | It put back the order of the quarters after a `pack` of AVX2, done in each block of 128 bits: `pack`, `ncvts` and `zip` work on the whole register. |
+| `transpose(tab)` | `transpose(t)` | `t` is an array of `N<T>()` registers, transposed in place, for every type and target ([Rearrangements §7](rearrangements.md#7-transpositions)). |
+| `transpose2(tab)` on AVX | `transpose_b128(t)` | A matrix in each block of 128 bits. |
+| `transpose8x8(tab)`, `transpose28x8(tab)` (`int8_t`) | `transpose_b128` of the registers cast to `int16_t` | As MIPPv1, which transposes pairs of bytes. |
 | `cmask(ids)` then `shuff(r, cm)` | `permute(v, idx)` | `idx` is a register of unsigned integers that holds the indices themselves. |
 | `cmask2`, `cmask4` then `shuff2`, `shuff4` | `permute_b128(v, idx)`, or `permute` | `permute_b128` when the parts are blocks of 128 bits. |
 | `compress(r, m)` | `compress(v, m)` | No library to link. With `expand`, and `storeu_compress` to filter an array. |
@@ -290,7 +296,7 @@ A program that keeps the real and imaginary parts in two arrays does not need th
 
 A few parts of MIPPv1 have no counterpart in MIPPv2:
 
-- **Transpositions** (`transpose`, `transpose2`, `transpose8x8`, `transpose28x8`) and the functions `interleavex2`, `interleavex4` and `interleavex16`.
+- **`transpose2` of `int8_t` on SSE**: two 8 × 8 matrices in the halves of 64 bits of 8 registers.
 - **Shifts of the lanes of a mask** (`m << n`, `mipp::lshift<N>(m, n)`).
 - **Interleaving by halves that are not blocks of 128 bits**: `interleavelo2` and `interleavehi2` on SSE and NEON (halves of 64 bits) and on AVX-512 (halves of 256 bits).
 - **`sincos` and `cossin`**: call `sin` and `cos`, whose common part the compiler computes once.

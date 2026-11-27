@@ -203,7 +203,42 @@ The immediate instructions are written for the unmasked functions of LMUL 1 on S
 
 ---
 
-## 7. Patterns Known at Compile Time (C++17)
+## 7. Transpositions
+
+`mipp::transpose<T>(t)` transposes a square matrix held in registers, in place: `t` is an array of N registers (N = `N<T, LMUL>()`), the rows of the matrix, and `t[i]` then holds its column `i` (the lane `j` of `t[i]` is the former lane `i` of `t[j]`).
+
+`mipp::transpose_b128<T>(t)` takes K = 16 / `sizeof(T)` registers (4 for `float32`, 8 for `int16`, 16 for `int8`) and transposes the K × K matrix of each block of 128 bits, independently: an AVX register holds two such matrices side by side. When the registers have 128 bits (SSE, NEON), it is `transpose`. Its usual use is the passage from an array of small structures (points x, y, z, w) to one register per field, and back. With registers of more than 128 bits, the points are not in the order of the memory in the registers of the fields, which does not matter to the operations lane by lane: the second transposition puts them back.
+
+In C, there is a function per datatype and LMUL: `mipp_transpose_float32(t)`, `mipp_transpose_b128_int8_m2(t)`... (no `_d2` version of `transpose_b128` when the registers have 128 bits). In C++, the number of registers is part of the type of the array: a wrong number does not compile (in C, an array parameter is a pointer). The Object API deduces `T` and `LMUL` (`mipp::transpose(t)`); the Functional API needs them, as `mipp::dump`.
+
+=== "C API"
+
+    ```c
+    --8<-- "examples/doc/rearrangements/c.c:transpose"
+    --8<-- "examples/doc/rearrangements/c.c:transpose_b128"
+    ```
+
+=== "C++ Functional API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/fun.cpp:transpose"
+    --8<-- "examples/doc/rearrangements/fun.cpp:transpose_b128"
+    ```
+
+=== "C++ Object API"
+
+    ```cpp
+    --8<-- "examples/doc/rearrangements/obj.cpp:transpose"
+    --8<-- "examples/doc/rearrangements/obj.cpp:transpose_b128"
+    ```
+
+Both are log2(K) steps of K / 2 `ziplo` / `ziphi` (`_b128` for `transpose_b128`), K log2(K) rearrangements: the usual transpositions of SSE, NEON, SVE and AVX-512 (8 `unpcklps` / `zip1`... for 4 × 4 `float32`). On AVX, where `ziplo` crosses the two blocks of 128 bits, `transpose` applies `transpose_b128` to each half of the rows, then exchanges the halves of the registers (`lo`, `hi`, `combine`): 24 rearrangements for 8 × 8 `float32` with AVX2 and Clang (`unpcklps`, `unpckhps`, `vperm2f128`, `vinsertf128`), as MIPPv1, against 52 with `ziplo`. The arrays grow with the number of lanes: from 32 registers or so (`int8` on AVX2, `int16` on AVX-512), they do not fit in the register file and live in memory.
+
+The transpositions are written once, on top of the generated functions: they are in `mipp/c/transpose.h`, `mipp/cpp/transpose.hpp` and `mipp/obj/transpose.hpp`, included by `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` but not by the [per-function headers](headers_and_compile_time.md).
+
+---
+
+## 8. Patterns Known at Compile Time (C++17)
 
 With C++17, `mipp::permute<P>(a)` and `mipp::permute2<P>(a, b)` take the indices from a **pattern** `P`: a type with a function `static constexpr int get(int i, int n)` that gives the source lane of the lane `i` of the result, `n` being the number of lanes of the whole group (`[0, n)` for `permute`, `[0, 2n)` for `permute2`), or `-1` for a zero. The registers can be of any LMUL, half-vectors included. The number of lanes is a constant of the compilation on every ISA (SVE and RVV with a fixed register size), so the indices are known by the compiler:
 
@@ -228,7 +263,7 @@ An index out of `[-1, n)` (`[-1, 2n)` for `permute2`) is a compilation error. Th
 
 ---
 
-## 8. Implementation Levels
+## 9. Implementation Levels
 
 The rearrangements are native on most ISAs: `svrev`, `svzip1`, `svuzp1`, `svsplice`, `svdup_lane`, `svtbl`, `svcompact` on SVE; `vzip1q`, `vuzp1q`, `vtrn1q`, `vrev64q`, `vqtbl1q` on NEON (AArch64); `unpcklps`, `shufps`, `vpermps`, `vpermt2ps`, `pshufb`, `vcompressps` on x86; `vrgather`, `vcompress`, `viota`, `vslideup` / `vslidedown` on RVV. `permute` of SSE and NEON computes the byte indices of the lanes for `pshufb` / `vqtbl1q`, and `compress` of SSE, AVX2 and NEON (32 and 64-bit elements) reads the shuffle of the mask in a small table of the headers. The others are generic (a slide through memory, `get` and `set1` for a broadcast) or, for some types and ISAs, written lane by lane (Level 3); the levels of each function are in its [reference page](../funcs_support/index.md).
 

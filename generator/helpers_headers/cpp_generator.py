@@ -29,6 +29,8 @@ def _generate_mipp_hpp(include_manager=None):
     content += '#include "mipp/cpp/utils.hpp"\n'
     # compile-time permutations (C++17), not included by utils.hpp: they pull 20 rearrangement functions
     content += '#include "mipp/cpp/patterns.hpp"\n'
+    # transpositions of an array of registers (ziplo/ziphi steps), not included by utils.hpp either
+    content += '#include "mipp/cpp/transpose.hpp"\n'
     print(content, file=file)
 
 def generate_cpp(include_manager=None, isa_list=None, all_isa_names=None):

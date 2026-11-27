@@ -901,4 +901,6 @@ def generate_obj(include_manager=None, output_dir="../include"):
         f.write('#include "mipp/obj/utils.hpp"\n')
         # compile-time permutations of the Vd registers (C++17): utils_generator.py
         f.write('#include "mipp/obj/patterns.hpp"\n')
+        # transpositions of an array of Vd registers: utils_generator.py
+        f.write('#include "mipp/obj/transpose.hpp"\n')
 

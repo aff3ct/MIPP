@@ -11,6 +11,10 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
 - `include/mipp/cpp/patterns.hpp` and `include/mipp/obj/patterns.hpp` (C++17, `mipp_patterns.tpl.hpp`,
   `mipp_obj_patterns.tpl.hpp`): `permute<P>` and `permute2<P>`, permutations whose pattern is known at compile time.
   They pull about 20 rearrangement functions: only the global headers include them, not the utils headers.
+- `include/mipp/c/transpose.h`, `include/mipp/cpp/transpose.hpp` and `include/mipp/obj/transpose.hpp`
+  (`mipp_transpose.tpl.h`, `mipp_transpose.tpl.hpp`, `mipp_obj_transpose.tpl.hpp`): `transpose` and `transpose_b128`,
+  in place on an array of registers (steps of ziplo/ziphi), one C function per datatype and LMUL. Only the global
+  headers include them.
 
 These functions are not in the registry: they are not implemented per ISA, they are written once on top of the
 generated functions (storeu, tovd, hadd, combine, ncvts, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
@@ -55,6 +59,9 @@ def generate_utils(output_dir="../include"):
         ("mipp_obj_utils.tpl.hpp", os.path.join(output_dir, "mipp", "obj", "utils.hpp")),
         ("mipp_patterns.tpl.hpp", os.path.join(output_dir, "mipp", "cpp", "patterns.hpp")),
         ("mipp_obj_patterns.tpl.hpp", os.path.join(output_dir, "mipp", "obj", "patterns.hpp")),
+        ("mipp_transpose.tpl.h", os.path.join(output_dir, "mipp", "c", "transpose.h")),
+        ("mipp_transpose.tpl.hpp", os.path.join(output_dir, "mipp", "cpp", "transpose.hpp")),
+        ("mipp_obj_transpose.tpl.hpp", os.path.join(output_dir, "mipp", "obj", "transpose.hpp")),
     ]
     for tpl, path in outputs:
         os.makedirs(os.path.dirname(path), exist_ok=True)
