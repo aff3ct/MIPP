@@ -28,13 +28,15 @@
 #include "mipp/c/fun/combine.h"
 
 /* log2(K) steps on the K registers of type VT from t: the pairs (t[i], t[i + K/2]) give (t'[2i], t'[2i + 1]) =
- * (ZLO, ZHI); the K x K matrix of the rows is then transposed. K is a constant of the compilation. */
+ * (ZLO, ZHI); the K x K matrix of the rows is then transposed. K is a constant of the compilation, 1 for the
+ * half-registers of 64-bit elements on 128 bits: `2i + 1 < K` rather than `i < K / 2`, which would be
+ * `i < 0` (GCC -Wtype-limits, an error with -Werror). */
 #define MIPP_TRANSPOSE_ZIP_(VT, K, ZLO, ZHI, t)                                                  \
 	do {                                                                                         \
 		size_t mipp_s_, mipp_i_;                                                                 \
 		for (mipp_s_ = 1; mipp_s_ < (size_t)(K); mipp_s_ *= 2) {                                 \
 			VT mipp_o_[K];                                                                       \
-			for (mipp_i_ = 0; mipp_i_ < (size_t)(K) / 2; mipp_i_++) {                            \
+			for (mipp_i_ = 0; 2 * mipp_i_ + 1 < (size_t)(K); mipp_i_++) {                        \
 				mipp_o_[2 * mipp_i_] = ZLO((t)[mipp_i_], (t)[mipp_i_ + (size_t)(K) / 2]);        \
 				mipp_o_[2 * mipp_i_ + 1] = ZHI((t)[mipp_i_], (t)[mipp_i_ + (size_t)(K) / 2]);    \
 			}                                                                                    \

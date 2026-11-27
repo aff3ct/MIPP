@@ -59,7 +59,7 @@ inline void transpose_zip(R* t)
 	for (std::size_t s = 1; s < K; s *= 2)
 	{
 		R o[K];
-		for (std::size_t i = 0; i < K / 2; i++)
+		for (std::size_t i = 0; 2 * i + 1 < K; i++) // not i < K / 2: i < 0 for K = 1 (GCC -Wtype-limits)
 		{
 			o[2 * i]     = zip_step<B128>::lo(t[i], t[i + K / 2]);
 			o[2 * i + 1] = zip_step<B128>::hi(t[i], t[i + K / 2]);
