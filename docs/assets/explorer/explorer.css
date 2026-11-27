@@ -3906,3 +3906,11 @@ html:has(.mipp-modal-backdrop.active) {
     display: none;
   }
 }
+
+/* Utility of the API Explorer absent from the selected API (category "utilities") */
+.mipp-utility-absent {
+  margin: 0.5rem 0;
+  font-size: var(--mipp-fs-base, 0.72rem);
+  color: var(--mipp-text-muted, #64748b);
+  font-style: italic;
+}

@@ -1,0 +1,155 @@
+{
+  "_comment": "Utilities of the API Explorer (category 'utilities'): the functions written by hand in helpers_headers/templates/ (utils_generator.py), outside the registry. One card per entry: `name` (identifier of the card, unique among the registry functions too), `label` (shown name), `description`, `apis` (signatures in each API, an empty list when the API has none; <type> and <lmul> are the suffixes of the C names), `headers` (header of each API) and `doc` (page of the user documentation, relative to docs/, with its anchor). Read by gen_mipp_api_data.py.",
+  "utilities": [
+    {
+      "name": "malloc",
+      "label": "malloc / free / is_aligned",
+      "description": "Memory aligned for the aligned loads and stores, on `MIPP_REQUIRED_ALIGNMENT` bytes (the size of a register). The C size is rounded up to a multiple of the alignment; `NULL` / `nullptr` on failure.",
+      "apis": {
+        "c99": [
+          "#define MIPP_REQUIRED_ALIGNMENT (MIPP_RVD_SIZE_BYTE)",
+          "void* mipp_malloc(size_t bytes);",
+          "void mipp_free(void* p);",
+          "int mipp_is_aligned(const void* p);"
+        ],
+        "cpp": [
+          "constexpr std::size_t mipp::required_alignment();",
+          "template <typename T> T* mipp::malloc(std::size_t n);",
+          "void mipp::free(void* p);",
+          "bool mipp::is_aligned(const void* p);"
+        ],
+        "obj": [
+          "constexpr std::size_t mipp::required_alignment();",
+          "template <typename T> T* mipp::malloc(std::size_t n);",
+          "void mipp::free(void* p);",
+          "bool mipp::is_aligned(const void* p);"
+        ]
+      },
+      "headers": {"c99": "mipp/c/utils.h", "cpp": "mipp/cpp/utils.hpp", "obj": "mipp/obj/utils.hpp"},
+      "doc": "user/memory_and_alignment.md#12-allocating-aligned-memory"
+    },
+    {
+      "name": "vector",
+      "label": "allocator / vector",
+      "description": "Standard allocator aligned on `MIPP_REQUIRED_ALIGNMENT`, and `std::vector` whose `data()` is aligned for `load` / `store`.",
+      "apis": {
+        "c99": [],
+        "cpp": [
+          "template <typename T> struct mipp::allocator;",
+          "template <typename T> using mipp::vector = std::vector<T, mipp::allocator<T>>;"
+        ],
+        "obj": [
+          "template <typename T> struct mipp::allocator;",
+          "template <typename T> using mipp::vector = std::vector<T, mipp::allocator<T>>;"
+        ]
+      },
+      "headers": {"cpp": "mipp/cpp/utils.hpp", "obj": "mipp/obj/utils.hpp"},
+      "doc": "user/memory_and_alignment.md#12-allocating-aligned-memory"
+    },
+    {
+      "name": "dump",
+      "label": "dump / operator<<",
+      "description": "Prints the lanes of a register, `[0, 1, 2, 3 | 4, 5, 6, 7]` with a `|` between the 128-bit blocks, or of a mask (`1` for an active lane).",
+      "apis": {
+        "c99": [
+          "void mipp_dump_<type>[_<lmul>](vd_<type>[_<lmul>]_t r);",
+          "void mipp_fdump_<type>[_<lmul>](FILE* f, vd_<type>[_<lmul>]_t r);",
+          "void mipp_dump_k_<type>[_<lmul>](vm_<type>[_<lmul>]_t m);",
+          "void mipp_fdump_k_<type>[_<lmul>](FILE* f, vm_<type>[_<lmul>]_t m);"
+        ],
+        "cpp": [
+          "template <typename T, int LMUL = 1> std::ostream& mipp::dump(const vd<T, LMUL>& r, std::ostream& os = std::cout);",
+          "template <typename T, int LMUL = 1> std::ostream& mipp::dump_k(const vm<T, LMUL>& m, std::ostream& os = std::cout);"
+        ],
+        "obj": [
+          "template <typename T, int LMUL> std::ostream& operator<<(std::ostream& os, const Vd<T, LMUL>& r);",
+          "template <typename T, int LMUL> std::ostream& operator<<(std::ostream& os, const Vm<T, LMUL>& m);"
+        ]
+      },
+      "headers": {"c99": "mipp/c/utils.h", "cpp": "mipp/cpp/utils.hpp", "obj": "mipp/obj/utils.hpp"},
+      "doc": "user/programming_model.md#45-printing-and-generic-reductions"
+    },
+    {
+      "name": "reduce",
+      "label": "reduce",
+      "description": "Reduces the lanes of a register, or the `n` elements of an array (`n` $\\geq 1$), with an associative and commutative operation `op(Vd, Vd) -> Vd` that accepts every LMUL: `mipp::op::add`, `mul`, `min`, `max`, `andb`, `orb`, `xorb`, or a functor with a template `operator()`.",
+      "apis": {
+        "c99": [],
+        "cpp": [],
+        "obj": [
+          "template <typename T, int LMUL, typename OP> T mipp::reduce(const Vd<T, LMUL>& r, OP op);",
+          "template <typename T, int LMUL = 1, typename OP> T mipp::reduce(const T* data, std::size_t n, OP op);",
+          "struct mipp::op::add; // and mul, min, max, andb, orb, xorb"
+        ]
+      },
+      "headers": {"obj": "mipp/obj/utils.hpp"},
+      "doc": "user/programming_model.md#45-printing-and-generic-reductions"
+    },
+    {
+      "name": "transpose",
+      "label": "transpose",
+      "description": "In place on an array of `N` registers, the rows of a square matrix: they become the rows of its transpose (`t[i]` lane `j` receives the former `t[j]` lane `i`).",
+      "apis": {
+        "c99": [
+          "void mipp_transpose_<type>[_<lmul>](vd_<type>[_<lmul>]_t t[MIPP_N_<TYPE>[_<LMUL>]]);"
+        ],
+        "cpp": [
+          "template <typename T, int LMUL = 1> void mipp::transpose(vd<T, LMUL> (&t)[N<T, LMUL>()]);"
+        ],
+        "obj": [
+          "template <typename T, int LMUL> void mipp::transpose(Vd<T, LMUL> (&t)[Vd<T, LMUL>::N()]);"
+        ]
+      },
+      "headers": {"c99": "mipp/c/transpose.h", "cpp": "mipp/cpp/transpose.hpp", "obj": "mipp/obj/transpose.hpp"},
+      "doc": "user/rearrangements.md#7-transpositions"
+    },
+    {
+      "name": "transpose_b128",
+      "label": "transpose_b128",
+      "description": "In place on an array of `16 / sizeof(T)` registers: the matrix of each block of 128 bits is transposed independently (4 x 4 for `float32`, 8 x 8 for `int16`...).",
+      "apis": {
+        "c99": [
+          "void mipp_transpose_b128_<type>[_<lmul>](vd_<type>[_<lmul>]_t t[16 / sizeof(<type>)]);"
+        ],
+        "cpp": [
+          "template <typename T, int LMUL = 1> void mipp::transpose_b128(vd<T, LMUL> (&t)[16 / sizeof(T)]);"
+        ],
+        "obj": [
+          "template <typename T, int LMUL> void mipp::transpose_b128(Vd<T, LMUL> (&t)[16 / sizeof(T)]);"
+        ]
+      },
+      "headers": {"c99": "mipp/c/transpose.h", "cpp": "mipp/cpp/transpose.hpp", "obj": "mipp/obj/transpose.hpp"},
+      "doc": "user/rearrangements.md#7-transpositions"
+    },
+    {
+      "name": "permute_pattern",
+      "label": "permute<P> / permute2<P>",
+      "description": "Permutations whose indices are known at compile time (C++17), given by a pattern `P` with `static constexpr int get(int i, int n)` (`-1` for a zero): replaced by a named rearrangement when there is one, a `permute` with a constant table otherwise.",
+      "apis": {
+        "c99": [],
+        "cpp": [
+          "template <typename P, typename R> R mipp::permute(const R& r);",
+          "template <typename P, typename R> R mipp::permute2(const R& vd0, const R& vd1);"
+        ],
+        "obj": [
+          "template <typename P, typename T, int LMUL> Vd<T, LMUL> mipp::permute(const Vd<T, LMUL>& r);",
+          "template <typename P, typename T, int LMUL> Vd<T, LMUL> mipp::permute2(const Vd<T, LMUL>& vd0, const Vd<T, LMUL>& vd1);"
+        ]
+      },
+      "headers": {"cpp": "mipp/cpp/patterns.hpp", "obj": "mipp/obj/patterns.hpp"},
+      "doc": "user/rearrangements.md#8-patterns-known-at-compile-time-c17"
+    },
+    {
+      "name": "info",
+      "label": "mipp_info",
+      "description": "Prints the target to `stdout`: OS, compiler, active SIMD extension and size of the registers.",
+      "apis": {
+        "c99": ["void mipp_info(void);"],
+        "cpp": ["void mipp_info(void);"],
+        "obj": ["void mipp_info(void);"]
+      },
+      "headers": {"c99": "mipp.h", "cpp": "mipp.hpp", "obj": "mipp_obj.hpp"},
+      "doc": "user/getting_started.md#4-architecture-introspection-mipp_info"
+    }
+  ]
+}

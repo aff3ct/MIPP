@@ -18,6 +18,8 @@ Utilities of the three APIs, written by hand in `templates/` and rendered here:
 
 These functions are not in the registry: they are not implemented per ISA, they are written once on top of the
 generated functions (storeu, tovd, hadd, combine, ncvts, ...). `mipp.h`, `mipp.hpp` and `mipp_obj.hpp` include them.
+The API Explorer lists them in the category `utilities` from `registry_utilities.json`: a new utility gets an
+entry there (signatures in the three APIs, header, section of the user documentation).
 """
 import os
 

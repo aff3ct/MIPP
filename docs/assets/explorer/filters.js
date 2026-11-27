@@ -16,6 +16,11 @@ function getPrimitiveFromQuery(rest) {
 function matchesPrototypeQuery(entry, q) {
   if (!q) return true;
 
+  // 0. Utilities: their signatures in the three APIs
+  if (entry.utility) {
+    return Object.values(entry.utility.apis).some((sigs) => sigs.some((s) => s.toLowerCase().includes(q)));
+  }
+
   // 1. C++ functional prototypes
   const cppSamples = (entry.prototypes && entry.prototypes.cpp_samples) || entry.cpp_samples;
   if (cppSamples && typeof cppSamples === "object") {
@@ -72,10 +77,12 @@ export function matchesQuery(entry, qClean, field = "all") {
   }
 
   const nameLow = entry.name.toLowerCase();
+  // shown name of a utility ("malloc / free / is_aligned", "permute<P> / permute2<P>")
+  const labelLow = (entry.label || "").toLowerCase();
 
   // Field: 'name'
   if (field === "name") {
-    if (nameLow.includes(qClean)) return { matches: true, matchedIntrinsic: null, matchedC99: null };
+    if (nameLow.includes(qClean) || labelLow.includes(qClean)) return { matches: true, matchedIntrinsic: null, matchedC99: null };
     if (qClean.startsWith("mipp_") || qClean.startsWith("mipp::") || qClean.startsWith("mipp_scalar_")) {
       const rest = qClean.replace(/^(mipp_scalar_|mipp_|mipp::)/, "");
       if (nameLow === rest || nameLow.startsWith(rest)) {
@@ -149,7 +156,7 @@ export function matchesQuery(entry, qClean, field = "all") {
 
   // 2. Standard search (no mipp_ prefix)
   // Check function name directly
-  if (nameLow.includes(qClean)) {
+  if (nameLow.includes(qClean) || labelLow.includes(qClean)) {
     return { matches: true, matchedIntrinsic: null, matchedC99: null };
   }
 

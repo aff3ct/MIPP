@@ -2,8 +2,8 @@
  * MIPP API Explorer - Card Component
  * Manages primitive card rendering and structural tab transitions.
  */
-import { escapeHtml, ICON_CHEVRON, ICON_WARNING, ICON_WARNING_SM } from "../explorer.config.js";
-import { formatCppObjProto, renderDescription, typesetMath } from "../syntax.js";
+import { escapeHtml, ICON_CHEVRON, ICON_COPY, ICON_WARNING, ICON_WARNING_SM } from "../explorer.config.js";
+import { formatCppObjProto, highlightCpp, renderDescription, typesetMath } from "../syntax.js";
 import { immTargetsSentence } from "./imm_tooltip.js";
 import { ALL_MASK_MODES, maskSupportOf } from "../data.js";
 import { state, syncUrlHash, setFocusedCard } from "../state.js";
@@ -61,13 +61,65 @@ export function getActivePrototype(entry) {
 }
 
 export function renderTabContent(entry, activeTab) {
+  if (entry.utility) return renderUtilityProto(entry);
   if (activeTab === "hw") return renderTabHw(entry);
   if (activeTab === "scalar") return renderTabAlgos(entry);
   if (activeTab === "specs") return renderTabSpecs(entry);
   return renderTabProto(entry);
 }
 
+const API_TITLES = { c99: "C API", cpp: "C++ Functional API", obj: "C++ Object API" };
+const MONO_HEADERS = { c99: "mipp.h", cpp: "mipp.hpp", obj: "mipp_obj.hpp" };
+
+/**
+ * Prototypes tab of a utility (category "utilities", written by hand outside the registry): its
+ * signatures in the API selected by the toolbar, its header, or the APIs that have it.
+ */
+function renderUtilityProto(entry) {
+  const { apis, headers } = entry.utility;
+  const flavor = API_TITLES[state.flavor] ? state.flavor : "cpp";
+  const sigs = apis[flavor] || [];
+  const others = Object.keys(API_TITLES).filter((api) => (apis[api] || []).length > 0);
+  const codeText = sigs.join("\n");
+  const headersText = headers[flavor] && headers[flavor] !== MONO_HEADERS[flavor]
+    ? `#include <${MONO_HEADERS[flavor]}>\n// or\n#include <${headers[flavor]}>`
+    : `#include <${MONO_HEADERS[flavor]}>`;
+  const codeBox = (title, text) => `
+      <div class="mipp-proto-group" style="margin-bottom: 0.75rem;">
+        <div class="mipp-code-box">
+          <div class="mipp-code-box-header">
+            <div class="mipp-code-box-header-left"><span class="mipp-code-box-title">${title}</span></div>
+            <button class="mipp-icon-btn copy-proto-btn" data-copy="${escapeHtml(text)}" title="Copy">${ICON_COPY}</button>
+          </div>
+          <pre><code>${highlightCpp(text)}</code></pre>
+        </div>
+      </div>`;
+  return sigs.length > 0
+    ? codeBox(API_TITLES[flavor], codeText) + codeBox("Headers", headersText)
+    : `<p class="mipp-utility-absent">Not in the ${API_TITLES[flavor]}: available in the ${others.map((api) => API_TITLES[api]).join(", ")}.</p>`;
+}
+
+/**
+ * Body of a utility: the Prototypes tab only (no hardware matrix, no scalar reference, no
+ * verification specs: not implemented per ISA), and the link to the user documentation.
+ */
+function renderUtilityDetails(entry) {
+  return `
+    <div class="mipp-card-body">
+      <nav class="mipp-card-tabs" role="tablist">
+        <button class="mipp-card-tab-btn active" data-tab="proto" data-card-tab="proto" data-target-card="${escapeHtml(entry.name)}" data-card="${escapeHtml(entry.name)}">
+          Prototypes
+        </button>
+        <a class="mipp-card-spec-link" href="${escapeHtml(entry.doc_url)}"
+           title="Section of the user documentation on ${escapeHtml(entry.label)}">Documentation →</a>
+      </nav>
+      <div class="mipp-tab-pane" id="tab-content-${escapeHtml(entry.name)}">${renderUtilityProto(entry)}</div>
+    </div>
+  `;
+}
+
 export function renderCardExpandedDetails(entry) {
+  if (entry.utility) return renderUtilityDetails(entry);
   const activeTab = state.cardTabs[entry.name] || "proto";
   const maskSupport = maskSupportOf(entry);
   const availableVariants = ALL_MASK_MODES.filter((m) => m === "unmasked" || maskSupport[m]);
@@ -202,7 +254,8 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
   );
   const globalVariant = state.maskVariant || "unmasked";
 
-  const variantBadgesHtml = `
+  const isUtility = Boolean(entry.utility);
+  const variantBadgesHtml = isUtility ? "" : `
     <div class="mipp-card-variant-badges">
       ${supportedVariants.map((m) => {
         const isActive = m === globalVariant;
@@ -217,10 +270,10 @@ export function renderCard(entry, matchedIntrinsic = null, matchedC99 = null) {
       <div class="mipp-card-header" data-card-name="${escapeHtml(entry.name)}">
         <div class="mipp-card-top-row">
           <div class="mipp-card-title-group">
-            <label class="mipp-checkbox-item" style="margin-right: 0.2rem;" onclick="event.stopPropagation();">
+            ${isUtility ? "" : `<label class="mipp-checkbox-item" style="margin-right: 0.2rem;" onclick="event.stopPropagation();">
               <input type="checkbox" data-compare="${escapeHtml(entry.name)}" data-compare-name="${escapeHtml(entry.name)}" ${isCompared ? "checked" : ""} title="Add to comparison">
-            </label>
-            <span class="mipp-card-name">${escapeHtml(entry.form_of || entry.name)}</span>
+            </label>`}
+            <span class="mipp-card-name">${escapeHtml(entry.label || entry.form_of || entry.name)}</span>
             <span class="mipp-cat-badge">${escapeHtml(entry.category)}</span>
             ${renderFormSelector(entry, "data-card-form")}
             ${variantBadgesHtml}

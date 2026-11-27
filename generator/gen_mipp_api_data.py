@@ -608,6 +608,46 @@ def build_levels_metadata():
     }
 
 
+UTILITIES_CATEGORY = "utilities"
+UTILITY_APIS = ("c99", "cpp", "obj")
+
+
+def build_utility_entries(datatypes, registry_names):
+    """
+    Entries of the utilities (registry_utilities.json): name, label, description, signatures and
+    header of each API, link to the user documentation. Every datatype, so that the datatype
+    filter only hides them when it hides everything.
+    """
+    path = os.path.join(base_generator_dir, "helpers_headers", "registry_utilities.json")
+    with open(path, "r", encoding="utf-8") as f:
+        utilities = json.load(f)["utilities"]
+    entries = []
+    for u in utilities:
+        if u["name"] in registry_names:
+            raise ValueError(f"registry_utilities.json: '{u['name']}' is also a function of the registry")
+        apis = {api: u["apis"].get(api, []) for api in UTILITY_APIS}
+        if not any(apis.values()):
+            raise ValueError(f"registry_utilities.json: '{u['name']}' has no signature")
+        page, _, anchor = u["doc"].partition("#")
+        if not os.path.exists(os.path.join(base_generator_dir, "..", "docs", page)):
+            raise ValueError(f"registry_utilities.json: '{u['name']}': no page docs/{page}")
+        entries.append({
+            "name": u["name"],
+            "kind": "utility",
+            "label": u.get("label", u["name"]),
+            "category": UTILITIES_CATEGORY,
+            "description": u["description"],
+            "datatypes": datatypes,
+            "variants": ["u"],
+            "utility": {"apis": apis, "headers": u.get("headers", {})},
+            # first C signature: indexed by the search like the C names of the registry functions
+            "prototypes": {"c99": apis["c99"][0] if apis["c99"] else ""},
+            # mkdocs: docs/user/x.md is served at user/x/, the Explorer at explorer/
+            "doc_url": "../" + page[:-len(".md")] + "/" + (f"#{anchor}" if anchor else ""),
+        })
+    return entries
+
+
 def generate_mipp_api_data(project_root=None):
     """
     Main extraction pipeline: merges metadata from registry, candidate solver,
@@ -1045,6 +1085,11 @@ def generate_mipp_api_data(project_root=None):
                 by_name[member["name"]]["form_of"] = base
                 by_name[member["name"]]["form"] = member["form"]
 
+    # Utilities (category "utilities"): the functions written by hand in helpers_headers/templates/,
+    # outside the registry, listed in registry_utilities.json. Their cards only show the signatures
+    # in the three APIs and link to the user documentation (kind "utility"; no ISA support, no masks).
+    api_entries += build_utility_entries(list(datatypes_meta.keys()), set(by_name))
+
     # 5. Export JSON to docs/assets/data/: the index, needed for the first display
     # (cards, filters, search), and the details, only read once a card tab or the
     # Algorithm modal is opened: the Explorer loads them after the first display
@@ -1063,7 +1108,7 @@ def generate_mipp_api_data(project_root=None):
         "datatype_groups": datatype_groups_meta,
         "mask_modes": mask_modes_meta,
         "levels": levels_meta,
-        "categories": list(categories.keys()),
+        "categories": list(categories.keys()) + [UTILITIES_CATEGORY],
         "primitives": api_entries
     }
 
