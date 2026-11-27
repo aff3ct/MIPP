@@ -285,12 +285,12 @@
                 "#include <cmath>",
                 "#include <cstdlib>",
                 "#include <cstring>",
-                "#include \"utils/random.hpp\"",
-                "#include \"utils/overflow_helpers.hpp\"",
-                "#include \"utils/abs_diff.hpp\"",
                 "#ifndef N_ITER",
                 "#define N_ITER {{N_ITER}}",
                 "#endif",
+                "#include \"utils/random.hpp\"",
+                "#include \"utils/overflow_helpers.hpp\"",
+                "#include \"utils/abs_diff.hpp\"",
                 ""
             ]
         }

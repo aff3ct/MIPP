@@ -32,7 +32,7 @@ _MK_ENUM = {"": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp
 _MK_LABEL = {"": "unmasked", "mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": "Source-Masked"}
 _C_STD = ("#include <exception>", "#include <algorithm>", "#include <numeric>", "#include <random>",
           "#include <cstdio>", "#include <cmath>", "#include <cstdlib>", "#include <cstring>", "#include <vector>",
-          '#include "utils/random.hpp"', "#ifndef N_ITER", "#define N_ITER {N_ITER}", "#endif")
+          "#ifndef N_ITER", "#define N_ITER {N_ITER}", "#endif", '#include "utils/random.hpp"')
 # scalar reference headers (first, as in the other tests: see TestsBuilderEngineCppBase._render_headers)
 _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("load", "gather"), ("store", "store"),
                  ("store", "scatter"), ("store", "get"), ("store", "get_k"),

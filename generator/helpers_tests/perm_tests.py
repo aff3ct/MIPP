@@ -23,8 +23,8 @@ PERM_FUNCS = ("permute", "permute2", "permute_b128", "compress", "expand", "stor
 _MK_ENUM = {"": "mipp::U", "mask": "mipp::M", "maskz": "mipp::Z", "masks": "mipp::S"}
 _MK_LABEL = {"": "unmasked", "mask": "Merge-Masked", "maskz": "Zero-Masked", "masks": "Source-Masked"}
 _C_STD = ("#include <exception>", "#include <algorithm>", "#include <random>", "#include <cstdio>", "#include <cmath>",
-          "#include <cstdlib>", "#include <cstring>", "#include <vector>", '#include "utils/random.hpp"',
-          "#ifndef N_ITER", "#define N_ITER {N_ITER}", "#endif")
+          "#include <cstdlib>", "#include <cstring>", "#include <vector>", "#ifndef N_ITER",
+          "#define N_ITER {N_ITER}", "#endif", '#include "utils/random.hpp"')
 # scalar reference headers (first, as in the other tests)
 _SCALAR_FUNCS = (("load", "load"), ("load", "set_k"), ("store", "store"), ("store", "get"), ("reinterpret", "tovd"),
                  ("reinterpret", "tovm"), ("rearrangement", "permute"), ("rearrangement", "permute2"),

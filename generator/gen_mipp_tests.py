@@ -120,7 +120,7 @@ def gen_test_files_unified_cpp(
         stats["generated"] += 1
 
 
-def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N: int = 10, mode: str = "function", stats: dict = None) -> None:
+def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N: int = 10, stats: dict = None) -> None:
     if stats is None:
         stats = {"generated": 0, "skipped_mask": [], "skipped_disabled": [], "skipped_obj": []}
 
@@ -154,7 +154,7 @@ def gen_test_files_all_funcs(kind: str = "c", lmul: int = 0, mkind: str = "", N:
         cat = _match_category(func)
 
         if regen_c:
-            c_file = engine.build_test_file_content("c", func, lmul_suffix, mkind=mkind, lmul=lmul)
+            c_file = engine.build_test_file_content("c", func, lmul_suffix, mkind=mkind, lmul=lmul, N=N)
             if disabled:
                 c_file = comment_out_cpp_file(c_file, reason)
             file_path = f"{cpath_root}{cat}/{lmul_tag}/{mask_tag}/{func}.cpp"
@@ -241,12 +241,6 @@ def build_arg_parser():
         "--skip-mask-cpp",
         action="store_true",
         help="Deprecated, no effect. Kept for backward compatibility.",
-    )
-    parser.add_argument(
-        "--header-type",
-        choices=["function", "full"],
-        default="function",
-        help="Headers included by the tests: the header of the tested function ('function') or the global header ('full').",
     )
     parser.add_argument(
         "--audit",
@@ -339,7 +333,7 @@ def main():
                 t0_step = time.perf_counter()
                 for lmul in valid_lmuls:
                     for mkind in valid_masks:
-                        gen_test_files_all_funcs(kind="c", lmul=lmul, mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+                        gen_test_files_all_funcs(kind="c", lmul=lmul, mkind=mkind, N=args.num_iterations, stats=stats)
                 print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
             if valid_ldivs:
                 ldiv_str = "{" + ", ".join(map(str, valid_ldivs)) + "}"
@@ -347,7 +341,7 @@ def main():
                 t0_step = time.perf_counter()
                 for ldiv in valid_ldivs:
                     for mkind in valid_masks:
-                        gen_test_files_all_funcs(kind="c", lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, mode=args.header_type, stats=stats)
+                        gen_test_files_all_funcs(kind="c", lmul=(-int(ldiv)), mkind=mkind, N=args.num_iterations, stats=stats)
                 print(f" Done ({time.perf_counter() - t0_step:.3f} s)!")
         else:
             valid_masks = [m for m in args.mask_kind]
